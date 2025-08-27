@@ -1,0 +1,17 @@
+<IfModule mod_rewrite.c>
+    # Block access to .env files
+    <FilesMatch "^\.env">
+        Require all denied
+    </FilesMatch>
+
+    RewriteEngine On
+
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    RewriteCond %{REQUEST_URI} ^/installer
+    RewriteRule ^installer(?:/(.*))?$ installer/index.php [L,QSA]
+
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
