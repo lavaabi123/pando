@@ -1,7 +1,6 @@
 <?php
     $optionSidebarSmall = get_option('backend_sidebar_type', 1);
     $hasSidebarSmall = UserInfo::getDataUser("sidebar-small", $optionSidebarSmall);
-	
     // Theme + colors (session first, then user, then defaults)
     $theme      = session('theme', optional(auth()->user())->theme ?? 'light');          // 'light' | 'dark'
     $primaryHex = session('primary_color', optional(auth()->user())->primary_color ?? '#7ec476');
@@ -12,7 +11,7 @@
 ?>
 
 <!DOCTYPE html>
-<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>"  dir="<?php echo e(Language::getCurrent('dir')); ?>" class="<?php echo e($hasSidebarSmall ? 'sidebar-small' : ($optionSidebarSmall == 1 ? 'sidebar-small' : '')); ?> <?php echo e($pClass); ?> <?php echo e($sClass); ?>" data-theme="<?php echo e($theme); ?>">
+<html lang="<?php echo e(str_replace('_', '-', app()->getLocale())); ?>"  dir="<?php echo e(Language::getCurrent('dir')); ?>" class="<?php echo e($hasSidebarSmall ? 'sidebar-small' : ($optionSidebarSmall == 1 ? 'sidebar-small' : '')); ?>  <?php echo e($pClass); ?> <?php echo e($sClass); ?>" data-theme="<?php echo e($theme); ?>">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -35,10 +34,11 @@
     <?php echo Script::globals(); ?>
 
     <link rel="stylesheet" href="<?php echo e(theme_public_asset('css/main.css')); ?>">
+	<link rel="stylesheet" href="<?php echo e(theme_public_asset('css/custom.css')); ?>">
 
     <?php echo $__env->yieldContent('head_embed_code'); ?>
-	
-	<style>
+    
+    <style>
     :root{
       --d-primary:   <?php echo e($primaryHex); ?>;
       --d-secondary: <?php echo e($secHex); ?>;
@@ -47,7 +47,7 @@
     }
     </style>
 </head>
-<body class="<?php echo e($theme); ?>" cz-shortcut-listen="true">
+<body class="<?php echo e($theme); ?>">
     <div class="loading">
         <div class="d-flex justify-content-center align-items-center hp-100">
             <div class="loader"></div>
@@ -130,10 +130,10 @@
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/datatables/datatables.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/fullcalendar/index.global.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js')); ?>"></script>
     <?php echo $__env->yieldContent('script'); ?>
     <?php echo Script::renderJs(); ?>
 
-    <?php echo Script::renderRaw(); ?>	
+    <?php echo Script::renderRaw(); ?>
+
 </body>
 </html><?php /**PATH C:\xampp82\htdocs\pando-laravel\resources\themes\app\pico\resources\views/layouts/app.blade.php ENDPATH**/ ?>

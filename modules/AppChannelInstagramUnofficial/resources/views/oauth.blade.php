@@ -44,7 +44,7 @@
                     </div>
 
                     <div class="mt-4 d-none" id="IG_SECURITY_BOX">
-                        <label for="ig_security_code" class="form-label">{{ __("Two-Factor Authentication Code") }}</label>
+                        <label for="ig_security_code" class="form-label">{{ __("Security Code") }}</label>
                         <input type="text" class="form-control" name="ig_security_code" id="ig_security_code" placeholder="{{ __("Enter the security code") }}">
                     </div>
 

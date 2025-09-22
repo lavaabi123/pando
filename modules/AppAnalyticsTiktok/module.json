@@ -1,0 +1,11 @@
+{
+    "name": "AppAnalyticsTiktok",
+    "alias": "appanalyticstiktok",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppAnalyticsTiktok\\Providers\\AppAnalyticsTiktokServiceProvider"
+    ],
+    "files": []
+}

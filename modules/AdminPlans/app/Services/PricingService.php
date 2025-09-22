@@ -218,9 +218,15 @@ class PricingService
 
     public static function hasPermissionKey($permissions, $key)
     {
-        foreach ($permissions as $item) {
-            if (isset($item['key']) && $item['key'] === $key) {
+        if (is_array($permissions)) {
+            if (array_key_exists($key, $permissions)) {
                 return true;
+            }
+
+            foreach ($permissions as $item) {
+                if (isset($item['key']) && $item['key'] === $key) {
+                    return true;
+                }
             }
         }
         return false;

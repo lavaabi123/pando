@@ -2,7 +2,6 @@
     <div class="container1 px-3 hp-100">
         <div class="hp-100 d-flex justify-content-between">
             <div class="d-flex justify-content-between align-items-center">			
-			@include('partials.theme-switcher')
                 <div class="d-block d-sm-block d-md-none">
                     <button class="btn btn-icon btn-light sidebar-toggle">
                         <i class="fa-light fa-chevron-right"></i>

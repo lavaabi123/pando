@@ -80,11 +80,11 @@
                     <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-success-500">
                         <i class="fa-light fa-circle-check text-white fs-22"></i>
                     </span>
-                    <span class="fw-6 fs-14 text-muted"><?php echo e($statusMap[5]['label'] ?? __('Success')); ?></span>
+                    <span class="fw-6 fs-14 text-muted"><?php echo e($statusMap[4]['label'] ?? __('Success')); ?></span>
                 </div>
                 <div class="fw-bold fs-2 mb-1 text-dark"><?php echo e(number_format($successTotal)); ?></div>
                 <div class="fs-14 text-muted">
-                    <?php echo e(($statusGrowth[5] ?? 0) == 0 ? '0%' : (($statusGrowth[5] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[5] ?? 0) . '%'); ?>
+                    <?php echo e(($statusGrowth[4] ?? 0) == 0 ? '0%' : (($statusGrowth[4] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[4] ?? 0) . '%'); ?>
 
                 </div>
             </div>
@@ -99,11 +99,11 @@
                     <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-danger-500">
                         <i class="fa-light fa-circle-xmark text-white fs-22"></i>
                     </span>
-                    <span class="fw-6 fs-14 text-muted"><?php echo e($statusMap[4]['label'] ?? __('Failed')); ?></span>
+                    <span class="fw-6 fs-14 text-muted"><?php echo e($statusMap[5]['label'] ?? __('Failed')); ?></span>
                 </div>
                 <div class="fw-bold fs-2 mb-1 text-dark"><?php echo e(number_format($failedTotal)); ?></div>
                 <div class="fs-14 text-muted">
-                    <?php echo e(($statusGrowth[4] ?? 0) == 0 ? '0%' : (($statusGrowth[4] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[4] ?? 0) . '%'); ?>
+                    <?php echo e(($statusGrowth[5] ?? 0) == 0 ? '0%' : (($statusGrowth[5] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[5] ?? 0) . '%'); ?>
 
                 </div>
             </div>
@@ -204,48 +204,80 @@
     <div class="col-lg-12 mb-4">
         <div class="card border-0 shadow-sm px-0">
             <div class="card-header">
-                <h5 class="fw-5 fs-16"><?php echo e(__('Recently Posted: Success & Failed')); ?></h5>
+                <h5 class="fs-5 fs-16"><?php echo e(__('Recently Posted: Success & Failed')); ?></h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle" id="RecentPostsTable">
                         <thead class="table-light text-center">
                             <tr>
-                                <th style="width: 60px;"><?php echo e(__('Thumbnail')); ?></th>
+                                <th style="w-60"><?php echo e(__('Thumbnail')); ?></th>
                                 <th><?php echo e(__('Caption')); ?></th>
-                                <th><?php echo e(__('Status')); ?></th>
                                 <th><?php echo e(__('Account')); ?></th>
+                                <th><?php echo e(__('Status')); ?></th>
                                 <th><?php echo e(__('Date')); ?></th>
                                 <th><?php echo e(__('View')); ?></th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php $__empty_1 = true; $__currentLoopData = $recentPosts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $post): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php
+                                    $data = is_string($post->data) ? json_decode($post->data, true) : $post->data;
+                                    $result = is_string($post->result) ? json_decode($post->result, true) : $post->result;
+                                    $url = $result['url'] ?? null;
+                                    $caption = $data['caption'] ?? '-';
+                                    $thumbnail = $data['medias'][0] ?? null;
+                                    $networkIcon = match($post->social_network ?? '') {
+                                        'facebook' => 'fa-brands fa-facebook text-primary',
+                                        'instagram' => 'fa-brands fa-instagram text-danger',
+                                        'tiktok' => 'fa-brands fa-tiktok text-dark',
+                                        default => 'fa-regular fa-share-nodes text-gray-500',
+                                    };
+                                ?>
                                 <tr>
-                                    <td class="text-center">
-                                        <?php if(!empty($post->media_url)): ?>
-                                            <img src="<?php echo e(Media::url($post->media_url)); ?>" class="rounded" style="width: 48px; height: 48px; object-fit: cover;">
+                                    <td class="text-center w-60">
+                                        <?php if(!empty($thumbnail)): ?>
+                                            <img src="<?php echo e(Media::url($thumbnail)); ?>" class="rounded size-48" style="object-fit: cover;">
+                                        <?php elseif($post->type == "link"): ?>
+                                            <div class="d-flex align-items-center justify-content-center bg-light border rounded size-48">
+                                                <i class="fa-light fa-link text-gray-600 fs-4"></i>
+                                            </div>
                                         <?php else: ?>
-                                            <div class="d-flex align-items-center justify-content-center bg-light border rounded" style="width: 48px; height: 48px;">
-                                                <i class="fa-light fa-image text-gray-600 fs-4"></i>
+                                            <div class="d-flex align-items-center justify-content-center bg-light border rounded size-48">
+                                                <i class="fa-light fa-align-center text-gray-600 fs-4"></i>
                                             </div>
                                         <?php endif; ?>
                                     </td>
-                                    <td><?php echo e(\Str::limit($post->title ?? $post->caption ?? '-', 80)); ?></td>
+                                    <td class="fs-14"><?php echo e(\Str::limit($caption, 80)); ?></td>
+                                    <td class="text-start">
+                                        <div class="d-flex align-items-center gap-2 justify-content-start gap-10">
+                                            <?php if(!empty($post->account->avatar)): ?>
+                                                <img src="<?php echo e(Media::url($post->account->avatar)); ?>" class="rounded-circle size-22" style="object-fit:cover;">
+                                            <?php endif; ?>
+                                            <span class="fs-14"><?php echo e($post->account->name ?? '-'); ?></span>
+                                        </div>
+                                    </td>
                                     <td class="text-center">
-                                        <span class="badge" style="background: <?php echo e($post->status_color); ?>; color: #fff;">
-                                            <?php echo e($post->status_label); ?>
+                                        <?php if($post->status == 4): ?>
+                                        <span class="badge badge-outline badge-sm badge-success">
+                                            <?php echo e(__("Success")); ?>
 
                                         </span>
+                                        <?php else: ?>
+                                        <span class="badge badge-outline badge-sm badge-danger">
+                                            <?php echo e(__("Failed")); ?>
+
+                                        </span>
+                                        <?php endif; ?>
+                                        
                                     </td>
-                                    <td class="text-center"><?php echo e($post->account_id); ?></td>
                                     <td class="text-nowrap text-gray-700 fs-14">
-                                        <?php echo e(\Carbon\Carbon::parse($post->created)->format('M d, Y H:i')); ?>
+                                        <?php echo e(datetime_show($post->time_post)); ?>
 
                                     </td>
                                     <td class="text-center">
-                                        <?php if(!empty($post->permalink_url)): ?>
-                                            <a href="<?php echo e($post->permalink_url); ?>" target="_blank">
+                                        <?php if(!empty($url)): ?>
+                                            <a href="<?php echo e($url); ?>" target="_blank" title="View">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         <?php endif; ?>
@@ -253,7 +285,7 @@
                                 </tr>
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted"><?php echo e(__('No posts found.')); ?></td>
+                                    <td colspan="7" class="text-center text-muted"><?php echo e(__('No posts found.')); ?></td>
                                 </tr>
                             <?php endif; ?>
                         </tbody>

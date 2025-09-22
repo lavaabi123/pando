@@ -89,7 +89,7 @@ class Language extends Facade
         $dirs = [];
 
         // Modules
-        $modulesDir = base_path('Modules');
+        $modulesDir = base_path('modules');
         if (is_dir($modulesDir)) {
             foreach (scandir($modulesDir) as $m) {
                 if ($m !== '.' && $m !== '..') {
@@ -217,7 +217,9 @@ class Language extends Facade
         }
 
         if (!file_exists($langDir)) {
-            mkdir($langDir, 0755, true);
+            try {
+                mkdir($langDir, 0755, true);
+            } catch (\Exception $e) {}
         }
 
         $existingTranslations = file_exists($langFile) ? json_decode(file_get_contents($langFile), true) : [];
@@ -389,7 +391,7 @@ class Language extends Facade
     public static function updateMissingTranslationKeys()
     {
         // Scan all modules to retrieve translation keys
-        $modulesDir = base_path('Modules');
+        $modulesDir = base_path('modules');
         $modules = scandir($modulesDir);
 
         $allTranslationKeys = [];
@@ -491,7 +493,10 @@ class Language extends Facade
 
                             // Capitalize the first letter of the sentence
                             $translatedValue = self::capitalizeFirstLetters($translatedValue);
-                            $translatedResults[$keys[$originalIndex]] = $translatedValue;
+
+                            if (isset($keys[$originalIndex])) {
+                                $translatedResults[$keys[$originalIndex]] = $translatedValue;
+                            }
                         }
                     }
 
@@ -505,45 +510,99 @@ class Language extends Facade
                 }
 
 
-                // Retry translating missing results
-                $attempts = 0;
+                // Retry translating missing results (respect max encoded length)
+                $attempts   = 0;
                 $retryLimit = $retryCount;
+
+                $maxEncodedLen = 1800;
+
+                $encodedLen = function (string $s): int {
+                    return strlen(rawurlencode($s));
+                };
+
                 while (!empty($missingResults) && $attempts < $retryLimit) {
-                    $missingKeys = array_keys($missingResults);
+                    $attempts++;
+
+                    $missingKeys   = array_keys($missingResults);
                     $missingValues = array_values($missingResults);
-                    $missingBatchText = implode("\n", $missingValues);
+
+                    $batches = [];
+                    $buf = '';
+                    $bufKeys = [];
+                    $tooLarge = [];
+
+                    foreach ($missingValues as $i => $text) {
+                        $line = (string) $text;
+                        $candidate = ($buf === '') ? $line : ($buf . "\n" . $line);
+
+                        if ($encodedLen($candidate) > $maxEncodedLen) {
+                            if ($buf !== '') {
+                                $batches[] = ['keys' => $bufKeys, 'text' => $buf];
+                            }
+
+                            if ($encodedLen($line) > $maxEncodedLen) {
+                                $tooLarge[$missingKeys[$i]] = $line;
+                                $buf = '';
+                                $bufKeys = [];
+                                continue;
+                            }
+
+                            $buf = $line;
+                            $bufKeys = [$missingKeys[$i]];
+                        } else {
+                            $buf = $candidate;
+                            $bufKeys[] = $missingKeys[$i];
+                        }
+                    }
+                    if ($buf !== '') {
+                        $batches[] = ['keys' => $bufKeys, 'text' => $buf];
+                    }
 
                     try {
-                        $trans = new GoogleTranslate();
-                        $trans->setSource('en');
-                        $trans->setTarget($locale);
+                        foreach ($batches as $batch) {
+                            $trans = new GoogleTranslate();
+                            $trans->setSource('en');
+                            $trans->setTarget($locale);
 
-                        $translatedText = $trans->translate($missingBatchText);
-                        $lines = self::fixTranslate($translatedText);
+                            $translatedText = $trans->translate($batch['text']);
+                            $lines = self::fixTranslate($translatedText);
 
-                        // Parse each translated line
-                        foreach ($lines as $i => $line) {
-                            if (isset($missingKeys[$i])) {
-                                $translatedResults[$missingKeys[$i]] = self::capitalizeFirstLetters(trim($line));
+                            foreach ($lines as $idx => $line) {
+                                if (isset($batch['keys'][$idx])) {
+                                    $translatedResults[$batch['keys'][$idx]] = self::capitalizeFirstLetters(trim($line));
+                                }
                             }
                         }
-
-                        // Reset missingResults if all have been translated
-                        $missingResults = array_diff_key($missingResults, $translatedResults);
                     } catch (\Exception $e) {
+                        $msg = $e->getMessage();
+                        if (stripos($msg, '413') !== false || stripos(\get_class($e), 'LargeTextException') !== false) {
+                            $maxEncodedLen = max(600, (int) floor($maxEncodedLen * 0.6)); // thu nhỏ mạnh tay
+                            \Log::warning("Retry: 413/LargeText -> shrink maxEncodedLen to {$maxEncodedLen}");
+                            usleep(300000); // 300ms
+                            continue;
+                        }
                         \Log::error("Retry failed while translating missing keys: " . $e->getMessage());
-                        sleep(1); // delay before retry
-                        $attempts++;
+                        usleep(300000);
+                    }
+
+                    foreach ($tooLarge as $k => $v) {
+                        $translatedResults[$k] = $v;
+                    }
+
+                    $missingResults = array_diff_key($missingResults, $translatedResults);
+
+                    if (!empty($missingResults)) {
+                        usleep(300000);
                     }
                 }
 
-                // If any keys still not translated, keep original English value
                 foreach ($missingResults as $key => $value) {
                     $translatedResults[$key] = $value;
                 }
 
                 $translatedData = $translatedResults;
             } catch (\Exception $e) {
+                dd($e);
                 \Log::error("Translation failed: " . $e->getMessage());
                 $translatedData = $translations;
             }

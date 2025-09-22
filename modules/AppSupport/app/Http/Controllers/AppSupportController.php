@@ -204,7 +204,7 @@ class AppSupportController extends Controller
     public function ticket(Request $request, $ticket_id)
     {
         $ticket = Support::getTicketDetail($ticket_id);
-        if (empty($ticket)) {
+        if (empty($ticket) || !isset($ticket->user_id)) {
             return redirect()->route('app.support.index');
         }
 

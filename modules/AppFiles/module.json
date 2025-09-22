@@ -11,6 +11,7 @@
     "assets": {
         "css": [],
         "js": [
+            "resources/assets/js/filerobot-image-editor.min.js",
             "resources/assets/js/files.js"
         ]
     },

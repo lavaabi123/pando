@@ -83,6 +83,7 @@
                                     <div class="input-group" >
                                         <span class="btn btn-input"><i class="fa-light fa-globe"></i></span>
                                         <select class="form-select" name="language" id="language">
+                                            <option value="en"><?php echo e(__("Select your language")); ?></option>
                                             <?php $__currentLoopData = $languages; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <option value="<?php echo e($value->code); ?>" <?php echo e($user->language == $value->code ? 'selected' : ''); ?>>
                                                     <?php echo e($value->name); ?>

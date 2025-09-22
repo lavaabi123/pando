@@ -38,7 +38,7 @@
                                             class="overflow-hidden h-0 duration-500"
                                         >
                                             <p class="mt-4 text-gray-600 font-medium">
-                                                <?php echo e($faq->desc); ?>
+                                                <?php echo $faq->content; ?>
 
                                             </p>
                                         </div>

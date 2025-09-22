@@ -89,11 +89,21 @@
                     </div>
                 </div>
 
-                <div class="d-flex flex-fill align-items-center justify-content-center overflow-y-auto bg-cover position-relative btl-r-6 btr-r-6 file-item-media text-{{ $detectType['color'] }} bg-{{ $detectType['color'] }}-100" style="background-image: url( {{ Media::url($value->file)  }} );">
-                    @if($value->detect != "image")
-                    <div class="fs-30">
-                        <i class="{{ $detectType['icon'] }}"></i>
-                    </div>
+                <div class="d-flex flex-fill align-items-center justify-content-center overflow-hidden position-relative 
+                            btl-r-6 btr-r-6 file-item-media text-{{ $detectType['color'] }} bg-{{ $detectType['color'] }}-100"
+                    @if($value->detect == "image")
+                        style="background-image: url('{{ Media::url($value->file) }}'); background-size: cover; background-position: center;"
+                    @endif
+                >
+                    @if($value->detect == "video")
+                        <video class="position-absolute top-0 start-0 w-100 h-100 object-cover" muted loop playsinline>
+                            <source src="{{ Media::url($value->file) }}" type="video/mp4">
+                            {{ __('Your browser does not support the video tag.') }}
+                        </video>
+                    @elseif($value->detect != "image")
+                        <div class="fs-30">
+                            <i class="{{ $detectType['icon'] }}"></i>
+                        </div>
                     @endif
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-auto p-1 gap-8 position-relative zIndex-4 file-info border-top">
@@ -109,13 +119,15 @@
                             </div>
                             <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-1 w-100 max-w-180 min-w-120">
                                 @can('appfiles.image_editor')
-                                <li>
-                                    <button type="button" class="dropdown-item px-2 p-t-4 p-b-4 rounded d-flex gap-8 fw-5 fs-13 editImage" data-file="{{ Media::url($value->file) }}" data-id="{{ $value->id_secure }}">
-                                        <span class="size-16 me-0 text-center"><i class="fa-light fa-edit"></i></span>
-                                        <span >{{ __('Edit Image') }}</span>
-                                    </button>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
+                                    @if($value->detect == "image")
+                                    <li>
+                                        <button type="button" class="dropdown-item px-2 p-t-4 p-b-4 rounded d-flex gap-8 fw-5 fs-13 editImage" data-file="{{ Media::url($value->file) }}" data-id="{{ $value->id_secure }}">
+                                            <span class="size-16 me-0 text-center"><i class="fa-light fa-edit"></i></span>
+                                            <span >{{ __('Edit Image') }}</span>
+                                        </button>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    @endif
                                 @endcan
                                 <li>
                                     <a class="dropdown-item px-2 p-t-4 p-b-4 rounded d-flex gap-8 fw-5 fs-13 actionItem" href="{{ url_app("files/destroy") }}" data-id="{{ $value->file }}" data-call-success="Main.ajaxScroll(true)">

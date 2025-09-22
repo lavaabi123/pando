@@ -1,0 +1,53 @@
+/* resources/css/custom.css */
+
+/** Color Picker Start **/
+[type='color'] {
+    -moz-appearance: none;
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+    width: 20px !important;
+    height: 20px !important;
+    border: none;
+    border-radius: 50%;
+    overflow: hidden;
+    flex: 0 0 20px;
+	margin-right: 5px;
+}
+
+[type='color']::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+[type='color']::-webkit-color-swatch {
+  border: none;
+}
+.colors .form-check-label {
+    white-space: nowrap;
+}
+/** Color Picker End **/
+
+/** Input Fields Start **/
+input[type="checkbox"], input[type="radio"] {
+    -webkit-appearance: none !important;
+    border: 2px solid #dedede !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 100% !important;
+    align-self: center !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 2px #ffffff inset !important;
+    flex: 0 0 30px;
+}
+input[type="checkbox"]:checked, input[type="radio"]:checked {
+	background: var(--d-primary) !important;
+	border-color: var(--d-primary) !important;
+}
+/** Input Fields End **/
+.gradient-bg {
+    background: linear-gradient(90deg, var(--d-primary), var(--d-secondary));
+}
+.main-services .icons svg {
+    width: 75px;
+    height: 75px;
+}

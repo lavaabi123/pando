@@ -28,6 +28,78 @@
     }
 ?>
 
+<div class=" fw-6 text-black fs-22">
+				<i class="fa-solid fa-face-smile text-primary"></i> Hi Royalink!
+			</div>
+<div class="colors d-flex align-items-center gap-1">
+    <div class="form-check form-check-inline ml-10">
+      <input class="form-check-input" type="checkbox" name="theme_color" id="theme_color_dark" value="dark">
+      <label class="form-check-label" for="theme_color_dark">Dark Theme</label>
+    </div>
+
+    <input type="color" id="colorPicker" value="" class="colorPicker w-25 h-20" role="button">
+    <input type="color" id="colorPicker_sec" value="" class="colorPicker w-25 h-20" role="button">
+
+    <i class="fa-solid fa-undo colorPicker_reset fs-20" data-bs-toggle="tooltip" data-bs-placement="bottom"
+       title="Reset" role="button" aria-label="Reset"></i>
+  </div>
+	<div class="gradient-bg d-flex gap-12 main-services text-center p-5">
+		<a class="icons" href="https://itspando.com/post">
+			<div class="mb-3">
+				<?php echo file_get_contents(public_path('img/post.svg')); ?>
+
+			</div>
+			<div class="fw-6 text-black">
+				Create Post
+			</div>
+		</a>
+		<a class="icons" href="https://itspando.com/account_manager">
+			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 75%,var(--d-secondary) 25%)">
+				<?php echo file_get_contents(public_path('img/account.svg')); ?>
+
+			</div>
+			<div class="fw-6 text-black">
+				Manage Accounts
+			</div>
+		</a>
+		<a class="icons" href="https://itspando.com/holidays">
+			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 60%,var(--d-secondary) 40%)">
+				<?php echo file_get_contents(public_path('img/calender.svg')); ?>
+
+			</div>
+			<div class="fw-6 text-black">
+				Calender
+			</div>
+		</a>
+		<a class="icons" href="https://itspando.com/reports">
+			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 50%,var(--d-secondary) 50%)">
+				<?php echo file_get_contents(public_path('img/Reports.svg')); ?>
+
+			</div>
+			<div class="fw-6 text-black">
+				Reports
+			</div>
+		</a>
+		<a class="icons" href="https://itspando.com/inbox">
+			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 20%,var(--d-secondary) 80%)">
+				<?php echo file_get_contents(public_path('img/inbox.svg')); ?>
+
+			</div>
+			<div class="fw-6 text-black">
+				Inbox
+			</div>
+		</a>
+		<a class="icons" href="https://itspando.com">
+			<div class="mb-3">
+				<?php echo file_get_contents(public_path('img/note.svg')); ?>
+
+			</div>
+			<div class="fw-6 text-black">
+				Notes
+			</div>
+		</a>
+	</div>
+	
 <div class="row">
 
     <div class="col-md-8 mb-4">

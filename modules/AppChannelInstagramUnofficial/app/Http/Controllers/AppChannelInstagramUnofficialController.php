@@ -91,7 +91,7 @@ class AppChannelInstagramUnofficialController extends Controller
                 ]);
             }
 
-            if (!empty($data['needs_challenge']) && !empty($data['options']['challenge'])) {
+            if (!empty($data['needs_challenge']) && !empty($data['options']['api_path'])) {
                 return response()->json([
                     'status'  => 0,
                     'type'    => "challenge",

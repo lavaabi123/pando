@@ -45,8 +45,8 @@ class InstagramUnofficialService
             ]);
         }
 
-    return $http;
-}
+        return $http;
+    }
 
     public function authenticate(string $username, string $password): array
     {
@@ -57,6 +57,7 @@ class InstagramUnofficialService
             ]);
             $this->prefill();
             $key = $this->sync();
+
             if ($key === false || empty($key['key_id']) || empty($key['pub_key'])) {
                 return [
                     'status' => false,
@@ -86,19 +87,14 @@ class InstagramUnofficialService
                 'signed_body' => 'SIGNATURE.' . json_encode($data)
             ]);
 
-            if (!$response->successful()) {
-                return [
-                    'status' => false,
-                    'error' => $this->parseInstagramError($response, __('Unable to login to Instagram. Please check your credentials or try again later.')),
-                ];
-            }
-
             $respArr = $response->json();
-            $authorization = $response->header('ig-set-authorization');
 
-            if (isset($respArr['logged_in_user']['pk_id']) && !empty($authorization)) {
-                $this->authData['authorization'] = $authorization;
-                $this->authData['user_id'] = $respArr['logged_in_user']['pk_id'];
+            $authorization = $response->header('ig-set-authorization');
+            $uid = $respArr['logged_in_user']['pk'] ?? $respArr['logged_in_user']['pk_id'] ?? null;
+
+            if ($uid && !empty($authorization)) {
+                $this->authData['authorization'] = is_array($authorization) ? ($authorization[0] ?? '') : $authorization;
+                $this->authData['user_id'] = $uid;
 
                 $profile_pic_url = $respArr['logged_in_user']['profile_pic_url'] ?? '';
                 $profile_pic = '';
@@ -122,6 +118,43 @@ class InstagramUnofficialService
                             'auth_data' => $this->authData
                         ]
                     ]
+                ];
+            }
+
+            if (($respArr['message'] ?? '') === 'challenge_required' && !empty($respArr['challenge']['api_path'])) {
+
+                return [
+                    'status' => false,
+                    'error' => __('We detected a security challenge on Instagram. Please confirm the login attempt in your Instagram app or email, then try again.')
+                ];
+                
+                $apiPath = $respArr['challenge']['api_path'] ?? null;
+                $ctx     = $respArr['challenge']['challenge_context'] ?? null;
+
+                $choice  = 0;
+                //$res = $this->sendSecurityCode($apiPath, $choice);
+
+                $verification_method = '2';
+
+                return [
+                    'status' => true,
+                    'data'   => [
+                        'needs_challenge' => true,
+                        'options' => [
+                            'auth_data'           => $this->authData,
+                            'verification_method' => $verification_method, // '1' hoặc '2'
+                            'api_path'            => $apiPath,
+                            'url'                 => $respArr['challenge']['url'] ?? null,
+                            'native'              => (bool)($respArr['challenge']['native_flow'] ?? false),
+                            'flow_nonce'          => $respArr['challenge']['challenge_context'] ?? null,
+                            'challenge_auto'      => [
+                                'status'   => (bool)($auto['status'] ?? false),
+                                'selected' => $auto['selected'] ?? null,
+                                'attempts' => $auto['attempts'] ?? null,
+                                'error'    => $auto['error']    ?? null,
+                            ],
+                        ],
+                    ],
                 ];
             }
 
@@ -186,8 +219,9 @@ class InstagramUnofficialService
 
             $auth = $response->header('ig-set-authorization');
             $body = $response->json();
+            $uid = $body['logged_in_user']['pk'] ?? $body['logged_in_user']['pk_id'] ?? null;
 
-            if (empty($auth) || empty($body['logged_in_user']['pk_id'])) {
+            if (empty($auth) || empty($uid)) {
                 return [
                     'status' => false,
                     'error'  => $this->parseInstagramError($body, __('Two-factor authentication failed. Please check your code or try again.')),
@@ -195,13 +229,13 @@ class InstagramUnofficialService
             }
 
             $this->authData['authorization'] = $auth;
-            $this->authData['user_id'] = $body['logged_in_user']['pk_id'];
+            $this->authData['user_id'] = $uid;
             return [
                 'status' => true,
                 'data'   => [
                     'name'       => $body['logged_in_user']['full_name'] ?? $this->authData['username'],
                     'username'   => $this->authData['username'],
-                    'profile_id' => $body['logged_in_user']['pk_id'],
+                    'profile_id' => $uid,
                     'profile_pic'=> $body['logged_in_user']['profile_pic_url'] ?? '',
                     'options'    => [
                         'auth_data' => $this->authData
@@ -212,6 +246,111 @@ class InstagramUnofficialService
             return [
                 'status' => false,
                 'error'  => __('An unexpected error occurred during two-factor authentication: :msg', ['msg' => $e->getMessage()])
+            ];
+        }
+    }
+
+    public function sendSecurityCode(string $apiPath, int $choice = 1): array
+    {
+        if (empty($apiPath)) {
+            return [
+                'status' => false,
+                'error'  => 'Missing API path',
+            ];
+        }
+
+        $apiPath = '/' . ltrim($apiPath, '/');
+        $endpoint = "https://i.instagram.com/api/v1" . $apiPath;
+
+        try {
+            $data = [
+                'choice' => $choice, // 0 = phone, 1 = email
+                '_uuid'  => $this->authData['device_id'] ?? $this->generateUuid(),
+                'guid'   => $this->authData['device_id'] ?? $this->generateUuid(),
+                'device_id' => $this->authData['android_device_id'] ?? '',
+                'login_attempt_count' => 0,
+            ];
+
+            $response = $this->http()
+                ->asForm()
+                ->post($endpoint, [
+                    'signed_body' => 'SIGNATURE.' . json_encode($data)
+                ]);
+
+            if (!$response->successful()) {
+                return [
+                    'status' => false,
+                    'error'  => $this->parseInstagramError($response, 'Failed to send security code.'),
+                    'http'   => $response->status(),
+                    'body'   => $response->body(),
+                ];
+            }
+
+            $json = $response->json();
+
+            return [
+                'status' => ($json['status'] ?? '') === 'ok',
+                'data'   => $json,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'status' => false,
+                'error'  => $e->getMessage(),
+            ];
+        }
+    }
+
+    public function submitSecurityCode(string $apiPath, string $securityCode): array
+    {
+        if (empty($apiPath) || empty($securityCode)) {
+            return [
+                'status' => false,
+                'error'  => 'Missing API path or code',
+            ];
+        }
+
+        $apiPath = '/' . ltrim($apiPath, '/');
+        $endpoint = "https://i.instagram.com/api/v1" . $apiPath;
+
+        try {
+            $data = [
+                'security_code' => $securityCode,
+                '_uuid'         => $this->authData['device_id'] ?? $this->generateUuid(),
+                'guid'          => $this->authData['device_id'] ?? $this->generateUuid(),
+                'device_id'     => $this->authData['android_device_id'] ?? '',
+                'login_attempt_count' => 0,
+            ];
+
+            $response = $this->http()
+                ->asForm()
+                ->post($endpoint, [
+                    'signed_body' => 'SIGNATURE.' . json_encode($data)
+                ]);
+
+            $json = $response->json();
+
+            // Nếu thành công → IG sẽ trả logged_in_user + auth
+            if (!empty($json['status']) && $json['status'] === 'ok' && !empty($json['logged_in_user'])) {
+                $this->authData['user_id'] = $json['logged_in_user']['pk'];
+                $this->authData['authorization'] = $response->header('ig-set-authorization') ?? '';
+                return [
+                    'status' => true,
+                    'data'   => [
+                        'user'  => $json['logged_in_user'],
+                        'auth'  => $this->authData,
+                    ]
+                ];
+            }
+
+            return [
+                'status' => false,
+                'error'  => $json['message'] ?? 'Failed to submit security code',
+                'data'   => $json,
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'status' => false,
+                'error'  => $e->getMessage(),
             ];
         }
     }
@@ -410,7 +549,7 @@ class InstagramUnofficialService
                     ]
                 ],
                 'has_original_sound'         => "1",
-                'camera_session_id'          => $options['camera_session_id'] ?? $this->generateUUID(),
+                'camera_session_id'          => $options['camera_session_id'] ?? $this->generateUuid(),
                 'timezone_offset'            => (string)(date('Z')),
                 'media_folder'               => "Camera",
                 'configure_mode'             => "1",
@@ -418,7 +557,7 @@ class InstagramUnofficialService
                 'capture_type'               => "normal",
                 'rich_text_format_types'     => ["default"],
                 '_uid'                       => $this->authData['user_id'] ?? 49154269846,
-                'composition_id'             => $options['composition_id'] ?? $this->generateUUID(),
+                'composition_id'             => $options['composition_id'] ?? $this->generateUuid(),
                 'original_media_type'        => "photo",
                 'camera_entry_point'         => "121",
             ];
@@ -812,7 +951,7 @@ class InstagramUnofficialService
     public function createLive($message = "Hey!", $previewWidth = 1080, $previewHeight = 2076)
     {
         $data = [
-            "_uuid"             => $this->authData['device_id'] ?? $this->getSettings('uuid'),
+            "_uuid"             => $this->authData['device_id'] ?? $this->generateUuid(),
             "preview_height"    => $previewHeight,
             "preview_width"     => $previewWidth,
             "broadcast_message" => $message,
@@ -850,7 +989,7 @@ class InstagramUnofficialService
     public function startLive($broadcastId, $latitude = null, $longitude = null)
     {
         $data = [
-            "_uuid" => $this->authData['device_id'] ?? $this->getSettings('uuid'),
+            "_uuid" => $this->authData['device_id'] ?? $this->generateUuid(),
         ];
         if ($latitude !== null && $longitude !== null) {
             $data['latitude'] = $latitude;
@@ -875,7 +1014,6 @@ class InstagramUnofficialService
                     'broadcast_id'    => $result['broadcast_id'] ?? $broadcastId,
                     'start_time'      => $result['start_time'] ?? null,
                     'viewer_count'    => $result['viewer_count'] ?? null,
-                    // Add more if needed
                 ]
             ];
         } else {
@@ -1287,7 +1425,7 @@ class InstagramUnofficialService
         $params = [
             'query' => $keyword,
             'count' => $count,
-            'timezone_offset' => '-14400', // optional, can be changed or removed
+            'timezone_offset' => '-14400',
         ];
 
         try {
@@ -1374,8 +1512,7 @@ class InstagramUnofficialService
             'upload_media_height' => (string)$video['height'],
             'upload_media_width' => (string)$video['width'],
             'upload_media_duration_ms' => (string)($video['duration'] * 1000),
-            'media_type' => '2',
-            'potential_share_types' => json_encode(['not supported type']),
+            'media_type' => '2'
         ];
         $entity_name = sprintf('%s_%d_%d', $uploadId, 0, crc32(basename($video['path'])));
         $endpoint = InstagramEndpoints::UPLOAD_VIDEO . $entity_name;
@@ -1478,41 +1615,38 @@ class InstagramUnofficialService
     protected function getDefaultHeaders(): array
     {
         return [
-            "User-Agent" => $this->userAgent,
-            "Accept-Encoding" => "gzip, deflate",
-            "Accept" => "*/*",
-            "Connection" => "keep-alive",
-            "X-IG-App-Locale" => "en_US",
-            "X-IG-Device-Locale" => "en_US",
-            "X-IG-Mapped-Locale" => "en_US",
-            "X-Pigeon-Session-Id" => "UFS-" . $this->generateUuid() . "-1",
-            "X-Pigeon-Rawclienttime" => sprintf('%.3f', microtime(true)),
-            "X-IG-Bandwidth-Speed-KBPS" => sprintf('%.3f', mt_rand(2500000, 3000000) / 1000),
-            "X-IG-Bandwidth-TotalBytes-B" => (string)mt_rand(5000000, 90000000),
-            "X-IG-Bandwidth-TotalTime-MS" => (string)mt_rand(2000, 9000),
-            "X-IG-App-Startup-Country" => "US",
-            "X-Bloks-Version-Id" => "5fd5e6e0f986d7e592743211c2dda24efc502cff541d7a7cfbb69da25b293bf1",
-            "X-IG-WWW-Claim" => "0",
-            "X-Bloks-Is-Layout-RTL" => "false",
-            "X-Bloks-Is-Panorama-Enabled" => "true",
-            "X-IG-Device-ID" => $this->authData['device_id'] ?? '',
-            "X-IG-Family-Device-ID" => $this->authData['phone_id'] ?? '',
-            "X-IG-Android-ID" => $this->authData['android_device_id'] ?? '',
-            "X-IG-Timezone-Offset" => "-14400",
-            "X-IG-Connection-Type" => "WIFI",
-            "X-IG-Capabilities" => "3brTvx0=",
-            "X-IG-App-ID" => "567067343352427",
-            "Priority" => "u=3",
-            "Accept-Language" => "en-US",
-            "X-MID" => $this->authData['mid'] ?? '',
-            "Host" => "i.instagram.com",
-            "X-FB-HTTP-Engine" => "Liger",
-            "X-FB-Client-IP" => "True",
-            "X-FB-Server-Cluster" => "True",
-            "IG-INTENDED-USER-ID" => $this->authData['user_id'] ?? '',
-            "IG-INTENDED-USER-ID" => $this->authData['user_id'] ?? '',
-            "Authorization" => $this->authData['authorization'] ?? '',
-            "Content-Type" => "application/x-www-form-urlencoded; charset=UTF-8"
+            'User-Agent'                   => $this->userAgent,
+            'Accept-Encoding'              => 'gzip, deflate',
+            'Accept'                       => '*/*',
+            'Connection'                   => 'keep-alive',
+            'X-IG-App-Locale'              => 'en_US',
+            'X-IG-Device-Locale'           => 'en_US',
+            'X-IG-Mapped-Locale'           => 'en_US',
+            'X-Pigeon-Session-Id'          => 'UFS-' . $this->generateUuid() . '-1',
+            'X-Pigeon-Rawclienttime'       => sprintf('%.3f', microtime(true)),
+            'X-IG-Bandwidth-Speed-KBPS'    => sprintf('%.3f', mt_rand(2500000, 3000000) / 1000),
+            'X-IG-Bandwidth-TotalBytes-B'  => (string)mt_rand(5000000, 90000000),
+            'X-IG-Bandwidth-TotalTime-MS'  => (string)mt_rand(2000, 9000),
+            'X-IG-App-Startup-Country'     => 'US',
+            'X-Bloks-Version-Id'           => '5fd5e6e0f986d7e592743211c2dda24efc502cff541d7a7cfbb69da25b293bf1', // có thể cần cập nhật bản mới
+            'X-Bloks-Is-Layout-RTL'        => 'false',
+            'X-Bloks-Is-Panorama-Enabled'  => 'true',
+            'X-IG-Device-ID'               => $this->authData['device_id'] ?? '',
+            'X-IG-Family-Device-ID'        => $this->authData['phone_id'] ?? '',
+            'X-IG-Android-ID'              => $this->authData['android_device_id'] ?? '',
+            'X-IG-Timezone-Offset'         => (string) (int) date('Z'), // offset thực của server (giây)
+            'X-IG-Connection-Type'         => 'WIFI',
+            'X-IG-Capabilities'            => '3brTvx0=', // cái này cũng hay đổi theo app version
+            'X-IG-App-ID'                  => '567067343352427',
+            'Priority'                     => 'u=3',
+            'Accept-Language'              => 'en-US',
+            'X-MID'                        => $this->authData['mid'] ?? '',
+            'X-FB-HTTP-Engine'             => 'Liger',
+            'X-FB-Client-IP'               => 'True',
+            'X-FB-Server-Cluster'          => 'True',
+            'IG-INTENDED-USER-ID'          => $this->authData['user_id'] ?? '',
+            'Authorization'                => $this->authData['authorization'] ?? '',
+            'Content-Type'                 => 'application/x-www-form-urlencoded; charset=UTF-8',
         ];
     }
 
@@ -1614,8 +1748,6 @@ class InstagramUnofficialService
         );
     }
 
-    // === Internal Instagram Encryption/Key Methods ===
-
     protected function prefill(): void {}
 
     protected function parseInstagramError($response, $default = null): string
@@ -1644,46 +1776,88 @@ class InstagramUnofficialService
     private function sync()
     {
         $csrfToken = $this->generateToken(32);
-        $mid = $this->generateToken(28);
+        $mid       = $this->generateToken(28);
+        $igDid     = strtoupper($this->generateUuid());
 
         $cookies = [
             'csrftoken' => $csrfToken,
-            'ig_did'    => strtoupper($this->generateUuid()),
+            'ig_did'    => $igDid,
             'ig_nrcb'   => '1',
-            'mid'       => $mid
+            'mid'       => $mid,
         ];
 
         $headers = [
-            'User-Agent' => $this->userAgent,
-            'Accept-Encoding' => 'gzip,deflate',
-            'Accept' => '*/*',
-            'Connection' => 'Keep-Alive',
+            'User-Agent'      => $this->userAgent,
+            'Accept-Encoding' => 'gzip, deflate, br',
+            'Accept'          => '*/*',
+            'Connection'      => 'Keep-Alive',
             'Accept-Language' => 'en-US',
+            'X-IG-App-ID'     => '567067343352427',
         ];
 
-        $response = $this->http(false)
-            ->withHeaders($headers)
-            ->withCookies($cookies, 'i.instagram.com')
-            ->get(InstagramEndpoints::QE_SYNC);
+        $payload = [
+            'id'          => $this->authData['device_id'] ?? ($this->authData['device_id'] = $this->generateUuid()),
+            'experiments' => 'ig_android_password_encryption'
+        ];
 
-        // Lấy cookie mid nếu có từ header response
-        $responseMid = $response->cookies()->getCookieByName('mid');
-        if ($responseMid && !empty($responseMid->getValue())) {
-            $this->authData['mid'] = $responseMid->getValue();
-        }
+        $data = [
+            'signed_body' => 'SIGNATURE.' . json_encode($payload, JSON_UNESCAPED_SLASHES),
+        ];
 
-        $keyId = $response->header('ig-set-password-encryption-key-id');
-        $pubKey = $response->header('ig-set-password-encryption-pub-key');
+        $attempts = 0;
+        do {
+            $attempts++;
+            $response = $this->http(false)
+                        ->asForm()
+                        ->withHeaders($headers)
+                        ->withCookies($cookies, 'i.instagram.com')
+                        ->post(InstagramEndpoints::QE_SYNC, $data);
 
-        if (!empty($keyId) && !empty($pubKey)) {
-            return [
-                'key_id' => is_array($keyId) ? $keyId[0] : $keyId,
-                'pub_key' => is_array($pubKey) ? $pubKey[0] : $pubKey,
-            ];
-        }
+            if ($response->successful()) {
+                // store cookies (server có thể set lại)
+                $this->authData['csrftoken'] = $csrfToken;
+                if ($response->cookies()) {
+                    $midCookie  = $response->cookies()->getCookieByName('mid');
+                    $csrfCookie = $response->cookies()->getCookieByName('csrftoken');
+                    if ($midCookie && $midCookie->getValue())  $this->authData['mid']      = $midCookie->getValue(); else $this->authData['mid'] = $mid;
+                    if ($csrfCookie && $csrfCookie->getValue()) $this->authData['csrftoken'] = $csrfCookie->getValue();
+                } else {
+                    $this->authData['mid'] = $mid;
+                }
 
-        return false;
-      
+                $keyId  = $response->header('ig-set-password-encryption-key-id');
+                $pubKey = $response->header('ig-set-password-encryption-pub-key');
+                if (is_array($keyId))  $keyId  = $keyId[0] ?? null;
+                if (is_array($pubKey)) $pubKey = $pubKey[0] ?? null;
+                $pubKey = $pubKey ? trim($pubKey, '"') : null;
+
+                if ($keyId && $pubKey) {
+                    return ['ok' => true, 'key_id' => $keyId, 'pub_key' => $pubKey];
+                }
+                \Log::warning('[IG][QE_SYNC] Missing encryption headers', [
+                    'status'  => $response->status(),
+                    'headers' => $response->headers(),
+                    'body'    => substr($response->body() ?? '', 0, 200),
+                ]);
+                return ['ok' => false, 'error' => 'Missing encryption headers'];
+            }
+
+            $status = $response->status();
+            \Log::warning('[IG][QE_SYNC] HTTP error', [
+                'status'  => $status,
+                'headers' => $response->headers(),
+                'body'    => substr($response->body() ?? '', 0, 200),
+            ]);
+
+            if ($status === 429 || ($status >= 500 && $status < 600)) {
+                usleep(200000 * $attempts); // 200ms, 400ms, 600ms
+                continue;
+            }
+            return ['ok' => false, 'error' => 'QE_SYNC http '.$status];
+
+        } while ($attempts < 3);
+
+        return ['ok' => false, 'error' => 'QE_SYNC retry exhausted'];
     }
 
     protected function encPass($password, $publicKeyId, $publicKey): string

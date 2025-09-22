@@ -19,17 +19,6 @@ class AppChannelsServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Pricing::add([
-            [
-                "sort"      => 110,
-                "key"       => "appchannels",
-                "label"     => __("12 Social networks"),
-                "check"     => true,
-                "type"      => "group",
-                "raw"       => null
-            ]
-        ]);
-
         $this->registerCommands();
         $this->registerCommandSchedules();
         $this->registerTranslations();

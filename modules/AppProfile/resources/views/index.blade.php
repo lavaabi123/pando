@@ -67,6 +67,7 @@
                                     <div class="input-group" >
                                         <span class="btn btn-input"><i class="fa-light fa-globe"></i></span>
                                         <select class="form-select" name="language" id="language">
+                                            <option value="en">{{ __("Select your language") }}</option>
                                             @foreach($languages as $key => $value)
                                                 <option value="{{ $value->code }}" {{ $user->language == $value->code ? 'selected' : '' }}>
                                                     {{ $value->name }}

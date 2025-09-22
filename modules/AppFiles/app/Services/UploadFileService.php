@@ -125,7 +125,6 @@ class UploadFileService
         $files = $request->file('files');
         $fileData = [];
 
-        // Check tổng size nếu muốn
         $totalSize = array_sum(array_map(fn($file) => $file->getSize(), $files));
         if ($this->checkStorageLimit($totalSize)) {
             throw new \Exception(__('You have exceeded your storage limit.'));
@@ -158,13 +157,20 @@ class UploadFileService
                 $mime_type = 'text/csv';
             }
 
-            // Save file
-            $file_path = Storage::disk($this->disk)->putFileAs('files', $file, $file_name, 'public');
+            // Save file (object key in bucket)
+            $relativePath = Storage::disk($this->disk)->putFileAs('files', $file, $file_name, 'public');
 
-            if (in_array($this->disk, ['s3', 'contabo'])) {
-                $file_path = Storage::disk($this->disk)->url($file_path);
+            // Convert to final URL/path
+            if ($this->disk === 's3') {
+                $file_path = Storage::disk($this->disk)->url($relativePath);
+            } elseif ($this->disk === 'contabo') {
+                $publicUrl = rtrim(get_option('file_contabos3_public_url'), '/'); 
+                $file_path = "{$publicUrl}/{$relativePath}";
+            } else {
+                $file_path = $relativePath;
             }
 
+            // Detect image info
             $is_image = false;
             $img_width = 0;
             $img_height = 0;
@@ -240,49 +246,56 @@ class UploadFileService
             $tempPath = $tempDir . DIRECTORY_SEPARATOR . $fileName;
             $cropped->save($tempPath);
 
-            $filePath = \Storage::disk($this->disk)->putFileAs($folder, new \Illuminate\Http\File($tempPath), $fileName);
+            $relativePath = \Storage::disk($this->disk)->putFileAs($folder, new \Illuminate\Http\File($tempPath), $fileName, 'public');
             @unlink($tempPath);
         } else {
             // Store original file
-            $filePath = $file->storeAs($folder, $fileName, $this->disk);
+            $relativePath = $file->storeAs($folder, $fileName, $this->disk);
         }
 
-        return $filePath;
-    }
+        // Build final URL/path
+        if ($this->disk === 's3') {
+            return Storage::disk($this->disk)->url($relativePath);
+        } elseif ($this->disk === 'contabo') {
+            $publicUrl = rtrim(get_option('file_contabos3_public_url'), '/');
+            return "{$publicUrl}/{$relativePath}";
+        }
 
+        // Local/public
+        return $relativePath;
+    }
 
     public function storeSingleFileFromURL(string $url, string $folder = 'uploads', ?string $customFileName = null): string
     {
-        $fileContent = @file_get_contents($url);
+        $context = stream_context_create([
+            "ssl" => [
+                "verify_peer"      => false,
+                "verify_peer_name" => false,
+            ]
+        ]);
+
+        $fileContent = @file_get_contents($url, false, $context);
 
         if ($fileContent === false) {
             throw new \Exception("Unable to download file from URL: $url");
         }
 
-        $path = parse_url($url, PHP_URL_PATH);
-        $baseNameRaw = basename($path);
-
-        $ext = pathinfo($baseNameRaw, PATHINFO_EXTENSION);
-        $ext = $ext ? strtolower($ext) : 'png';
-
-        $filenameOnly = preg_replace('/[^A-Za-z0-9_\-]/', '', pathinfo($baseNameRaw, PATHINFO_FILENAME));
-        if (empty($filenameOnly)) {
-            $filenameOnly = 'file';
-        }
-
-        $finalFileName = $customFileName
-            ? preg_replace('/[^A-Za-z0-9_\-\.]/', '', pathinfo($customFileName, PATHINFO_FILENAME)) . '.' . $ext
-            : uniqid() . '_' . $filenameOnly . '.' . $ext;
-
+        $finalFileName = $this->sanitizeFileNameFromUrl($url, $customFileName);
         $tempPath = tempnam(sys_get_temp_dir(), 'upload_');
         file_put_contents($tempPath, $fileContent);
         $file = new \Illuminate\Http\File($tempPath);
-
-        $filePath = Storage::disk($this->disk)->putFileAs($folder, $file, $finalFileName);
+        $relativePath = Storage::disk($this->disk)->putFileAs($folder, $file, $finalFileName, 'public');
 
         @unlink($tempPath);
 
-        return $filePath;
+        if ($this->disk === 's3') {
+            return Storage::disk($this->disk)->url($relativePath);
+        } elseif ($this->disk === 'contabo') {
+            $publicUrl = rtrim(get_option('file_contabos3_public_url'), '/');
+            return "{$publicUrl}/{$relativePath}";
+        }
+
+        return $relativePath;
     }
 
     public function saveFileFromUrl(array $file)
@@ -313,65 +326,75 @@ class UploadFileService
         }
 
         $fileContent = $this->downloadFileContent($file['file_url'], $from, $file['access_token'] ?? '');
-
-        // Lấy tên file từ đường dẫn, ưu tiên tên truyền vào
         $file_name = $file['file_name'] ?? basename(parse_url($file['file_url'], PHP_URL_PATH));
-        $file_ext = pathinfo($file_name, PATHINFO_EXTENSION);
+        $file_ext  = pathinfo($file_name, PATHINFO_EXTENSION);
+        $file_name = $this->sanitizeFileNameFromUrl($file_name);
 
-        // Nếu không có extension, dùng Content-Type
-        if (!$file_ext) {
-            $head = \Http::head($file['file_url']);
-            $mime = $head->header('Content-Type');
-            $map = [
-                'image/jpeg' => 'jpg',
-                'image/png' => 'png',
-                'image/webp' => 'webp',
-                'video/mp4' => 'mp4',
-                'audio/mpeg' => 'mp3',
-                'application/json' => 'json',
-            ];
-            $file_ext = $map[$mime] ?? 'jpg';
-            $file_name .= '.' . $file_ext;
-        }
-
-        $file_path = 'files/' . uniqid() . '_' . $file_name;
-
-        // Lưu file
-        \Storage::disk($this->disk)->put($file_path, $fileContent);
-
-        // Lấy content-type chính xác
+        $file_type = null;
         if ($from === 'google_drive') {
             $file_type = 'application/octet-stream';
         } else {
-            $head = \Http::head($file['file_url']);
-            $file_type = $head->header('Content-Type') ?: Media::detectFileType($file_ext) ?: 'application/octet-stream';
+            $response  = \Http::get($file['file_url']);
+            if (!$response->successful()) {
+                throw new \Exception(__('Failed to fetch file headers'));
+            }
+            $file_type = $response->header('Content-Type') ?: 'application/octet-stream';
+            if (!$file_ext) {
+                $map = [
+                    'image/jpeg' => 'jpg',
+                    'image/png'  => 'png',
+                    'image/webp' => 'webp',
+                    'video/mp4'  => 'mp4',
+                    'audio/mpeg' => 'mp3',
+                    'application/json' => 'json',
+                    'text/csv'   => 'csv',
+                ];
+                $file_ext  = $map[$file_type] ?? 'bin';
+                $file_name .= '.' . $file_ext;
+            }
         }
 
         $file_detect = Media::detectFileType($file_ext);
-        $file_size = strlen($fileContent);
+        $file_size   = strlen($fileContent);
 
-        if (!in_array($file_ext, $this->allowedFileTypes)) {
+        if (!in_array(strtolower($file_ext), $this->allowedFileTypes)) {
             throw new \Exception(__('Invalid file type. Allowed: ') . implode(', ', $this->allowedFileTypes));
         }
-
         if ($this->checkStorageLimit($file_size)) {
             throw new \Exception(__('You have exceeded your storage limit.'));
         }
-
         if ($file_size > $this->maxFileSize * 1024) {
-            throw new \Exception(__('File size exceeds the maximum allowed size of :size MB.', ['size' => $this->maxFileSize / 1024]));
+            throw new \Exception(__('File size exceeds the maximum allowed size of :size MB.', [
+                'size' => $this->maxFileSize / 1024
+            ]));
         }
 
-        // Xử lý ảnh
-        $is_image = in_array($file_type, ['image/jpeg', 'image/png']);
-        $img_width = 0;
-        $img_height = 0;
+        // Save object key
+        $relativePath = 'files/' . uniqid() . '_' . $file_name;
+        Storage::disk($this->disk)->put($relativePath, $fileContent);
 
-        if ($is_image) {
-            $ImageManager = ImageManager::gd();
-            $image = $ImageManager->read(Media::path($file_path));
-            $img_width = $image->width();
-            $img_height = $image->height();
+        // Build final URL
+        if ($this->disk === 's3') {
+            $file_path = Storage::disk($this->disk)->url($relativePath);
+        } elseif ($this->disk === 'contabo') {
+            $publicUrl = rtrim(get_option('file_contabos3_public_url'), '/');
+            $file_path = "{$publicUrl}/{$relativePath}";
+        } else {
+            $file_path = $relativePath;
+        }
+
+        // Image info
+        $is_image   = false;
+        $img_width  = 0;
+        $img_height = 0;
+        if (str_starts_with($file_type, 'image/')) {
+            try {
+                $ImageManager = ImageManager::gd();
+                $image = $ImageManager->read(Storage::disk($this->disk)->path($relativePath));
+                $img_width  = $image->width();
+                $img_height = $image->height();
+                $is_image   = true;
+            } catch (\Exception $e) {}
         }
 
         $fileData = [
@@ -396,6 +419,23 @@ class UploadFileService
         return \Media::url($file_path);
     }
 
+    protected function sanitizeFileNameFromUrl($url, $customFileName = null)
+    {
+        $path = parse_url($url, PHP_URL_PATH);
+        $baseNameRaw = basename($path);
+        $decodedName = urldecode($baseNameRaw);
+        $filename = $customFileName ?: $decodedName;
+        $filename = iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', $filename);
+        $filename = strtolower($filename);
+        $ext = pathinfo($filename, PATHINFO_EXTENSION);
+        $name = pathinfo($filename, PATHINFO_FILENAME);
+        $name = preg_replace('/[^a-z0-9\-_]+/', '-', $name);
+        $name = trim($name, '-_');
+        $rand = rand_string(6);
+
+        return $name . '_' . $rand . ($ext ? '.' . $ext : '');
+    }
+
     protected function downloadFileContent($file_url, $from, $access_token = '')
     {
         if ($from === 'google_drive') {
@@ -405,19 +445,20 @@ class UploadFileService
             return $this->getGoogleDriveFileContent($file_url, $access_token)['fileContent'];
         }
 
-        $fileContent = \Http::get($file_url);
-        if (!$fileContent->successful()) {
+        $response = \Http::get($file_url);
+        if (!$response->successful()) {
             throw new \Exception(__('Failed to download file'));
         }
-        return $fileContent;
+
+        return $response->body();
     }
 
     protected function getGoogleDriveFileContent($file_id, $access_token)
     {
         $this->client = new Google_Client();
-        $this->client->setClientId( get_option('file_google_drive_client_id') );
-        $this->client->setClientSecret( get_option('file_google_drive_api_key') );
-        $this->client->setDeveloperKey( get_option('file_google_drive_client_secret') );
+        $this->client->setClientId(get_option('file_google_drive_client_id'));
+        $this->client->setClientSecret(get_option('file_google_drive_client_secret'));
+        $this->client->setDeveloperKey(get_option('file_google_drive_api_key'));
         $this->client->addScope(Google_Service_Drive::DRIVE_READONLY);
         $this->client->setAccessType('offline');
         $this->client->setPrompt('select_account consent');
@@ -531,14 +572,41 @@ class UploadFileService
         }
     }
 
-    /**
-     * Deletes a file from the server's storage.
-     *
-     * @param string $filePath
-     */
+    protected function getObjectKeyFromUrl($url, $bucket = null)
+    {
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            return $url;
+        }
+
+        $parsed = parse_url($url);
+        if (!isset($parsed['path'])) {
+            return $url;
+        }
+
+        $path = ltrim($parsed['path'], '/');
+
+        // Nếu có bucket, bỏ prefix bucket/
+        if ($bucket && strpos($path, $bucket . '/') === 0) {
+            $path = substr($path, strlen($bucket) + 1);
+        }
+
+        return $path;
+    }
+
     public function deleteFileFromServer($filePath)
     {
-        if ($filePath && Storage::disk($this->disk)->exists($filePath)) {
+        if (!$filePath) return;
+
+        $bucket = null;
+        if ($this->disk === 's3') {
+            $bucket = get_option('file_aws_bucket_name');
+        } elseif ($this->disk === 'contabo') {
+            $bucket = get_option('file_contabos3_bucket_name');
+        }
+
+        $filePath = $this->getObjectKeyFromUrl($filePath, $bucket);
+
+        if (Storage::disk($this->disk)->exists($filePath)) {
             Storage::disk($this->disk)->delete($filePath);
         }
     }

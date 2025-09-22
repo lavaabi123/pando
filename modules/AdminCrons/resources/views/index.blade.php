@@ -45,7 +45,7 @@
                 {{ __('Use cron with URL') }}
             </div>
             <div class="card-body text-success bg-dark">
-                <pre class="mb-0">{{ $value['expression'] }} {{ $value['url'] ?? $value['command']  }}</pre>
+                <pre class="mb-0">{{ $value['expression'] }} curl -fsS "{{ $value['url'] ?? $value['command']  }}" >/dev/null 2>&1</pre>
             </div>
             @endif
             <div class="card-body bg-gray-100 fw-5 fs-12 py-2 px-3">

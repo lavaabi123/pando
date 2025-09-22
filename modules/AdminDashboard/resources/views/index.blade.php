@@ -13,8 +13,12 @@
     </div>
 
     <div class="container py-5">
-
+	
         <div class="ajax-pages" data-url="{{ route('admin.dashboard.statistics') }}" data-resp=".ajax-pages">
+			
+			<div class=" fw-6 text-black fs-22">
+				<i class="fa-solid fa-face-smile text-primary"></i> Hi Royalink!
+			</div>
             
             <div class="pb-30 mt-200 ajax-scroll-loading">
                 <div class="app-loading mx-auto mt-10 pl-0 pr-0">

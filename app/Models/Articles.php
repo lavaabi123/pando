@@ -154,36 +154,36 @@ class Articles extends Model
      */
     public static function getArticlesDetail($articleId)
     {
-        if (!$articleId) {
-            return false;
-        }
+        if (!$articleId) return false;
+
+        $tagsSub = DB::table('article_map_tags as amt')
+            ->join('article_tags as t', 'amt.tag_id', '=', 't.id')
+            ->select(
+                'amt.article_id',
+                DB::raw("GROUP_CONCAT(DISTINCT t.id ORDER BY t.id SEPARATOR ',')  AS tag_ids"),
+                DB::raw("GROUP_CONCAT(DISTINCT t.name ORDER BY t.name SEPARATOR ',') AS tag_names")
+            )
+            ->groupBy('amt.article_id');
 
         $article = DB::table('articles as a')
-            // Join with article_categories to get the category details.
             ->leftJoin('article_categories as c', 'a.cate_id', '=', 'c.id')
-            // Join with the pivot table article_map_tags, then with article_tags to get tag details.
-            ->leftJoin('article_map_tags as amt', 'a.id', '=', 'amt.article_id')
-            ->leftJoin('article_tags as t', 'amt.tag_id', '=', 't.id')
+            ->leftJoinSub($tagsSub, 'tg', function ($join) {
+                $join->on('tg.article_id', '=', 'a.id');
+            })
             ->select(
                 'a.*',
                 'c.name as category_name',
-                // Aggregate tag information into a comma-separated string.
-                DB::raw("GROUP_CONCAT(COALESCE(t.id, '') SEPARATOR ',') as tag_ids"),
-                DB::raw("GROUP_CONCAT(COALESCE(t.name, '') SEPARATOR ',') as tag_names")
+                'tg.tag_ids',
+                'tg.tag_names'
             )
-            ->where('a.id_secure', $articleId)
-            ->groupBy('a.id')
+            ->where('a.id_secure', $articleId) 
             ->first();
 
-        if (!$article) {
-            return null;
-        }
+        if (!$article) return null;
 
-        $article->tag_ids  = $article->tag_ids ? explode(',', $article->tag_ids) : [''];
+        $article->tag_ids   = $article->tag_ids ? explode(',', $article->tag_ids) : [''];
         $article->tag_names = $article->tag_names ? explode(',', $article->tag_names) : [''];
 
         return $article;
     }
-
-
 }

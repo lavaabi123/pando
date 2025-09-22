@@ -19,7 +19,7 @@
                         </div>
                         <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-1 w-100 max-w-120 min-w-120">
                             <li>
-                                <a class="dropdown-item px-2 p-t-2 p-b-2 rounded d-flex align-items-center gap-8 fw-5 fs-13 actionItem" href="{{ module_url("update") }}" data-id="{{ $value->id_secure }}" data-popup="SupportLabelsModal" data-call-success="">
+                                <a class="dropdown-item px-2 p-t-2 p-b-2 rounded d-flex align-items-center gap-8 fw-5 fs-13 actionItem" href="{{ module_url("update") }}" data-id="{{ $value->id_secure }}" data-popup="supportTypeModal" data-call-success="">
                                     <i class="fa-light fa-pen-to-square"></i> <span >{{ __('Edit') }}</span>
                                 </a>
                             </li>

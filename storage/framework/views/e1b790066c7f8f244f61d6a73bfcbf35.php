@@ -4,7 +4,15 @@
 
     <div class="flex flex-col justify-center flex-1 px-8 py-16 bg-blueGray-100 z-10" style="background-image: url(<?php echo e(theme_public_asset('images/pattern-light-big.svg')); ?>); background-position: center;">
         <form class="actionForm max-w-md mx-auto w-full space-y-5" action="<?php echo e(module_url('do_forgot_password')); ?>" method="POST">
+        	<div class="show-on-mobile">
+                <a class="mb-4 inline-block" href="<?php echo e(url('')); ?>">
+                    <img class="h-10" src="<?php echo e(url( get_option("website_logo_brand_dark", asset('public/img/logo-brand-dark.png')) )); ?>" alt="">
+                </a>
+                <h2 class="mb-16 text-4xl md:text-4xl font-bold font-heading tracking-px-n leading-tight">
+                    <?php echo e(__("Forgot password")); ?>
 
+                </h2>
+            </div>
 			<div>
 			    <label for="email" class="block text-gray-700 font-semibold mb-2"><?php echo e(__("Email Address")); ?></label>
 			    <input type="email" id="email" name="email"

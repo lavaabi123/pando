@@ -57,7 +57,7 @@ Route::middleware(['web', 'auth'])->group(function () {
                         "message" => __("The coupon you entered has expired. Please try another one or contact support for help.")
                     ]);
 
-                if($coupon->usage_limit <= $coupon->usage_count)
+                if($coupon->usage_limit != -1 && $coupon->usage_limit <= $coupon->usage_count)
                     return response()->json([
                         "status" => 0,
                         "message" => __("This coupon has reached its usage limit and can no longer be used.")

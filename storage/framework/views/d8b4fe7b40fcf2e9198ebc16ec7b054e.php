@@ -46,11 +46,29 @@
 
                     <?php $__currentLoopData = $plans; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $plan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                        <div class="w-full md:w-1/2 lg:w-1/3 flex-1"
+                        <?php
+                            $isFreePlan = $plan['free_plan'];
+                        ?>
+
+                        <div class="w-full xs:w-full sm:w-full md:w-full lg:w-1/3 flex-1"
                              x-show="type == <?php echo e($typeKey); ?>"
                              x-transition
                              style="display: none; z-index: <?php echo e(1000 - $index); ?>">
-                            <div class="px-9 pt-8 pb-11 h-full rounded-3xl" style="backdrop-filter: blur(46px);">
+
+                            <div class="relative px-9 pt-8 pb-11 h-full rounded-3xl" style="backdrop-filter: blur(46px);">
+
+                                
+                                <?php if(!empty($plan['featured'])): ?>
+                                    <div class="overflow-hidden absolute right-0 w-40 h-40 top-0">
+                                        <div class="absolute top-6 -right-10 rotate-45">
+                                            <span class="bg-indigo-600 text-white px-12 py-1 text-xs font-bold shadow-md uppercase">
+                                                <?php echo e(__('Featured')); ?>
+
+                                            </span>
+                                        </div>
+                                    </div>
+                                <?php endif; ?>
+
                                 <span class="mb-3 inline-block text-sm text-indigo-600 font-semibold uppercase tracking-px leading-snug">
                                     <?php echo e(__($plan['name'] ?? '-')); ?>
 
@@ -60,18 +78,19 @@
 
                                 </p>
                                 <h3 class="mb-1 text-4xl text-gray-900 font-bold leading-tight">
-                                    $<?php echo e($plan['price'] ?? '0'); ?>
+                                    <?php if($isFreePlan): ?>
+                                        <?php echo e(Payment::price(0)); ?>
 
+                                    <?php else: ?>
+                                        <?php echo e(Payment::price($plan['price'] ?? 0)); ?>
+
+                                    <?php endif; ?>
                                     <span class="text-gray-400">/<?php echo e(strtolower($typeLabel)); ?></span>
                                 </h3>
                                 <p class="mb-8 text-sm text-gray-500 font-medium leading-relaxed">
                                     <?php echo e(__("Billed")); ?> <?php echo e($typeLabel); ?>
 
                                 </p>
-
-                                <?php
-                                    $isFreePlan = $plan['free_plan'];
-                                ?>
 
                                 <?php if($isFreePlan): ?>
                                     <a href="<?php echo e(route('payment.index', $plan['id_secure'])); ?>" class="mb-9 py-4 px-9 w-full font-semibold rounded-xl text-indigo-600 bg-white hover:bg-indigo-200 border border-indigo-600 hover:text-white transition ease-in-out duration-200 text-center block">

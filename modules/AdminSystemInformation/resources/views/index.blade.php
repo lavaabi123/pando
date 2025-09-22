@@ -191,13 +191,6 @@
                         </td>
                         <td class="fw-5 fs-13">{{ __("Required for zip archive handling") }}</td>
                     </tr>
-                    <tr>
-                        <td class="fw-5 fs-13">{{ __("zlib.output_compression") }}</td>
-                        <td class="{{ $extensions['zlib_output_compression'] === 'Disabled' ? 'fs-13 fw-6 text-danger' : 'fs-13 fw-6 text-success' }}">
-                            {{ __($extensions['zlib_output_compression']) }}
-                        </td>
-                        <td class="fw-5 fs-13">{{ __("Enabled for compression") }}</td>
-                    </tr>
                 </tbody>
             </table>
         </div>
@@ -265,13 +258,6 @@
                             {{ __($tools['ffmpeg']) }}
                         </td>
                         <td class="fw-5 fs-13">{{ __("Required for video processing") }}</td>
-                    </tr>
-                    <tr>
-                        <td class="fw-5 fs-13">{{ __("Node.js") }}</td>
-                        <td class="{{ $tools['nodeJs'] === 'Not Installed' ? 'fs-13 fw-6 text-danger' : 'fs-13 fw-6 text-success' }}">
-                            {{ __($tools['nodeJs']) }}
-                        </td>
-                        <td class="fw-5 fs-13">{{ __("Required for WhatsApp script") }}</td>
                     </tr>
                 </tbody>
             </table>

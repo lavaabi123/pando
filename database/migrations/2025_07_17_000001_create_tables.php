@@ -31,8 +31,6 @@ return new class extends Migration
             $table->string('remember_token', 100)->nullable();
             $table->integer('changed')->nullable();
             $table->integer('created')->nullable();
-			$table->string('theme')->default('light');
-            $table->string('accent_color')->nullable();
         });
 
         Schema::create('addons', function (Blueprint $table) {

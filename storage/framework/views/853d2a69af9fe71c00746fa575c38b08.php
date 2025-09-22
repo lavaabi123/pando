@@ -51,7 +51,7 @@
                 
                 <div class="w-auto p-4">
                     <a href="<?php echo e(url('/')); ?>">
-                        <img class="h-9" src="<?php echo e(url(get_option("website_logo_brand_dark", asset('img/logo-brand-dark.png')))); ?>" alt="">
+                        <img class="h-9" src="<?php echo e(url(get_option("website_logo_brand_dark", asset('public/img/logo-brand-dark.png')))); ?>" alt="">
                     </a>
                 </div>
                 

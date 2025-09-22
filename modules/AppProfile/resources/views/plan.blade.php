@@ -194,7 +194,9 @@
                                 <div class="card pricing-card hp-100 text-center border-0 shadow-sm">
                                     <div class="card-body py-5 position-relative">
                                         @if(!empty($plan['featured']))
-                                            {{-- {{ __('Most Popular') }} --}}
+                                            <span class="position-absolute top-0 end-0 bg-primary-400 wp-100 text-white px-3 py-2 small fw-bold btr-r-25 btl-r-25 text-uppercase">
+                                                {{ __('Featured') }}
+                                            </span>
                                         @endif
                                         <span class="text-uppercase fw-bold text-primary mb-2 d-block" style="letter-spacing:1px;">
                                             {{ __($plan['name'] ?? '-') }}
@@ -205,15 +207,15 @@
 
                                         <h2 class="fw-bold mb-0 mt-2 fs-35">
                                             @if($isFreePlan)
-                                                $0
+                                                {{ Payment::price(0) }}
                                                 <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
                                             @else
-                                                ${{ $plan['price'] }}
+                                                {{ Payment::price($plan['price'] ?? 0) }}
                                                 <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
                                             @endif
                                         </h2>
                                         <div class="mb-2 text-muted mb-4">{{ $plan['desc'] ?? '' }}</div>
-                                        <ul class="list-unstyled text-start mb-4 mx-auto" style="max-width:240px;">
+                                        <ul class="list-unstyled text-start mb-4 mx-auto max-w-240">
                                             @foreach($plan['features'] as $feature)
                                                 <li class="mb-2 d-flex align-items-center gap-1">
                                                     <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">

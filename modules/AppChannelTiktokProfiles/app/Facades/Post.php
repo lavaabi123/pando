@@ -108,8 +108,7 @@ class Post extends Facade
 
         $data = json_decode($post->data, false);
         $medias = $data->medias ?? [];
-        $options = $data->options ?? (object)[];
-        $caption = $options->caption ?? '';
+        $caption = $data->caption ?? '';
         $videoPath = Media::url($medias[0] ?? '');
 
         $errors = self::validator($post);

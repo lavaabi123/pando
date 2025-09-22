@@ -104,15 +104,30 @@
 
     <div class="col-lg-2 col-md-4 col-sm-6 col-6 mb-4">
         <div class="bg-light border b-r-10 position-relative">
-            <label class="w-100 h-150 bg-cover border-bottom btl-r-10 btr-r-10 d-flex align-items-center justify-content-center text-{{ $detectType['color'] }} bg-{{ $detectType['color'] }}-100" for="file_{{ $value->id_secure }}" style="background-image: url('{{ Media::url($value->file)  }}');">
-                <div class="position-absolute r-10 t-10">
-                    <input class="form-check-input checkbox-item" type="checkbox" name="id[]" value="{{ $value->id_secure }}" id="file_{{ $value->id_secure }}">
+            <label 
+                class="w-100 h-150 border-bottom btl-r-10 btr-r-10 d-flex align-items-center justify-content-center 
+                       text-{{ $detectType['color'] }} bg-{{ $detectType['color'] }}-100 position-relative overflow-hidden" 
+                for="file_{{ $value->id_secure }}"
+                @if($value->detect == "image")
+                    style="background-image: url('{{ Media::url($value->file) }}'); background-size: cover; background-position: center;"
+                @endif
+            >
+                <!-- Checkbox -->
+                <div class="position-absolute r-10 t-10 z-10">
+                    <input class="form-check-input checkbox-item" type="checkbox" 
+                           name="id[]" value="{{ $value->id_secure }}" 
+                           id="file_{{ $value->id_secure }}">
                 </div>
 
-                @if($value->detect != "image")
-                <div class="fs-40">
-                    <i class="{{ $detectType['icon'] }}"></i>
-                </div>
+                @if($value->detect == "video")
+                    <video class="position-absolute top-0 start-0 w-100 h-150 object-cover" muted loop>
+                        <source src="{{ Media::url($value->file) }}" type="video/mp4">
+                        {{ __('Your browser does not support the video tag.') }}
+                    </video>
+                @elseif($value->detect != "image")
+                    <div class="fs-40">
+                        <i class="{{ $detectType['icon'] }}"></i>
+                    </div>
                 @endif
             </label>
             <div class="px-2 py-1 d-flex align-items-center justify-content-between gap-8">
@@ -127,13 +142,15 @@
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end right-0 p-2 border-1 border-gray-300">
                             @can('appfiles.image_editor')
-                            <li>
-                                <button type="button" class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 editImage" data-file="{{ Media::url($value->file) }}" data-id="{{ $value->id_secure }}">
-                                    <span class="size-16 me-1 text-center"><i class="fa-light fa-edit"></i></span>
-                                    <span class="fw-5">{{ __("Edit Image") }}</span>
-                                </button>
-                            </li>
-                            <li><hr class="dropdown-divider"></li>
+                                @if($value->detect == "image")
+                                <li>
+                                    <button type="button" class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 editImage" data-file="{{ Media::url($value->file) }}" data-id="{{ $value->id_secure }}">
+                                        <span class="size-16 me-1 text-center"><i class="fa-light fa-edit"></i></span>
+                                        <span class="fw-5">{{ __("Edit Image") }}</span>
+                                    </button>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                @endif
                             @endcan
                             <li>
                                 <a class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 actionItem" href="{{ module_url("destroy") }}" data-id="{{ $value->id_secure }}" data-call-success="Main.ajaxScroll(true)">

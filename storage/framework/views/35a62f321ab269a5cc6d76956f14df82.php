@@ -224,7 +224,10 @@
                                 <div class="card pricing-card hp-100 text-center border-0 shadow-sm">
                                     <div class="card-body py-5 position-relative">
                                         <?php if(!empty($plan['featured'])): ?>
-                                            
+                                            <span class="position-absolute top-0 end-0 bg-primary-400 wp-100 text-white px-3 py-2 small fw-bold btr-r-25 btl-r-25 text-uppercase">
+                                                <?php echo e(__('Featured')); ?>
+
+                                            </span>
                                         <?php endif; ?>
                                         <span class="text-uppercase fw-bold text-primary mb-2 d-block" style="letter-spacing:1px;">
                                             <?php echo e(__($plan['name'] ?? '-')); ?>
@@ -236,16 +239,17 @@
 
                                         <h2 class="fw-bold mb-0 mt-2 fs-35">
                                             <?php if($isFreePlan): ?>
-                                                $0
+                                                <?php echo e(Payment::price(0)); ?>
+
                                                 <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
                                             <?php else: ?>
-                                                $<?php echo e($plan['price']); ?>
+                                                <?php echo e(Payment::price($plan['price'] ?? 0)); ?>
 
                                                 <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
                                             <?php endif; ?>
                                         </h2>
                                         <div class="mb-2 text-muted mb-4"><?php echo e($plan['desc'] ?? ''); ?></div>
-                                        <ul class="list-unstyled text-start mb-4 mx-auto" style="max-width:240px;">
+                                        <ul class="list-unstyled text-start mb-4 mx-auto max-w-240">
                                             <?php $__currentLoopData = $plan['features']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <li class="mb-2 d-flex align-items-center gap-1">
                                                     <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-danger'); ?>">

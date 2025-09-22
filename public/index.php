@@ -31,7 +31,7 @@ $env = loadEnv(__DIR__.'/../.env');
 $appInstalled = $env['APP_INSTALLED'] ?? null;
 if ( (!$appInstalled && $appInstalled !== 'true' ) || strtolower($appInstalled) === 'false') {
     $basePath = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/');
-    header('Location: ' . $basePath . '/installer');
+    header('Location: ' . $basePath . '/installer/');
     exit;
 }
 

@@ -4,19 +4,27 @@ namespace Modules\AdminSystemInformation\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use DB;
 
 class AdminSystemInformationController extends Controller
-  
 {
-
     public function index()
     {
-        // Fetch PHP, MySQL, and server settings.
-        $mysqlConfig = DB::select("SHOW VARIABLES WHERE Variable_name IN (
-            'max_connections', 'max_user_connections', 'wait_timeout', 'max_allowed_packet'
-        )");
+        // MySQL settings
+        $mysqlConfig = DB::select("
+            SHOW VARIABLES
+            WHERE Variable_name IN ('max_connections','max_user_connections','wait_timeout','max_allowed_packet')
+        ");
         $mysqlSettings = collect($mysqlConfig)->pluck('Value', 'Variable_name');
+
+        // Tool checks that DON'T require shell_exec
+        $ffmpegStatus = $this->hasBinary('ffmpeg', [
+            env('FFMPEG_PATH'), '/usr/bin/ffmpeg', '/usr/local/bin/ffmpeg', '/bin/ffmpeg'
+        ]);
+        $nodeStatus = $this->hasBinary('node', [
+            env('NODE_PATH'), '/usr/bin/node', '/usr/local/bin/node', '/bin/node'
+        ]);
 
         $data = [
             'phpSettings' => [
@@ -46,27 +54,50 @@ class AdminSystemInformationController extends Controller
                 'webp' => function_exists('imagewebp') ? 'Supported' : 'Not Supported',
             ],
             'tools' => [
-                'ffmpeg'  => shell_exec('ffmpeg -version') ? 'Installed' : 'Not Installed',
-                'nodeJs'  => shell_exec('node -v') ? 'Installed' : 'Not Installed',
+                'ffmpeg' => $ffmpegStatus,
+                'nodeJs' => $nodeStatus,
             ],
             'serverSoftware' => $_SERVER['SERVER_SOFTWARE'] ?? 'Not Available',
         ];
-        return view('adminsysteminformation::index',$data);
+
+        return view('adminsysteminformation::index', $data);
     }
 
+    /**
+     * Check if a binary exists without relying on shell_exec.
+     * Returns: 'Installed' | 'Not Installed' | 'Unknown (shell_exec disabled)'
+     */
+    private function hasBinary(string $command, array $commonPaths = []): string
+    {
+        // 1) Environment variable path
+        foreach ($commonPaths as $p) {
+            if (!$p) continue;
+            if (@is_file($p) || @is_link($p)) {
+                return 'Installed';
+            }
+        }
 
-    
-    
+        // 2) If shell_exec is available, confirm via command -v / which
+        if (function_exists('shell_exec')) {
+            $out = @\shell_exec("command -v " . escapeshellcmd($command) . " 2>/dev/null")
+               ?: @\shell_exec("which " . escapeshellcmd($command) . " 2>/dev/null");
+            if ($out && trim($out) !== '') {
+                return 'Installed';
+            }
+            return 'Not Installed';
+        }
+
+        // 3) Unknown if we can't probe
+        return 'Unknown (shell_exec disabled)';
+    }
 
     public function save(Request $request)
     {
-        $posts = $request->all();
-        foreach ($posts as $name => $value)
-        {
-            if(is_string($value) || $value==""){
+        foreach ($request->all() as $name => $value) {
+            if (is_string($value) || $value === "") {
                 DB::table('options')->updateOrInsert(
                     ['name' => $name],
-                    fn ($exists) => $exists ? ['value' => $value] : ['value' => $value],
+                    ['value' => $value]
                 );
             }
         }
@@ -77,7 +108,8 @@ class AdminSystemInformationController extends Controller
         ]);
     }
 
-    public function pusher(){
+    public function pusher()
+    {
         return view('adminsettings::pusher');
     }
 }

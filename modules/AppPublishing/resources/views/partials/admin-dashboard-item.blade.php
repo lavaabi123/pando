@@ -79,11 +79,11 @@
                     <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-success-500">
                         <i class="fa-light fa-circle-check text-white fs-22"></i>
                     </span>
-                    <span class="fw-6 fs-14 text-muted">{{ $statusMap[5]['label'] ?? __('Success') }}</span>
+                    <span class="fw-6 fs-14 text-muted">{{ $statusMap[4]['label'] ?? __('Success') }}</span>
                 </div>
                 <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($successTotal) }}</div>
                 <div class="fs-14 text-muted">
-                    {{ ($statusGrowth[5] ?? 0) == 0 ? '0%' : (($statusGrowth[5] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[5] ?? 0) . '%' }}
+                    {{ ($statusGrowth[4] ?? 0) == 0 ? '0%' : (($statusGrowth[4] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[4] ?? 0) . '%' }}
                 </div>
             </div>
         </div>
@@ -97,11 +97,11 @@
                     <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-danger-500">
                         <i class="fa-light fa-circle-xmark text-white fs-22"></i>
                     </span>
-                    <span class="fw-6 fs-14 text-muted">{{ $statusMap[4]['label'] ?? __('Failed') }}</span>
+                    <span class="fw-6 fs-14 text-muted">{{ $statusMap[5]['label'] ?? __('Failed') }}</span>
                 </div>
                 <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($failedTotal) }}</div>
                 <div class="fs-14 text-muted">
-                    {{ ($statusGrowth[4] ?? 0) == 0 ? '0%' : (($statusGrowth[4] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[4] ?? 0) . '%' }}
+                    {{ ($statusGrowth[5] ?? 0) == 0 ? '0%' : (($statusGrowth[5] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[5] ?? 0) . '%' }}
                 </div>
             </div>
         </div>
@@ -197,46 +197,77 @@
     <div class="col-lg-12 mb-4">
         <div class="card border-0 shadow-sm px-0">
             <div class="card-header">
-                <h5 class="fw-5 fs-16">{{ __('Recently Posted: Success & Failed') }}</h5>
+                <h5 class="fs-5 fs-16">{{ __('Recently Posted: Success & Failed') }}</h5>
             </div>
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle" id="RecentPostsTable">
                         <thead class="table-light text-center">
                             <tr>
-                                <th style="width: 60px;">{{ __('Thumbnail') }}</th>
+                                <th style="w-60">{{ __('Thumbnail') }}</th>
                                 <th>{{ __('Caption') }}</th>
-                                <th>{{ __('Status') }}</th>
                                 <th>{{ __('Account') }}</th>
+                                <th>{{ __('Status') }}</th>
                                 <th>{{ __('Date') }}</th>
                                 <th>{{ __('View') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse ($recentPosts as $post)
+                                @php
+                                    $data = is_string($post->data) ? json_decode($post->data, true) : $post->data;
+                                    $result = is_string($post->result) ? json_decode($post->result, true) : $post->result;
+                                    $url = $result['url'] ?? null;
+                                    $caption = $data['caption'] ?? '-';
+                                    $thumbnail = $data['medias'][0] ?? null;
+                                    $networkIcon = match($post->social_network ?? '') {
+                                        'facebook' => 'fa-brands fa-facebook text-primary',
+                                        'instagram' => 'fa-brands fa-instagram text-danger',
+                                        'tiktok' => 'fa-brands fa-tiktok text-dark',
+                                        default => 'fa-regular fa-share-nodes text-gray-500',
+                                    };
+                                @endphp
                                 <tr>
-                                    <td class="text-center">
-                                        @if (!empty($post->media_url))
-                                            <img src="{{ Media::url($post->media_url) }}" class="rounded" style="width: 48px; height: 48px; object-fit: cover;">
+                                    <td class="text-center w-60">
+                                        @if (!empty($thumbnail))
+                                            <img src="{{ Media::url($thumbnail) }}" class="rounded size-48" style="object-fit: cover;">
+                                        @elseif($post->type == "link")
+                                            <div class="d-flex align-items-center justify-content-center bg-light border rounded size-48">
+                                                <i class="fa-light fa-link text-gray-600 fs-4"></i>
+                                            </div>
                                         @else
-                                            <div class="d-flex align-items-center justify-content-center bg-light border rounded" style="width: 48px; height: 48px;">
-                                                <i class="fa-light fa-image text-gray-600 fs-4"></i>
+                                            <div class="d-flex align-items-center justify-content-center bg-light border rounded size-48">
+                                                <i class="fa-light fa-align-center text-gray-600 fs-4"></i>
                                             </div>
                                         @endif
                                     </td>
-                                    <td>{{ \Str::limit($post->title ?? $post->caption ?? '-', 80) }}</td>
+                                    <td class="fs-14">{{ \Str::limit($caption, 80) }}</td>
+                                    <td class="text-start">
+                                        <div class="d-flex align-items-center gap-2 justify-content-start gap-10">
+                                            @if(!empty($post->account->avatar))
+                                                <img src="{{ Media::url($post->account->avatar) }}" class="rounded-circle size-22" style="object-fit:cover;">
+                                            @endif
+                                            <span class="fs-14">{{ $post->account->name ?? '-' }}</span>
+                                        </div>
+                                    </td>
                                     <td class="text-center">
-                                        <span class="badge" style="background: {{ $post->status_color }}; color: #fff;">
-                                            {{ $post->status_label }}
+                                        @if($post->status == 4)
+                                        <span class="badge badge-outline badge-sm badge-success">
+                                            {{ __("Success") }}
                                         </span>
+                                        @else
+                                        <span class="badge badge-outline badge-sm badge-danger">
+                                            {{ __("Failed") }}
+                                        </span>
+                                        @endif
+                                        
                                     </td>
-                                    <td class="text-center">{{ $post->account_id }}</td>
                                     <td class="text-nowrap text-gray-700 fs-14">
-                                        {{ \Carbon\Carbon::parse($post->created)->format('M d, Y H:i') }}
+                                        {{ datetime_show($post->time_post) }}
                                     </td>
                                     <td class="text-center">
-                                        @if (!empty($post->permalink_url))
-                                            <a href="{{ $post->permalink_url }}" target="_blank">
+                                        @if (!empty($url))
+                                            <a href="{{ $url }}" target="_blank" title="View">
                                                 <i class="fas fa-external-link-alt"></i>
                                             </a>
                                         @endif
@@ -244,7 +275,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="6" class="text-center text-muted">{{ __('No posts found.') }}</td>
+                                    <td colspan="7" class="text-center text-muted">{{ __('No posts found.') }}</td>
                                 </tr>
                             @endforelse
                         </tbody>

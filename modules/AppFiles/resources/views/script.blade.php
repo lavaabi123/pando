@@ -13,6 +13,3 @@
 @endif
 
 </script>
-
-<link rel="stylesheet" href="https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.19.1/filerobot-image-editor.min.css">
-<script src="https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.19.1/filerobot-image-editor.min.js"></script>

@@ -70,7 +70,7 @@ $stats = UploadFile::getFileStorageStats();
 
         <div>
             <div class="fw-5">{{ __("Total") }}</div>
-            <div class="text-gray-900 fw-6">{{ sprintf(__("%d files"), $stats['total_files']) }}</div>
+            <div class="text-gray-900 fw-6">{{ sprintf("%d ". __("files"), $stats['total_files']) }}</div>
         </div>
         <div class="text-end">
             <div class="fw-5">{{ __("Used") }}</div>

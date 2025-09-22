@@ -74,7 +74,9 @@ var Files = new (function ()
 
                 Main.ajaxPost( $(this), uploadFilesUrl, formData, function(res) {
                     ImageEditor.close();
-                    Main.ajaxScroll(true, file_id);
+                    var file_id = file_id=="undefined" ? 0 : file_id;
+                    console.log(file_id);
+                    Main.ajaxScroll(true, file_id );
                 });
             });
         }

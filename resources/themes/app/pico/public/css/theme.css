@@ -21,8 +21,14 @@ html[data-theme="light"] a { color: var(--d-primary); }
 /* ---- DARK (scoped) ---- */
 html[data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0e1218; --surface-1:#111827; --surface-2:#0f1724; --surface-3:#0c1220;
-  --border:#253349; --text:#fff; --text-dim:#f2f3f5; --muted:rgba(255,255,255,.65);
+  --bg: #0e1218; 
+  --surface-1:#111827; 
+  --surface-2:#0f1724; 
+  --surface-3:#0c1220;
+  --border:#253349; 
+  --text:#fff; 
+  --text-dim:#f2f3f5; 
+  --muted:rgba(255,255,255,.65);
   --primary: var(--d-primary, #6aa4ff);
   --secondary: var(--d-secondary, #64748b);
 
@@ -34,15 +40,29 @@ html[data-theme="dark"] {
   --bs-link-color: var(--primary);
 }
 
-html[data-theme="dark"] body { background: var(--bg); color: var(--text); }
-html[data-theme="dark"] .card, html[data-theme="dark"] .modal-content, html[data-theme="dark"] .dropdown-menu {
-  background: var(--surface-2) !important; color: var(--text) !important; border-color: var(--border) !important;
-}
-html[data-theme="dark"] .sidebar, html[data-theme="dark"] .app-sidebar {
-  background: var(--surface-3) !important; border-right:1px solid var(--border);
-}
+html[data-theme="dark"] body, html[data-theme="dark"], html[data-theme="dark"] .bg-white { background: var(--bg) !important; color: var(--text); }
+html[data-theme="dark"] .bg-light, html[data-theme="dark"] .fc table tr > th.fc-day  { background: var(--surface-2) !important; color: var(--text); }
+html[data-theme="dark"] .fc table tr > th.fc-day a { color: var(--text); }
+html[data-theme="dark"] .card, html[data-theme="dark"] .modal-content, html[data-theme="dark"] .dropdown-menu, html[data-theme="dark"] .bg-gray-100,
+html[data-theme="dark"] .header { background: var(--surface-2) !important; color: var(--text) !important; border-color: var(--border) !important; }
+html[data-theme="dark"] .sidebar, html[data-theme="dark"] .app-sidebar {  background: var(--surface-3) !important; border-right:1px solid var(--border); }
 html[data-theme="dark"] .btn-primary { background: var(--primary) !important; border-color: var(--primary) !important; color:#0e1218 !important; }
 html[data-theme="dark"] .btn-secondary { background: var(--secondary) !important; border-color: var(--secondary) !important; color:#0e1218 !important; }
+
+html[data-theme="dark"] .text-dark, html[data-theme="dark"] .text-black, html[data-theme="dark"] .table-info {color: var(--text) !important; }
+html[data-theme="dark"] .text-muted, html[data-theme="dark"] .text-gray-900  { color: var(--muted) !important; }
+html[data-theme="dark"] .menu .bg-gray-200 { background-color: var(--border) !important; }
+
+html[data-theme="dark"] .table > :not(caption) > * > *, html[data-theme="dark"] .fc-day.past-day { color: var(--text); background-color: var(--bg); border-color: var(--border) !important; }
+html[data-theme="dark"] .card.border-0 { border: 1px solid var(--border) !important;}
+html[data-theme="dark"] .card .card-header, html[data-theme="dark"]  .border-gray-300 { border-color: var(--border) !important; }
+html[data-theme="dark"] .card .card-footer, html[data-theme="dark"] .fc table tr > td.fc-day, html[data-theme="dark"] .fc table tr > th.fc-day { border-color: var(--border) !important; }
+html[data-theme="dark"] .form-control:focus { color: #333333;}
+html[data-theme="dark"] .text-gray-800, html[data-theme="dark"] .text-body-secondary, html[data-theme="dark"] .nav-link, html[data-theme="dark"] .nav-link:focus { color: var(--muted) !important; }
+html[data-theme="dark"] .nav-link.text-primary { color: var(--primary) !important; }
+html[data-theme="dark"] .table tr > th {  color: var(--text) !important; background-color: var(--surface-1) !important;}
+
+
 /* resources/css/theme.css (keep your other rules — add this) */
 
 /* round color buttons */
@@ -64,3 +84,11 @@ html[data-theme="dark"] .btn-secondary { background: var(--secondary) !important
 .sidebar .menu .menu-item .menu-link {
     color: #fff !important;
 }
+
+
+/** Input Fields Start **/
+.dark input[type="checkbox"]:checked, .dark input[type="radio"]:checked {
+    background: linear-gradient(45deg, var(--d-primary), var(--d-secondary)) !important;
+    border-color: var(--d-white) !important;
+}
+/** Input Fields End **/

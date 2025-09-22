@@ -1,0 +1,11 @@
+{
+    "name": "AppAnalyticsLinkedin",
+    "alias": "appanalyticslinkedin",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppAnalyticsLinkedin\\Providers\\AppAnalyticsLinkedinServiceProvider"
+    ],
+    "files": []
+}

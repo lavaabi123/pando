@@ -16,21 +16,10 @@ class Support extends Model
 
     protected $table = 'support_tickets';
 
-    /**
-     * Retrieve a paginated list of tickets including joined data from:
-     * - support_categories (fields: name and color)
-     * - support_status (fields: name and color)
-     * - support_labels (fields: name, color, icon) via support_map_labels
-     * - users (fields: username, user_id, fullname, avatar, email)
-     *
-     * @param array $params Parameters such as start, length, order, cate_id, status, search, etc.
-     *
-     * @return array The paginated result including total records and data rows.
-     */
     public static function getTicketsList(array $params)
     {
-        $start    = isset($params['start']) ? (int)$params['start'] : 0;
-        $per_page = isset($params['length']) ? (int)$params['length'] : 10;
+        $start        = isset($params['start']) ? (int)$params['start'] : 0;
+        $per_page     = isset($params['length']) ? (int)$params['length'] : 10;
         $current_page = intval($start / $per_page) + 1;
 
         $order_field = "t.id";
@@ -56,65 +45,78 @@ class Support extends Model
             return $current_page;
         });
 
-        // Build the main query with optimized joins using the pivot table
+        $labelsSub = DB::table('support_map_labels as sml')
+            ->join('support_labels as l', 'sml.label_id', '=', 'l.id')
+            ->select(
+                'sml.ticket_id',
+                DB::raw("GROUP_CONCAT(DISTINCT l.name  ORDER BY l.name  SEPARATOR ',') as label_names"),
+                DB::raw("GROUP_CONCAT(DISTINCT l.color ORDER BY l.color SEPARATOR ',') as label_colors"),
+                DB::raw("GROUP_CONCAT(DISTINCT l.icon  ORDER BY l.icon  SEPARATOR ',') as label_icons")
+            )
+            ->groupBy('sml.ticket_id');
+
         $query = self::query()
             ->from('support_tickets as t')
             ->leftJoin('support_categories as c', 't.cate_id', '=', 'c.id')
             ->leftJoin('support_types as s', 't.type_id', '=', 's.id')
-            ->leftJoin('support_map_labels as sml', 't.id', '=', 'sml.ticket_id')
-            ->leftJoin('support_labels as l', 'sml.label_id', '=', 'l.id')
+            ->leftJoinSub($labelsSub, 'lbl', function ($join) {
+                $join->on('lbl.ticket_id', '=', 't.id');
+            })
             ->select(
                 't.id',
                 't.id_secure',
                 't.title',
+                't.content',
                 't.status',
                 't.changed',
                 't.created',
                 't.user_read',
                 't.admin_read',
-                'c.name as category_name',
+                'c.name  as category_name',
                 'c.color as category_color',
-                's.name as type_name',
+                's.name  as type_name',
                 's.color as type_color',
-                's.icon as type_icon',
-                DB::raw("GROUP_CONCAT(COALESCE(l.name, '') SEPARATOR ',') as label_names"),
-                DB::raw("GROUP_CONCAT(COALESCE(l.color, '') SEPARATOR ',') as label_colors"),
-                DB::raw("GROUP_CONCAT(COALESCE(l.icon, '') SEPARATOR ',') as label_icons"),
-            );
-
-        $query->where('t.user_id', '=', Auth::id());
+                's.icon  as type_icon',
+                'lbl.label_names',
+                'lbl.label_colors',
+                'lbl.label_icons'
+            )
+            ->where('t.user_id', Auth::id());
 
         if (isset($params['cate_id']) && $params['cate_id'] != -1) {
-            $query->where('t.cate_id', '=', $params['cate_id']);
+            $query->where('t.cate_id', $params['cate_id']);
         }
 
         if (isset($params['label_id']) && $params['label_id'] != -1) {
-            $query->where('sml.label_id', '=', $params['label_id']);
+            $labelId = $params['label_id'];
+            $query->whereExists(function ($q) use ($labelId) {
+                $q->from('support_map_labels as _sml')
+                  ->whereColumn('_sml.ticket_id', 't.id')
+                  ->where('_sml.label_id', $labelId);
+            });
         }
 
         if (isset($params['status']) && $params['status'] != -1) {
-            $query->where('t.status', '=', $params['status']);
+            $query->where('t.status', $params['status']);
         }
 
         if (isset($params['search']) && trim($params['search']) !== "") {
-            $search = $params['search'];
+            $search = trim($params['search']);
             $query->where(function ($q) use ($search) {
-                $q->orWhere('t.content', 'like', "%{$search}%")
+                $q->where('t.content', 'like', "%{$search}%")
                   ->orWhere('t.title', 'like', "%{$search}%")
                   ->orWhere('c.name', 'like', "%{$search}%");
             });
         }
 
-        
-
-        $query->groupBy('t.id')->orderBy($order_field, $order_sort);
+        $query->orderBy($order_field, $order_sort);
 
         $pagination = $query->paginate($per_page);
 
         $data = $pagination->getCollection()->map(function ($record) {
-            $record->label_names  = $record->label_names ? explode(',', $record->label_names) : [''];
-            $record->label_colors = $record->label_colors ? explode(',', $record->label_colors) : [''];
-            $record->label_icons  = $record->label_icons ? explode(',', $record->label_icons) : [''];
+            $record->label_names  = !empty($record->label_names)  ? explode(',', $record->label_names)  : [];
+            $record->label_colors = !empty($record->label_colors) ? explode(',', $record->label_colors) : [];
+            $record->label_icons  = !empty($record->label_icons)  ? explode(',', $record->label_icons)  : [];
             return $record;
         })->toArray();
 
@@ -125,161 +127,149 @@ class Support extends Model
         ];
     }
 
-    /**
-     * Retrieve detailed information for a specific ticket.
-     *
-     * This method fetches ticket data along with:
-     *  - Category details (name, color) from support_categories.
-     *  - Status details (name, color, icon) from support_types.
-     *  - Aggregated label details (name, color, icon) from support_labels via support_map_labels,
-     *    returned as a JSON string.
-     *
-     * Note: Comments are not included.
-     *
-     * @param int $ticketId The ID of the ticket for which details are needed.
-     *
-     * @return object|null The ticket details object (or null if not found).
-     */
     public static function getTicketDetail($ticketId)
     {
-        if (!$ticketId) {
-            return false;
-        }
+        if (!$ticketId) return false;
+
+        $labelsSub = DB::table('support_map_labels as sml')
+            ->join('support_labels as l', 'sml.label_id', '=', 'l.id')
+            ->select(
+                'sml.ticket_id',
+                DB::raw("GROUP_CONCAT(DISTINCT l.id    ORDER BY l.id    SEPARATOR ',') as label_ids"),
+                DB::raw("GROUP_CONCAT(DISTINCT l.name  ORDER BY l.name  SEPARATOR ',') as label_names"),
+                DB::raw("GROUP_CONCAT(DISTINCT l.color ORDER BY l.color SEPARATOR ',') as label_colors"),
+                DB::raw("GROUP_CONCAT(DISTINCT l.icon  ORDER BY l.icon  SEPARATOR ',') as label_icons")
+            )
+            ->groupBy('sml.ticket_id');
+
+        $commentsSub = DB::table('support_comments')
+            ->select('ticket_id', DB::raw('COUNT(*) as total_comment'))
+            ->groupBy('ticket_id');
 
         $ticket = DB::table('support_tickets as t')
-            // Join with support_categories to get the category details.
             ->leftJoin('support_categories as c', 't.cate_id', '=', 'c.id')
-            // Join the users table for user details (fullname and avatar).
             ->leftJoin('users as u', 't.user_id', '=', 'u.id')
-            // Join with support_types to get the type details.
             ->leftJoin('support_types as s', 't.type_id', '=', 's.id')
-            // Join with the pivot table support_map_labels, then with support_labels to get label details.
-            ->leftJoin('support_map_labels as sml', 't.id', '=', 'sml.ticket_id')
-            ->leftJoin('support_labels as l', 'sml.label_id', '=', 'l.id')
+            ->leftJoinSub($labelsSub, 'lbl', function ($join) {
+                $join->on('lbl.ticket_id', '=', 't.id');
+            })
+            ->leftJoinSub($commentsSub, 'com', function ($join) {
+                $join->on('com.ticket_id', '=', 't.id');
+            })
             ->select(
-                't.*',
-                'c.name as category_name',
+                't.id',
+                't.id_secure',
+                't.user_id',
+                't.title',
+                't.content',
+                't.status',
+                't.changed',
+                't.created',
+                't.user_read',
+                't.admin_read',
+                't.open_by',
+                'c.name  as category_name',
                 'c.color as category_color',
-                's.name as type_name',
+                's.name  as type_name',
                 's.color as type_color',
-                's.icon as type_icon',
+                's.icon  as type_icon',
                 'u.fullname as user_fullname',
-                'u.avatar as user_avatar',
-                // Aggregate label information into a JSON formatted string.
-                DB::raw("GROUP_CONCAT(COALESCE(l.id, '') SEPARATOR ',') as label_ids"),
-                DB::raw("GROUP_CONCAT(COALESCE(l.name, '') SEPARATOR ',') as label_names"),
-                DB::raw("GROUP_CONCAT(COALESCE(l.color, '') SEPARATOR ',') as label_colors"),
-                DB::raw("GROUP_CONCAT(COALESCE(l.icon, '') SEPARATOR ',') as label_icons")
+                'u.avatar   as user_avatar',
+                'lbl.label_ids',
+                'lbl.label_names',
+                'lbl.label_colors',
+                'lbl.label_icons',
+                DB::raw('COALESCE(com.total_comment, 0) as total_comment')
             )
             ->where('t.id_secure', $ticketId)
             ->where('t.user_id', Auth::id())
-            ->groupBy('t.id')
             ->first();
 
-        if (!$ticket) {
-            return null;
-        }
+        if (!$ticket) return null;
 
-        $ticket->label_ids  = $ticket->label_ids ? explode(',', $ticket->label_ids) : [''];
-        $ticket->label_names  = $ticket->label_names ? explode(',', $ticket->label_names) : [''];
-        $ticket->label_colors = $ticket->label_colors ? explode(',', $ticket->label_colors) : [''];
-        $ticket->label_icons  = $ticket->label_icons ? explode(',', $ticket->label_icons) : [''];
-
-        // Count total comments for this ticket from the support_comments table.
-        $totalComment = DB::table('support_comments')
-                            ->where('ticket_id', $ticket->id)
-                            ->count();
-
-        // Attach the total count of comments to the ticket object.
-        $ticket->total_comment = $totalComment;
-
-        if($ticket != "user_id"){
-            
-        }
+        $ticket->label_ids    = !empty($ticket->label_ids)    ? explode(',', $ticket->label_ids)    : [];
+        $ticket->label_names  = !empty($ticket->label_names)  ? explode(',', $ticket->label_names)  : [];
+        $ticket->label_colors = !empty($ticket->label_colors) ? explode(',', $ticket->label_colors) : [];
+        $ticket->label_icons  = !empty($ticket->label_icons)  ? explode(',', $ticket->label_icons)  : [];
 
         return $ticket;
     }
 
-    /**
-     * Retrieve paginated comments for a specific ticket.
-     *
-     * This method fetches ticket comments with associated user information 
-     * (e.g., user's avatar and fullname) from the support_comments table.
-     * It uses pagination to limit the result to 10 comments per page.
-     *
-     * @param int $ticketId The ID of the ticket for which the comments are needed.
-     * @param int $page (Optional) The current page number (default is 1).
-     *
-     * @return array An array containing the comments and pagination data:
-     *               - 'comments': list of comment objects.
-     *               - 'pagination': total, per_page, current_page, and last_page.
-     */
     public static function getCommentsByTicket($ticketId, $page = 1)
     {
         $perPage = 50;
+        $page = max(1, (int)$page);
+
+        $total = DB::table('support_comments')->where('ticket_id', $ticketId)->count();
+        $lastPage = max(1, (int)ceil($total / $perPage));
+        if ($page > $lastPage) $page = $lastPage;
+
         $offset = ($page - 1) * $perPage;
 
-        // Retrieve the ticket's comments along with user details (avatar & fullname)
-        $comments = DB::table('support_comments as c')
+        $descPage = DB::table('support_comments as c')
             ->leftJoin('users as u', 'c.user_id', '=', 'u.id')
+            ->where('c.ticket_id', $ticketId)
             ->select(
-                'c.*',
+                'c.id',
+                'c.ticket_id',
+                'c.user_id',
+                'c.comment',
+                'c.changed',
+                'c.created',
                 'u.avatar as user_avatar',
                 'u.fullname as user_fullname'
             )
-            ->where('c.ticket_id', $ticketId)
             ->orderBy('c.created', 'desc')
+            ->orderBy('c.id', 'desc')
             ->offset($offset)
-            ->limit($perPage)
-            ->get();
+            ->limit($perPage);
 
-        $comments = $comments->reverse()->values();
-
-        // Count the total number of comments for the ticket to set pagination info.
-        $totalComments = DB::table('support_comments')
-            ->where('ticket_id', $ticketId)
-            ->count();
-
-        $lastPage = ceil($totalComments / $perPage);
+        $comments = DB::query()
+            ->fromSub($descPage, 'x')
+            ->orderBy('created', 'asc')
+            ->orderBy('id', 'asc')
+            ->get()
+            ->values();
 
         return [
             'comments' => $comments,
             'pagination' => [
-                'total' => $totalComments,
-                'per_page' => $perPage,
+                'total'        => $total,
+                'per_page'     => $perPage,
                 'current_page' => $page,
-                'last_page' => $lastPage,
-            ]
+                'last_page'    => $lastPage,
+            ],
         ];
     }
 
-
     public static function getRecentTickets($excludeTicketId)
     {
-        // Query recent tickets with related category and status details.
-        // Also, join a subquery to count total comments for each ticket.
+        $commentsSub = DB::table('support_comments')
+            ->select('ticket_id', DB::raw('COUNT(*) as total_comment'))
+            ->groupBy('ticket_id');
+
         $tickets = DB::table('support_tickets as t')
-            // Join support_categories to retrieve category details.
             ->leftJoin('support_categories as c', 't.cate_id', '=', 'c.id')
-            // Join a subquery that counts comments for each ticket group by ticket_id.
-            ->leftJoin(
-                DB::raw('(SELECT ticket_id, COUNT(*) AS total_comment FROM support_comments GROUP BY ticket_id) as com'),
-                't.id', '=', 'com.ticket_id'
-            )
+            ->leftJoinSub($commentsSub, 'com', function ($join) {
+                $join->on('t.id', '=', 'com.ticket_id');
+            })
             ->select(
-                't.*',
+                't.id',
+                't.id_secure',
+                't.title',
+                't.status',
+                't.created',
                 'c.name as category_name',
                 'c.color as category_color',
-                // Use IFNULL to default to 0 when there are no comments.
-                DB::raw("IFNULL(com.total_comment, 0) as total_comment")
+                DB::raw('COALESCE(com.total_comment, 0) as total_comment')
             )
-            // Exclude the ticket identified by $excludeTicketId.
             ->where('t.id_secure', '!=', $excludeTicketId)
-            ->where('t.user_id', '==', Auth::id())
+            ->where('t.user_id', Auth::id())
             ->orderBy('t.created', 'desc')
             ->limit(10)
             ->get();
 
         return $tickets;
     }
+
 }

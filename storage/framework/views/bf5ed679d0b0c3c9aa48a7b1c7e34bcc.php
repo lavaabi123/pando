@@ -12,7 +12,4 @@
 	Files.Dropbox('<?php echo e(get_option('file_dropbox_api_key')); ?>');
 <?php endif; ?>
 
-</script>
-
-<link rel="stylesheet" href="https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.19.1/filerobot-image-editor.min.css">
-<script src="https://cdn.scaleflex.it/plugins/filerobot-image-editor/3.19.1/filerobot-image-editor.min.js"></script><?php /**PATH /home/royalinkdevelopm/public_html/pando.royalinkdevelopment.com/modules/AppFiles/resources/views/script.blade.php ENDPATH**/ ?>
+</script><?php /**PATH /home/royalinkdevelopm/public_html/pando.royalinkdevelopment.com/modules/AppFiles/resources/views/script.blade.php ENDPATH**/ ?>

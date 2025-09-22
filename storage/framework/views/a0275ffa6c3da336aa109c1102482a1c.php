@@ -27,6 +27,7 @@
     <?php echo Script::globals(); ?>
 
     <link rel="stylesheet" href="<?php echo e(theme_public_asset('css/main.css')); ?>">
+	<link rel="stylesheet" href="<?php echo e(theme_public_asset('css/custom.css')); ?>">
 
     <?php echo $__env->yieldContent('head_embed_code'); ?>
 </head>

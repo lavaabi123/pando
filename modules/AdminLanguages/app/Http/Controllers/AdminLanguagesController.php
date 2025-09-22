@@ -318,6 +318,7 @@ class AdminLanguagesController extends Controller
                 'message' => __('Languages updated successfully.')
             ]);
         } catch (\Exception $e) {
+            dd($e);
             return response()->json([
                 'status' => 0,
                 'message' => __("Auto translation failed: ") . $e->getMessage()

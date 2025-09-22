@@ -132,9 +132,9 @@ class AdminBlogsController extends Controller
         return response()->json($data);
     }
 
-    public function update(Request $request)
+    public function update(Request $request, $postId = "")
     {
-        $result = Articles::getArticlesDetail($request->id);
+        $result = Articles::getArticlesDetail($postId);
         $categories = ArticleCategories::get();
         $tags = ArticleTags::get();
 

@@ -94,5 +94,11 @@
     "PaymentStripeRecurring": true,
     "AppChannelPinterestBoards": true,
     "AppChannelYoutubeChannels": true,
-    "AppChannelGBPLocations": true
+    "AppChannelGBPLocations": true,
+    "AppAnalytics": true,
+    "AppAnalyticsFacebook": true,
+    "AppAnalyticsInstagram": true,
+    "AppAnalyticsLinkedin": true,
+    "AppAnalyticsTiktok": true,
+    "AppAnalyticsYoutube": true
 }

@@ -25,6 +25,31 @@ if (!function_exists('theme_public_asset')) {
     }
 }
 
+if( !function_exists('get_header') ){
+    function get_header($path)
+    {   
+        try {
+            $stream_opts = [
+                "ssl" => [
+                    "verify_peer"=>false,
+                    "verify_peer_name"=>false,
+                ]
+            ]; 
+
+            $headers = get_headers( $path , 1, stream_context_create($stream_opts));
+            if(!$headers){
+                return false;
+            }
+
+            $headers = array_change_key_case($headers, CASE_LOWER);
+
+            return $headers;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+}
+
 if (!function_exists('menu_active')) {
     function menu_active($uri) {
         if (is_array($uri)) {

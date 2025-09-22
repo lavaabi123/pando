@@ -51,7 +51,7 @@ class XApi {
             
             $curl = curl_init();
             curl_setopt_array($curl, [
-                CURLOPT_URL            => 'https://api.x.com/2/oauth2/token?' . http_build_query($params),
+                CURLOPT_URL            => 'https://api.twitter.com/2/oauth2/token?' . http_build_query($params),
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_POST           => true,
                 CURLOPT_POSTFIELDS     => http_build_query($params),
@@ -90,45 +90,47 @@ class XApi {
      * @return mixed The new access token on success, or an error array on failure.
      */
     public function refreshToken($refresh_token) {
-        if ($refresh_token) {
-            $params = [
-                'client_id'     => $this->client_id,
-                'client_secret' => $this->client_secret,
-                'refresh_token' => $refresh_token,
-                'grant_type'    => 'refresh_token',
-                'redirect_uri'  => $this->redirect_uri,
-            ];
-            
-            $curl = curl_init();
-            curl_setopt_array($curl, [
-                CURLOPT_URL            => 'https://api.x.com/2/oauth2/token?' . http_build_query($params),
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_POST           => true,
-                CURLOPT_POSTFIELDS     => http_build_query($params),
-                CURLOPT_HTTPHEADER     => [
-                    "Content-Type: application/x-www-form-urlencoded"
-                ],
-                CURLOPT_SSL_VERIFYHOST => 0,
-                CURLOPT_SSL_VERIFYPEER => 0,
-            ]);
-            
-            $resp = curl_exec($curl);
-            curl_close($curl);
-            $result = json_decode($resp);
-            
-            if (isset($result->access_token)) {
-                $this->access_token = $result->access_token;
-                return $result;
-            } else {
-                return [
-                    "status"  => "0",
-                    "message" => isset($result->error_description) ? __($result->error_description) : __("Unknown error")
-                ];
-            }
-        } else {
+        if (!$refresh_token) {
             return [
                 "status"  => "0",
                 "message" => __("Please provide a valid refresh token")
+            ];
+        }
+
+        $params = [
+            'refresh_token' => $refresh_token,
+            'grant_type'    => 'refresh_token',
+            'client_id'     => $this->client_id,
+        ];
+
+        $basicAuth = base64_encode("{$this->client_id}:{$this->client_secret}");
+
+        $curl = curl_init();
+        curl_setopt_array($curl, [
+            CURLOPT_URL            => 'https://api.twitter.com/2/oauth2/token',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => http_build_query($params),
+            CURLOPT_HTTPHEADER     => [
+                "Authorization: Basic {$basicAuth}",
+                "Content-Type: application/x-www-form-urlencoded",
+            ],
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_SSL_VERIFYPEER => 0,
+        ]);
+
+        $resp = curl_exec($curl);
+        curl_close($curl);
+
+        $result = json_decode($resp);
+
+        if (isset($result->access_token)) {
+            $this->access_token = $result->access_token;
+            return $result;
+        } else {
+            return [
+                "status"  => "0",
+                "message" => $result->error_description ?? __("Unknown error")
             ];
         }
     }
@@ -144,7 +146,7 @@ class XApi {
      * Retrieves user information from X.
      */
     public function getUserInfo() {
-        $url = 'https://api.x.com/2/users/me?user.fields=id,name,username,profile_image_url';
+        $url = 'https://api.twitter.com/2/users/me?user.fields=id,name,username,profile_image_url';
         return $this->curlGet($url);
     }
     
@@ -160,7 +162,7 @@ class XApi {
         if (!empty($media_ids)) {
             $data['media'] = ['media_ids' => $media_ids];
         }
-        $url = 'https://api.x.com/2/tweets';
+        $url = 'https://api.twitter.com/2/tweets';
         return $this->curlPost($url, json_encode($data));
     }
     
