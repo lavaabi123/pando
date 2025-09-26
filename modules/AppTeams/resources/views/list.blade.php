@@ -35,7 +35,7 @@
                                         href="{{ module_url('resend-invite') }}"
                                         data-id="{{ $member->id_secure }}">
                                         <span class="size-16 me-1 text-center"><i class="fa-light fa-envelope"></i></span>
-                                        <span class="fw-5">{{ __("Resend Invite") }}</span>
+                                        <!--<span class="fw-5">{{ __("Resend Invite") }}</span>-->
                                     </a>
                                 </li>
                             @endif

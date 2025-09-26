@@ -3,7 +3,7 @@
 		<form class="modal-content actionForm" action="{{ module_url("send-invite") }}" data-call-success="Main.closeModal('inviteModal'); Main.ajaxScroll(true);">
 			<input type="text" class="d-none" name="type" value="0">
 			<div class="modal-header">
-				<h1 class="modal-title fs-16">{{ __("Invite Member") }}</h1>
+				<h1 class="modal-title fs-16">{{ __("Add User") }}</h1>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body p-4">
@@ -15,13 +15,30 @@
          		<div class="msg-errors"></div>
  				<div class="row">
  					<div class="col-md-12">
- 						<div class="mb-4">
-		                  	<label for="email" class="form-label mb-1">{{ __('Team Member Email') }}</label>
-		                  	<div class="fs-12 text-gray-600 mb-2">
-						        {{ __('We will send an invite to this email address.') }}
-						    </div>
-	                     	<input placeholder="{{ __('Enter team member email address') }}" class="form-control" name="email" id="email" type="email" value="">
+						<!-- Full Name -->
+						<div class="mb-2">
+							<label for="fullname" class="form-label">{{ __("Full Name") }}</label>
+							<input type="text" value="" name="fullname" class="form-control" placeholder="{{ __('Enter full name') }}" required>
+						</div>
+						<!-- Username -->
+						<div class="mb-2">
+							<label for="username" class="form-label">{{ __("Username") }}</label>
+							<input type="text" id="username" name="username" class="form-control" placeholder="{{ __('Choose a username') }}" required>
+						</div>						
+ 						<div class="mb-2">
+		                  	<label for="email" class="form-label">{{ __('User Email') }}</label>
+	                     	<input placeholder="{{ __('Enter user email address') }}" class="form-control" name="email" id="email" type="email" value="" required>
 		                </div>
+						<!-- Password -->
+						<div class="mb-2">
+							<label for="password" class="form-label">{{ __("Password") }}</label>
+							<input type="password" id="password" name="password" class="form-control" placeholder="{{ __('Enter your password') }}" required>
+						</div>
+						<!-- Confirm Password -->
+						<div class="mb-4">
+							<label for="password_confirmation" class="form-label">{{ __("Confirm Password") }}</label>
+							<input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="{{ __('Re-enter your password') }}" required>
+						</div>
 
 		                <div class="mb-4">
 							<label for="name" class="form-label">{{ __('Select permissions') }}</label>
@@ -106,7 +123,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
-				<button type="submit" class="btn btn-dark">{{ __('Send invite') }}</button>
+				<button type="submit" class="btn btn-dark">{{ __('Submit') }}</button>
 			</div>
 		</form>
 	</div>

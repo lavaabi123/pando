@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Modules\AdminUsers\Models\Teams;
 use Modules\AdminUsers\Models\TeamMembers;
 use App\Models\User;
+use Hash;
 
 class AppTeamsController extends Controller
 {
@@ -139,12 +140,13 @@ class AppTeamsController extends Controller
         $teamId = $request->team_id;
         $team = Teams::where('id', $teamId)->firstOrFail();
         $member = TeamMembers::where("id_secure", $id)->with('user')->firstOrFail();
-  
+        $tmember = User::where('id', $member->uid)->firstOrFail();
         return response()->json([
             "status" => 1,
             "data" => view(module("key").'::update', [
                 "member" => $member,
-                "team" => $team
+                "team" => $team,
+                "tmember" => $tmember
             ])->render()
         ]);
     }
@@ -154,20 +156,44 @@ class AppTeamsController extends Controller
      */
     public function save(Request $request)
     {
+		
+        $id = $request->input("id");
+        // Find the member
+        $member = TeamMembers::where('id_secure', $id)->firstOrFail();
+        $team = Teams::where('id', $member->team_id)->firstOrFail();
+		
         $request->validate([
+            'fullname'  => 'required|string|max:255',
+			'username'  => [
+                'required',
+                'string',
+                'min:5',
+                'max:64',
+                'regex:/^\S+$/',
+                'unique:users,username',
+            ],
+            'email'  => 'required|email|unique:users,email,' . $member->uid,			
+            'password'         => ['nullable', 'min:6', 'confirmed'],
             'id'               => 'required',
             'permissions'      => 'required|array|min:1',
             'team_permissions' => 'nullable|array',
             'status'           => 'nullable|integer',
-        ]);
+        ], [
+            'fullname.required' => __('Full name is required.'),
+            'fullname.min'      => __('Full name must be at least :min characters.'),
+            'username.required' => __('Username is required.'),
+            'username.min'      => __('Username must be at least :min characters.'),
+            'username.regex'    => __('Username must not contain spaces.'),
+            'email.required'    => __('Email is required.'),
+            'email.email'       => __('Please provide a valid email address.'),
+            'email.unique'      => __('This email is already taken.'),
+            'password.min'      => __('New password must be at least :min characters.', ['min' => 6]),
+            'password.confirmed'=> __('Password confirmation does not match.'),
+         ]);
 
-        $id = $request->input("id");
         $selected_permissions = $request->input('permissions', []);
         $excluded_permissions = $request->input('team_permissions', []);
 
-        // Find the member
-        $member = TeamMembers::where('id_secure', $id)->firstOrFail();
-        $team = Teams::where('id', $member->team_id)->firstOrFail();
         $all_permissions = $team->permissions ?? [];
 
         // 1. Get permissions that are in selected_permissions
@@ -200,6 +226,15 @@ class AppTeamsController extends Controller
         }
 
         $member->save();
+		
+		$user = User::findOrFail($member->uid);
+        $values = [
+            'fullname' => $request->input('fullname'),
+            'username' => $request->input('username'),
+            'email'    => $request->input('email'),
+            'changed'  => time()
+        ];
+		$user->update($values);
 
         return response()->json([
             "status" => 1,
@@ -254,10 +289,25 @@ class AppTeamsController extends Controller
     public function sendInvite(Request $request)
     {
         $request->validate([
+            'fullname'  => 'required|string|max:255',
+			'username'  => [
+                'required',
+                'string',
+                'min:5',
+                'max:64',
+                'regex:/^\S+$/',
+                'unique:users,username',
+            ],
+            'password'  => 'required|string|min:6|confirmed',
             'email'            => 'required|email',
             'team_id'          => 'required|integer|exists:teams,id',
             'permissions'      => 'required|array|min:1',
             'team_permissions' => 'nullable|array',
+        ], [
+            'username.regex'    => __('Username must not contain any whitespace.'),
+            'username.min'      => __('Username must be at least 5 characters.'),
+            'timezone.required' => __('Please select your timezone.'),
+            'timezone.in'       => __('Invalid timezone.'),
         ]);
 
         $email = $request->input('email');
@@ -294,7 +344,7 @@ class AppTeamsController extends Controller
         if ($user && $user->id == $team->owner) {
             return response()->json([
                 "status" => 0,
-                "message" => __('You cannot invite the team owner.')
+                "message" => __('You cannot add the admin as user.')
             ]);
         }
 
@@ -307,7 +357,7 @@ class AppTeamsController extends Controller
             if ($exists) {
                 return response()->json([
                     "status" => 0,
-                    "message" => __('User is already in the team or has been invited.')
+                    "message" => __('User is already added.')
                 ]);
             }
         } else {
@@ -318,14 +368,14 @@ class AppTeamsController extends Controller
             if ($exists) {
                 return response()->json([
                     "status" => 0,
-                    "message" => __('This email has already been invited.')
+                    "message" => __('This email has already been added.')
                 ]);
             }
         }
 
         // If the user already exists, add them directly to the team.
         if ($user) {
-            $member = TeamMembers::create([
+           $member = TeamMembers::create([
                 'id_secure'   => rand_string(),
                 'uid'         => $user->id,
                 'team_id'     => $teamId,
@@ -337,28 +387,56 @@ class AppTeamsController extends Controller
                 "message" => __('User added to the team!')
             ]);
         } else {
+			$user = User::create([
+				'id_secure'     => rand_string(),
+				'role'          => 1,
+				'login_type'    => 'direct',
+				'fullname'      => $request->fullname,
+				'email'         => $request->email,
+				'username'      => $request->username,
+				'password'      => Hash::make($request->password),
+				'timezone'      => 'America/Los_Angeles',
+				'avatar'        => text2img($request->fullname),
+				'secret_key'    => rand_string(32),
+				'status'        => 2,
+				'changed'       => time(),
+				'created'       => time()
+			]);
+			
+			Teams::create([
+				'id_secure'   => rand_string(),
+				'owner'       => $user->id
+			]);
+			
             $inviteToken = \Str::random(32);
             $member = TeamMembers::create([
                 'id_secure'    => rand_string(),
-                'uid'          => null,
+                'uid'          => $user->id,
                 'team_id'      => $teamId,
-                'pending'      => $email,
                 'permissions'  => json_encode($member_permissions),
-                'status'       => 0,
-                'invite_token' => $inviteToken
+                'status'       => 1
             ]);
 
-            $inviter = auth()->user();
+            /*$inviter = auth()->user();
 
             \MailSender::sendByTemplate('invite', $email, [
                 'team_name'    => $team->name ?? $inviter->fullname ?? '',
                 'invite_url'   => route('app.teams.join', ['token' => $inviteToken]),
                 'inviter_name' => $inviter->fullname ?? '',
-            ]);
+            ]);*/
+			
+			if (get_option('auth_welcome_email_new_user_status', 0)) {
+                \MailSender::sendByTemplate('welcome', $user->email, [
+                    'fullname'  => $user->fullname,
+                    'username'  => $user->username,
+					'password'  => $request->password,
+                    'login_url' => url('auth/login'),
+                ]);
+            }
 
             return response()->json([
                 "status" => 1,
-                "message" => __('Invitation sent!')
+                "message" => __('User added!')
             ]);
         }
     }

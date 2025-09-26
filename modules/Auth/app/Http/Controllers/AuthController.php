@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Modules\AdminUsers\Models\Teams;
+use Modules\AdminUsers\Models\TeamMembers;
 use Laravel\Socialite\Facades\Socialite;
 use Modules\Auth\Events\AuthEvent;
 use App\Models\User;
@@ -291,6 +292,17 @@ class AuthController extends Controller
                         $team->permissions = $planPermissions;
                         $team->save();
                     }
+					
+					//check if team member and add session to assigned team
+					$user_member = TeamMembers::where('uid', $user->id)
+						->where('status', 1)
+						->first();
+					if ($user_member) {
+						$team_m = Teams::where("id", $user_member->team_id)->first();
+						session(['current_team_id' => $user_member->team_id]);
+						session(['current_team_secure' => $team_m->id_secure]);
+						session(['current_team_name' => $team_m->name]);
+					}
 
                     return ms([
                         "status" => 1,

@@ -17,6 +17,32 @@
                 <div class="msg-errors"></div>
                 <div class="row">
                     <div class="col-md-12">
+					
+						<!-- Full Name -->
+						<div class="mb-2">
+							<label for="fullname" class="form-label">{{ __("Full Name") }}</label>
+							<input type="text" value="{{$tmember->fullname}}" name="fullname" class="form-control" placeholder="{{ __('Enter full name') }}" required>
+						</div>
+						<!-- Username -->
+						<div class="mb-2">
+							<label for="username" class="form-label">{{ __("Username") }}</label>
+							<input type="text" value="{{$tmember->username}}" id="username" name="username" class="form-control" placeholder="{{ __('Choose a username') }}" required>
+						</div>						
+ 						<div class="mb-2">
+		                  	<label for="email" class="form-label">{{ __('User Email') }}</label>
+	                     	<input placeholder="{{ __('Enter user email address') }}" class="form-control" name="email" id="email" type="email" value="{{$tmember->email}}" required>
+		                </div>
+						<!-- Password -->
+						<div class="mb-2">
+							<label for="password" class="form-label">{{ __("Password") }}</label>
+							<input type="password" id="password" name="password" class="form-control" placeholder="{{ __('Enter your password') }}">
+						</div>
+						<!-- Confirm Password -->
+						<div class="mb-4">
+							<label for="password_confirmation" class="form-label">{{ __("Confirm Password") }}</label>
+							<input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="{{ __('Re-enter your password') }}">
+						</div>
+						
                         <div class="mb-4">
                             <label for="name" class="form-label">{{ __('Select permissions') }}</label>
                             <div class="mb-3">
@@ -100,7 +126,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
-                <button type="submit" class="btn btn-dark">{{ __('Send invite') }}</button>
+                <button type="submit" class="btn btn-dark">{{ __('Submit') }}</button>
             </div>
         </form>
     </div>
