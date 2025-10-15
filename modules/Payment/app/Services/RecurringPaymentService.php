@@ -5,6 +5,7 @@ namespace Modules\Payment\Services;
 use Exception;
 use Modules\Payment\Interfaces\RecurringPaymentInterface;
 use Modules\AdminPaymentSubscriptions\Models\PaymentSubscription;
+use Modules\AdminPaymentHistory\Models\PaymentHistory;
 use Illuminate\Support\Facades\Cache;
 
 class RecurringPaymentService
@@ -130,18 +131,37 @@ class RecurringPaymentService
         return $this->gateway->handleWebhook($request);
     }
 
-    public static function updateSubscriptionStatus($subscriptionId, $status, $update_plan = 0)
+    public static function updateSubscriptionStatus(string $subscriptionId, $transactionId = null, int $status = 0, int $updatePlan = 0)
     {
-        if (!$subscriptionId) return false;
+        if (!$subscriptionId) {
+            return false;
+        }
 
         $updateData = [
             'status'  => $status,
             'changed' => time(),
         ];
 
-        if($update_plan){
-            $subscription = PaymentSubscription::where('subscription_id', $subscriptionId)->first();
-            if($subscription){
+        $subscription = PaymentSubscription::where('subscription_id', $subscriptionId)->first();
+
+        if ($subscription) {
+            if ($updatePlan && $transactionId) {
+                PaymentHistory::firstOrCreate(
+                    ['transaction_id' => $transactionId],
+                    [
+                        'id_secure' => rand_string(),
+                        'uid'       => $subscription->uid,
+                        'plan_id'   => $subscription->plan_id,
+                        'from'      => isset($subscription->source) ? ucfirst($subscription->source) : 'recurring',
+                        'currency'  => $subscription->currency ?? 'USD',
+                        'by'        => $subscription->type ?? 'recurring',
+                        'amount'    => $subscription->amount ?? 0,
+                        'status'    => 1,
+                        'changed'   => time(),
+                        'created'   => time(),
+                    ]
+                );
+
                 \Plan::updatePlanForTeam($subscription->plan_id, $subscription->uid);
             }
         }

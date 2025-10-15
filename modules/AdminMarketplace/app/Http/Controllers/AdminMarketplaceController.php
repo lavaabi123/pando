@@ -407,11 +407,16 @@ class AdminMarketplaceController extends Controller
             ]);
         }
 
+        $domain = preg_replace('/^www\./', '', $request->getHost());
+
         // 1. Request the Marketplace server for update info
         $response = Http::withoutVerifying()->post(self::API_BASE_URL . 'update', [
-            'purchase_code'   => $addon->purchase_code,
-            'product_id'      => $addon->product_id,
-            'current_version' => $addon->version,
+            'purchase_code'     => $addon->purchase_code,
+            'product_id'        => $addon->product_id,
+            'current_version'   => $addon->version,
+            'domain'            => $domain,
+            'website'           => route('home'),
+
         ]);
 
         if (!$response->ok() || ($response['status'] ?? 0) != 1) {
@@ -484,13 +489,41 @@ class AdminMarketplaceController extends Controller
 
         // 4. Migrate if needed
         try {
+            $migrationsDirs = [];
+
             if ($moduleName) {
-                \Artisan::call('module:migrate', ['module' => $moduleName]);
+                $migrationsDirs[] = base_path("Modules/{$moduleName}/Database/Migrations");
             }
-            \Artisan::call('migrate', ['--force' => true]);
+
+            // luôn chạy migrations chính
+            $migrationsDirs[] = base_path("database/migrations");
+
+            foreach ($migrationsDirs as $dir) {
+                if (!is_dir($dir)) continue;
+
+                foreach (glob($dir . '/*.php') as $file) {
+                    try {
+                        $relative = str_replace(base_path() . DIRECTORY_SEPARATOR, '', $file);
+                        $relative = str_replace('\\', '/', $relative);
+
+                        \Artisan::call('migrate', [
+                            '--path'          => $relative,
+                            '--force'         => true,
+                            '--no-interaction'=> true,
+                        ]);
+
+                        \Log::info("[Addon Update] Migrated: {$relative}");
+                    } catch (\Exception $e) {
+                        // ghi log nhưng bỏ qua lỗi, chạy tiếp file khác
+                        \Log::warning("[Addon Update] Migration failed at {$file}: " . $e->getMessage());
+                        continue;
+                    }
+                }
+            }
+
+            \Artisan::call('optimize:clear');
         } catch (\Exception $e) {
-            \Log::warning('[Addon Update] Migrate failed: ' . $e->getMessage());
-            // Log warning, do not fail update
+            \Log::warning('[Addon Update] Migration loop failed: ' . $e->getMessage());
         }
 
         // 5. Update version in addons table

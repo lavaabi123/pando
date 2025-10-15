@@ -434,6 +434,7 @@ class PaymentService implements RecurringPaymentInterface
             $subscriptionId = $resource['billing_agreement_id'] ?? null;
         }
 
+        $transactionId = $resource['id'] ?? null;
         $customId = $resource['custom_id'] ?? $resource['custom'] ?? null;
         $userId = $planId = $planType = null;
         if ($customId && preg_match('/^(\d+)-(\w+)-(\d+)$/', $customId, $matches)) {
@@ -472,18 +473,18 @@ class PaymentService implements RecurringPaymentInterface
             switch ($eventType) {
                 case 'BILLING.SUBSCRIPTION.CREATED':
                 case 'BILLING.SUBSCRIPTION.ACTIVATED':
-                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, 1, 0);
+                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, false, 1, 0);
                     break;
                 case 'BILLING.SUBSCRIPTION.CANCELLED':
                 case 'BILLING.SUBSCRIPTION.EXPIRED':
-                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, 2, 0);
+                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, false, 2, 0);
                     break;
                 case 'PAYMENT.SALE.COMPLETED':
                     \RecurringPayment::saveSubscription($data);
-                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, 1, 1);
+                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, $transactionId, 1, 1);
                     break;
                 case 'PAYMENT.SALE.DENIED':
-                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, 2, 0);
+                    \RecurringPayment::updateSubscriptionStatus($subscriptionId, false, 2, 0);
                     break;
             }
             return response()->json(['status' => 'success'], 200);

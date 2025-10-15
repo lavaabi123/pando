@@ -12,14 +12,23 @@ class SearchMediaService
         $this->providers[$name] = $provider;
     }
 
-    public function services(){
-        $services = [
-            'unsplash' => __('Unsplash'),
-            'pexels_photo' => __('Pexels Photo'),
-            'pexels_video' => __('Pexels Video'),
-            'pixabay_photo' => __('Pixabay Photo'),
-            'pixabay_video' => __('Pixabay Video'),
-        ];
+    public function services()
+    {
+        $services = [];
+
+        if (get_option("file_unsplash_status", 0) == 1) {
+            $services['unsplash'] = __('Unsplash');
+        }
+
+        if (get_option("file_pexels_status", 0) == 1) {
+            $services['pexels_photo'] = __('Pexels Photo');
+            $services['pexels_video'] = __('Pexels Video');
+        }
+
+        if (get_option("file_pixabay_status", 0) == 1) {
+            $services['pixabay_photo'] = __('Pixabay Photo');
+            $services['pixabay_video'] = __('Pixabay Video');
+        }
 
         return $services;
     }

@@ -28,7 +28,7 @@ $stats = UploadFile::getFileStorageStats();
                 <a class="text-gray-700 text-hover-primary" id="onedrive-chooser" href="javascript:void(0);" data-call-success="Main.ajaxScroll(true)"><i class="fa-regular fa-cloud"></i></a>
             @endif
 
-            @if(Gate::allows('appmediasearch'))
+            @if(Gate::allows('appmediasearch') && !empty(SearchMedia::services()))
             <a class="text-gray-700 text-hover-primary actionItem" href="{{ route("app.search_media.popup_search") }}" data-popup="searchMediaModel"><i class="fa-light fa-magnifying-glass"></i></a>
             @endif
             

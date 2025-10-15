@@ -9,7 +9,7 @@
         "Modules\\AppAffiliate\\Providers\\EventServiceProvider"
     ],
     "files": [],
-    "permission": false,
+    "permission": true,
     "menu": {
         "uri": "app/affiliate",
         "role": "client",

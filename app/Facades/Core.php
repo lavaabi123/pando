@@ -38,8 +38,7 @@ class Core extends Facade
 
     protected static function currency($number, $in = "USD")
     {
-        $currency = Number::currency($number, in: $in);
-        return $currency;
+        return price($number);
     }
 
     public static function parseDateRange($request, $defaultDays = 30)

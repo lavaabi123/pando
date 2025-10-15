@@ -9,7 +9,7 @@
         <select class="form-select" data-control="select2" name="ai_options[include_media]">
             <option value="0" <?php echo e((isset($options['include_media']) && $options['include_media'] == 0) ? 'selected' : ''); ?>><?php echo e(__("Disable")); ?></option>
             <optgroup label="<?php echo e(__('Media Online')); ?>"> 
-                
+                <option value="ai" <?php echo e((isset($options['include_media']) && $options['include_media'] == 'ai') ? 'selected' : ''); ?>><?php echo e(__('AI Image')); ?></option>
                 <option value="unsplash" <?php echo e((isset($options['include_media']) && $options['include_media'] == 'unsplash') ? 'selected' : ''); ?>><?php echo e(__('Unsplash')); ?></option>
                 <option value="pexels_photo" <?php echo e((isset($options['include_media']) && $options['include_media'] == 'pexels_photo') ? 'selected' : ''); ?>><?php echo e(__('Pexels Photo')); ?></option>
                 <option value="pexels_video" <?php echo e((isset($options['include_media']) && $options['include_media'] == 'pexels_video') ? 'selected' : ''); ?>><?php echo e(__('Pexels Video')); ?></option>

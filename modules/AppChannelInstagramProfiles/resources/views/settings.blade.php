@@ -54,7 +54,7 @@
                     <div class="col-md-12">
                         <div class="mb-4">
                             <label for="name" class="form-label">{{ __('Permissions') }}</label>
-                            <input class="form-control" name="instagram_permissions" id="instagram_permissions" type="text" value="{{ get_option("instagram_permissions", "instagram_basic,instagram_content_publish,pages_read_engagement,pages_show_list,business_management,instagram_manage_insights") }}">
+                            <input class="form-control" name="instagram_permissions" id="instagram_permissions" type="text" value="{{ get_option("instagram_permissions", "instagram_basic,instagram_content_publish,pages_read_engagement,pages_show_list,instagram_manage_insights,business_management") }}">
                         </div>
                     </div>
                     <div class="col-md-12">

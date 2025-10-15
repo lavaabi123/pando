@@ -1,6 +1,6 @@
 <script type="text/javascript">
 <?php if(get_option('file_addobe_express_status') && Access::permission('appfiles.image_editor')): ?>
-	Files.loadAdobeExpress('<?php echo e(get_option('file_addobe_express_api_key')); ?>');
+	Files.loadAdobeExpress('<?php echo e(get_option('file_addobe_express_app_name')); ?>', '<?php echo e(get_option('file_addobe_express_api_key')); ?>');
 <?php endif; ?>
 <?php if(get_option('file_onedrive_status') && Access::permission('appfiles.onedrive')): ?>
 	Files.openOneDriveActions('<?php echo e(get_option('file_onedrive_api_key')); ?>');

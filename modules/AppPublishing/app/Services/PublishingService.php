@@ -7,23 +7,23 @@ use Illuminate\Support\Facades\Log;
 use Modules\AppChannels\Models\Accounts;
 use Modules\AppPublishing\Models\Posts;
 use Modules\AppPublishing\Models\PostStat;
+use UploadFile;
 
 class PublishingService
 {
+    protected array $uploadedFiles = [];
+
     /**
      * Validate a list of posts.
-     *
-     * @param array $posts
-     * @return array
      */
     public function validate($posts)
     {
-        $errors = [];
-        $htmlErrors = "";
+        $htmlErrors = '';
         $countErrors = 0;
         $socialPosts = [];
         $socialCanPosts = [];
         $canPost = false;
+        $errors = [];
 
         foreach ($posts as $post) {
             if (empty($post->module) || empty($post->social_network)) continue;
@@ -66,8 +66,12 @@ class PublishingService
             }
         }
 
-        $htmlErrors = "<p>" . sprintf(__("%d profiles will be excluded from your publication in next step due to errors"), $countErrors)
-            . " </p><ul class='text-danger'>{$htmlErrors}</ul>";
+        if ($countErrors > 0) {
+            $htmlErrors = "<p>" . __(
+                ':count profiles will be excluded from your publication in next step due to errors',
+                ['count' => $countErrors]
+            ) . "</p><ul class='text-danger'>{$htmlErrors}</ul>";
+        }
 
         $status = !$countErrors ? 1 : ($canPost ? 2 : 0);
         $message = "";
@@ -76,9 +80,9 @@ class PublishingService
             $lastError = end($errors);
             $message = __(is_array($lastError) ? $lastError[0] : $lastError);
         } elseif ($status === 0) {
-            $message = sprintf(
-                __("Missing content on the following social networks: %s"),
-                implode(", ", array_unique($socialPosts))
+            $message = __(
+                'Missing content on the following social networks: :networks',
+                ['networks' => implode(", ", array_unique($socialPosts))]
             );
         }
 
@@ -92,10 +96,6 @@ class PublishingService
 
     /**
      * Publish posts on social networks.
-     *
-     * @param array $posts
-     * @param array|bool $socialCanPost
-     * @return array
      */
     public function post($posts, $socialCanPost = false)
     {
@@ -147,7 +147,17 @@ class PublishingService
                 }
 
                 if (method_exists($module, 'post')) {
-                    $tmpPost = (array)$post;
+                    if (is_null($post)) {
+                        $tmpPost = [];
+                    } elseif ($post instanceof \Illuminate\Database\Eloquent\Model || $post instanceof \Illuminate\Support\Collection) {
+                        $tmpPost = $post->toArray();
+                    } elseif ($post instanceof \stdClass) {
+                        $tmpPost = (array) $post;
+                    } elseif (is_array($post)) {
+                        $tmpPost = $post;
+                    } else {
+                        $tmpPost = json_decode(json_encode($post), true);
+                    }
                     if (isset($post->team_id)) $teamId = $post->team_id;
 
                     $socialNetwork = $post->social_network;
@@ -196,7 +206,7 @@ class PublishingService
                                     }
 
                                     // Handle repost
-                                    if (($tmpPost['repost_frequency'] ?? 0) != 0 && $postBy != 1) {
+                                    if (($tmpPost['repost_frequency'] ?? 0) != 0) {
                                         $nextTime = $tmpPost['repost_frequency'] * 86400;
                                         unset($tmpPost['account'], $tmpPost['id']);
 
@@ -235,7 +245,6 @@ class PublishingService
                                     $postResponse = json_decode($postArr['result'], true) ?? [];
                                     $this->savePostStat($post, $postArr['status'], $postResponse['message'] ?? null, $postResponse['id'] ?? 0);
                                 }
-                                
                             }
                         } else {
                             $postArr = (is_object($post) && method_exists($post, 'toArray'))
@@ -262,7 +271,6 @@ class PublishingService
             } catch (Exception $e) {
                 $this->savePostStat($post, 5, $e->getMessage(), null);
 
-
                 $postArr = (is_object($post) && method_exists($post, 'toArray'))
                     ? $post->toArray()
                     : (array)$post;
@@ -272,17 +280,20 @@ class PublishingService
                 $postArr['result'] = json_encode(["message" => $e->getMessage()], JSON_UNESCAPED_UNICODE);
                 if ($postId) {
                     Posts::where("id", $postId)->update($postArr);
-                }else{
+                } else {
                     Posts::create($postArr);
                 }
             }
         }
 
+        // cleanup uploaded files sau khi post
+        $this->cleanupFiles();
+
         if ($postBy == 1 || isset($post->id)) {
             if ($countError == 0) {
                 return [
                     "status" => 1,
-                    "message" => sprintf(__("Content is being published on %d profiles"), $countSuccess)
+                    "message" => __("Content is being published on :success profiles", ['success' => $countSuccess])
                 ];
             } else if ($countError == 1 && $countSuccess == 0) {
                 return [
@@ -302,14 +313,53 @@ class PublishingService
         ];
     }
 
+    /**
+     * Xử lý media (convert b64_json → file url)
+     */
     protected function handleMediaPreprocessing(&$post)
     {
         if ($post->type === 'media' && !empty($post->data)) {
-            $data = is_string($post->data) ? json_decode($post->data, true) : (array) $post->data;
-            $data['medias'] = \Watermark::createWatermarkedList($data['medias'], $post->account_id);
+            $data = is_string($post->data) ? json_decode($post->data, true) : (array)$post->data;
+            $normalized = [];
+
+            foreach ($data['medias'] ?? [] as $media) {
+                if (isset($media['b64_json'])) {
+                    $ext = str_contains($media['mimeType'] ?? '', 'png') ? 'png' : 'jpg';
+                    $fileName = uniqid('aiimg_') . '.' . $ext;
+                    $tempPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . $fileName;
+
+                    file_put_contents($tempPath, base64_decode($media['b64_json']));
+
+                    $fileUrl = UploadFile::storeSingleFile(new \Illuminate\Http\File($tempPath), 'uploads');
+
+                    $this->uploadedFiles[] = $fileUrl;
+                    @unlink($tempPath);
+
+                    $normalized[] = $fileUrl;
+                } elseif (isset($media['url'])) {
+                    $normalized[] = $media;
+                }
+            }
+
+            if (!empty($normalized)) {
+                $data['medias'] = \Watermark::createWatermarkedList($normalized, $post->account_id);
+            }
+
             $post->data = json_encode($data, JSON_UNESCAPED_UNICODE);
         }
         return $post;
+    }
+
+    protected function cleanupFiles()
+    {
+        foreach ($this->uploadedFiles as $fileUrl) {
+            try {
+                UploadFile::deleteFileFromServer($fileUrl);
+            } catch (\Throwable $e) {
+                Log::warning("Failed to delete uploaded file {$fileUrl}: " . $e->getMessage());
+            }
+        }
+        $this->uploadedFiles = [];
     }
 
     private function savePostStat($post, $status, $message = null, $post_social_id = null)
@@ -332,6 +382,8 @@ class PublishingService
             'category'       => $data['category']       ?? null,
             'module'         => $data['module']         ?? null,
             'type'           => $data['type']           ?? null,
+            'method'         => $data['method']         ?? null,
+            'query_id'       => $data['query_id']       ?? null,
             'status'         => $status,
             'post_social_id' => $post_social_id,
             'created'        => $data['created'] ?? time(),

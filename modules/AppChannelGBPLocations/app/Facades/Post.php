@@ -205,7 +205,7 @@ class Post extends Facade
         if(isset($responseData['error'])){
             return [
                 "status"  => 0,
-                "message" => $responseData['error']['details'][0]['errorDetails'][0]['message']
+                "message" => $responseData['error']['details'][0]['errorDetails'][0]['message'] ?? ( $responseData['error']['message'] ?? __("Unknown error") )
             ];
         }
 

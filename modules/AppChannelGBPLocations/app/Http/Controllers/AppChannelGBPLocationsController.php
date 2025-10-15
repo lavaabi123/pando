@@ -43,7 +43,6 @@ class AppChannelGBPLocationsController extends Controller
             $this->client->setRedirectUri($this->callback_url);
             $this->client->setDeveloperKey($this->api_key);
             $this->client->setScopes([
-                'https://www.googleapis.com/auth/plus.business.manage',
                 'https://www.googleapis.com/auth/business.manage',
                 'https://www.googleapis.com/auth/userinfo.email'
             ]);
@@ -83,8 +82,6 @@ class AppChannelGBPLocationsController extends Controller
 
             $this->client->setAccessToken($accessToken);
 
-
-            //dd($this->gbp);
             $accountsList = $this->gbp_management->accounts->listAccounts()->getAccounts();
             if(!empty($accountsList))
             {

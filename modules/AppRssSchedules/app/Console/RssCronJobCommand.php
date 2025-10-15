@@ -7,8 +7,12 @@ use Modules\AppRssSchedules\Models\RssSchedule;
 use Modules\AppRssSchedules\Models\RssScheduleHistory;
 use Modules\AppChannels\Models\Accounts;
 use Modules\AppRssSchedules\Facades\RssAutomation;
+use Modules\AdminUsers\Models\Teams;
+use App\Models\User;
 use Publishing;
 use Modules\AdminCrons\Facades\CronService;
+use Carbon\Carbon;
+use Carbon\CarbonTimeZone;
 
 class RssCronJobCommand extends Command
 {
@@ -21,7 +25,7 @@ class RssCronJobCommand extends Command
 
         // Get all schedules that are due to run
         $schedules = RssSchedule::where('status', 1)
-            ->where('next_try', '<=', $now)
+            //->where('next_try', '<=', $now)
             ->get();
 
         if ($schedules->isEmpty()) {
@@ -115,8 +119,11 @@ class RssCronJobCommand extends Command
                 $schedule->time_post = time();
             }
 
+            $team = Teams::find($schedule->team_id);
+            $userTimezone = $team?->owner ? User::find($team->owner)?->timezone : config('app.timezone', 'UTC');
+
             // Always update next_try
-            $nextTry = $this->getNextTime($time_posts, $weekdays);
+            $nextTry = $this->getNextTime($time_posts, $weekdays, $userTimezone);
 
             // Kiểm tra end_date
             $end_date = $data['end_date'] ?? null;
@@ -139,35 +146,41 @@ class RssCronJobCommand extends Command
      * @param array $weekdays    Enabled weekdays ["Mon" => 1, ...]
      * @return int               Next run timestamp
      */
-    private function getNextTime(array $timePosts, array $weekdays): int
+    private function getNextTime(array $timePosts, array $weekdays, string $timezone = 'UTC'): int
     {
-        $timeNow = time();
+        $now = Carbon::now($timezone);
 
-        if (!empty($timePosts)) {
-            usort($timePosts, fn($a, $b) => strtotime($a) <=> strtotime($b));
+        if (empty($timePosts) || empty($weekdays)) {
+            return $now->timestamp;
         }
 
-        $currentDay = strtotime(date("Y-m-d"));
-        $nextTime = $timeNow;
+        // Chuẩn hoá timePosts
+        $timePosts = array_map(fn($t) => date("H:i", strtotime($t)), $timePosts);
+        sort($timePosts);
 
-        for ($i = 0; $i < 7; $i++) {
-            $nextDay = $currentDay + (86400 * $i);
-            $day = date("D", $nextDay);
+        // Ép weekdays về int (0/1)
+        $weekdays = array_map('intval', $weekdays); 
+        // ex: ["Mon" => 0, "Tue" => 0, "Wed" => 1, ...]
 
-            if (!empty($weekdays[$day])) {
-                foreach ($timePosts as $timePost) {
-                    $timePost24 = date("G:i", strtotime($timePost));
-                    [$hours, $minutes] = explode(':', $timePost24);
-                    
-                    $timeSeconds = $nextDay + ($hours * 3600) + ($minutes * 60);
+        // Duyệt 14 ngày tới
+        for ($i = 0; $i < 14; $i++) {
+            $day = $now->copy()->startOfDay()->addDays($i);
+            $dayName = $day->format('D'); // "Mon", "Tue", ...
 
-                    if ($timeSeconds > $timeNow) {
-                        return $timeSeconds;
+            if (!empty($weekdays[$dayName])) { // chỉ lấy ngày có bật
+                foreach ($timePosts as $tp) {
+                    [$h, $m] = explode(':', $tp);
+                    $slot = $day->copy()->setTime((int)$h, (int)$m);
+
+                    if ($slot->greaterThan($now)) {
+                        // trả về UTC timestamp để lưu DB
+                        return $slot->clone()->setTimezone('UTC')->timestamp;
                     }
                 }
             }
         }
 
-        return $nextTime;
+        // fallback: sau 5 phút nữa
+        return $now->addMinutes(3600)->setTimezone('UTC')->timestamp;
     }
 }

@@ -7,15 +7,42 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 use Carbon\Carbon;
 
-function canAccess($key)
-{
-    if (!Auth::check()) return false;
-    try {
-        return Gate::allows($key);
-    } catch (\Throwable $e) {
-        return false;
+if (!function_exists('canAccess')) {
+    function canAccess($key)
+    {
+        if (!Auth::check()) return false;
+        try {
+            return Gate::allows($key);
+        } catch (\Throwable $e) {
+            return false;
+        }
+    } 
+}
+
+if (!function_exists('price')) {
+    function price($price, $withSymbol = true)
+    {
+        $currency  = get_option("currency", "USD");
+        $symbol    = get_option("currency_symbol", "$");
+        $position  = get_option("currency_symbol_postion", "1");
+
+        // Chuyển sang float và giới hạn 2 số thập phân
+        $price = is_numeric($price) ? round((float)$price, 2) : $price;
+
+        // Nếu là số, bỏ bớt số 0 dư (vd: 0.10 -> 0.1)
+        if (is_numeric($price)) {
+            $price = rtrim(rtrim(number_format($price, 2, '.', ''), '0'), '.');
+        }
+
+        if (!$withSymbol) {
+            return $price;
+        }
+
+        return $position == "1"
+            ? $symbol . $price
+            : $price . ' ' . $symbol;
     }
-} 
+}
 
 if (!function_exists('theme_public_asset')) {
     function theme_public_asset($path)
@@ -123,12 +150,16 @@ if (!function_exists('country_name_to_iso')) {
     function country_name_to_iso(string $name): ?string
     {
         static $nameToIso = null;
+
         if (!$nameToIso) {
             $path = base_path('vendor/umpirsky/country-list/data/en/country.php');
             $countries = file_exists($path) ? require $path : [];
             $nameToIso = array_flip($countries);
         }
-        return strtoupper($nameToIso[$name]) ?? null;
+
+        return isset($nameToIso[$name]) 
+            ? strtoupper($nameToIso[$name]) 
+            : null;
     }
 }
 

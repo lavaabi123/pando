@@ -6,14 +6,18 @@ use Illuminate\Console\Command;
 use Modules\AppAIPublishing\Models\AIPosts;
 use Modules\AppAIPrompts\Models\AIPrompt;
 use Modules\AppChannels\Models\Accounts;
+use Modules\AdminUsers\Models\Teams;
+use App\Models\User;
 use AI;
 use Publishing;
+use Carbon\Carbon;
+use Carbon\CarbonTimeZone;
 
 
 class CronJobCommand extends Command
 {
     // The name and signature of the console command.
-    protected $signature = 'appaiublishing:cronjob';
+    protected $signature = 'appaipublishing:cron';
 
     // The console command description.
     protected $description = 'Execute the scheduler cron job';
@@ -49,7 +53,10 @@ class CronJobCommand extends Command
                         continue;
                     }
 
-                    $nextTime = $this->getNextTime($timePosts, $weekdays);
+                    $team = Teams::find($post->team_id);
+                    $userTimezone = $team?->owner ? User::find($team->owner)?->timezone : config('app.timezone', 'UTC');
+
+                    $nextTime = $this->getNextTime($timePosts, $weekdays, $userTimezone);
                     $status   = $nextTime > $post->end_date ? 2 : 1;
 
                     $this->updatePostSchedule($post->id, $nextTime, $status);
@@ -69,6 +76,7 @@ class CronJobCommand extends Command
                     }
 
                 } catch (\Throwable $e) {
+                    dd($e);
                     \Log::error("Error processing post ID {$post->id}: " . $e->getMessage(), [
                         'trace' => $e->getTraceAsString()
                     ]);
@@ -84,36 +92,45 @@ class CronJobCommand extends Command
         return 0;
     }
 
-    private function getNextTime(array $timePosts, array $weekdays): int
+    /**
+     * Tính thời gian post tiếp theo dựa vào danh sách giờ & ngày trong tuần
+     */
+    private function getNextTime(array $timePosts, array $weekdays, string $timezone = 'UTC'): int
     {
-        $timeNow = time();
+        $now = Carbon::now($timezone);
 
-        if (!empty($timePosts)) {
-            usort($timePosts, fn($a, $b) => strtotime($a) <=> strtotime($b));
+        if (empty($timePosts) || empty($weekdays)) {
+            return $now->timestamp;
         }
 
-        $currentDay = strtotime(date("Y-m-d"));
-        $nextTime = $timeNow;
+        // Chuẩn hoá timePosts
+        $timePosts = array_map(fn($t) => date("H:i", strtotime($t)), $timePosts);
+        sort($timePosts);
 
-        for ($i = 0; $i < 7; $i++) {
-            $nextDay = $currentDay + (86400 * $i);
-            $day = date("D", $nextDay);
+        // Ép weekdays về int (0/1)
+        $weekdays = array_map('intval', $weekdays); 
+        // ex: ["Mon" => 0, "Tue" => 0, "Wed" => 1, ...]
 
-            if (!empty($weekdays[$day])) {
-                foreach ($timePosts as $timePost) {
-                    $timePost24 = date("G:i", strtotime($timePost));
-                    [$hours, $minutes] = explode(':', $timePost24);
-                    
-                    $timeSeconds = $nextDay + ($hours * 3600) + ($minutes * 60);
+        // Duyệt 14 ngày tới
+        for ($i = 0; $i < 14; $i++) {
+            $day = $now->copy()->startOfDay()->addDays($i);
+            $dayName = $day->format('D'); // "Mon", "Tue", ...
 
-                    if ($timeSeconds > $timeNow) {
-                        return $timeSeconds;
+            if (!empty($weekdays[$dayName])) { // chỉ lấy ngày có bật
+                foreach ($timePosts as $tp) {
+                    [$h, $m] = explode(':', $tp);
+                    $slot = $day->copy()->setTime((int)$h, (int)$m);
+
+                    if ($slot->greaterThan($now)) {
+                        // trả về UTC timestamp để lưu DB
+                        return $slot->clone()->setTimezone('UTC')->timestamp;
                     }
                 }
             }
         }
 
-        return $nextTime;
+        // fallback: sau 5 phút nữa
+        return $now->addMinutes(3600)->setTimezone('UTC')->timestamp;
     }
 
     /**
@@ -162,33 +179,49 @@ class CronJobCommand extends Command
      */
     private function generateCaption(string $keyword, object $data, int $teamId)
     {
-        // Build an array of instructions for clarity.
+        // Map creativity to human-readable instruction
+        $creativityMap = [
+            'low'    => 'Keep the caption simple, straightforward, and factual.',
+            'medium' => 'Balance clarity with a touch of creativity.',
+            'high'   => 'Be imaginative, playful, and use metaphors if suitable.'
+        ];
+        $creativityInstruction = $creativityMap[strtolower($data->creativity)] ?? "Be clear and engaging.";
+
+        // Build prompt with detailed, natural instructions
         $instructions = [
-            "Generate a caption about \"$keyword\".",
-            "Max {$data->max_length} words.",
-            "Creativity: {$data->creativity}.",
-            "Language: {$data->language}.",
-            "Tone: {$data->tone_of_voice}."
+            "Write a social media caption about: \"{$keyword}\".",
+            "Do not exceed {$data->max_length} words.",
+            $creativityInstruction,
+            "Write in {$data->language}.",
+            "Use a {$data->tone_of_voice} tone of voice."
         ];
 
-        if (isset($data->include_hashtags) && $data->include_hashtags > 0) {
-            $instructions[] = "Include {$data->include_hashtags} hashtags.";
+        if (!empty($data->include_hashtags) && $data->include_hashtags > 0) {
+            $instructions[] = "Include exactly {$data->include_hashtags} relevant and trending hashtags.";
         }
-        // Join the instructions into a single prompt string.
+
+        // Final prompt
         $prompt = implode(' ', $instructions);
 
-        // Generate text using the constructed prompt.
-        $result = AI::process($prompt, 1, $teamId);
-        $data = $result['data'];
+        try {
+            // Call AI service
+            $result = AI::process($prompt, 'text', [
+                'maxResult' => 1
+            ], $teamId);
 
-        // Check that the result structure is as expected.
-        if (!empty($data)) {
-            $caption = trim($data[0], '" ');
-            return $caption;
+            $data = $result['data'] ?? [];
+
+            if (!empty($data)) {
+                // Clean output
+                $caption = trim($data[0]);
+                $caption = trim($caption, '"\' ');
+                return $caption;
+            }
+
+            throw new \Exception("Empty AI response for caption generation.");
+        } catch (\Throwable $e) {
+            throw new \Exception("Caption generation failed: " . $e->getMessage());
         }
-        
-        // If the response is not in the expected format, throw an exception.
-        throw new \Exception("Unable to generate caption");
     }
 
     /**
@@ -208,31 +241,40 @@ class CronJobCommand extends Command
      */
     private function generateTitle(string $caption, object $data, int $teamId): string
     {
-        // Build the prompt instructions.
+        // Build the prompt instructions
         $instructions = [
-            "Generate a title for the following caption:",
-            "\"{$caption}\".",
-            "Language: {$data->language}.",
-            "Max 15 words.",
-            "Tone: {$data->tone_of_voice}.",
-            "Do not include any hashtags."
+            "Create a short and catchy title based on the following caption:",
+            "\"{$caption}\"",
+            "Write in {$data->language}.",
+            "Do not exceed 15 words.",
+            "Use a {$data->tone_of_voice} tone of voice.",
+            "Do not include any hashtags or special characters.",
+            "Keep it suitable for a social media post title."
         ];
-        
-        // Join the instructions into a single prompt.
-        $prompt = implode(' ', $instructions);
-        
-        // Generate text using the constructed prompt
-        $result = AI::process($prompt, 1, $teamId);
-        $data = $result['data'];
 
-        // Check that the result structure is as expected.
-        if (!empty($data)) {
-            $title = trim(preg_replace('/\r|\n/', ' ', $data[0]), '" ');
-            return $title;
+        // Join the instructions into a final prompt
+        $prompt = implode(' ', $instructions);
+
+        try {
+            // Generate text using AI service
+            $result = AI::process($prompt, 'text', [
+                'maxResult' => 1
+            ], $teamId);
+
+            $data = $result['data'] ?? [];
+
+            if (!empty($data)) {
+                // Clean the output
+                $title = $data[0] ?? '';
+                $title = trim(preg_replace('/\s+/', ' ', $title));  // remove newlines, extra spaces
+                $title = trim($title, "\"' #-.");                    // strip quotes, hashtags, dashes, dots
+                return $title;
+            }
+
+            throw new \Exception("Empty AI response for title generation.");
+        } catch (\Throwable $e) {
+            throw new \Exception("Title generation failed: " . $e->getMessage());
         }
-        
-        // If the expected structure is not present, throw an exception.
-        throw new \Exception("Unable to generate title");
     }
 
     /**
@@ -253,12 +295,15 @@ class CronJobCommand extends Command
     private function fetchImages($source, $caption, $teamId)
     {
         $medias = [];
-
         if (!$source) return $medias;
 
         switch ($source) {
             case 'ai':
-                $medias[] = generate_image($caption)->data->data[0]->url;
+                $result = AI::process($caption, 'image', [
+                    'size' => '1024x1024'
+                ], $teamId);
+
+                $medias = $result['data'] ?? [];
                 break;
             case 'unsplash':
             case 'pexels_photo':

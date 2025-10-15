@@ -207,10 +207,10 @@
 
                                         <h2 class="fw-bold mb-0 mt-2 fs-35">
                                             @if($isFreePlan)
-                                                {{ Payment::price(0) }}
+                                                {{ price(0) }}
                                                 <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
                                             @else
-                                                {{ Payment::price($plan['price'] ?? 0) }}
+                                                {{ price($plan['price'] ?? 0) }}
                                                 <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
                                             @endif
                                         </h2>

@@ -78,7 +78,7 @@ class AppChannelFacebookPagesController extends Controller
                             $result[] = [
                                 'id' => $value['id'],
                                 'name' => $value['name'],
-                                'avatar' => $value['picture']['data']['url'],
+                                'avatar' => $value['picture']['data']['url']??text2img($response['name'], 'rand'),
                                 'desc' => $value['category'],
                                 'link' => $value['link'],
                                 'oauth' => $value['access_token'],

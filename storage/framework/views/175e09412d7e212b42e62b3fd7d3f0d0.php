@@ -26,26 +26,37 @@
     function display_limit($value) {
         return $value == -1 ? __('Unlimited') : number_format($value);
     }
+    // Theme + colors (session first, then user, then defaults)
+    $theme      = session('theme', optional(auth()->user())->theme ?? 'light');          // 'light' | 'dark'
+    $primaryHex = session('primary_color', optional(auth()->user())->primary_color ?? '#7ec476');
+    $secHex     = session('sec_color',     optional(auth()->user())->secondary_color ?? '#fd8107');
+
+    $pClass = 'primary-'.ltrim($primaryHex, '#');
+    $sClass = 'secondary-'.ltrim($secHex, '#');
 ?>
+<div class="d-flex justify-content-between">
+	<div class=" fw-6 text-black fs-22">
+		<i class="fa-solid fa-face-smile text-primary"></i> Hi Royalink!
+	</div>
+	<div class="colors d-flex align-items-center gap-1">
+		<div class="form-check form-check-inline ml-10">
+		  <input class="form-check-input" type="checkbox" name="theme_color" id="theme_color_dark" value="dark" <?php echo e($theme === 'dark' ? 'checked' : ''); ?>>
+		  <label class="form-check-label" for="theme_color_dark">Dark Theme</label>
+		</div>
 
-<div class=" fw-6 text-black fs-22">
-				<i class="fa-solid fa-face-smile text-primary"></i> Hi Royalink!
-			</div>
-<div class="colors d-flex align-items-center gap-1">
-    <div class="form-check form-check-inline ml-10">
-      <input class="form-check-input" type="checkbox" name="theme_color" id="theme_color_dark" value="dark">
-      <label class="form-check-label" for="theme_color_dark">Dark Theme</label>
-    </div>
+		<input type="color" id="colorPicker" value="<?php echo e($primaryHex); ?>" class="colorPicker w-25 h-20" role="button">
+		<input type="color" id="colorPicker_sec" value="<?php echo e($secHex); ?>" class="colorPicker w-25 h-20" role="button">
 
-    <input type="color" id="colorPicker" value="" class="colorPicker w-25 h-20" role="button">
-    <input type="color" id="colorPicker_sec" value="" class="colorPicker w-25 h-20" role="button">
+		<i class="fa-solid fa-undo colorPicker_reset fs-20" data-bs-toggle="tooltip" data-bs-placement="bottom"
+		   title="Reset" role="button" aria-label="Reset"></i>
+	</div>
+</div>
 
-    <i class="fa-solid fa-undo colorPicker_reset fs-20" data-bs-toggle="tooltip" data-bs-placement="bottom"
-       title="Reset" role="button" aria-label="Reset"></i>
-  </div>
-	<div class="gradient-bg d-flex gap-12 main-services text-center p-5">
+
+<div class="gradient-bg main-services text-center my-4 p-4 b-r-20 justify-content-xl-evenly">
+	<div class="p-4 d-flex gap-25 justify-content-xl-evenly">
 		<a class="icons" href="https://itspando.com/post">
-			<div class="mb-3">
+			<div class="mb-3" style="fill:var(--d-primary);">
 				<?php echo file_get_contents(public_path('img/post.svg')); ?>
 
 			</div>
@@ -90,7 +101,7 @@
 			</div>
 		</a>
 		<a class="icons" href="https://itspando.com">
-			<div class="mb-3">
+			<div class="mb-3" style="fill:var(--d-secondary);">
 				<?php echo file_get_contents(public_path('img/note.svg')); ?>
 
 			</div>
@@ -99,12 +110,107 @@
 			</div>
 		</a>
 	</div>
-	
+</div>
+
+<div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
+    <div class="card-body py-4 px-4">
+		<div class="text-black mb-3">
+			<h5 class="fw-6">Daily Alerts!</h5>
+			<p class="mb-0">Stay up to date on all your accounts!</p>
+		</div>
+		<div class="row row-gap-4">
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Accounts with no scheduled posts today</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">1</h3>
+					<h5 class="mb-0 fw-bold">Accounts with inbox not cleared for more than 24 hours</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">7</h3>
+					<h5 class="mb-0 fw-bold">Posts pending approval</h5>
+				</div>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
+    <div class="card-body py-4 px-4">
+		<div class="text-black mb-3">
+			<h5 class="fw-6">Today! October 14, 2025</h5>
+			<p class="mb-0">What’s happening on your accounts today!</p>
+		</div>
+		<div class="row row-gap-4">
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">4</h3>
+					<h5 class="mb-0 fw-bold">Amount of total scheduled posts</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Inbox Messages</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Total Reviews</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">4</h3>
+					<h5 class="mb-0 fw-bold">Number of New People added</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Total failed posts</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Holidays</h5>
+				</div>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="row">
 
     <div class="col-md-8 mb-4">
         <div class="card shadow-sm position-relative overflow-hidden hp-100">
-            <div class="card-body py-4 px-5">
+            <div class="card-body py-4 px-4">
                 <div class="d-flex flex-wrap align-items-center gap-4 justify-content-between hp-100">
                     <div class="d-flex flex-column flex-grow-1 hp-100 justify-content-between">
                         <div>
@@ -223,4 +329,14 @@
 	</div>
 
 </div>
+
+  <script>
+  window.routes = {
+    setColor: <?php echo json_encode(route('profile.set_color'), 15, 512) ?>,
+    saveTheme: <?php echo json_encode(route('settings.save_theme'), 15, 512) ?>,
+  };
+  window.csrfToken = "<?php echo e(csrf_token()); ?>";
+  window.themeCssUrl = "<?php echo e(theme_public_asset('css/theme.css')); ?>";
+</script>
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js')); ?>"></script>
 <?php /**PATH /home/royalinkdevelopm/public_html/pando.royalinkdevelopment.com/modules/AdminCredits/resources/views/partials/app-dashboard-item.blade.php ENDPATH**/ ?>

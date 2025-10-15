@@ -31,7 +31,7 @@
                                     <td>{{ \Carbon\Carbon::parse($bill->created)->format('d/m/Y') }}</td>
                                     <td>
                                         <span class="fw-bold">
-                                            {{ number_format($bill->amount) }}
+                                            {{ number_format($bill->amount, 2) }}
                                             <span class="text-uppercase">{{ $bill->currency }}</span>
                                         </span>
                                     </td>

@@ -515,16 +515,32 @@ var Main = new (function ()
 
     },
 
-    Main.Tooltip = function(){
+    Main.Tooltip = function () {
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-            return new bootstrap.Tooltip(tooltipTriggerEl);
+
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            var title = tooltipTriggerEl.getAttribute('data-bs-title') 
+                     || tooltipTriggerEl.getAttribute('title') 
+                     || ' ';
+
+            if (!tooltipTriggerEl.getAttribute('title') && !tooltipTriggerEl.getAttribute('data-bs-title')) {
+                tooltipTriggerEl.setAttribute('title', title);
+            }
+
+            return new bootstrap.Tooltip(tooltipTriggerEl, {
+                title: title
+            });
         });
 
         $(document).on('mouseenter', '[data-bs-toggle="tooltip"]', function () {
-            var tooltipInstance = bootstrap.Tooltip.getInstance(this); 
+            var tooltipInstance = bootstrap.Tooltip.getInstance(this);
             if (!tooltipInstance) {
-                new bootstrap.Tooltip(this).show();
+                var title = this.getAttribute('data-bs-title') 
+                         || this.getAttribute('title') 
+                         || ' ';
+                new bootstrap.Tooltip(this, { title: title }).show();
+            } else {
+                tooltipInstance.show();
             }
         });
 
@@ -578,7 +594,7 @@ var Main = new (function ()
         $(document).on("change", ".checkbox-all", function(){
             var parentSelector = $(this).data("checkbox-parent");
             var $parent = parentSelector ? $(this).closest(parentSelector) : $(document);
-console.log($parent);
+
             var isChecked = $(this).prop("checked");
 
             $parent.find("input.checkbox-item:checkbox").prop('checked', isChecked);
@@ -1152,6 +1168,12 @@ console.log($parent);
                 style: 'multi',
                 selector: 'td:first-child input[type="checkbox"]',
                 className: 'row-selected'
+            },
+            language: {
+                paginate: { first: '', last: '', previous: '', next: '' },
+                lengthMenu: "Show _MENU_ per page",
+                zeroRecords: "No matching records found.",
+                infoEmpty: "No records available"
             },
             initComplete: (settings, json) => {
                 setTimeout(function(){

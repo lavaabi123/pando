@@ -107,18 +107,17 @@ class CreditService
 
         $today = Carbon::now()->startOfDay()->timestamp;
 
-        $usage = CreditUsage::where('team_id', $teamId)
+        // Thử update trước
+        $updated = \DB::table('credit_usages')
+            ->where('team_id', $teamId)
             ->where('feature', $feature)
             ->where('model', $model)
             ->where('date', $today)
-            ->first();
+            ->increment('credits_used', $credits, ['changed' => time()]);
 
-        if ($usage) {
-            $usage->credits_used += $credits;
-            $usage->changed = time();
-            $usage->save();
-        } else {
-            CreditUsage::create([
+        // Nếu chưa có row nào thì insert
+        if (!$updated) {
+            \DB::table('credit_usages')->insert([
                 'team_id'      => $teamId,
                 'feature'      => $feature,
                 'model'        => $model,

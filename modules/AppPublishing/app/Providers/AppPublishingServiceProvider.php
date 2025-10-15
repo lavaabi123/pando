@@ -7,6 +7,7 @@ use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
+use Modules\AppPublishing\Console\CronJobCommand;
 
 class AppPublishingServiceProvider extends ServiceProvider
 {
@@ -41,10 +42,6 @@ class AppPublishingServiceProvider extends ServiceProvider
             class_alias(\Modules\AppPublishing\Facades\Publishing::class, 'Publishing');
         }
 
-        \CronService::addCron($this->name, [
-            'apppublishing:cron' => url_app('publishing/cron?key=' . get_option('cron_key', rand_string())),
-        ]);
-
         \AdminDashboard::registerDashboardItem(function () {
             return view('apppublishing::partials.admin-dashboard-item')->render();
         }, 11000, fn() => 1);
@@ -59,6 +56,11 @@ class AppPublishingServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Register module commands
+        $this->commands([
+            CronJobCommand::class,
+        ]);
+
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
@@ -84,6 +86,10 @@ class AppPublishingServiceProvider extends ServiceProvider
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
             $schedule->command('apppublishing:cron')->everyMinute();
         });
+
+        \CronService::addCron($this->name, [
+            'apppublishing:cron' => url_app('publishing/cron?key=' . get_option('cron_key', rand_string())),
+        ]);
     }
 
     /**

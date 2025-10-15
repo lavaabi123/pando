@@ -45,13 +45,13 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-12 allow_channels">
+            <div class="col-md-12 allow_publishing">
                 <div class="mb-0">
                     <div class="d-flex gap-8 justify-content-between border-bottom mb-3 pb-2">
                         <div class="fw-5 text-gray-800 fs-14 mb-2">{{ __('Allow post to channels') }}</div>
                         <div class="form-check">
-                            <input class="form-check-input checkbox-all" data-checkbox-parent=".allow_channels" type="checkbox" value="" id="allow_channels">
-                            <label class="form-check-label" for="allow_channels">
+                            <input class="form-check-input checkbox-all" data-checkbox-parent=".allow_publishing" type="checkbox" value="" id="allow_publishing">
+                            <label class="form-check-label" for="allow_publishing">
                                 {{ __('Select All') }}
                             </label>
                         </div>

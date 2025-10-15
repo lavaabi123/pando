@@ -6,6 +6,7 @@ use Modules\AdminPaymentHistory\Models\PaymentHistory;
 use Modules\Payment\Interfaces\PaymentInterface;
 use Modules\Payment\Events\PaymentSuccess;
 use Modules\AdminPlans\Models\Plans;
+use App\Models\User;
 use Exception;
 use DB;
 
@@ -33,7 +34,7 @@ class PaymentService
         $discountType = 0;
 
         $coupon = $this->appliedCoupon();
-        if($coupon){
+        if ($coupon) {
             $coupon_plans = json_decode($coupon->plans);
 
             if (
@@ -47,35 +48,33 @@ class PaymentService
             }
         }
 
-        // Calculate discount amount based on discount type.
+        // Tính discount theo loại
         if ($discountType == 1) {
-            // Percentage discount.
+            // % discount
             $discountAmount = ($subtotal * $discount) / 100;
         } else {
-            // If discount type is unrecognized, assume fixed discount.
+            // fixed discount
             $discountAmount = $discount;
         }
 
-        // Calculate total after applying discount.
+        // Tổng sau khi giảm
         $total = $subtotal - $discountAmount;
-        
-        // If total is less than or equal to zero, set it to 0.
+
         if ($total <= 0) {
             $total = 0;
         }
 
-        // Return either formatted values or raw numbers.
         if ($formatted) {
             return [
-                'subtotal' => \Core::currency( number_format($subtotal, 2, '.', '') ),
-                'discount' => \Core::currency( number_format($discountAmount * -1, 2, '.', '') ),
-                'total'    => \Core::currency( number_format($total, 2, '.', '') ),
+                'subtotal' => \Core::currency($subtotal),
+                'discount' => \Core::currency($discountAmount * -1),
+                'total'    => \Core::currency($total),
             ];
         }
-        
+
         return [
             'subtotal' => $subtotal,
-            'discount' => $discountAmount*-1,
+            'discount' => $discountAmount * -1,
             'total'    => $total,
         ];
     }
@@ -237,6 +236,7 @@ class PaymentService
      */
     public function success()
     {
+
         try {
             if (!$this->gateway instanceof PaymentInterface) {
                 throw new Exception( __("Invalid payment gateway.") );
@@ -253,7 +253,7 @@ class PaymentService
 
                 $this->updatedCoupon();
                 $response = $this->gateway->success();
-                
+
                 $dataPaymentHistory = [
                     'uid'            => $user_id,
                     'plan_id'        => $plan_id,
@@ -306,6 +306,76 @@ class PaymentService
 
         } catch (Exception $e) {
             return $this->apiError($e->getMessage(), $e->getCode() ?: 400);
+        }
+    }
+
+    public function notify(array $response)
+    {
+        try {
+            if (!$this->gateway instanceof PaymentInterface) {
+                throw new Exception(__("Invalid payment gateway."));
+            }
+
+            $userId   = $response['uid']       ?? (\Auth::id() ?? 0);
+            $planId   = $response['plan_id']   ?? session("checkout_plan_id");
+            $planType = $response['plan_type'] ?? session("checkout_plan_type");
+
+            if (!$planId) {
+                throw new Exception("Missing plan_id for payment.");
+            }
+
+            $plan      = Plans::find($planId);
+            $invoiceId = rand_string();
+            $paymentHistory = PaymentHistory::firstOrCreate(
+                ['transaction_id' => $response['transaction_id']],
+                [
+                    'uid'            => $userId,
+                    'plan_id'        => $planId,
+                    'from'           => $response['gateway'],
+                    'transaction_id' => $response['transaction_id'],
+                    'currency'       => $response['currency'],
+                    'by'             => $planType,
+                    'amount'         => $response['amount'],
+                    'status'         => $response['status'] ?? 1,
+                    'changed'        => time(),
+                    'created'        => time(),
+                    'id_secure'      => $invoiceId,
+                ]
+            );
+
+            \Log::info('PaymentHistory result', [
+                'id'   => $paymentHistory->id,
+                'new'  => $paymentHistory->wasRecentlyCreated,
+                'exists' => $paymentHistory->exists,
+            ]);
+
+            $response['user_id']    = $userId;
+            $response['payment_id'] = $paymentHistory->id;
+            $response['plan_id']    = $planId;
+
+            event(new PaymentSuccess($response));
+
+            $user = User::find($userId);
+            if ($user && $plan) {
+                \MailSender::sendByTemplate('payment_success', $user->email, [
+                    'fullname'       => $user->fullname ?? $user->username,
+                    'order_id'       => $invoiceId,
+                    'plan_name'      => $plan->name,
+                    'order_amount'   => $response['amount'],
+                    'order_currency' => $response['currency'] ?? get_option("currency", "USD"),
+                    'order_date'     => \Carbon\Carbon::now()->format('d M Y'),
+                    'login_url'      => route("login")
+                ]);
+            }
+
+            return response('OK', 200);
+
+        } catch (Exception $e) {
+            \Log::info('PaymentHistory result', [
+                'id'   => $response['gateway'],
+                'new'  => $e->getMessage()
+            ]);
+            return response('Invalid: '.$e->getMessage(), 400);
         }
     }
 

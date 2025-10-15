@@ -27,6 +27,7 @@ if (!function_exists("languages")) {
             "ko-KR" => "Korean (South Korea)",
             "lt-LT" => "Lithuanian (Lithuania)",
             "ms-MY" => "Malay (Malaysia)",
+            "mk-MK" => "Macedonian (Macedonia)",
             "nb-NO" => "Norwegian (Norway)",
             "pl-PL" => "Polish (Poland)",
             "pt-BR" => "Portuguese (Brazil)",

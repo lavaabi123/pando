@@ -11,10 +11,8 @@
         }
     ],
     "extra": {
-        "theme": {
-            "parent": "",
-            "active": true,
-            "screenshot": "screenshot.png"
+        "laravel-theme": {
+            "name": "app/pico"
         }
     }
 }

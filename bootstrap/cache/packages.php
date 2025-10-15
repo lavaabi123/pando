@@ -129,6 +129,13 @@
       0 => 'Nwidart\\Modules\\LaravelModulesServiceProvider',
     ),
   ),
+  'openai-php/laravel' => 
+  array (
+    'providers' => 
+    array (
+      0 => 'OpenAI\\Laravel\\ServiceProvider',
+    ),
+  ),
   'pestphp/pest-plugin-laravel' => 
   array (
     'providers' => 

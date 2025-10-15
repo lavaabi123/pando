@@ -21,3 +21,14 @@ Route::middleware(['web', 'auth'])->group(function () {
         });
     });
 });
+
+
+Route::get('/pusher/config', function () {
+    return response()->json([
+        'key'     => get_option('pusher_app_key'),
+        'cluster' => get_option('pusher_cluster', 'mt1'),
+        'host'    => get_option('pusher_host'),
+        'port'    => get_option('pusher_port', 443),
+        'scheme'  => get_option('pusher_scheme', 'https'),
+    ]);
+})->middleware('auth');

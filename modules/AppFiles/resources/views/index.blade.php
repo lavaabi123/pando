@@ -95,13 +95,17 @@
                     </li>
                     @endif
 
-                    @if(Gate::allows('appmediasearch'))
-                    <li>
-                        <a class="dropdown-item p-2 rounded d-flex gap-8 fw-5 fs-14 actionItem" href="{{ route("app.search_media.popup_search") }}" data-popup="searchMediaModel">
-                            <span class="size-16 me-1 text-center"><i class="fa-light fa-magnifying-glass"></i></span>
-                            <span class="text-truncate">{{ __("Search Media Online") }}</span>
-                        </a>
-                    </li>
+                    @if(Gate::allows('appmediasearch') && !empty(SearchMedia::services()))
+                        <li>
+                            <a class="dropdown-item p-2 rounded d-flex gap-8 fw-5 fs-14 actionItem"
+                               href="{{ route("app.search_media.popup_search") }}"
+                               data-popup="searchMediaModel">
+                                <span class="size-16 me-1 text-center">
+                                    <i class="fa-light fa-magnifying-glass"></i>
+                                </span>
+                                <span class="text-truncate">{{ __("Search Media Online") }}</span>
+                            </a>
+                        </li>
                     @endif
 
                     <li><hr class="dropdown-divider"></li>

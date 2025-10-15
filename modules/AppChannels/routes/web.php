@@ -14,13 +14,16 @@ use Modules\AppChannels\Http\Controllers\AppChannelsController;
 |
 */
 
-Route::group(["prefix" => "app"], function () {
-    Route::group(["prefix" => "channels"], function () {
-        Route::resource('/', AppChannelsController::class)->names('app.channels');
-        Route::get('add', [AppChannelsController::class, 'add'])->name('app.channels.add');
-        Route::post('save', [AppChannelsController::class, 'save'])->name('app.channels.save');
-        Route::post('list', [AppChannelsController::class, 'list'])->name('app.channels.list');
-        Route::post('status/{any}', [AppChannelsController::class, 'status'])->name('app.channels.status');
-        Route::post('destroy', [AppChannelsController::class, 'destroy'])->name('app.channels.destroy');
+
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::group(["prefix" => "app"], function () {
+        Route::group(["prefix" => "channels"], function () {
+            Route::resource('/', AppChannelsController::class)->names('app.channels');
+            Route::get('add', [AppChannelsController::class, 'add'])->name('app.channels.add');
+            Route::post('save', [AppChannelsController::class, 'save'])->name('app.channels.save');
+            Route::post('list', [AppChannelsController::class, 'list'])->name('app.channels.list');
+            Route::post('status/{any}', [AppChannelsController::class, 'status'])->name('app.channels.status');
+            Route::post('destroy', [AppChannelsController::class, 'destroy'])->name('app.channels.destroy');
+        });
     });
 });

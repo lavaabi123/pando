@@ -145,7 +145,8 @@ class AppChannelXProfilesController extends Controller
                 'block.write',
                 'bookmark.read',
                 'bookmark.write',
-                'media.write'
+                'media.write',
+                'users.email'
             ],
         ];
 

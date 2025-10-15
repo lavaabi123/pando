@@ -205,7 +205,11 @@ class UploadFileService
 
     public function storeSingleFile($file, string $folder = 'uploads', bool $autoCrop = false, string $aspectRatio = '1:1'): string
     {
-        $fileName = $this->sanitizeFileName($file->getClientOriginalName());
+        if (method_exists($file, 'getClientOriginalName')) {
+            $fileName = $this->sanitizeFileName($file->getClientOriginalName());
+        } else {
+            $fileName = $this->sanitizeFileName($file->getFilename());
+        }
 
         if ($autoCrop && str_starts_with($file->getMimeType(), 'image/')) {
             $manager = \Intervention\Image\ImageManager::gd();
@@ -214,21 +218,17 @@ class UploadFileService
             $width = $image->width();
             $height = $image->height();
 
-            // Parse aspect ratio (e.g. 16:9 → [16, 9])
             [$aspectW, $aspectH] = explode(':', $aspectRatio);
             $aspectRatioFloat = floatval($aspectW) / floatval($aspectH);
-
             $currentRatio = $width / $height;
 
             if ($currentRatio > $aspectRatioFloat) {
-                // Crop horizontally (image is too wide)
                 $newWidth = intval($height * $aspectRatioFloat);
                 $x = intval(($width - $newWidth) / 2);
                 $y = 0;
                 $cropWidth = $newWidth;
                 $cropHeight = $height;
             } else {
-                // Crop vertically (image is too tall)
                 $newHeight = intval($width / $aspectRatioFloat);
                 $x = 0;
                 $y = intval(($height - $newHeight) / 2);
@@ -238,22 +238,19 @@ class UploadFileService
 
             $cropped = $image->crop($cropWidth, $cropHeight, $x, $y);
 
-            // Save to temp file and upload
             $tempDir = sys_get_temp_dir();
-            if (!is_writable($tempDir)) {
-                throw new \Exception('System temp directory is not writable.');
-            }
             $tempPath = $tempDir . DIRECTORY_SEPARATOR . $fileName;
             $cropped->save($tempPath);
 
-            $relativePath = \Storage::disk($this->disk)->putFileAs($folder, new \Illuminate\Http\File($tempPath), $fileName, 'public');
+            $relativePath = Storage::disk($this->disk)
+                ->putFileAs($folder, new \Illuminate\Http\File($tempPath), $fileName, 'public');
+
             @unlink($tempPath);
         } else {
-            // Store original file
-            $relativePath = $file->storeAs($folder, $fileName, $this->disk);
+            $relativePath = Storage::disk($this->disk)
+                ->putFileAs($folder, $file, $fileName, 'public');
         }
 
-        // Build final URL/path
         if ($this->disk === 's3') {
             return Storage::disk($this->disk)->url($relativePath);
         } elseif ($this->disk === 'contabo') {
@@ -261,9 +258,9 @@ class UploadFileService
             return "{$publicUrl}/{$relativePath}";
         }
 
-        // Local/public
         return $relativePath;
     }
+
 
     public function storeSingleFileFromURL(string $url, string $folder = 'uploads', ?string $customFileName = null): string
     {

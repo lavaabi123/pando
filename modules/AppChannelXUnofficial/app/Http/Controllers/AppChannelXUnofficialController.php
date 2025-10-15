@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 
 class AppChannelXUnofficialController extends Controller
 {
+    public function index(Request $request)
+    {
+        return redirect( module_url("oauth") );
+    }
+
     public function oauth(Request $request)
     {
         return view( module('key') . '::oauth', [] );

@@ -9,7 +9,7 @@
         <select class="form-select" data-control="select2" name="ai_options[include_media]">
             <option value="0" {{ (isset($options['include_media']) && $options['include_media'] == 0) ? 'selected' : '' }}>{{ __("Disable") }}</option>
             <optgroup label="{{ __('Media Online') }}"> 
-                {{-- <option value="ai" {{ (isset($options['include_media']) && $options['include_media'] == 'ai') ? 'selected' : '' }}>{{ __('AI Image') }}</option> --}}
+                <option value="ai" {{ (isset($options['include_media']) && $options['include_media'] == 'ai') ? 'selected' : '' }}>{{ __('AI Image') }}</option>
                 <option value="unsplash" {{ (isset($options['include_media']) && $options['include_media'] == 'unsplash') ? 'selected' : '' }}>{{ __('Unsplash') }}</option>
                 <option value="pexels_photo" {{ (isset($options['include_media']) && $options['include_media'] == 'pexels_photo') ? 'selected' : '' }}>{{ __('Pexels Photo') }}</option>
                 <option value="pexels_video" {{ (isset($options['include_media']) && $options['include_media'] == 'pexels_video') ? 'selected' : '' }}>{{ __('Pexels Video') }}</option>

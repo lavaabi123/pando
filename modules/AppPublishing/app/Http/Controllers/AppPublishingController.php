@@ -128,7 +128,7 @@ class AppPublishingController extends Controller
                     'link'      => $postData['link'] ?? '',
                     'time_post'    => date('h:i A', $post->time_post),
                     'module_name'  => $module['name'] ?? '',
-                    'response'     => json_decode($post->result ?? []),
+                    'response'     => json_decode($post->result ?? '{}'),
                 ],
             ];
         });

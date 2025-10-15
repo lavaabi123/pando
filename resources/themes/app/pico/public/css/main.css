@@ -107015,6 +107015,82 @@ h1, .h1, h2, .h2, h3, .h3, h4, .h4, h5, .h5, h6, .h6 {
   background-color: #675dff !important;
 }
 
+/*
+* Drag & Drop
+ */
+#drag-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999999999999;
+  transition: opacity 0.3s ease-in-out;
+}
+
+#drag-overlay.active {
+  display: flex;
+  animation: fadeIn 0.25s ease-in-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.overlay-box {
+  background: #fff;
+  padding: 40px 60px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  animation: scaleUp 0.3s ease-in-out;
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.overlay-box i {
+  font-size: 60px;
+  color: #28a745;
+  margin-bottom: 15px;
+  animation: bounce 1.2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.overlay-box h2, .overlay-box .h2 {
+  font-size: 24px;
+  margin: 10px 0;
+  color: #333;
+  font-weight: bold;
+}
+
+.overlay-box p {
+  font-size: 14px;
+  color: #666;
+}
+
 .header {
   position: fixed;
   top: 0;

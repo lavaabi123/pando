@@ -73,9 +73,9 @@
                                 </p>
                                 <h3 class="mb-1 text-4xl text-gray-900 font-bold leading-tight">
                                     @if($isFreePlan)
-                                        {{ Payment::price(0) }}
+                                        {{ price(0) }}
                                     @else
-                                        {{ Payment::price($plan['price'] ?? 0) }}
+                                        {{ price($plan['price'] ?? 0) }}
                                     @endif
                                     <span class="text-gray-400">/{{ strtolower($typeLabel) }}</span>
                                 </h3>

@@ -101,5 +101,6 @@
     "AppAnalyticsLinkedin": true,
     "AppAnalyticsTiktok": true,
     "AppAnalyticsYoutube": true,
-    "AppBrands": true
+    "AppBrands": true,
+    "AdminCache": true
 }

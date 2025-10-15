@@ -20,7 +20,7 @@ class AppChannelInstagramProfilesController extends Controller
         $appVersion = get_option("instagram_graph_version", "v21.0");
         $appPermissions = get_option(
             "instagram_permissions", 
-            "instagram_basic,instagram_content_publish,pages_read_engagement,pages_show_list,business_management,instagram_manage_insights"
+            "instagram_basic,instagram_content_publish,pages_read_engagement,pages_show_list,instagram_manage_insights,business_management"
         );
 
         if(!$appId || !$appSecret || !$appVersion || !$appPermissions){
@@ -101,9 +101,9 @@ class AppChannelInstagramProfilesController extends Controller
 
                         $result[] = [
                             'id' => $response['id'],
-                            'name' => $response['name'],
+                            'name' => isset($response['name'])?$response['name']:$response['username'],
                             'username' => $response['username'],
-                            'avatar' => $response['profile_picture_url'],
+                            'avatar' => $response['profile_picture_url']??text2img($response['username'], 'rand'),
                             'desc' => isset($response['name'])?$response['name']:$response['username'],
                             'link' => 'https://www.instagram.com/'.$response['username'],
                             'oauth' => $accessToken,

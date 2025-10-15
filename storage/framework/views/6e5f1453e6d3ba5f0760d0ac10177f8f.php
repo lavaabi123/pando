@@ -1,5 +1,5 @@
 <div class="sidebar hide-scroll">
-
+ 
     <div class="sidebar-header d-flex align-items-center px-3 position-relative">
         <div class="min-h-22px overflow-hidden">
             <a href="<?php echo e(session('login_as') == "admin" ? route("admin.dashboard") : route("app.dashboard")); ?>">

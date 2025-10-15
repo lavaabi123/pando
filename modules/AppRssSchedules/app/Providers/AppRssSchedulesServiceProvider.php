@@ -5,6 +5,7 @@ namespace Modules\AppRssSchedules\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Nwidart\Modules\Traits\PathNamespace;
+use Modules\AppRssSchedules\Console\RssCronJobCommand;
 
 class AppRssSchedulesServiceProvider extends ServiceProvider
 {
@@ -29,10 +30,6 @@ class AppRssSchedulesServiceProvider extends ServiceProvider
         if (!class_exists('RssAutomation')) {
             class_alias(\Modules\AppRssSchedules\Facades\RssAutomation::class, 'RssAutomation');
         }
-
-        \CronService::addCron($this->name, [
-            'apprsschedules:cron' => url_app('rss-schedules/cron?key=' . get_option('cron_key', rand_string())),
-        ]);
     }
 
     /**
@@ -40,6 +37,11 @@ class AppRssSchedulesServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Register module commands
+        $this->commands([
+            RssCronJobCommand::class,
+        ]);
+        
         $this->app->register(EventServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
@@ -73,6 +75,10 @@ class AppRssSchedulesServiceProvider extends ServiceProvider
             $schedule = $this->app->make(\Illuminate\Console\Scheduling\Schedule::class);
             $schedule->command('apprsschedules:cron')->everyMinute();
         });
+
+        \CronService::addCron($this->name, [
+            'apprsschedules:cron' => url_app('ai-publishing/cron?key=' . get_option('cron_key', rand_string())),
+        ]);
     }
 
     /**

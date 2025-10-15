@@ -84,6 +84,7 @@ var Files = new (function ()
         Files.doUpload();
         Files.Actions();
         Files.DragAndDropSelect();
+        Files.enableGlobalDropUpload();
     },
 
     Files.Actions = function(){
@@ -298,6 +299,51 @@ var Files = new (function ()
             $(".uploadFromURL").attr("data-id", folder_id);
     },
 
+    Files.enableGlobalDropUpload = function() {
+        var $overlay = $("#drag-overlay");
+
+        // Khi kéo file vào body
+        $("body").on("dragover", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $overlay.addClass("active");
+        });
+
+        // Khi rời body
+        $("body").on("dragleave", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Kiểm tra nếu thực sự rời ra ngoài
+            if (e.originalEvent.pageX === 0 && e.originalEvent.pageY === 0) {
+                $overlay.removeClass("active");
+            }
+        });
+
+        // Khi thả file vào body
+        $("body").on("drop", function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $overlay.removeClass("active");
+
+            var files = e.originalEvent.dataTransfer.files;
+            if (!files || files.length === 0) return;
+
+            var formData = new FormData();
+            var folder_id = $('[name="folder_id"]:checked').val() || 0;
+            formData.append("folder_id", folder_id);
+
+            for (var i = 0; i < files.length; i++) {
+                formData.append("files[]", files[i]);
+            }
+
+            // Gọi ajax upload
+            Main.ajaxPost($(this), Files_url + "upload_files", formData, function(res) {
+                Main.ajaxScroll(true);
+            });
+        });
+    },
+
     Files.doUpload = function(upload_id) {
         var upload_id = (upload_id == undefined) ? '#file-upload' : upload_id;
         var upload_id_name = upload_id.replaceAll("#", "");
@@ -464,28 +510,35 @@ var Files = new (function ()
         OneDrive.open(odOptions);
     },
 
-    /* GOOGLE DRIVE */
+    /* ================================
+       GOOGLE DRIVE (GIS + Picker API)
+    ================================ */
     Files.onGoogleDriveAuthApiLoad = function () {
-        window.gapi.auth.authorize(
-            {
-                'client_id': pickerClientID, // Replace with your actual client ID
-                'scope': ['https://www.googleapis.com/auth/drive.readonly'],
-                'immediate': false
+        if (!window.google || !google.accounts || !google.accounts.oauth2) {
+            console.error("Google Identity Services SDK not loaded.");
+            return;
+        }
+
+        const client = google.accounts.oauth2.initTokenClient({
+            client_id: pickerClientID,
+            scope: "https://www.googleapis.com/auth/drive.readonly",
+            callback: (tokenResponse) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                    oauthToken = tokenResponse.access_token;
+                    Files.createGoogleDrivePicker();
+                } else {
+                    console.error("Google Drive: Failed to get access token.");
+                }
             },
-            Files.handleGoogleDriveAuthResult
-        );
-    },
+        });
+
+        // Request access token (must be triggered by user action)
+        client.requestAccessToken();
+    };
 
     Files.onGoogleDrivePickerApiLoad = function () {
         pickerApiLoaded = true;
-    },
-
-    Files.handleGoogleDriveAuthResult = function (authResult) {
-        if (authResult && !authResult.error) {
-            oauthToken = authResult.access_token;
-            Files.createGoogleDrivePicker();
-        }
-    },
+    };
 
     Files.createGoogleDrivePicker = function () {
         if (pickerApiLoaded && oauthToken) {
@@ -494,47 +547,54 @@ var Files = new (function ()
                 .setOAuthToken(oauthToken)
                 .setDeveloperKey(pickerApiKey)
                 .setCallback(Files.pickerGoogleDriveCallback)
-                .setSelectableMimeTypes(allowedExtensions.map(ext => {
-                    switch(ext) {
-                        case '.pdf': return 'application/pdf';
-                        case '.doc': return 'application/msword';
-                        case '.docx': return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-                        case '.csv': return 'text/csv';
-                        case '.jpeg': case '.jpg': return 'image/jpeg';
-                        case '.png': return 'image/png';
-                        case '.gif': return 'image/gif';
-                        case '.svg': return 'image/svg+xml';
-                        case '.zip': return 'application/zip';
-                        case '.xls': return 'application/vnd.ms-excel';
-                        case '.xlsx': return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-                        case '.mp4': return 'video/mp4';
-                        case '.mov': return 'video/quicktime';
-                        case '.mp3': return 'audio/mpeg';
-                        case '.webp': return 'image/webp';
-                        case '.ogg': return 'audio/ogg';
-                        default: return '';
-                    }
-                }).join(','))
+                .setSelectableMimeTypes(
+                    allowedExtensions
+                        .map((ext) => {
+                            switch (ext) {
+                                case ".pdf": return "application/pdf";
+                                case ".doc": return "application/msword";
+                                case ".docx": return "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+                                case ".csv": return "text/csv";
+                                case ".jpeg":
+                                case ".jpg": return "image/jpeg";
+                                case ".png": return "image/png";
+                                case ".gif": return "image/gif";
+                                case ".svg": return "image/svg+xml";
+                                case ".zip": return "application/zip";
+                                case ".xls": return "application/vnd.ms-excel";
+                                case ".xlsx": return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                                case ".mp4": return "video/mp4";
+                                case ".mov": return "video/quicktime";
+                                case ".mp3": return "audio/mpeg";
+                                case ".webp": return "image/webp";
+                                case ".ogg": return "audio/ogg";
+                                default: return "";
+                            }
+                        })
+                        .filter(Boolean)
+                        .join(",")
+                )
                 .build();
             picker.setVisible(true);
+        } else {
+            console.warn("Google Drive Picker not ready yet.");
         }
-    },
+    };
 
     Files.pickerGoogleDriveCallback = function (data) {
         var $this = $("#google-drive-chooser");
         if (data.action === google.picker.Action.PICKED) {
-            console.log(data.docs);
             var files = data.docs
-                .filter(file => {
-                    var extension = file.name.split('.').pop().toLowerCase();
-                    return allowedExtensions.includes('.' + extension);
+                .filter((file) => {
+                    var extension = file.name.split(".").pop().toLowerCase();
+                    return allowedExtensions.includes("." + extension);
                 })
-                .map(file => ({
+                .map((file) => ({
                     from: "google_drive",
                     link: file.id,
                     name: file.name,
-                    type: file.name.split('.').pop(),
-                    access_token: oauthToken
+                    type: file.name.split(".").pop(),
+                    access_token: oauthToken,
                 }));
 
             if (files.length) {
@@ -543,35 +603,58 @@ var Files = new (function ()
                 console.error("No valid files selected.");
             }
         }
-    },
+    };
 
     Files.pickGoogleDriveFile = function (apiKey, clientId) {
         pickerApiKey = apiKey;
         pickerClientID = clientId;
 
+        // Load Google Identity Services (GIS)
         ((document, url) => {
-            // Create a new <script> element.
-            const script = document.createElement("script");
-            // Set the source URL to load the Google Drive SDK.
-            script.src = url;
-            // When the script loads, check if Google Drive is available
-            script.onload = async () => {
-                $(document).on("click", "#google-drive-chooser", function(){
-                    if( !pickerApiLoaded ){
-                        gapi.load('auth', { 'callback': Files.onGoogleDriveAuthApiLoad });
-                        gapi.load('picker', { 'callback': Files.onGoogleDrivePickerApiLoad });
-                    }
-                    Files.createGoogleDrivePicker();
-                });
-            };
-            // Append the script to the body to load it.
-            document.body.appendChild(script);
+            if (!document.getElementById("gis-sdk")) {
+                const script = document.createElement("script");
+                script.id = "gis-sdk";
+                script.src = url;
+                script.async = true;
+                script.defer = true;
+
+                script.onload = () => {
+                    console.log("GIS loaded ✅");
+
+                    // Sau khi GIS load xong mới bind click
+                    $(document).on("click", "#google-drive-chooser", function () {
+                        if (!pickerApiLoaded) {
+                            console.warn("Google Picker chưa sẵn sàng");
+                            return;
+                        }
+                        Files.onGoogleDriveAuthApiLoad();
+                    });
+                };
+
+                document.body.appendChild(script);
+            }
+        })(document, "https://accounts.google.com/gsi/client");
+
+        // Load Google API (Picker SDK)
+        ((document, url) => {
+            if (!document.getElementById("gapi-sdk")) {
+                const script = document.createElement("script");
+                script.id = "gapi-sdk";
+                script.src = url;
+                script.async = true;
+                script.defer = true;
+
+                script.onload = () => {
+                    console.log("gapi loaded ✅");
+                    gapi.load("picker", { callback: Files.onGoogleDrivePickerApiLoad });
+                };
+
+                document.body.appendChild(script);
+            }
         })(document, GoogleDriveJS_URL);
+    };
 
-        
-    },
-
-    Files.loadAdobeExpress = function(clientId) {
+    Files.loadAdobeExpress = function(appName, clientId) {
         var CCEverywhere;
         ((document, url) => {
             const script = document.createElement("script");
@@ -583,7 +666,7 @@ var Files = new (function ()
 
                 CCEverywhere  = await window.CCEverywhere.initialize({
                     clientId: clientId,
-                    appName: "AdobeExpress",
+                    appName: appName,
                 });
             };
             document.body.appendChild(script);

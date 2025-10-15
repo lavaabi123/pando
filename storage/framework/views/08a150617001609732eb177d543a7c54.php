@@ -5,7 +5,7 @@ $query = DB::table('accounts')->where('status', 1);
 if ($teamId) $query->where('team_id', $teamId);
 
 if (!empty($accounts) && is_array($accounts)) {
-    $query->whereIn("id", $accounts);
+    //$query->whereIn("id", $accounts);
 }
 
 $channels = $query->get();

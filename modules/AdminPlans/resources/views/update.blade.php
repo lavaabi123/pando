@@ -112,7 +112,7 @@
                     <div class="col-md-6">
                         <div class="mb-4">
                             <label for="name" class="form-label">{{ __('Price') }}</label>
-                            <input class="form-control" name="price" id="price" type="number" value="{{ $result->price ?? 0 }}">
+                            <input class="form-control" name="price" id="price" type="float" value="{{ $result->price ?? 0 }}">
                         </div>
                     </div>
                     <div class="col-md-6">

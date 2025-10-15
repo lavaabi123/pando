@@ -124,7 +124,8 @@ class PaymentController extends Controller
             'plan_desc'  => $plan->desc,
             'amount'     => $calculatePayment['total'],
             'currency'   => get_option("currency", "USD"),
-            'description'=> "New Payment",
+            'title'      => $plan->name,
+            'description'=> $plan->desc,
             'return_url' => route('payment.success', ['gateway' => $gateway_name]),
             'cancel_url' => route('payment.cancel', ['gateway' => $gateway_name])
         ];
@@ -169,6 +170,18 @@ class PaymentController extends Controller
         $result = null;
 
         try {
+            if ($request->isMethod('post')) {
+                $queryData = collect($request->post())
+                    ->except(['module', 'team', 'team_id'])
+                    ->toArray();
+
+                $queryString = http_build_query($queryData);
+                $url = route('payment.success', ['gateway' => $payment_gateway]) . '?' . $queryString;
+
+                header("Location: {$url}");
+                exit(0);
+            }
+
             if ($isRecurring) {
                 RecurringPayment::setGateway($gateway_id);
                 $msg = __("Your subscription is being processed. It will be activated as soon as we receive confirmation from the payment gateway.");
@@ -198,6 +211,18 @@ class PaymentController extends Controller
 
     public function cancel(Request $request, $payment_gateway)
     {
+        if ($request->isMethod('post')) {
+            $queryData = collect($request->post())
+                ->except(['module', 'team', 'team_id'])
+                ->toArray();
+
+            $queryString = http_build_query($queryData);
+            $url = route('payment.cancel', ['gateway' => $payment_gateway]) . '?' . $queryString;
+
+            header("Location: {$url}");
+            exit(0);
+        }
+
         return view('payment::payment_failed', []);
     }
 

@@ -26,8 +26,7 @@
 
     <?php echo Script::globals(); ?>
 
-    <link rel="stylesheet" href="<?php echo e(theme_public_asset('css/main.css')); ?>">
-	<link rel="stylesheet" href="<?php echo e(theme_public_asset('css/custom.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(theme_public_asset('css/main.css')); ?>?version=9.0.3">
 
     <?php echo $__env->yieldContent('head_embed_code'); ?>
 </head>
@@ -35,6 +34,21 @@
     <div class="loading">
         <div class="d-flex justify-content-center align-items-center hp-100">
             <div class="loader"></div>
+        </div>
+    </div>
+
+    <div id="drag-overlay">
+        <div class="overlay-box">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h2 class="mb-2"><?php echo e(__('Drag & Drop your files here')); ?></h2>
+            <p class="mb-0 text-muted">
+                <?php echo e(__('Supported formats:')); ?>
+
+                <span class="text-uppercase">
+                    <?php echo e(get_option('file_allowed_file_types', 'jpeg,gif,png,jpg,webp,mp4,csv,pdf,mp3,wmv,json')); ?>
+
+                </span>
+            </p>
         </div>
     </div>
 
@@ -113,7 +127,7 @@
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/lazysizes/lazysizes.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/datatables/datatables.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/fullcalendar/index.global.min.js')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>"></script>
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=9.0.3"></script>
     <?php echo $__env->yieldContent('script'); ?>
     <?php echo Script::renderJs(); ?>
 

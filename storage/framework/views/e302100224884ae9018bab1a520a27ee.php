@@ -21,6 +21,14 @@
             </div>
 
             <div class="d-flex flex-grow-1 justify-content-between wp-100">
+				<ul class="top-menu d-flex align-items-center mb-0 ms-4">
+					<li><a class="icons active" href="#"><?php echo file_get_contents(public_path('img/post.svg')); ?></a></li>
+					<li><a class="icons" href="#"><?php echo file_get_contents(public_path('img/notification.svg')); ?></a></li>
+					<li><a class="icons" href="#"><?php echo file_get_contents(public_path('img/add.svg')); ?></a></li>
+					<li><a class="icons" href="#"><?php echo file_get_contents(public_path('img/note.svg')); ?></a></li>
+					<li><a class="icons" href="#"><?php echo file_get_contents(public_path('img/inbox.svg')); ?></a></li>
+				</ul>
+				
                 <?php $__currentLoopData = \HeaderManager::getHeaderItems('center'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $headerItem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php
                         $isVisible = $headerItem['visible'] ?? fn() => true;

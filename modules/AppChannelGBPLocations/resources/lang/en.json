@@ -28,5 +28,7 @@
     "Google Business Profile location": "Google Business Profile location",
     "Your name": "Your name",
     "Google Business Profile: The media file is missing, invalid, or not an image.": "Google Business Profile: The media file is missing, invalid, or not an image.",
-    "Google Business Profile: Action link is required for call to action": "Google Business Profile: Action link is required for call to action"
+    "Google Business Profile: Action link is required for call to action": "Google Business Profile: Action link is required for call to action",
+    "To use Google Business Profile, you must first configure the client ID, client secret, and API key.": "To use Google Business Profile, you must first configure the client ID, client secret, and API key.",
+    "Could not connect to Google Business API: ": "Could not connect to Google Business API: "
 }

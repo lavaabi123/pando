@@ -12,9 +12,15 @@
 	                </span>
 	                <input name="keyword" placeholder="{{ __('Enter keyword') }}" type="text">
 	                <select class="max-w-120 border-start ps-3" name="source">
-	                	@foreach(SearchMedia::services() as $key => $value)
-	                	<option value="{{ $key }}">{{ $value }}</option>
-	                	@endforeach
+	                	@php $services = SearchMedia::services(); @endphp
+
+                        @if(empty($services))
+                            <option value="">{{ __('No provider enabled') }}</option>
+                        @else
+                            @foreach($services as $key => $value)
+                                <option value="{{ $key }}">{{ $value }}</option>
+                            @endforeach
+                        @endif
 	                </select>
 	                <button class="btn btn-dark btl-r-0 bbl-r-0">{{ __('Search') }}</button>
 	            </div>

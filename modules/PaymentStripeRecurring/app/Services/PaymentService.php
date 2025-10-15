@@ -229,15 +229,26 @@ class PaymentService implements RecurringPaymentInterface
 
 	    $object = $event->data->object;
 	    $subscriptionId = $object->subscription ?? $object->id ?? null;
+	    $transactionId  = $object->payment_intent ?? $object->charge ?? $object->id;
 
-	    $plan = $object->plan ?? null;
-	    if (!$plan && isset($object->lines->data[0]->plan)) {
-	        $plan = $object->lines->data[0]->plan;
-	    }
-	    $currency = $plan->currency ?? null;
-	    $amount = isset($plan->amount)
-	        ? (isZeroDecimalCurrency($currency) ? $plan->amount : $plan->amount / 100)
-	        : null;
+	    $plan = null;
+
+		if (isset($object->plan)) {
+		    $plan = $object->plan;
+		}
+
+		if (!$plan && isset($object->lines->data[0]->price)) {
+		    $plan = $object->lines->data[0]->price;
+		}
+
+		if (!$plan && isset($object->lines->data[0]->plan)) {
+		    $plan = $object->lines->data[0]->plan;
+		}
+
+		// Ưu tiên lấy từ invoice object
+		$amountData = $this->extractStripeAmountAndCurrency($object);
+		$amount     = $amountData['amount'];
+		$currency   = $amountData['currency'];
 
 	    $metadata = $object->metadata ?? (object)[];
 	    $userId = $metadata->user_id ?? null;
@@ -270,13 +281,13 @@ class PaymentService implements RecurringPaymentInterface
 
 	    switch ($event->type) {
 	        case 'invoice.payment_succeeded':
-	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, 1, 1);
+	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, $transactionId, 1, 1);
 	            break;
 	        case 'invoice.payment_failed':
-	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, 0, 0);
+	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, null, 0, 0);
 	            break;
 	        case 'customer.subscription.deleted':
-	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, 2, 0);
+	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, null, 2, 0);
 	            break;
 	        case 'customer.subscription.updated':
 	            $status    = $object->status ?? null;
@@ -286,12 +297,41 @@ class PaymentService implements RecurringPaymentInterface
 	                'canceled' => 2,
 	                'unpaid'   => 2,
 	            ];
-	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, $statusMap[$status] ?? 0, 0);
+	            \RecurringPayment::updateSubscriptionStatus($subscriptionId, null, $statusMap[$status] ?? 0, 0);
 	            break;
 	    }
 
 	    return response()->json(['status' => 'success'], 200);
 	}
 
+	public function extractStripeAmountAndCurrency($object) {
+	    $currency = $object->currency ?? null;
+	    $amount   = null;
+
+	    foreach (['amount_paid', 'amount_due', 'total'] as $field) {
+	        if (isset($object->$field)) {
+	            $rawAmount = $object->$field;
+	            $amount = round(isZeroDecimalCurrency($currency) ? $rawAmount : $rawAmount / 100, 2);
+	            return compact('amount', 'currency');
+	        }
+	    }
+
+	    $line = $object->lines->data[0] ?? null;
+	    if ($line) {
+	        if (isset($line->price)) {
+	            $currency  = $line->price->currency ?? $currency;
+	            $rawAmount = $line->price->unit_amount ?? null;
+	        } elseif (isset($line->plan)) {
+	            $currency  = $line->plan->currency ?? $currency;
+	            $rawAmount = $line->plan->amount ?? null;
+	        }
+
+	        if ($rawAmount !== null) {
+	            $amount = round(isZeroDecimalCurrency($currency) ? $rawAmount : $rawAmount / 100, 2);
+	        }
+	    }
+
+	    return compact('amount', 'currency');
+	}
 
 }

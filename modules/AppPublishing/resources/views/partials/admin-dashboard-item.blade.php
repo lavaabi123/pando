@@ -22,8 +22,8 @@
     $statusGrowth = $reportStat['status_growth'];
     $totalPosts   = $reportStat['total_posts'];
     $totalGrowth  = $reportStat['total_growth'];
-    $successTotal = $statusCounts[5] ?? 0;
-    $failedTotal  = $statusCounts[4] ?? 0;
+    $successTotal = $statusCounts[4] ?? 0;
+    $failedTotal  = $statusCounts[5] ?? 0;
 
     $processingTotal = $report['status_counts'][3] ?? 0;
     $processingGrowth = $report['status_growth'][3] ?? 0;

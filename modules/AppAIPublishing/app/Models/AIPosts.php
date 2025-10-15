@@ -137,6 +137,7 @@ class AIPosts extends Model
     {
         $posts = self::query()
             ->where("time_post", "<=", time())
+            ->where("status", 1)
             ->orderByDesc('changed')
             ->limit($numberRecords)
             ->get();

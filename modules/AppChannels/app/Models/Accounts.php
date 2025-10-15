@@ -16,4 +16,9 @@ class Accounts extends Model
     {
         return $this->hasMany(\Modules\AppPublishing\Models\Posts::class, 'account_id');
     }
+
+    public function scopeByTeam($query, $teamId)
+    {
+        return $query->where('team_id', $teamId);
+    }
 }

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Payment\Http\Controllers\PaymentController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('payment')->group(function () {
@@ -18,4 +19,6 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 Route::middleware(['web'])->group(function () {
     Route::post('/payment/webhook/{gateway}', [PaymentController::class, 'webhook'])->name('payment.webhook');
+    Route::post('/payment/success/{gateway}', [PaymentController::class, 'success'])->withoutMiddleware([VerifyCsrfToken::class])->name('payment.success');
+    Route::post('/payment/cancel/{gateway}', [PaymentController::class, 'cancel'])->withoutMiddleware([VerifyCsrfToken::class])->name('payment.cancel');
 });

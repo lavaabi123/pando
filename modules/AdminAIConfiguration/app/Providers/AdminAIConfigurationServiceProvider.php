@@ -3,7 +3,10 @@
 namespace Modules\AdminAIConfiguration\Providers;
 
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Schema\Blueprint;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -13,7 +16,6 @@ class AdminAIConfigurationServiceProvider extends ServiceProvider
     use PathNamespace;
 
     protected string $name = 'AdminAIConfiguration';
-
     protected string $nameLower = 'adminaiconfiguration';
 
     /**
@@ -36,6 +38,12 @@ class AdminAIConfigurationServiceProvider extends ServiceProvider
         \Credit::addCreditRates($this->name, [
             "view" => "credit-rates"
         ]);
+
+        // 👇 Nếu bảng chưa có thì tạo mới
+        $this->createAiModelsTableIfNotExists();
+
+        // 👇 Nếu bảng rỗng thì import model mặc định từ AIService
+        $this->importAiModelsIfEmpty();
     }
 
     /**
@@ -47,28 +55,9 @@ class AdminAIConfigurationServiceProvider extends ServiceProvider
         $this->app->register(RouteServiceProvider::class);
     }
 
-    /**
-     * Register commands in the format of Command::class
-     */
-    protected function registerCommands(): void
-    {
-        // $this->commands([]);
-    }
+    protected function registerCommands(): void {}
+    protected function registerCommandSchedules(): void {}
 
-    /**
-     * Register command Schedules.
-     */
-    protected function registerCommandSchedules(): void
-    {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
-    }
-
-    /**
-     * Register translations.
-     */
     public function registerTranslations(): void
     {
         $langPath = resource_path('lang/modules/'.$this->nameLower);
@@ -82,9 +71,6 @@ class AdminAIConfigurationServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register config.
-     */
     protected function registerConfig(): void
     {
         $relativeConfigPath = config('modules.paths.generator.config.path');
@@ -106,9 +92,6 @@ class AdminAIConfigurationServiceProvider extends ServiceProvider
         }
     }
 
-    /**
-     * Register views.
-     */
     public function registerViews(): void
     {
         $viewPath = resource_path('views/modules/'.$this->nameLower);
@@ -122,9 +105,6 @@ class AdminAIConfigurationServiceProvider extends ServiceProvider
         Blade::componentNamespace($componentNamespace, $this->nameLower);
     }
 
-    /**
-     * Get the services provided by the provider.
-     */
     public function provides(): array
     {
         return [];
@@ -138,7 +118,57 @@ class AdminAIConfigurationServiceProvider extends ServiceProvider
                 $paths[] = $path.'/modules/'.$this->nameLower;
             }
         }
-
         return $paths;
+    }
+
+    /**
+     * Nếu bảng ai_models chưa tồn tại thì tạo mới
+     */
+    private function createAiModelsTableIfNotExists(): void
+    {
+        if (!Schema::hasTable('ai_models')) {
+            Schema::create('ai_models', function (Blueprint $table) {
+                $table->id();
+                $table->string('id_secure', 50)->nullable()->unique();
+                $table->string('provider');       // openai, claude, gemini, deepseek...
+                $table->string('model_key');      // gpt-4o, gpt-5, claude-haiku...
+                $table->string('name');           // Friendly name
+                $table->string('category')->default('text'); 
+                $table->string('type')->nullable(); 
+                $table->boolean('is_active')->default(true);
+                $table->string('api_type')->default('chat')
+                      ->comment('API endpoint type: chat, responses, audio, image, video, embedding...');
+                $table->json('api_params')->nullable()
+                      ->comment('Custom API params mapping, e.g., {"max_tokens":"max_output_tokens"}');
+                $table->json('meta')->nullable();
+                $table->timestamps();
+                $table->unique(['provider', 'model_key', 'category']);
+            });
+
+            \Log::info('[AdminAIConfiguration] Created table ai_models automatically.');
+        }
+    }
+
+    /**
+     * Nếu bảng ai_models rỗng thì import models từ AIService
+     */
+    private function importAiModelsIfEmpty(): void
+    {
+        if (!Schema::hasTable('ai_models')) {
+            return;
+        }
+
+        if (DB::table('ai_models')->count() > 0) {
+            return; // bảng đã có data
+        }
+
+        try {
+            $models = \AI::getLatestModels();
+            \AI::syncModels($models);
+
+            \Log::info('[AdminAIConfiguration] Auto-imported AI models because table was empty.');
+        } catch (\Exception $e) {
+            \Log::error('[AdminAIConfiguration] Auto import failed: ' . $e->getMessage());
+        }
     }
 }

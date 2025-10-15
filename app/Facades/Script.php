@@ -70,11 +70,48 @@ class Script extends Facade
 
     protected static function renderCss(): string
     {
-        return collect(Core::loadModuleAssets()['css'])->map(fn($css) => "<link rel=\"stylesheet\" href=\"{$css}\">")->implode("\n");
+        $assets = Core::loadModuleAssets()['css'] ?? [];
+
+        return collect($assets)
+            ->filter() // loại null/empty
+            ->unique() // loại trùng lặp
+            ->map(function ($css) {
+                $version = file_exists(public_path($css))
+                    ? filemtime(public_path($css))
+                    : config('app.asset_version', time());
+
+                return sprintf(
+                    '<link rel="stylesheet" href="%s?v=%s">',
+                    e($css),
+                    $version
+                );
+            })
+            ->implode("\n");
     }
 
-    protected static function renderJs(): string
+    protected static function renderJs(bool $defer = true, bool $async = false): string
     {
-        return collect(Core::loadModuleAssets()['js'])->map(fn($js) => "<script src=\"{$js}\"></script>")->implode("\n");
+        $assets = Core::loadModuleAssets()['js'] ?? [];
+
+        return collect($assets)
+            ->filter()
+            ->unique()
+            ->map(function ($js) use ($defer, $async) {
+                $version = file_exists(public_path($js))
+                    ? filemtime(public_path($js))
+                    : config('app.asset_version', time());
+
+                $attrs = [];
+                if ($defer) $attrs[] = 'defer';
+                if ($async) $attrs[] = 'async';
+
+                return sprintf(
+                    '<script src="%s?v=%s" %s></script>',
+                    e($js),
+                    $version,
+                    implode(' ', $attrs)
+                );
+            })
+            ->implode("\n");
     }
 }

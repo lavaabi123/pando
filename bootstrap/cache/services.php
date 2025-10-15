@@ -38,15 +38,16 @@
     34 => 'NunoMaduro\\Collision\\Adapters\\Laravel\\CollisionServiceProvider',
     35 => 'Termwind\\Laravel\\TermwindServiceProvider',
     36 => 'Nwidart\\Modules\\LaravelModulesServiceProvider',
-    37 => 'Pest\\Laravel\\PestServiceProvider',
-    38 => 'SocialiteProviders\\Manager\\ServiceProvider',
-    39 => 'Yajra\\DataTables\\ButtonsServiceProvider',
-    40 => 'Yajra\\DataTables\\EditorServiceProvider',
-    41 => 'Yajra\\DataTables\\ExportServiceProvider',
-    42 => 'Yajra\\DataTables\\FractalServiceProvider',
-    43 => 'Yajra\\DataTables\\HtmlServiceProvider',
-    44 => 'Yajra\\DataTables\\DataTablesServiceProvider',
-    45 => 'App\\Providers\\AppServiceProvider',
+    37 => 'OpenAI\\Laravel\\ServiceProvider',
+    38 => 'Pest\\Laravel\\PestServiceProvider',
+    39 => 'SocialiteProviders\\Manager\\ServiceProvider',
+    40 => 'Yajra\\DataTables\\ButtonsServiceProvider',
+    41 => 'Yajra\\DataTables\\EditorServiceProvider',
+    42 => 'Yajra\\DataTables\\ExportServiceProvider',
+    43 => 'Yajra\\DataTables\\FractalServiceProvider',
+    44 => 'Yajra\\DataTables\\HtmlServiceProvider',
+    45 => 'Yajra\\DataTables\\DataTablesServiceProvider',
+    46 => 'App\\Providers\\AppServiceProvider',
   ),
   'eager' => 
   array (
@@ -238,6 +239,9 @@
     'Laravel\\Sail\\Console\\PublishCommand' => 'Laravel\\Sail\\SailServiceProvider',
     'Laravel\\Socialite\\Contracts\\Factory' => 'SocialiteProviders\\Manager\\ServiceProvider',
     'command.tinker' => 'Laravel\\Tinker\\TinkerServiceProvider',
+    'OpenAI\\Client' => 'OpenAI\\Laravel\\ServiceProvider',
+    'OpenAI\\Contracts\\ClientContract' => 'OpenAI\\Laravel\\ServiceProvider',
+    'openai' => 'OpenAI\\Laravel\\ServiceProvider',
   ),
   'when' => 
   array (
@@ -290,6 +294,9 @@
     array (
     ),
     'Laravel\\Tinker\\TinkerServiceProvider' => 
+    array (
+    ),
+    'OpenAI\\Laravel\\ServiceProvider' => 
     array (
     ),
     'SocialiteProviders\\Manager\\ServiceProvider' => 

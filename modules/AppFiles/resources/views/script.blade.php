@@ -1,6 +1,6 @@
 <script type="text/javascript">
 @if(get_option('file_addobe_express_status') && Access::permission('appfiles.image_editor'))
-	Files.loadAdobeExpress('{{ get_option('file_addobe_express_api_key') }}');
+	Files.loadAdobeExpress('{{ get_option('file_addobe_express_app_name') }}', '{{ get_option('file_addobe_express_api_key') }}');
 @endif
 @if(get_option('file_onedrive_status') && Access::permission('appfiles.onedrive'))
 	Files.openOneDriveActions('{{ get_option('file_onedrive_api_key') }}');

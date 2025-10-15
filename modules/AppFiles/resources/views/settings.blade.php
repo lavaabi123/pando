@@ -183,7 +183,12 @@
                         </div>
 
                         <div class="mb-4">
-                            <label for="name" class="form-label">{{ __('API Key') }}</label>
+                            <label for="file_addobe_express_app_name" class="form-label">{{ __('App name') }}</label>
+                            <input class="form-control" name="file_addobe_express_app_name" id="file_addobe_express_app_name" type="text" value="{{ get_option("file_addobe_express_app_name", "") }}">
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="file_addobe_express_api_key" class="form-label">{{ __('API Key') }}</label>
                             <input class="form-control" name="file_addobe_express_api_key" id="file_addobe_express_api_key" type="text" value="{{ get_option("file_addobe_express_api_key", "") }}">
                         </div>
                     </div>
