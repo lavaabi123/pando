@@ -1,8 +1,7 @@
 <div class="header">
     <div class="container1 px-3 hp-100">
         <div class="hp-100 d-flex justify-content-between">
-            <div class="d-flex justify-content-between align-items-center">	
-			
+            <div class="d-flex justify-content-between align-items-center">			
                 <div class="d-block d-sm-block d-md-none">
                     <button class="btn btn-icon btn-light sidebar-toggle">
                         <i class="fa-light fa-chevron-right"></i>
@@ -21,6 +20,14 @@
             </div>
 
             <div class="d-flex flex-grow-1 justify-content-between wp-100">
+				<ul class="top-menu d-flex align-items-center mb-0 ms-4">
+					<li><a class="icons active" href="#">{!! file_get_contents(public_path('img/post.svg')) !!}</a></li>
+					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/notification.svg')) !!}</a></li>
+					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/add.svg')) !!}</a></li>
+					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/note.svg')) !!}</a></li>
+					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/inbox.svg')) !!}</a></li>
+				</ul>
+				
                 @foreach(\HeaderManager::getHeaderItems('center') as $headerItem)
                     @php
                         $isVisible = $headerItem['visible'] ?? fn() => true;
