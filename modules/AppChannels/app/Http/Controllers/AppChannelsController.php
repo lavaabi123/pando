@@ -18,12 +18,12 @@ class AppChannelsController extends Controller
     public function __construct(Request $request)
     {
         $this->maxChannels = \Access::permission('max_channels');
-        $this->totalAccounts = Accounts::where('team_id',  $request->team_id)->where('status', '!=', 0)->count();
+        $this->totalAccounts = Accounts::where('team_id',  $request->team_id)->where("brand_id", session('brand_id'))->where('status', '!=', 0)->count();
     }
 
     public function index(Request $request)
     {
-        $total = Accounts::where("team_id", $request->team_id)->count();
+        $total = Accounts::where("team_id", $request->team_id)->where("brand_id", session('brand_id'))->count();
         
         return view('appchannels::index', [
             'total' => $total,
@@ -39,7 +39,7 @@ class AppChannelsController extends Controller
         $per_page = 30;
 
         $wheres = ["team_id" => $request->team_id ];
-
+		$wheres = ["brand_id" => session('brand_id') ];
         if($module_name != "" && Module::find($module_name))
         {
             $wheres['module'] = $module_name;

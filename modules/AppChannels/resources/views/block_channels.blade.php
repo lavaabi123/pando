@@ -1,11 +1,11 @@
 @php
 $permission = $permission ?? 'appchannels';
 $teamId = request()->team_id;
-$query = DB::table('accounts')->where('status', 1);
+$query = DB::table('accounts')->where('status', 1)->where('brand_id',session('brand_id'));
 if ($teamId) $query->where('team_id', $teamId);
 
 if (!empty($accounts) && is_array($accounts)) {
-    //$query->whereIn("id", $accounts);
+    $query->whereIn("id", $accounts);
 }
 
 $channels = $query->get();

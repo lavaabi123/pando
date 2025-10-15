@@ -1,10 +1,17 @@
 @php
     $optionSidebarSmall = get_option('backend_sidebar_type', 1);
     $hasSidebarSmall = UserInfo::getDataUser("sidebar-small", $optionSidebarSmall);
+	
+	// Theme + colors (session first, then user, then defaults)
+    $theme      = session('theme', optional(auth()->user())->theme ?? 'light');          // 'light' | 'dark'
+    $primaryHex = session('primary_color', optional(auth()->user())->primary_color ?? '#7ec476');
+    $secHex     = session('sec_color',     optional(auth()->user())->secondary_color ?? '#fd8107');
+    $pClass = 'primary-'.ltrim($primaryHex, '#');
+    $sClass = 'secondary-'.ltrim($secHex, '#');
 @endphp
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  dir="{{ Language::getCurrent('dir') }}" class="{{ $hasSidebarSmall ? 'sidebar-small' : ($optionSidebarSmall == 1 ? 'sidebar-small' : '') }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}"  dir="{{ Language::getCurrent('dir') }}" class="{{ $hasSidebarSmall ? 'sidebar-small' : ($optionSidebarSmall == 1 ? 'sidebar-small' : '') }}  {{ $pClass }} {{ $sClass }}" data-theme="{{ $theme }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -23,11 +30,20 @@
     @yield('css')
     {!! Script::renderCss() !!}
     {!! Script::globals() !!}
-    <link rel="stylesheet" href="{{ theme_public_asset('css/main.css') }}?version=9.0.3">
+    <link rel="stylesheet" href="{{ theme_public_asset('css/main.css') }}?version=9.0.3">	
+	<link rel="stylesheet" href="{{ theme_public_asset('css/custom.css') }}?version=1.0.0">
 
     @yield('head_embed_code')
+	<style>
+    :root{
+      --d-primary:   {{ $primaryHex }};
+      --d-secondary: {{ $secHex }};
+      --sp-primary:  {{ $primaryHex }};
+      --sp-secondary:{{ $secHex }};
+    }
+    </style>
 </head>
-<body>
+<body class="{{ $theme }}">
     <div class="loading">
         <div class="d-flex justify-content-center align-items-center hp-100">
             <div class="loader"></div>
@@ -122,7 +138,8 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/lazysizes/lazysizes.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
-    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=9.0.3"></script>
+    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=9.0.3"></script>	
+    <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.3') }}"></script>
     @yield('script')
     {!! Script::renderJs() !!}
     {!! Script::renderRaw() !!}

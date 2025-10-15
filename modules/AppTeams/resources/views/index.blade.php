@@ -12,7 +12,7 @@
         </a>
         <a class="btn btn-dark btn-sm actionItem" href="{{ module_url('invite') }}" data-popup="inviteModal" >
             <span><i class="fa-light fa-plus"></i></span>
-            <span>{{ __('Invite') }}</span>
+            <span>{{ __('Add New Team Member') }}</span>
         </a>
     </x-sub-header>
 @endsection
