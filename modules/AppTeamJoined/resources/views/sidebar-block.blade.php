@@ -4,7 +4,7 @@
 @endphp
 
 @if($teams && count($teams))
-<div class="menu-item mb-2">
+<div class="menu-item mb-2 d-none">
     <label class="form-label mb-1">{{ __("Select Team") }}</label>
     <div class="input-group">
      	<select class="form-select actionChange" name="team_id" data-url="{{ route("app.teams.joined.open_team") }}">

@@ -53,28 +53,7 @@ if ((int)$role === 2) {
 }
 @endphp
 
-			<select class="form-control" id="brandSelect"
-        data-control="select2"
-        data-change-url="{{ route('brand.change') }}"
-        data-placeholder="Select Brand">
-    <option></option> {{-- allows placeholder --}}
-    @if(!empty($brands))
-        @foreach($brands as $brand)
-            <option
-                value="{{ $brand->id }}"
-                {{ session('brand_id') == $brand->id ? 'selected' : '' }}
 
-                {{-- optional UX data --}}
-                data-avatar="{{ $brand->logo_url ?? '' }}"
-                data-badge="{{ $brand->unread_count ?? '' }}"
-                data-fav="{{ !empty($brand->is_favorite) ? 1 : 0 }}"
-                data-recent="{{ !empty($brand->is_recent) ? 1 : 0 }}"
-            >
-                {{ $brand->name }}
-            </option>
-        @endforeach
-    @endif
-</select>
 
             <div class="d-flex justify-content-between align-items-center">			
                 <div class="d-block d-sm-block d-md-none">
@@ -114,7 +93,28 @@ if ((int)$role === 2) {
 
                 @yield('header_center')
             </div>
+			<select class="form-control" id="brandSelect"
+					data-control="select2"
+					data-change-url="{{ route('brand.change') }}"
+					data-placeholder="Select Brand">
+				<option></option> {{-- allows placeholder --}}
+				@if(!empty($brands))
+					@foreach($brands as $brand)
+						<option
+							value="{{ $brand->id }}"
+							{{ session('brand_id') == $brand->id ? 'selected' : '' }}
 
+							{{-- optional UX data --}}
+							data-avatar="{{ $brand->logo_url ?? '' }}"
+							data-badge="{{ $brand->unread_count ?? '' }}"
+							data-fav="{{ !empty($brand->is_favorite) ? 1 : 0 }}"
+							data-recent="{{ !empty($brand->is_recent) ? 1 : 0 }}"
+						>
+							{{ $brand->name }}
+						</option>
+					@endforeach
+				@endif
+			</select>
             <div class="d-flex align-items-center gap-16">
                 @yield('header_end')
 

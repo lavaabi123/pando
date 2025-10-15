@@ -124,10 +124,54 @@ class AppTeamsController extends Controller
     {
         $teamId = $request->team_id;
         $team = Teams::where('id', $teamId)->firstOrFail();
+		$userId = session('user_id');
+		// Get role once (role=2 => Super Admin)
+		$role = DB::table('users')->where('id', $userId)->value('role');
+		if ((int)$role === 2) {
+			// SUPER ADMIN: see every brand
+			$brands = DB::table('brands')
+				->orderBy('name')
+				->get();
+		} else {
+			// Determine if this user is a team member and get effective team_id
+			$memberRow = DB::table('team_members')
+				->select('team_id')
+				->where('uid', $userId)
+				->first();
+
+			$isMember = (bool) $memberRow;
+			$teamId   = $isMember ? $memberRow->team_id : $userId;
+
+			if (!$isMember) {
+				// TEAM ADMIN: see all brands in this team
+				$brands = DB::table('brands')
+					->where('team_id', $teamId)
+					->orderBy('name')
+					->get();
+			} else {
+				// TEAM MEMBER: see brands created by me OR assigned to me (within team)
+				$brands = DB::table('brands as b')
+					->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
+						$join->on('ub.brand_id', '=', 'b.id')
+							 ->where('ub.user_id', '=', $userId)
+							 ->where('ub.team_id', '=', $teamId);
+					})
+					->where('b.team_id', $teamId)
+					->where(function ($q) use ($userId) {
+						$q->where('b.user_id', $userId)      // created by me
+						  ->orWhereNotNull('ub.user_id');     // assigned to me
+					})
+					->select('b.*')
+					->distinct()
+					->orderBy('b.name')
+					->get();
+			}
+		}
         return response()->json([
             "status" => 1,
             "data" => view(module("key").'::invite', [
-                "team" => $team
+                "team" => $team,
+                "brands" => $brands,
             ])->render()
         ]);
     }
@@ -549,6 +593,18 @@ class AppTeamsController extends Controller
                 'permissions'  => json_encode($member_permissions),
                 'status'       => 1
             ]);
+			$brandIds = $request->input('brands', []);
+			 DB::table('user_brands')
+            ->where('user_id', $member->uid)
+            ->when(count($brandIds) > 0, fn($q) => $q->whereNotIn('brand_id', $brandIds))
+            ->delete();
+
+			foreach ($brandIds as $bid) {
+				DB::table('user_brands')->updateOrInsert(
+					['user_id' => $member->uid,'ids' => rand_string() , 'brand_id' => $bid],
+					['role_id' => 1, 'team_id' => $member->team_id]
+				);
+			}
 
             /*$inviter = auth()->user();
 

@@ -30,14 +30,14 @@
                                 </a>
                             </li>
                             @if($member->status == 0)
-                                <li>
+                                <!--<li>
                                     <a class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 actionItem"
                                         href="{{ module_url('resend-invite') }}"
                                         data-id="{{ $member->id_secure }}">
                                         <span class="size-16 me-1 text-center"><i class="fa-light fa-envelope"></i></span>
-                                        <!--<span class="fw-5">{{ __("Resend Invite") }}</span>-->
+                                        <span class="fw-5">{{ __("Resend Invite") }}</span>
                                     </a>
-                                </li>
+                                </li>-->
                             @endif
                             <li><hr class="dropdown-divider"></li>
                             <li>
@@ -59,7 +59,7 @@
                     {{ $member->user->email ?? $member->pending ?? '' }}
                 </div>
             </div>
-            <div class="d-flex align-items-center justify-content-between fw-5">
+            <!--<div class="d-flex align-items-center justify-content-between fw-5">
                 <div class="fs-12 d-flex align-items-center gap-8">
                     <span>
                         @if($member->status == 0)
@@ -76,7 +76,7 @@
                     </span>
                 </div>
                 
-            </div>
+            </div>-->
         </div>
     </div>
 @endforeach

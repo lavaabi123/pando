@@ -29,13 +29,6 @@
  						<div class="mb-2">
 		                  	<label for="email" class="form-label">{{ __('User Email') }}</label>
 	                     	<input placeholder="{{ __('Enter user email address') }}" class="form-control" name="email" id="email" type="email" value="" required>
-							<div class="mb-4">
-								<label for="email" class="form-label mb-1">{{ __('Team Member Email') }}</label>
-								<div class="fs-12 text-gray-600 mb-2">
-									{{ __('We will send an invite to this email address.') }}
-								</div>
-								<input placeholder="{{ __('Enter team member email address') }}" class="form-control" name="email" id="email" type="email" value="">
-							</div>
 						</div>
 						<!-- Password -->
 						<div class="mb-2">
@@ -47,16 +40,16 @@
 							<label for="password_confirmation" class="form-label">{{ __("Confirm Password") }}</label>
 							<input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="{{ __('Re-enter your password') }}" required>
 						</div>
-		                <div class="mb-4">
+		                <div class="mb-4 per-all">
 							<label for="name" class="form-label">{{ __('Select permissions') }}</label>
 							<div class="mb-3">
 					            <div class="input-group">
 					                <div class="form-control">
 				                     	<i class="fa-light fa-magnifying-glass"></i>
-				                     	<input placeholder="{{ __("Search") }}" type="text" class="search-input" value="">
+				                     	<input placeholder="{{ __("Search") }}" type="text" data-search="search-per" class="search-input" value="">
 					                </div>
 					                <span class="btn btn-icon btn-input min-w-55">
-					                    <input class="form-check-input checkbox-all" type="checkbox" value="">
+					                    <input class="form-check-input checkbox-all" data-checkbox-parent=".per-all" type="checkbox" value="">
 					                </span>
 					            </div>
 							</div>
@@ -71,7 +64,7 @@
 
 			                  			@if(Module::find($value['key']) && $value['key'] != 'appteams')
 			                  				
-				                  			<li class="search-list border-start-2 border-primary">
+				                  			<li class="search-per search-list border-start-2 border-primary">
 				                  				<input type="hidden" name="team_permissions[]" value="{{ $value['key'] }}">
 						                        <div class="list-group-item border-start-0 border-end-0 border-top-0 d-flex justify-content-between align-items-center gap-8">
 											  		<label  class="mt-1 fs-14 d-flex align-items-center gap-8 text-truncate" for="id_{{ $value['key'] }}">
@@ -125,6 +118,53 @@
 		                </div>
 
  					</div>
+					
+                        <div class="mb-4 brand-all">
+                            <label for="name" class="form-label">{{ __('Assign Brands') }}</label>
+                            <div class="mb-3">
+                                <div class="input-group">
+                                    <div class="form-control">
+                                        <i class="fa-light fa-magnifying-glass"></i>
+                                        <input placeholder="{{ __("Search") }}" type="text" data-search="search-brand" class="search-input" value="">
+                                    </div>
+                                    <span class="btn btn-icon btn-input min-w-55">
+                                        <input class="form-check-input checkbox-all" data-checkbox-parent=".brand-all" type="checkbox" value="">
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="mb-4 pf-0 b-r-4">
+                                @if($brands)
+								@php
+                                    $selected_brands =  [];
+                                @endphp
+                                <ul class="list-group border overflow-y-scroll max-h-350">
+                                    @foreach($brands as $value)
+
+                                            <li class="search-brand border-start-2 border-primary">
+                                                <input type="hidden" name="brand_permissions[]" value="{{ $value->id }}">
+                                                <div class="list-group-item border-start-0 border-end-0 border-top-0 d-flex justify-content-between align-items-center gap-8">
+                                                    <label  class="mt-1 fs-14 d-flex align-items-center gap-8 text-truncate" for="id_{{ $value->id }}">
+                                                        <div class="size-26 min-w-26 border b-r-6 d-flex justify-content-between align-items-center text-center bg-gray-100 text-success fs-14 border-success-200">
+                                                            <i class="fa-light fa-key wp-100"></i>
+                                                        </div>
+                                                        <div class="text-truncate">
+                                                            <div class="fs-12 lh-sm mb-1 fw-5">{{ $value->name }}</div>
+                                                        </div>
+                                                    </label>
+                                                    <span>
+                                                        <input class="form-check-input checkbox-item" type="checkbox" name="brands[]" value="{{ $value->id }}" id="id_{{ $value->id }}" {{ __( in_array($value->id, $selected_brands)?"checked":"" ) }} >
+                                                    </span>
+                                                </div>
+                                            </li>
+
+                                    @endforeach
+                                </ul>
+                                @else
+                                <div class="empty"></div>
+                                @endif
+                            </div>
+                        </div>
+
  				</div>
 
 			</div>
