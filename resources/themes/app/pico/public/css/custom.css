@@ -1,5 +1,12 @@
 /* resources/css/custom.css */
-
+:root {
+	--white: #ffffff;
+	--black: #000000;
+}
+a {
+    text-decoration: none;
+    transition: all 0.4s;
+}
 /** Color Picker Start **/
 [type='color'] {
     -moz-appearance: none;
@@ -47,7 +54,37 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 .gradient-bg {
     background: linear-gradient(90deg, var(--d-primary), var(--d-secondary));
 }
+.main-services .icons {
+    background: var(--white);
+    width: 20%;
+    border-radius: 20px;
+    padding: 20px;
+    font-size: 14px;
+    font-family: "Open Sans";
+	min-height: 167px;
+    min-width: 167px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
 .main-services .icons svg {
-    width: 75px;
-    height: 75px;
+    width: 55%;
+    /*height: 75px;*/
+	aspect-ratio: 1 / 1;
+}
+.main-services:hover .icons:first-child {
+    transform: none;
+	margin-right: 0;
+}
+.main-services .icons:hover {
+    margin: 0px 15px 0px 15px;
+    transform: scale(1.13);
+}
+.main-services .icons:first-child {
+    transform: scale(1.13);
+    margin-right: 15px;
+}
+.main-services .icons:first-child:first-child:hover {
+    transform: scale(1.13);
+    margin: 0px 15px 0px 0px;
 }

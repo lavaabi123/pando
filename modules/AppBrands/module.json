@@ -1,0 +1,23 @@
+{
+    "name": "AppBrands",
+    "alias": "appbrands",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppBrands\\Providers\\AppBrandsServiceProvider"
+    ],
+    "files": [],
+    "permission": false,
+    "menu": {
+        "uri": "app/brands",
+        "role": "client",
+        "platform": 1,
+        "section": "top",
+        "tab_id": 20,
+        "position": 600,
+        "name": "Brands",
+        "color": "#2bfdc4",
+        "icon": "fa-light fa-users-medical"
+    }
+}

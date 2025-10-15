@@ -100,5 +100,6 @@
     "AppAnalyticsInstagram": true,
     "AppAnalyticsLinkedin": true,
     "AppAnalyticsTiktok": true,
-    "AppAnalyticsYoutube": true
+    "AppAnalyticsYoutube": true,
+    "AppBrands": true
 }

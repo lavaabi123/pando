@@ -578,7 +578,7 @@ var Main = new (function ()
         $(document).on("change", ".checkbox-all", function(){
             var parentSelector = $(this).data("checkbox-parent");
             var $parent = parentSelector ? $(this).closest(parentSelector) : $(document);
-
+console.log($parent);
             var isChecked = $(this).prop("checked");
 
             $parent.find("input.checkbox-item:checkbox").prop('checked', isChecked);

@@ -4,6 +4,7 @@ namespace Modules\AppTeams\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -141,11 +142,103 @@ class AppTeamsController extends Controller
         $team = Teams::where('id', $teamId)->firstOrFail();
         $member = TeamMembers::where("id_secure", $id)->with('user')->firstOrFail();
         $tmember = User::where('id', $member->uid)->firstOrFail();
+		
+		$userId = session('user_id');
+		// Get role once (role=2 => Super Admin)
+		$role = DB::table('users')->where('id', $userId)->value('role');
+		if ((int)$role === 2) {
+			// SUPER ADMIN: see every brand
+			$brands = DB::table('brands')
+				->orderBy('name')
+				->get();
+		} else {
+			// Determine if this user is a team member and get effective team_id
+			$memberRow = DB::table('team_members')
+				->select('team_id')
+				->where('uid', $userId)
+				->first();
+
+			$isMember = (bool) $memberRow;
+			$teamId   = $isMember ? $memberRow->team_id : $userId;
+
+			if (!$isMember) {
+				// TEAM ADMIN: see all brands in this team
+				$brands = DB::table('brands')
+					->where('team_id', $teamId)
+					->orderBy('name')
+					->get();
+			} else {
+				// TEAM MEMBER: see brands created by me OR assigned to me (within team)
+				$brands = DB::table('brands as b')
+					->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
+						$join->on('ub.brand_id', '=', 'b.id')
+							 ->where('ub.user_id', '=', $userId)
+							 ->where('ub.team_id', '=', $teamId);
+					})
+					->where('b.team_id', $teamId)
+					->where(function ($q) use ($userId) {
+						$q->where('b.user_id', $userId)      // created by me
+						  ->orWhereNotNull('ub.user_id');     // assigned to me
+					})
+					->select('b.*')
+					->distinct()
+					->orderBy('b.name')
+					->get();
+			}
+		}
+		
+		$userId = $member->uid;
+		// Get role once (role=2 => Super Admin)
+		$role = DB::table('users')->where('id', $userId)->value('role');
+		if ((int)$role === 2) {
+			// SUPER ADMIN: see every brand
+			$user_brands = DB::table('brands')
+				->orderBy('name')
+				->get();
+		} else {
+			// Determine if this user is a team member and get effective team_id
+			$memberRow = DB::table('team_members')
+				->select('team_id')
+				->where('uid', $userId)
+				->first();
+
+			$isMember = (bool) $memberRow;
+			$teamId   = $isMember ? $memberRow->team_id : $userId;
+
+			if (!$isMember) {
+				// TEAM ADMIN: see all brands in this team
+				$user_brands = DB::table('brands')
+					->where('team_id', $teamId)
+					->orderBy('name')
+					->get();
+			} else {
+				// TEAM MEMBER: see brands created by me OR assigned to me (within team)
+				$user_brands = DB::table('brands as b')
+					->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
+						$join->on('ub.brand_id', '=', 'b.id')
+							 ->where('ub.user_id', '=', $userId)
+							 ->where('ub.team_id', '=', $teamId);
+					})
+					->where('b.team_id', $teamId)
+					->where(function ($q) use ($userId) {
+						$q->where('b.user_id', $userId)      // created by me
+						  ->orWhereNotNull('ub.user_id');     // assigned to me
+					})
+					->select('b.*')
+					->distinct()
+					->orderBy('b.name')
+					->get();
+			}
+		}
+		
+		
         return response()->json([
             "status" => 1,
             "data" => view(module("key").'::update', [
                 "member" => $member,
                 "team" => $team,
+                "brands" => $brands,
+				"user_brands" => $user_brands,
                 "tmember" => $tmember
             ])->render()
         ]);
@@ -154,94 +247,134 @@ class AppTeamsController extends Controller
     /**
      * Update an existing member's permissions and status
      */
-    public function save(Request $request)
-    {
-		
-        $id = $request->input("id");
-        // Find the member
-        $member = TeamMembers::where('id_secure', $id)->firstOrFail();
-        $team = Teams::where('id', $member->team_id)->firstOrFail();
-		
-        $request->validate([
-            'fullname'  => 'required|string|max:255',
-			'username'  => [
-                'required',
-                'string',
-                'min:5',
-                'max:64',
-                'regex:/^\S+$/',
-                'unique:users,username',
-            ],
-            'email'  => 'required|email|unique:users,email,' . $member->uid,			
-            'password'         => ['nullable', 'min:6', 'confirmed'],
-            'id'               => 'required',
-            'permissions'      => 'required|array|min:1',
-            'team_permissions' => 'nullable|array',
-            'status'           => 'nullable|integer',
-        ], [
-            'fullname.required' => __('Full name is required.'),
-            'fullname.min'      => __('Full name must be at least :min characters.'),
-            'username.required' => __('Username is required.'),
-            'username.min'      => __('Username must be at least :min characters.'),
-            'username.regex'    => __('Username must not contain spaces.'),
-            'email.required'    => __('Email is required.'),
-            'email.email'       => __('Please provide a valid email address.'),
-            'email.unique'      => __('This email is already taken.'),
-            'password.min'      => __('New password must be at least :min characters.', ['min' => 6]),
-            'password.confirmed'=> __('Password confirmation does not match.'),
-         ]);
+  public function save(Request $request)
+{
+    $idSecure = $request->input('id'); // nullable on "add"
+    $member   = TeamMembers::where('id_secure', $idSecure)->first();
+    $isEdit   = (bool) $member;
 
-        $selected_permissions = $request->input('permissions', []);
-        $excluded_permissions = $request->input('team_permissions', []);
+    // If editing, we know the team from the member; otherwise require it from request
+    $teamId = $isEdit ? $member->team_id : $request->input('team_id');
+    $team   = Teams::where('id', $teamId)->firstOrFail();
 
-        $all_permissions = $team->permissions ?? [];
+    // Build validation rules dynamically
+    $userIdToIgnore = $isEdit ? $member->uid : null;
 
-        // 1. Get permissions that are in selected_permissions
-        $member_permissions = [];
-        foreach ($all_permissions as $item) {
-            if (
-                $item['key'] !== 'appteams' &&          // Bỏ qua appteams (chữ thường)
-                in_array($item['key'], $selected_permissions)
-            ) {
-                $member_permissions[] = $item;
-            }
+    $rules = [
+        'fullname'  => ['required', 'string', 'max:255'],
+        'username'  => [
+            'required', 'string', 'min:5', 'max:64', 'regex:/^\S+$/',
+            Rule::unique('users', 'username')->ignore($userIdToIgnore),
+        ],
+        'email'     => [
+            'required', 'email',
+            Rule::unique('users', 'email')->ignore($userIdToIgnore),
+        ],
+        'password'  => [$isEdit ? 'nullable' : 'required', 'min:6', 'confirmed'],
+        // on edit "id" is required; on add it's not
+        'id'               => [$isEdit ? 'required' : 'nullable'],
+        'permissions'      => ['required','array','min:1'],
+        'team_permissions' => ['nullable','array'],
+        'status'           => ['nullable','integer'],
+        'brands'           => ['array'],           // brand ids
+        'role_id'          => ['nullable','integer'],
+        'team_id'          => [$isEdit ? 'nullable' : 'required','integer','exists:teams,id'],
+    ];
+
+    $messages = [
+        'fullname.required' => __('Full name is required.'),
+        'username.required' => __('Username is required.'),
+        'username.min'      => __('Username must be at least :min characters.'),
+        'username.regex'    => __('Username must not contain spaces.'),
+        'email.required'    => __('Email is required.'),
+        'email.email'       => __('Please provide a valid email address.'),
+        'email.unique'      => __('This email is already taken.'),
+        'password.min'      => __('New password must be at least :min characters.', ['min' => 6]),
+        'password.confirmed'=> __('Password confirmation does not match.'),
+    ];
+
+    $validated = $request->validate($rules, $messages);
+
+    // Build member permission payload (keep your existing logic)
+    $selected   = $request->input('permissions', []);
+    $excluded   = $request->input('team_permissions', []);
+    $allPerms   = $team->permissions ?? [];
+
+    $memberPerms = [];
+    foreach ($allPerms as $item) {
+        if ($item['key'] !== 'appteams' && in_array($item['key'], $selected)) {
+            $memberPerms[] = $item;
         }
-
-        // 2. Add missing permissions not in excluded_permissions and not already added
-        foreach ($all_permissions as $item) {
-            if (
-                $item['key'] !== 'appteams' &&          // Bỏ qua appteams (chữ thường)
-                !in_array($item['key'], $selected_permissions) &&
-                !in_array($item['key'], $excluded_permissions)
-            ) {
-                $member_permissions[] = $item;
-            }
+    }
+    foreach ($allPerms as $item) {
+        if ($item['key'] !== 'appteams'
+            && !in_array($item['key'], $selected)
+            && !in_array($item['key'], $excluded)) {
+            $memberPerms[] = $item;
         }
-
-        // Update permissions and status (if provided)
-        $member->permissions = json_encode($member_permissions);
-
-        if ($request->filled('status')) {
-            $member->status = $request->input('status');
-        }
-
-        $member->save();
-		
-		$user = User::findOrFail($member->uid);
-        $values = [
-            'fullname' => $request->input('fullname'),
-            'username' => $request->input('username'),
-            'email'    => $request->input('email'),
-            'changed'  => time()
-        ];
-		$user->update($values);
-
-        return response()->json([
-            "status" => 1,
-            "message" => __('Member updated successfully!')
-        ]);
     }
 
+    $brandIds = $request->input('brands', []);
+    $roleId   = $request->input('role_id') ?? ($isEdit ? $member->role_id : null) ?? 1;
+
+    DB::transaction(function () use ($isEdit, $member, $teamId, $memberPerms, $request, $brandIds, $roleId) {
+        // Upsert User
+        if ($isEdit) {
+            $user = User::findOrFail($member->uid);
+            $user->fullname = $request->input('fullname');
+            $user->username = $request->input('username');
+            $user->email    = $request->input('email');
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->input('password'));
+            }
+            $user->changed = time();
+            $user->save();
+
+            // Update TeamMember
+            $member->permissions = json_encode($memberPerms);
+            if ($request->filled('status')) {
+                $member->status = (int) $request->input('status');
+            }
+            $member->save();
+        } else {
+            // Create User + TeamMember
+            $user = User::create([
+                'fullname' => $request->input('fullname'),
+                'username' => $request->input('username'),
+                'email'    => $request->input('email'),
+                'password' => Hash::make($request->input('password')),
+                'changed'  => time(),
+            ]);
+
+            $member = TeamMembers::create([
+                'id_secure'   => \Str::uuid()->toString(),
+                'uid'         => $user->id,
+                'team_id'     => $teamId,
+                'role_id'     => $roleId,
+                'permissions' => json_encode($memberPerms),
+                'status'      => (int) ($request->input('status') ?? 1),
+            ]);
+        }
+
+        // Sync user_brands (remove unselected, upsert selected)
+        DB::table('user_brands')
+            ->where('user_id', $member->uid)
+            ->when(count($brandIds) > 0, fn($q) => $q->whereNotIn('brand_id', $brandIds))
+            ->delete();
+
+        foreach ($brandIds as $bid) {
+            DB::table('user_brands')->updateOrInsert(
+                ['user_id' => $member->uid,'ids' => rand_string() , 'brand_id' => $bid],
+                ['role_id' => $roleId, 'team_id' => $member->team_id]
+            );
+        }
+    });
+
+    return response()->json([
+        'status'  => 1,
+        'message' => __('Member updated successfully!'),
+    ]);
+}
     /**
      * Change status (enable/disable) for one or multiple members
      */

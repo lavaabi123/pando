@@ -34,25 +34,29 @@
     $pClass = 'primary-'.ltrim($primaryHex, '#');
     $sClass = 'secondary-'.ltrim($secHex, '#');
 ?>
+<div class="d-flex justify-content-between">
+	<div class=" fw-6 text-black fs-22">
+		<i class="fa-solid fa-face-smile text-primary"></i> Hi Royalink!
+	</div>
+	<div class="colors d-flex align-items-center gap-1">
+		<div class="form-check form-check-inline ml-10">
+		  <input class="form-check-input" type="checkbox" name="theme_color" id="theme_color_dark" value="dark" <?php echo e($theme === 'dark' ? 'checked' : ''); ?>>
+		  <label class="form-check-label" for="theme_color_dark">Dark Theme</label>
+		</div>
 
-<div class=" fw-6 text-black fs-22">
-				<i class="fa-solid fa-face-smile text-primary"></i> Hi Royalink!
-			</div>
-<div class="colors d-flex align-items-center gap-1">
-    <div class="form-check form-check-inline ml-10">
-      <input class="form-check-input" type="checkbox" name="theme_color" id="theme_color_dark" value="dark" <?php echo e($theme === 'dark' ? 'checked' : ''); ?>>
-      <label class="form-check-label" for="theme_color_dark">Dark Theme</label>
-    </div>
+		<input type="color" id="colorPicker" value="<?php echo e($primaryHex); ?>" class="colorPicker w-25 h-20" role="button">
+		<input type="color" id="colorPicker_sec" value="<?php echo e($secHex); ?>" class="colorPicker w-25 h-20" role="button">
 
-    <input type="color" id="colorPicker" value="<?php echo e($primaryHex); ?>" class="colorPicker w-25 h-20" role="button">
-    <input type="color" id="colorPicker_sec" value="<?php echo e($secHex); ?>" class="colorPicker w-25 h-20" role="button">
+		<i class="fa-solid fa-undo colorPicker_reset fs-20" data-bs-toggle="tooltip" data-bs-placement="bottom"
+		   title="Reset" role="button" aria-label="Reset"></i>
+	</div>
+</div>
 
-    <i class="fa-solid fa-undo colorPicker_reset fs-20" data-bs-toggle="tooltip" data-bs-placement="bottom"
-       title="Reset" role="button" aria-label="Reset"></i>
-  </div>
-	<div class="gradient-bg d-flex gap-12 main-services text-center p-5 justify-content-xl-evenly">
+
+<div class="gradient-bg main-services text-center my-4 p-4 b-r-20 justify-content-xl-evenly">
+	<div class="p-4 d-flex gap-25 justify-content-xl-evenly">
 		<a class="icons" href="https://itspando.com/post">
-			<div class="mb-3">
+			<div class="mb-3" style="fill:var(--d-primary);">
 				<?php echo file_get_contents(public_path('img/post.svg')); ?>
 
 			</div>
@@ -97,7 +101,7 @@
 			</div>
 		</a>
 		<a class="icons" href="https://itspando.com">
-			<div class="mb-3">
+			<div class="mb-3" style="fill:var(--d-secondary);">
 				<?php echo file_get_contents(public_path('img/note.svg')); ?>
 
 			</div>
@@ -106,6 +110,7 @@
 			</div>
 		</a>
 	</div>
+</div>
 	
 <div class="row">
 

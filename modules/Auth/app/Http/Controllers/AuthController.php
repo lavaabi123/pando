@@ -276,7 +276,8 @@ class AuthController extends Controller
                     $user = Auth::user();
                     $user->last_login = time();
                     $user->save();
-
+					session(['brand_id' => $user->recent_brand_id]);
+					session(['user_id' => $user->id]);
                     if($user->language){
                         \Cookie::queue('locale', $user->language, 60 * 24 * 365 * 10);
                     }

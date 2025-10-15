@@ -34,10 +34,6 @@
             </div>
 
             <div class="d-flex align-items-center gap-16">
-			<select>
-<option>Select Brand</option>
-<option>Pando</option>
-</select>
                 @yield('header_end')
 
                 @foreach(\HeaderManager::getHeaderItems('end') as $headerItem)
