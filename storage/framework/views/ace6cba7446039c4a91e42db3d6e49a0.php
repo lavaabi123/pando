@@ -111,12 +111,106 @@
 		</a>
 	</div>
 </div>
-	
+
+<div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
+    <div class="card-body py-4 px-4">
+		<div class="text-black mb-3">
+			<h5 class="fw-6">Daily Alerts!</h5>
+			<p class="mb-0">Stay up to date on all your accounts!</p>
+		</div>
+		<div class="row row-gap-4">
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Accounts with no scheduled posts today</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">1</h3>
+					<h5 class="mb-0 fw-bold">Accounts with inbox not cleared for more than 24 hours</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">7</h3>
+					<h5 class="mb-0 fw-bold">Posts pending approval</h5>
+				</div>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
+    <div class="card-body py-4 px-4">
+		<div class="text-black mb-3">
+			<h5 class="fw-6">Today! October 14, 2025</h5>
+			<p class="mb-0">What’s happening on your accounts today!</p>
+		</div>
+		<div class="row row-gap-4">
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">4</h3>
+					<h5 class="mb-0 fw-bold">Amount of total scheduled posts</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Inbox Messages</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Total Reviews</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">4</h3>
+					<h5 class="mb-0 fw-bold">Number of New People added</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Total failed posts</h5>
+				</div>
+				</a>
+			</div>
+			<div class="col-md-4">
+				<a href="#">
+				<div class="card p-3 d-flex flex-row align-items-center">
+					<h3 class="count text-primary mb-0">0</h3>
+					<h5 class="mb-0 fw-bold">Holidays</h5>
+				</div>
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+
 <div class="row">
 
     <div class="col-md-8 mb-4">
         <div class="card shadow-sm position-relative overflow-hidden hp-100">
-            <div class="card-body py-4 px-5">
+            <div class="card-body py-4 px-4">
                 <div class="d-flex flex-wrap align-items-center gap-4 justify-content-between hp-100">
                     <div class="d-flex flex-column flex-grow-1 hp-100 justify-content-between">
                         <div>
