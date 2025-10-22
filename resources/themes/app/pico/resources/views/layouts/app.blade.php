@@ -31,7 +31,7 @@
     {!! Script::renderCss() !!}
     {!! Script::globals() !!}
     <link rel="stylesheet" href="{{ theme_public_asset('css/main.css') }}?version=9.0.3">	
-	<link rel="stylesheet" href="{{ theme_public_asset('css/custom.css') }}?version=1.0.0">
+	<link rel="stylesheet" href="{{ theme_public_asset('css/custom.css') }}?version=1.0.1">
 
     @yield('head_embed_code')
 	<style>
@@ -111,6 +111,17 @@
     @include('partials.footer')
 
     <!-- FOOTER END -->
+	
+	<script>
+		window.appRoutes = {
+			brandChange: "{{ route('app.brands.change') }}",
+			brandToggleFavorite: "{{ route('app.brands.toggle-favorite') }}",
+			brandCreate: "{{ route('app.brands.create') }}",
+			brandEdit: "{{ url('app.brands.update') }}", // We'll append /{id}/edit in JS
+			brandDelete: "{{ url('app.brands') }}" // We'll append /{id} in JS
+		};
+	</script>
+
     <script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/maps/modules/map.js"></script>
@@ -139,7 +150,7 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=9.0.3"></script>	
-    <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.3') }}"></script>
+    <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.16') }}"></script>
     @yield('script')
     {!! Script::renderJs() !!}
     {!! Script::renderRaw() !!}

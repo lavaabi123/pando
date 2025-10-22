@@ -21,5 +21,9 @@ Route::group(["prefix" => "app"], function () {
         Route::post('save', [AppBrandsController::class, 'save'])->name('app.brands.save');
         Route::post('list', [AppBrandsController::class, 'list'])->name('app.brands.list');
         Route::post('destroy', [AppBrandsController::class, 'destroy'])->name('app.brands.destroy');
+		
+		Route::post('change', [AppBrandsController::class, 'changeBrand'])->name('app.brands.change');
+		Route::post('toggle_favorite', [AppBrandsController::class, 'toggleFavorite'])->name('app.brands.toggle-favorite');
+		Route::post('create', [AppBrandsController::class, 'createBrand'])->name('app.brands.create');
     });
 });

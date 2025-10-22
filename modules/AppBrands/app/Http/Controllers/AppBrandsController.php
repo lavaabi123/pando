@@ -203,4 +203,149 @@ if ((int)$role === 2) {
 
         return ms(['status' => 1, 'message' => __('Succeed')]);
     }
+	
+	public function changeBrand(Request $request)
+	{
+		try {
+			$request->validate([
+				'brand_id' => 'required|integer|exists:brands,id'
+			]);
+			
+			$userId = auth()->id();
+			$brandId = $request->input('brand_id');
+			
+			// Get brand details
+			$brand = DB::table('brands')
+				->select('id', 'name', 'image')
+				->where('id', $brandId)
+				->first();
+			
+			if (!$brand) {
+				return response()->json([
+					'success' => false,
+					'message' => 'Brand not found'
+				], 404);
+			}
+			
+			// Update or insert recent history (UPSERT approach)
+			// This prevents duplicates by updating if exists, inserting if not
+			DB::table('brands_recents')
+				->updateOrInsert(
+					[
+						'user_id' => $userId,
+						'brand_id' => $brandId
+					],
+					[
+						'changed' => time(),
+						'created' => DB::raw('COALESCE(created, ' . time() . ')')
+					]
+				);
+			
+			// Optional: Keep only last 20 recent brands per user
+			$this->cleanupOldRecents($userId, 20);
+			
+			// Set session data
+			session([
+				'brand_id' => $brand->id,
+				'brand_name' => $brand->name,
+				'brand_image' => $brand->image
+			]);
+			
+			return response()->json([
+				'success' => true,
+				'status' => 1,
+				'message' => 'Brand changed successfully',
+				'brand' => [
+					'id' => $brand->id,
+					'name' => $brand->name,
+					'image' => $brand->image
+				]
+			]);
+			
+		} catch (\Exception $e) {
+			\Log::error('Brand change error: ' . $e->getMessage());
+			
+			return response()->json([
+				'success' => false,
+				'message' => $e->getMessage()
+			], 500);
+		}
+	}
+
+	/**
+	 * Keep only the most recent N brands per user
+	 */
+	private function cleanupOldRecents($userId, $limit = 20)
+	{
+		// Get IDs of records to keep (most recent N)
+		$keepIds = DB::table('brands_recents')
+			->where('user_id', $userId)
+			->orderBy('changed', 'desc')
+			->limit($limit)
+			->pluck('id');
+		
+		// Delete older records
+		if ($keepIds->isNotEmpty()) {
+			DB::table('brands_recents')
+				->where('user_id', $userId)
+				->whereNotIn('id', $keepIds)
+				->delete();
+		}
+	}
+	
+	public function toggleFavorite(Request $request)
+	{
+		try {
+			// Validate the request
+			$request->validate([
+				'brand_id' => 'required|integer|exists:brands,id'
+			]);
+			
+			$userId = auth()->id(); // Get authenticated user ID
+			$brandId = $request->input('brand_id');
+			
+			// Check if favorite already exists
+			$favorite = DB::table('brands_favorites')
+				->where('user_id', $userId)
+				->where('brand_id', $brandId)
+				->first();
+			
+			if ($favorite) {
+				// Remove from favorites
+				DB::table('brands_favorites')
+					->where('user_id', $userId)
+					->where('brand_id', $brandId)
+					->delete();
+				
+				$isFavorite = false;
+				$message = 'Removed from favorites';
+			} else {
+				// Add to favorites
+				DB::table('brands_favorites')->insert([
+					'user_id' => $userId,
+					'brand_id' => $brandId,
+					'changed' => now()->timestamp,
+					'created' => now()->timestamp,
+				]);
+				
+				$isFavorite = true;
+				$message = 'Added to favorites';
+			}
+			
+			return response()->json([
+				'status' => 'success',
+				'success' => true,
+				'message' => $message,
+				'is_favorite' => $isFavorite
+			]);
+			
+		} catch (\Exception $e) {
+			return response()->json([
+				'status' => 'error',
+				'success' => false,
+				'message' => 'Failed to toggle favorite'
+			], 500);
+		}
+	}
+	
 }

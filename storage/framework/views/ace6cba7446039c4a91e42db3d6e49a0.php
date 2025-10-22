@@ -206,10 +206,24 @@
 	</div>
 </div>
 
+<div class="card position-relative overflow-hidden hp-100 mb-4">
+    <div class="card-body d-flex align-items-center justify-content-between py-4 px-4">
+		<div class="text-black">
+			<h5 class="fw-6 d-flex icon-primary"><span><?php echo file_get_contents(public_path('img/Reports.svg')); ?></span> Post Analytics</h5>
+		</div>
+		<div class="align-self-end">
+			<select class="form-control">
+				<option>All Platform</option>
+				<option>Facebook</option>
+			</select>
+		</div>
+	</div>
+</div>
+
 <div class="row">
 
     <div class="col-md-8 mb-4">
-        <div class="card shadow-sm position-relative overflow-hidden hp-100">
+        <div class="card position-relative overflow-hidden hp-100">
             <div class="card-body py-4 px-4">
                 <div class="d-flex flex-wrap align-items-center gap-4 justify-content-between hp-100">
                     <div class="d-flex flex-column flex-grow-1 hp-100 justify-content-between">
@@ -277,7 +291,7 @@
 	?>
 
 	<div class="col-md-4 mb-4">
-	    <div class="card shadow-sm p-4 hp-100 d-flex flex-column">
+	    <div class="card p-4 hp-100 d-flex flex-column">
 	        <div class="d-flex align-items-center mb-3 gap-12">
 	            <span class="d-inline-flex align-items-center justify-content-center fs-28 b-r-12 size-50 bg-warning-100 border border-warning-200 text-warning">
 	                <i class="fa-light fa-gem"></i>

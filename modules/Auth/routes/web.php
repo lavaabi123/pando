@@ -46,7 +46,6 @@ Route::group(['middleware' => 'web'], function () {
 
         Route::get('view-as-user/{any}', [AuthController::class, 'viewAsUser'])->name("auth.view_as_user");
         Route::get('leave-impersonate', [AuthController::class, 'leaveImpersonate'])->name("auth.leave_impersonate");
-		Route::post('/brand/change', [BrandController::class, 'changeBrand'])->name('brand.change');
     });
 });
 

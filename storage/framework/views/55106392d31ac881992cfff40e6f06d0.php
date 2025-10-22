@@ -1,5 +1,5 @@
 <div class="sidebar hide-scroll">
-
+ 
     <div class="sidebar-header d-flex align-items-center px-3 position-relative">
         <div class="min-h-22px overflow-hidden">
             <a href="<?php echo e(session('login_as') == "admin" ? route("admin.dashboard") : route("app.dashboard")); ?>">
@@ -16,81 +16,7 @@
             <a href="javascript:void(0)" class="d-flex align-items-center justify-content-center border-1 px-2 rounded size-24 fs-14 d-block text-gray-500"><i class="fa-duotone fa-arrow-right-to-line"></i></a>
         </div>
     </div>
-<?php
-use Illuminate\Support\Facades\DB;
 
-$userId = session('user_id');
-
-// Get role once (role=2 => Super Admin)
-$role = DB::table('users')->where('id', $userId)->value('role');
-
-if ((int)$role === 2) {
-    // SUPER ADMIN: see every brand
-    $brands = DB::table('brands')
-        ->orderBy('name')
-        ->get();
-
-} else {
-    // Determine if this user is a team member and get effective team_id
-    $memberRow = DB::table('team_members')
-        ->select('team_id')
-        ->where('uid', $userId)
-        ->first();
-
-    $isMember = (bool) $memberRow;
-    $teamId   = $isMember ? $memberRow->team_id : $userId;
-
-    if (!$isMember) {
-        // TEAM ADMIN: see all brands in this team
-        $brands = DB::table('brands')
-            ->where('team_id', $teamId)
-            ->orderBy('name')
-            ->get();
-    } else {
-        // TEAM MEMBER: see brands created by me OR assigned to me (within team)
-        $brands = DB::table('brands as b')
-            ->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
-                $join->on('ub.brand_id', '=', 'b.id')
-                     ->where('ub.user_id', '=', $userId)
-                     ->where('ub.team_id', '=', $teamId);
-            })
-            ->where('b.team_id', $teamId)
-            ->where(function ($q) use ($userId) {
-                $q->where('b.user_id', $userId)      // created by me
-                  ->orWhereNotNull('ub.user_id');     // assigned to me
-            })
-            ->select('b.*')
-            ->distinct()
-            ->orderBy('b.name')
-            ->get();
-    }
-}
-?>
-
-			<select class="form-control" id="brandSelect"
-        data-control="select2"
-        data-change-url="<?php echo e(route('brand.change')); ?>"
-        data-placeholder="Select Brand">
-    <option></option> 
-    <?php if(!empty($brands)): ?>
-        <?php $__currentLoopData = $brands; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $brand): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <option
-                value="<?php echo e($brand->id); ?>"
-                <?php echo e(session('brand_id') == $brand->id ? 'selected' : ''); ?>
-
-
-                
-                data-avatar="<?php echo e($brand->logo_url ?? ''); ?>"
-                data-badge="<?php echo e($brand->unread_count ?? ''); ?>"
-                data-fav="<?php echo e(!empty($brand->is_favorite) ? 1 : 0); ?>"
-                data-recent="<?php echo e(!empty($brand->is_recent) ? 1 : 0); ?>"
-            >
-                <?php echo e($brand->name); ?>
-
-            </option>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    <?php endif; ?>
-</select>
     <div class="menu d-flex flex-column align-items-lg-center flex-row-auto" id="accordionMenu">
         
         <?php if( isset( $sidebar['top'] ) ): ?>
@@ -109,7 +35,7 @@ if ((int)$role === 2) {
                     <?php endif; ?>
                 
                     <?php if($value['tab_id'] != $current_tab && $current_tab): ?>
-                        <div class="menu-item h-1 bg-gray-200 my-2"> </div>
+                        <div class="menu-item h-1 nav-line my-2"> </div>
 
                         <?php if( isset( $value['tab_name'] ) ): ?>
                         <div class="menu-item pt-2">

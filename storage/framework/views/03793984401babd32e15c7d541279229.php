@@ -1,11 +1,11 @@
 <?php
     $optionSidebarSmall = get_option('backend_sidebar_type', 1);
     $hasSidebarSmall = UserInfo::getDataUser("sidebar-small", $optionSidebarSmall);
-    // Theme + colors (session first, then user, then defaults)
+	
+	// Theme + colors (session first, then user, then defaults)
     $theme      = session('theme', optional(auth()->user())->theme ?? 'light');          // 'light' | 'dark'
     $primaryHex = session('primary_color', optional(auth()->user())->primary_color ?? '#7ec476');
     $secHex     = session('sec_color',     optional(auth()->user())->secondary_color ?? '#fd8107');
-
     $pClass = 'primary-'.ltrim($primaryHex, '#');
     $sClass = 'secondary-'.ltrim($secHex, '#');
 ?>
@@ -33,12 +33,11 @@
 
     <?php echo Script::globals(); ?>
 
-    <link rel="stylesheet" href="<?php echo e(theme_public_asset('css/main.css')); ?>">
-	<link rel="stylesheet" href="<?php echo e(theme_public_asset('css/custom.css')); ?>">
+    <link rel="stylesheet" href="<?php echo e(theme_public_asset('css/main.css')); ?>?version=9.0.3">	
+	<link rel="stylesheet" href="<?php echo e(theme_public_asset('css/custom.css')); ?>?version=1.0.1">
 
     <?php echo $__env->yieldContent('head_embed_code'); ?>
-    
-    <style>
+	<style>
     :root{
       --d-primary:   <?php echo e($primaryHex); ?>;
       --d-secondary: <?php echo e($secHex); ?>;
@@ -51,6 +50,21 @@
     <div class="loading">
         <div class="d-flex justify-content-center align-items-center hp-100">
             <div class="loader"></div>
+        </div>
+    </div>
+
+    <div id="drag-overlay">
+        <div class="overlay-box">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <h2 class="mb-2"><?php echo e(__('Drag & Drop your files here')); ?></h2>
+            <p class="mb-0 text-muted">
+                <?php echo e(__('Supported formats:')); ?>
+
+                <span class="text-uppercase">
+                    <?php echo e(get_option('file_allowed_file_types', 'jpeg,gif,png,jpg,webp,mp4,csv,pdf,mp3,wmv,json')); ?>
+
+                </span>
+            </p>
         </div>
     </div>
 
@@ -102,6 +116,17 @@
     <?php echo $__env->make('partials.footer', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <!-- FOOTER END -->
+	
+	<script>
+		window.appRoutes = {
+			brandChange: "<?php echo e(route('app.brands.change')); ?>",
+			brandToggleFavorite: "<?php echo e(route('app.brands.toggle-favorite')); ?>",
+			brandCreate: "<?php echo e(route('app.brands.create')); ?>",
+			brandEdit: "<?php echo e(url('app.brands.update')); ?>", // We'll append /{id}/edit in JS
+			brandDelete: "<?php echo e(url('app.brands')); ?>" // We'll append /{id} in JS
+		};
+	</script>
+
     <script type="text/javascript" src="https://code.highcharts.com/highcharts.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/maps/modules/map.js"></script>
@@ -129,8 +154,8 @@
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/lazysizes/lazysizes.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/datatables/datatables.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/fullcalendar/index.global.min.js')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js?v=1.0')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js?v=1.3')); ?>"></script>
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=9.0.3"></script>	
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js?v=1.16')); ?>"></script>
     <?php echo $__env->yieldContent('script'); ?>
     <?php echo Script::renderJs(); ?>
 

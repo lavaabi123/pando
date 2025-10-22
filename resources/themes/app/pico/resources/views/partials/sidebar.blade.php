@@ -35,7 +35,7 @@
                     @endif
                 
                     @if($value['tab_id'] != $current_tab && $current_tab)
-                        <div class="menu-item h-1 bg-gray-200 my-2"> </div>
+                        <div class="menu-item h-1 nav-line my-2"> </div>
 
                         @if( isset( $value['tab_name'] ) )
                         <div class="menu-item pt-2">

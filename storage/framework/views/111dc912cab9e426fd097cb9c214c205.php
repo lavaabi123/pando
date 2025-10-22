@@ -79,10 +79,10 @@
                                 </p>
                                 <h3 class="mb-1 text-4xl text-gray-900 font-bold leading-tight">
                                     <?php if($isFreePlan): ?>
-                                        <?php echo e(Payment::price(0)); ?>
+                                        <?php echo e(price(0)); ?>
 
                                     <?php else: ?>
-                                        <?php echo e(Payment::price($plan['price'] ?? 0)); ?>
+                                        <?php echo e(price($plan['price'] ?? 0)); ?>
 
                                     <?php endif; ?>
                                     <span class="text-gray-400">/<?php echo e(strtolower($typeLabel)); ?></span>

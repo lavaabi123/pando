@@ -30,14 +30,14 @@
                                 </a>
                             </li>
                             <?php if($member->status == 0): ?>
-                                <li>
+                                <!--<li>
                                     <a class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 actionItem"
                                         href="<?php echo e(module_url('resend-invite')); ?>"
                                         data-id="<?php echo e($member->id_secure); ?>">
                                         <span class="size-16 me-1 text-center"><i class="fa-light fa-envelope"></i></span>
-                                        <!--<span class="fw-5"><?php echo e(__("Resend Invite")); ?></span>-->
+                                        <span class="fw-5"><?php echo e(__("Resend Invite")); ?></span>
                                     </a>
-                                </li>
+                                </li>-->
                             <?php endif; ?>
                             <li><hr class="dropdown-divider"></li>
                             <li>
@@ -61,7 +61,7 @@
 
                 </div>
             </div>
-            <div class="d-flex align-items-center justify-content-between fw-5">
+            <!--<div class="d-flex align-items-center justify-content-between fw-5">
                 <div class="fs-12 d-flex align-items-center gap-8">
                     <span>
                         <?php if($member->status == 0): ?>
@@ -79,7 +79,7 @@
                     </span>
                 </div>
                 
-            </div>
+            </div>-->
         </div>
     </div>
 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

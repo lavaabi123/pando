@@ -4,6 +4,15 @@
 	--black: #000000;
 	--d-red: #cb2a1f;
     --d-grey: #e9e7e7;
+	--sp-gray-100: #f5f8fa;
+    --sp-gray-200: #eff2f5;
+    --sp-gray-300: #E4E6EF;
+    --sp-gray-400: #B5B5C3;
+    --sp-gray-500: #A1A5B7;
+    --sp-gray-600: #7E8299;
+    --sp-gray-700: #5E6278;
+    --sp-gray-800: #3F4254;
+    --sp-gray-900: #181C32;
 }
 body, html {
     font-family: "Open Sans", serif;
@@ -122,8 +131,41 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 .top-menu a:hover svg, .top-menu a:focus svg, .top-menu a.active svg {
     fill: var(--white);
 }
-
-
+.header .select2-container {
+    align-self: stretch;
+	width: 237.175px !important;
+}
+.header .select2-container > span {
+    height: 100%;
+    display: flex;
+}
+.header .select2-container .select2-selection {
+	height: 100%;
+    border: none;
+    display: flex;
+    font-weight: 700;
+    border-radius: 0;
+    border-left: 1px solid #cecece;
+    border-right: 1px solid #cecece;
+    margin: 0 15px;
+}
+.header .select2-container .select2-selection .select-option-text {
+    font-weight: 700;
+    color: var(--black);
+    font-size: 14px !important;
+}
+.select2-container--bootstrap-5 .select2-search {
+	width: 450px !important;
+}
+span.select2-container.select2-container--open {
+    right: 0px !important;
+    left: auto !important;
+}
+.select2-container--bootstrap-5 .select2-dropdown {
+	margin-right: 110px;
+	border: 1px solid #cecece !important;
+    border-radius: 0;
+}
 /** SideBar **/
 .sidebar {
     background-color: #343b3b;
@@ -133,17 +175,34 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 }
 .sidebar .menu .menu-item .menu-link {
     color: var(--white);
+	padding: 0.5rem 20px;
+	font-size: 14px;
  }
 .sidebar .menu .menu-item .menu-link .menu-icon {
     color: var(--white) !important;
 }
-.sidebar .menu .menu-item .menu-link .menu-icon.text-primary {
+.sidebar .menu .menu-item .menu-link:hover, .sidebar .menu .menu-item .menu-link:hover .menu-icon {
     color: var(--d-primary) !important;
 }
-.sidebar .menu .menu-item .menu-link:hover, .sidebar .menu .menu-item .menu-link .menu-icon.text-primary:hover {
-    color: var(--d-primary);
+.sidebar .menu .menu-item .menu-link.text-primary:hover, .sidebar .menu .menu-item .menu-link.text-primary:hover .menu-icon {
+	color: var(--white) !important;
+}
+.sidebar .nav-line {
+	background: #1e2626 !important;
+    box-shadow: 0 1px 0px #4f5b5b;
+}
+a.menu-link.text-primary {
+    background: var(--d-primary);
+    border-radius: 3rem;
+    color: var(--white) !important;
 }
 /** Dashboard **/
+.sidebar {
+    width: 250px;
+}
+.main {
+    width: calc(100% - 250px);
+}
 .card {
     border-color: #dedede !important;
     box-shadow: none;
@@ -166,4 +225,40 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 .count.red {
 	border: 3px solid var(--d-red);
 	color: var(--d-red) !important;
+}
+.icon-primary {
+    gap: 10px;
+    align-items: center;
+}
+.icon-primary svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--d-primary);
+}
+.icon-with-circle {
+    padding: 6px;
+    border: 1px solid var(--sp-gray-400);
+    line-height: 1;
+    border-radius: 100%;
+    text-align: center;
+}
+.icon-with-circle svg {
+    width: 18px;
+    height: 18px;
+    fill: var(--sp-gray-400);
+}
+.form-control {
+    border-radius: 25px;
+    background: var(--white);
+}
+select.form-control {
+    background-image: linear-gradient(45deg, transparent 50%, var(--black) 50%), linear-gradient(135deg, var(--black) 50%, transparent 50%);
+    background-position: calc(100% - 17px) 50%, calc(100% - 12px) 50%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    padding-right: 30px;
+}
+/** Brand Page **/
+.channel-list label.card:hover {
+    box-shadow: 0 0 0 2px var(--d-primary) inset !important;
 }
