@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\Auth\Http\Controllers\AuthController;
-use Modules\Auth\Http\Controllers\BrandController;
 use App\Http\Middleware\Themes;
 
 /*

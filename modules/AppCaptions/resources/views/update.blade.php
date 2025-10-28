@@ -3,7 +3,7 @@
 		<form class="modal-content actionForm" action="{{ module_url("save") }}" data-call-success="Main.closeModal('captionModal'); Main.ajaxScroll(true);">
 			<input type="text" class="d-none" name="type" value="0">
 			<div class="modal-header">
-				<h1 class="modal-title fs-16">{{ __("Create caption") }}</h1>
+				<h1 class="modal-title fs-16">{{ __("Create hashtag") }}</h1>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
@@ -19,8 +19,8 @@
  					</div>
  					<div class="col-md-12">
  						<div class="mb-4">
-		                  	<label for="content" class="form-label">{{ __('Caption') }}</label>
-	                     	<textarea  class="form-control input-emoji" name="content" id="content" placeholder="{{ __('Enter caption') }}">{{ data($result, "content") }}</textarea>
+		                  	<label for="content" class="form-label">{{ __('Hashtag') }}</label>
+	                     	<textarea  class="form-control input-emoji" name="content" id="content" placeholder="{{ __('Enter hashtag') }}">{{ data($result, "content") }}</textarea>
 		                </div>
  					</div>
  				</div>

@@ -58,15 +58,15 @@
 	        <i class="fa-light fa-quote-right"></i>
 	    </span>
 	    <div class="fw-semibold fs-5 mb-2 text-gray-900">
-	        <?php echo e(__('No Captions Yet')); ?>
+	        <?php echo e(__('No Hashtags Yet')); ?>
 
 	    </div>
 	    <div class="text-body-secondary mb-4 text-center max-w-500">
-	        <?php echo e(__('Start saving your favorite captions to reuse and streamline your content creation process.')); ?>
+	        <?php echo e(__('Start saving your favorite hashtags to reuse and streamline your content creation process.')); ?>
 
 	    </div>
 	    <a class="btn btn-dark actionItem" href="<?php echo e(module_url("update")); ?>" data-popup="captionModal" data-call-success="Main.ajaxScroll(true);">
-	        <i class="fa-light fa-plus me-1"></i> <?php echo e(__('Add new caption')); ?>
+	        <i class="fa-light fa-plus me-1"></i> <?php echo e(__('Add new hashtag')); ?>
 
 	    </a>
 	</div>

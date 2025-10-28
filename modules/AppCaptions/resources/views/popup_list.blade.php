@@ -28,7 +28,7 @@
 	        </div>
 
 	        <a href="javascript:void(0);" class="card-footer d-flex align-items-center justify-content-center bg-hover-dark text-hover-white gap-8 fs-14 bbr-r-10 bbl-r-10 addToField" data-field=".post-caption" data-refresh="1" data-content="{{ $value->content }}" onclick="Main.closeOffCanvas('getCaptionOffCanvas');">
-	        	<i class="fa-light fa-plus"></i> {{ __("Use this caption") }}
+	        	<i class="fa-light fa-plus"></i> {{ __("Use this hashtag") }}
 	        </a>
 	    </label>
 	</div>

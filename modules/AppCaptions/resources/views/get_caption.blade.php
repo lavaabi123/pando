@@ -1,6 +1,6 @@
 <div class="offcanvas offcanvas-end border-start" data-bs-backdrop="false" tabindex="-1" id="getCaptionOffCanvas">
     <div class="offcanvas-header border-bottom pt-23 pb-22">
-        <div class="fw-5">{{ __("List caption") }}</div>
+        <div class="fw-5">{{ __("List hashtag") }}</div>
         <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body p-0">

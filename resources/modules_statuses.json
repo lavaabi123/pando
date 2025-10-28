@@ -103,5 +103,10 @@
     "AppAnalyticsYoutube": true,
     "AppBrands": true,
     "AdminCache": true,
-    "AppHashtags": true
+    "AppHandles": true,
+    "AppReplies": true,
+    "AppReplies.zip": true,
+    "AppHandles.zip": true,
+    "InboxModule": true,
+    "AppInbox": true
 }

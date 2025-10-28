@@ -239,11 +239,11 @@
 
                                         <h2 class="fw-bold mb-0 mt-2 fs-35">
                                             <?php if($isFreePlan): ?>
-                                                <?php echo e(Payment::price(0)); ?>
+                                                <?php echo e(price(0)); ?>
 
                                                 <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
                                             <?php else: ?>
-                                                <?php echo e(Payment::price($plan['price'] ?? 0)); ?>
+                                                <?php echo e(price($plan['price'] ?? 0)); ?>
 
                                                 <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
                                             <?php endif; ?>

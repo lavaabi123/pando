@@ -1,0 +1,23 @@
+{
+    "name": "AppReplies",
+    "alias": "appreplies",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppReplies\\Providers\\AppRepliesServiceProvider"
+    ],
+    "files": [],
+    "permission": false,
+    "menu": {
+        "uri": "app/replies",
+        "role": "client",
+        "platform": 1,
+        "section": "top",
+        "tab_id": 20,
+        "position": 600,
+        "name": "Replies",
+        "color": "#18939a",
+        "icon": "fa-light fa-message-lines"
+    }
+}

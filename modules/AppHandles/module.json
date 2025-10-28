@@ -1,0 +1,23 @@
+{
+    "name": "AppHandles",
+    "alias": "apphandles",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppHandles\\Providers\\AppHandlesServiceProvider"
+    ],
+    "files": [],
+    "permission": false,
+    "menu": {
+        "uri": "app/handles",
+        "role": "client",
+        "platform": 1,
+        "section": "top",
+        "tab_id": 20,
+        "position": 600,
+        "name": "Handles",
+        "color": "#18939a",
+        "icon": "fa-light fa-message-lines"
+    }
+}

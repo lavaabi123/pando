@@ -3,7 +3,7 @@
 		<form class="modal-content actionForm" action="<?php echo e(module_url("save")); ?>" data-call-success="Main.closeModal('captionModal'); Main.ajaxScroll(true);">
 			<input type="text" class="d-none" name="type" value="0">
 			<div class="modal-header">
-				<h1 class="modal-title fs-16"><?php echo e(__("Create caption")); ?></h1>
+				<h1 class="modal-title fs-16"><?php echo e(__("Create hashtag")); ?></h1>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
@@ -19,8 +19,8 @@
  					</div>
  					<div class="col-md-12">
  						<div class="mb-4">
-		                  	<label for="content" class="form-label"><?php echo e(__('Caption')); ?></label>
-	                     	<textarea  class="form-control input-emoji" name="content" id="content" placeholder="<?php echo e(__('Enter caption')); ?>"><?php echo e(data($result, "content")); ?></textarea>
+		                  	<label for="content" class="form-label"><?php echo e(__('Hashtag')); ?></label>
+	                     	<textarea  class="form-control input-emoji" name="content" id="content" placeholder="<?php echo e(__('Enter hashtag')); ?>"><?php echo e(data($result, "content")); ?></textarea>
 		                </div>
  					</div>
  				</div>

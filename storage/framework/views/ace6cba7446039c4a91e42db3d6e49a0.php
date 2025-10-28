@@ -55,7 +55,7 @@
 
 <div class="gradient-bg main-services text-center my-4 p-4 b-r-20 justify-content-xl-evenly">
 	<div class="p-4 d-flex gap-25 justify-content-xl-evenly">
-		<a class="icons" href="https://itspando.com/post">
+		<a class="icons" href="">
 			<div class="mb-3" style="fill:var(--d-primary);">
 				<?php echo file_get_contents(public_path('img/post.svg')); ?>
 
@@ -64,7 +64,7 @@
 				Create Post
 			</div>
 		</a>
-		<a class="icons" href="https://itspando.com/account_manager">
+		<a class="icons" href="">
 			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 75%,var(--d-secondary) 25%)">
 				<?php echo file_get_contents(public_path('img/account.svg')); ?>
 
@@ -73,7 +73,7 @@
 				Manage Accounts
 			</div>
 		</a>
-		<a class="icons" href="https://itspando.com/holidays">
+		<a class="icons" href="">
 			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 60%,var(--d-secondary) 40%)">
 				<?php echo file_get_contents(public_path('img/calender.svg')); ?>
 
@@ -82,7 +82,7 @@
 				Calender
 			</div>
 		</a>
-		<a class="icons" href="https://itspando.com/reports">
+		<a class="icons" href="">
 			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 50%,var(--d-secondary) 50%)">
 				<?php echo file_get_contents(public_path('img/Reports.svg')); ?>
 
@@ -91,7 +91,7 @@
 				Reports
 			</div>
 		</a>
-		<a class="icons" href="https://itspando.com/inbox">
+		<a class="icons" href="">
 			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 20%,var(--d-secondary) 80%)">
 				<?php echo file_get_contents(public_path('img/inbox.svg')); ?>
 
@@ -100,7 +100,7 @@
 				Inbox
 			</div>
 		</a>
-		<a class="icons" href="https://itspando.com">
+		<a class="icons" href="">
 			<div class="mb-3" style="fill:var(--d-secondary);">
 				<?php echo file_get_contents(public_path('img/note.svg')); ?>
 
