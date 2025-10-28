@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\AppInbox\Models;
+namespace Modules\Inbox\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -82,10 +82,39 @@ class Inbox extends Model
     {
         $query = DB::table('inbox as i')
             ->select([
-                'i.*',
-                't.tag_ids',
+                'i.id',
+                'i.user_id',
+                'i.account_id',
+                'i.post_id',
+                'i.conversation_id',
+                'i.media_type',
+                'i.inbox_type',
+                'i.message',
+                'i.from_name',
+                'i.to_name',
+                'i.to_user_id',
+                'i.to_type',
+                'i.from_user_id',
+                'i.from_image',
+                'i.to_image',
+                'i.message_id',
+                'i.created_time',
+                'i.brand_id',
+                'i.team_id',
+                'i.is_completed',
+                'i.is_sent',
+                'i.is_deleted',
+                'i.is_favourite',
+                'i.last_reviewed_user_id',
+                'i.last_reviewed_date',
+                'i.story',
+                'i.attachments',
+                'i.shares',
+                'i.created_at',
+                'i.updated_at',
+                DB::raw('MAX(t.tag_ids) as tag_ids'),
                 DB::raw('GROUP_CONCAT(DISTINCT t2.tag_name) AS tag_names'),
-                'u.user_ids',
+                DB::raw('MAX(u.user_ids) as user_ids'),
                 DB::raw('GROUP_CONCAT(DISTINCT u2.fullname) AS user_names')
             ])
             ->leftJoin(DB::raw('(SELECT * FROM inbox_tags_manage WHERE table_name = "inbox") as t'), 't.inbox_id', '=', 'i.id')
@@ -117,7 +146,38 @@ class Inbox extends Model
             }
         }
 
-        $query->groupBy('i.id');
+        $query->groupBy([
+            'i.id',
+            'i.user_id',
+            'i.account_id',
+            'i.post_id',
+            'i.conversation_id',
+            'i.media_type',
+            'i.inbox_type',
+            'i.message',
+            'i.from_name',
+            'i.to_name',
+            'i.to_user_id',
+            'i.to_type',
+            'i.from_user_id',
+            'i.from_image',
+            'i.to_image',
+            'i.message_id',
+            'i.created_time',
+            'i.brand_id',
+            'i.team_id',
+            'i.is_completed',
+            'i.is_sent',
+            'i.is_deleted',
+            'i.is_favourite',
+            'i.last_reviewed_user_id',
+            'i.last_reviewed_date',
+            'i.story',
+            'i.attachments',
+            'i.shares',
+            'i.created_at',
+            'i.updated_at'
+        ]);
 
         return $query->get();
     }
