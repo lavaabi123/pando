@@ -1,0 +1,904 @@
+<?php
+
+namespace Modules\AppInbox\Http\Controllers;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
+use Modules\AppInbox\Models\Inbox;
+use Modules\AppInbox\Models\InboxComment;
+use Modules\AppInbox\Models\InboxTag;
+use Modules\AppInbox\Models\InboxTagManage;
+use Modules\AppInbox\Models\InboxUserManage;
+
+class InboxController extends Controller
+{
+    protected $perPage = 4;
+
+    public function __construct()
+    {
+        // Add middleware if needed
+    }
+
+    /**
+     * Display inbox index page
+     */
+    public function index(Request $request)
+    {
+        $teamId = $request->team_id;
+        $brandId = session('brand_id');
+
+        // Get brand detail
+        $brandDetail = DB::table('brands')->where('id', $brandId)->first();
+        $brandDetailData = [];
+        
+        if (!empty($brandDetail->data) && $brandDetail->data != 'null') {
+            $brandDetailData = json_decode($brandDetail->data, true);
+        }
+
+        // Get accounts (you'll need to implement this based on your account model)
+        $accounts = $this->getAccountsByBrand($brandDetailData);
+        
+        // Get lists
+        $inboxList = $this->getInboxList();
+        $brandsList = $this->getBrandsList();
+        $usersList = $this->getUsersList();
+        $tagsList = $this->getTagsList();
+
+        return view(module('key') . '::index', [
+            'title' => 'Inbox',
+            'inbox_list' => $inboxList,
+            'brands_list' => $brandsList,
+            'accounts' => $accounts,
+            'users_list' => $usersList,
+            'tags_list' => $tagsList,
+            'module' => $request->module,
+        ]);
+    }
+
+    /**
+     * Get inbox list via AJAX
+     */
+    public function ajaxList(Request $request)
+    {
+        $wheres = [];
+        $whereIn = [];
+        $filterText = '';
+
+        // Base conditions
+        $wheres['to_type'] = 'me';
+        $wheres['is_deleted'] = 0;
+
+        // Item Filter (Inbox, Completed, Pending)
+        $itemFilter = $request->input('itemFilter');
+        if (!empty($itemFilter)) {
+            if ($itemFilter == 'Inbox') {
+                $whereIn['is_completed'] = [0, 1];
+                $whereIn['is_sent'] = [0, 1];
+            } elseif ($itemFilter == 'Completed') {
+                $wheres['is_completed'] = 1;
+            } elseif ($itemFilter == 'Pending') {
+                $wheres['is_completed'] = 0;
+                $wheres['is_sent'] = 0;
+            }
+        } else {
+            $wheres['is_completed'] = 0;
+            $wheres['is_sent'] = 0;
+        }
+
+        // Brand filter
+        if ($request->has('brand') && !empty($request->brand)) {
+            $whereIn['brand_id'] = $request->brand;
+            foreach ($request->brand as $brand) {
+                $brandName = $this->getBrandName($brand);
+                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $brandName . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Brand:</span><span class="text-truncate me-3">' . $brandName . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'brand[]\',' . $brand . ')">x</span></div></li>';
+            }
+        } else {
+            $wheres['brand_id'] = session('brand_id');
+        }
+
+        // Users filter
+        if ($request->has('users') && !empty($request->users)) {
+            $whereIn['u2.id'] = $request->users;
+            foreach ($request->users as $userId) {
+                $userName = $this->getUserName($userId);
+                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $userName . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">User:</span><span class="text-truncate me-3">' . $userName . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'users[]\',' . $userId . ')">x</span></div></li>';
+            }
+        }
+
+        // Tags filter
+        if ($request->has('tags') && !empty($request->tags)) {
+            if (in_array(0, $request->tags)) {
+                $wheres['t.tag_ids'] = null;
+            } else {
+                $whereIn['t2.id'] = $request->tags;
+            }
+
+            foreach ($request->tags as $tag) {
+                if ($tag == 0) {
+                    $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="Untag items"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Tag:</span><span class="text-truncate me-3">Untag items</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'tags[]\',0)">x</span></div></li>';
+                } else {
+                    $tagName = $this->getTagName($tag);
+                    $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $tagName . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Tag:</span><span class="text-truncate me-3">' . $tagName . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'tags[]\',' . $tag . ')">x</span></div></li>';
+                }
+            }
+        }
+
+        // Accounts filter
+        if ($request->has('accounts') && !empty($request->accounts)) {
+            $whereIn['account_id'] = $request->accounts;
+            foreach ($request->accounts as $account) {
+                $profile = $this->getProfileName($account);
+                $icon = $this->generateProfileIcon($profile);
+                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $profile->name . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Profile:</span><span class="text-truncate me-3">' . $icon . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'accounts[]\',' . $account . ')">x</span></div></li>';
+            }
+        }
+
+        // Event Type filter
+        if ($request->has('eventType') && !empty($request->eventType)) {
+            $events = [];
+            $networkType = [];
+            foreach ($request->eventType as $et) {
+                $parts = explode('_', $et);
+                $events[] = $parts[1] ?? '';
+                $networkType[] = $parts[0] ?? '';
+                
+                $icon = $this->generateNetworkIcon($parts[0] ?? '');
+                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . ($parts[1] ?? '') . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Type:</span><span class="text-truncate me-3">' . $icon . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'eventType[]\',\'' . $et . '\')">x</span></div></li>';
+            }
+            $whereIn['media_type'] = $networkType;
+            $whereIn['inbox_type'] = $events;
+        }
+
+        // Date range filter
+        if ($request->has('dateRange') && !empty($request->dateRange)) {
+            $dateRange = explode(' - ', $request->dateRange);
+            if (count($dateRange) == 2) {
+                $wheres['(i.created_time - INTERVAL 7 HOUR) >='] = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+                $wheres['(i.created_time - INTERVAL 7 HOUR) <='] = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $request->dateRange . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Date:</span><span class="text-truncate me-3">' . $request->dateRange . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'dateRange\',\'' . $request->dateRange . '\')">x</span></div></li>';
+            }
+        }
+
+        // Favourite filter
+        if ($request->has('itemFav') && !empty($request->itemFav)) {
+            if ($request->itemFav == 'Favourite') {
+                $wheres['is_favourite'] = 1;
+            }
+        }
+
+        // Get inbox data
+        $inboxData = $this->getInboxData($wheres, $whereIn);
+        $inboxComments = $this->getInboxCommentsData($wheres, $whereIn);
+
+        // Merge and sort
+        $inboxList = array_merge($inboxData->toArray(), $inboxComments->toArray());
+        usort($inboxList, function ($a, $b) {
+            return strtotime($b['created_time']) - strtotime($a['created_time']);
+        });
+
+        // Pagination
+        $page = $request->input('page', 1);
+        $totalRecords = count($inboxList);
+        $totalPages = ceil($totalRecords / $this->perPage);
+        $offset = ($page - 1) * $this->perPage;
+        $inboxList = array_slice($inboxList, $offset, $this->perPage);
+
+        // Generate pagination
+        $pagerContainer = $this->generatePagination($page, $totalPages);
+
+        // Get detail view for first item
+        $detailView = '';
+        if (!empty($inboxList)) {
+            $detailView = $this->getDetailView($inboxList[0], $wheres, $whereIn);
+        }
+
+        return response()->json([
+            'filter_text' => $filterText,
+            'list' => view(module('key') . '::ajax_list', [
+                'inbox_list' => $inboxList,
+                'page' => $page,
+                'pagerContainer' => $pagerContainer
+            ])->render(),
+            'list_detail' => $detailView
+        ]);
+    }
+
+    /**
+     * Get detail view for AJAX
+     */
+    public function ajaxListDetail(Request $request)
+    {
+        $wheres = [];
+        $whereIn = [];
+
+        if (empty($request->conversation_id)) {
+            // Comment detail
+            DB::table('inbox_comments')
+                ->where('post_id', $request->post_id)
+                ->update([
+                    'last_reviewed_user_id' => session('user_id'),
+                    'last_reviewed_date' => now()
+                ]);
+
+            $wheres['post_id'] = $request->post_id;
+            $wheres['is_child'] = 0;
+            $id = $request->id;
+
+            $inboxList = InboxComment::getInboxCommentsDetail($wheres, $whereIn)->toArray();
+
+            if (!empty($inboxList)) {
+                foreach ($inboxList as $key => $item) {
+                    if ($item['comment_count'] > 0) {
+                        $wheresChild = [
+                            'post_id' => $request->post_id,
+                            'parent_id' => $item['message_id'],
+                            'is_child' => 1
+                        ];
+                        $inboxList[$key]['child'] = InboxComment::getInboxCommentsDetail($wheresChild, [])->toArray();
+                    } else {
+                        $inboxList[$key]['child'] = [];
+                    }
+                }
+            }
+
+            $postDetail = [];
+            if ($request->network == 'facebook') {
+                if (!in_array($inboxList[0]['inbox_type'] ?? '', ['Comment', 'AdComment'])) {
+                    $postDetail = [];
+                } else {
+                    $postDetail = $this->getPostDetail($request->post_id);
+                }
+            } elseif ($request->network == 'linkedin') {
+                $postDetail = [];
+            } else {
+                $postDetail = $this->getPostDetailInsta($request->post_id);
+            }
+
+            return response()->json([
+                'list_detail' => view(module('key') . '::ajax_list_comment_detail', [
+                    'post_detail' => $postDetail,
+                    'lists' => $inboxList,
+                    'id' => $id,
+                    'conversation_id' => ''
+                ])->render()
+            ]);
+        } else {
+            // Message detail
+            $id = $request->id;
+            $wheres['conversation_id'] = $request->conversation_id;
+
+            $inboxDetail = DB::table('inbox')
+                ->select('account_id', 'from_user_id', 'to_user_id')
+                ->where('id', $id)
+                ->first();
+
+            $wheres['account_id'] = $inboxDetail->account_id;
+
+            $inboxList = Inbox::getInboxDetail($wheres, $whereIn, $inboxDetail->from_user_id, $inboxDetail->to_user_id)->toArray();
+
+            DB::table('inbox')
+                ->where('id', $id)
+                ->update([
+                    'last_reviewed_user_id' => session('user_id'),
+                    'last_reviewed_date' => now()
+                ]);
+
+            return response()->json([
+                'list_detail' => view(module('key') . '::ajax_list_detail', [
+                    'lists' => $inboxList,
+                    'id' => $id,
+                    'conversation_id' => $request->conversation_id
+                ])->render()
+            ]);
+        }
+    }
+
+    /**
+     * Save comment/message
+     */
+    public function saveComment(Request $request)
+    {
+        $id = $request->detail_id;
+        $comment = $request->comment;
+        $conversationId = $request->conversation_id;
+        $completeId = $request->complete_id ?? '';
+
+        if (empty($conversationId)) {
+            // It's a comment
+            if (!empty($request->media_type) && $request->media_type == 'linkedin') {
+                $result = $this->postLinkedinComment($request->account_id, $id, $comment, $conversationId, $completeId);
+            } else {
+                $result = $this->postComment($id, $comment, $conversationId, $completeId);
+            }
+        } else {
+            // It's a message
+            if (!empty($request->media_type) && $request->media_type == 'twitter') {
+                $result = $this->postTwitterMessage($request->account_id, $id, $comment, $conversationId, $completeId);
+            } else {
+                $result = $this->postMessage($id, $comment, $conversationId, $completeId);
+            }
+        }
+
+        return response()->json($result);
+    }
+
+    /**
+     * Delete single message
+     */
+    public function deleteMessage(Request $request)
+    {
+        $id = $request->id;
+        $table = $request->table;
+
+        DB::table($table)->where('id', $id)->update(['is_deleted' => 1]);
+
+        return response()->json(['message' => 'success']);
+    }
+
+    /**
+     * Delete messages in bulk
+     */
+    public function deleteMessageBulk(Request $request)
+    {
+        $inboxComments = [];
+        $inbox = [];
+        $ids = $request->ids;
+
+        if (!empty($ids)) {
+            foreach ($ids as $id) {
+                $parts = explode('--', $id);
+                if ($parts[0] == 'inbox') {
+                    $inbox[] = $parts[1];
+                } elseif ($parts[0] == 'inbox_comments') {
+                    $inboxComments[] = $parts[1];
+                }
+            }
+        }
+
+        if (!empty($inbox)) {
+            DB::table('inbox')->whereIn('id', $inbox)->update(['is_deleted' => 1]);
+        }
+
+        if (!empty($inboxComments)) {
+            DB::table('inbox_comments')->whereIn('id', $inboxComments)->update(['is_deleted' => 1]);
+        }
+
+        return response()->json(['message' => 'success']);
+    }
+
+    /**
+     * Mark selected posts as complete
+     */
+    public function makePostCompleteSelected(Request $request)
+    {
+        $inboxComments = [];
+        $inbox = [];
+        $ids = $request->ids;
+
+        if (!empty($ids)) {
+            foreach ($ids as $id) {
+                $parts = explode('--', $id);
+                if ($parts[0] == 'inbox') {
+                    $inbox[] = $parts[1];
+                } elseif ($parts[0] == 'inbox_comments') {
+                    $inboxComments[] = $parts[1];
+                }
+            }
+        }
+
+        if (!empty($inbox)) {
+            DB::table('inbox')->whereIn('id', $inbox)->update(['is_completed' => 1]);
+        }
+
+        if (!empty($inboxComments)) {
+            DB::table('inbox_comments')->whereIn('id', $inboxComments)->update(['is_completed' => 1]);
+        }
+
+        return response()->json(['message' => 'success']);
+    }
+
+    /**
+     * Mark all posts as complete
+     */
+    public function makePostCompleteAll(Request $request)
+    {
+        DB::table('inbox')
+            ->where('to_type', 'me')
+            ->where('is_deleted', 0)
+            ->where('is_completed', 0)
+            ->where('is_sent', 0)
+            ->where('brand_id', session('brand_id'))
+            ->update(['is_completed' => 1]);
+
+        DB::table('inbox_comments')
+            ->where('to_type', 'me')
+            ->where('is_deleted', 0)
+            ->where('is_completed', 0)
+            ->where('is_sent', 0)
+            ->where('brand_id', session('brand_id'))
+            ->update(['is_completed' => 1]);
+
+        return response()->json(['message' => 'success']);
+    }
+
+    /**
+     * Mark selected posts as incomplete
+     */
+    public function makePostIncompleteSelected(Request $request)
+    {
+        $inboxComments = [];
+        $inbox = [];
+        $ids = $request->ids;
+
+        if (!empty($ids)) {
+            foreach ($ids as $id) {
+                $parts = explode('--', $id);
+                if ($parts[0] == 'inbox') {
+                    $inbox[] = $parts[1];
+                } elseif ($parts[0] == 'inbox_comments') {
+                    $inboxComments[] = $parts[1];
+                }
+            }
+        }
+
+        if (!empty($inbox)) {
+            DB::table('inbox')->whereIn('id', $inbox)->update(['is_completed' => 0]);
+        }
+
+        if (!empty($inboxComments)) {
+            DB::table('inbox_comments')->whereIn('id', $inboxComments)->update(['is_completed' => 0]);
+        }
+
+        return response()->json(['message' => 'success']);
+    }
+
+    /**
+     * Mark all posts as incomplete
+     */
+    public function makePostIncompleteAll(Request $request)
+    {
+        DB::table('inbox')
+            ->where('to_type', 'me')
+            ->where('is_deleted', 0)
+            ->where('is_completed', 1)
+            ->where('is_sent', 0)
+            ->where('brand_id', session('brand_id'))
+            ->update(['is_completed' => 0]);
+
+        DB::table('inbox_comments')
+            ->where('to_type', 'me')
+            ->where('is_deleted', 0)
+            ->where('is_completed', 1)
+            ->where('is_sent', 0)
+            ->where('brand_id', session('brand_id'))
+            ->update(['is_completed' => 0]);
+
+        return response()->json(['message' => 'success']);
+    }
+
+    /**
+     * Mark post as complete
+     */
+    public function makePostComplete(Request $request)
+    {
+        $id = $request->conversation_id;
+        
+        if (empty($id)) {
+            DB::table('inbox_comments')
+                ->where('id', $request->inbox_id)
+                ->update(['is_completed' => 1]);
+        } else {
+            DB::table('inbox')
+                ->where('id', $request->inbox_id)
+                ->update(['is_completed' => 1]);
+        }
+
+        $inboxCount = session('brand_id') ? $this->getInboxCount(session('brand_id')) : 0;
+
+        return response()->json([
+            'message' => 'success',
+            'inbox_count' => $inboxCount
+        ]);
+    }
+
+    /**
+     * Mark post as uncomplete
+     */
+    public function makePostUncomplete(Request $request)
+    {
+        DB::table('inbox')
+            ->where('id', $request->inbox_id)
+            ->update(['is_completed' => 0]);
+
+        $inboxCount = session('brand_id') ? $this->getInboxCount(session('brand_id')) : 0;
+
+        return response()->json([
+            'message' => 'success',
+            'inbox_count' => $inboxCount
+        ]);
+    }
+
+    /**
+     * Add new tag
+     */
+    public function addTag(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'tag_name' => 'required|string|max:500'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $validator->errors()->first()
+            ]);
+        }
+
+        $tag = InboxTag::create([
+            'tag_name' => $request->tag_name,
+            'added_user_id' => session('user_id'),
+            'brand_id' => session('brand_id'),
+        ]);
+
+        $html = '<li class="py-1 d-flex">
+                    <input type="checkbox" name="tags[]" value="' . $tag->id . '" class="me-2">
+                    <label class="form-check-label" for="Inbox">' . $request->tag_name . '</label>
+                </li>';
+
+        return response()->json([
+            'message' => 'success',
+            'html' => $html
+        ]);
+    }
+
+    /**
+     * Assign tag to inbox item
+     */
+    public function assignTag(Request $request)
+    {
+        $tagIds = !empty($request->selected_tags) ? implode(',', $request->selected_tags) : '';
+
+        DB::statement("
+            INSERT INTO inbox_tags_manage (inbox_id, tag_ids, table_name, added_user_id, brand_id) 
+            VALUES (?, ?, ?, ?, ?) 
+            ON DUPLICATE KEY UPDATE tag_ids = ?",
+            [
+                $request->inbox_id,
+                $tagIds,
+                $request->table,
+                session('user_id'),
+                session('brand_id'),
+                $tagIds
+            ]
+        );
+
+        $result = DB::table('inbox_tags_manage as t')
+            ->select('t.*', DB::raw('GROUP_CONCAT(t2.tag_name) AS tag_names'))
+            ->leftJoin('inbox_tags as t2', function($join) {
+                $join->whereRaw('FIND_IN_SET(t2.id, t.tag_ids)');
+            })
+            ->where('t.table_name', $request->table)
+            ->where('t.inbox_id', $request->inbox_id)
+            ->first();
+
+        $html = '';
+        if (!empty($result) && $result->tag_names != null) {
+            $tagNames = explode(',', $result->tag_names);
+            foreach ($tagNames as $tagName) {
+                $html .= '<span class="badge bg-secondary me-2"><i class="fa-tag fal me-1"></i><span>' . $tagName . '</span></span>';
+            }
+        }
+
+        return response()->json([
+            'message' => 'success',
+            'html' => $html,
+            'ids' => $tagIds
+        ]);
+    }
+
+    /**
+     * Set favourite status
+     */
+    public function setFavourite(Request $request)
+    {
+        DB::table($request->table)
+            ->where('id', $request->inbox_id)
+            ->update(['is_favourite' => $request->fav]);
+
+        return response()->json(['message' => 'success']);
+    }
+
+    /**
+     * Assign user to inbox item
+     */
+    public function assignUser(Request $request)
+    {
+        $userIds = !empty($request->selected_users) ? implode(',', $request->selected_users) : '';
+
+        DB::statement("
+            INSERT INTO inbox_users_manage (inbox_id, user_ids, table_name, added_user_id, brand_id) 
+            VALUES (?, ?, ?, ?, ?) 
+            ON DUPLICATE KEY UPDATE user_ids = ?",
+            [
+                $request->inbox_id,
+                $userIds,
+                $request->table,
+                session('user_id'),
+                session('brand_id'),
+                $userIds
+            ]
+        );
+
+        $result = DB::table('inbox_users_manage as t')
+            ->select('t.*', DB::raw('GROUP_CONCAT(t2.fullname) AS user_names'))
+            ->leftJoin('users as t2', function($join) {
+                $join->whereRaw('FIND_IN_SET(t2.id, t.user_ids)');
+            })
+            ->where('t.table_name', $request->table)
+            ->where('t.inbox_id', $request->inbox_id)
+            ->first();
+
+        $html = '';
+        if (!empty($result) && $result->user_names != null) {
+            $userNames = explode(',', $result->user_names);
+            foreach ($userNames as $userName) {
+                $html .= '<span class="badge bg-secondary me-2"><i class="fa-user fal me-1"></i><span>' . $userName . '</span></span>';
+            }
+        }
+
+        return response()->json([
+            'message' => 'success',
+            'html' => $html,
+            'ids' => $userIds
+        ]);
+    }
+
+    // Helper methods would go here
+    // These would need to be implemented based on your specific application logic
+    
+    protected function getInboxList()
+    {
+        return Inbox::getInboxList();
+    }
+
+    protected function getBrandsList()
+    {
+        $userId = session('user_id');
+        $isAdmin = session('is_admin', 0);
+
+        if ($isAdmin == 0) {
+            $role = session('role');
+            if ($role == 1) {
+                return DB::table('user_brands as u')
+                    ->join('brands as b', 'b.id', '=', 'u.brand_id')
+                    ->where(function($query) use ($userId) {
+                        $query->where('u.user_id', $userId)
+                              ->orWhereIn('u.user_id', function($subQuery) use ($userId) {
+                                  $subQuery->select('id')
+                                           ->from('users')
+                                           ->where('added_by', $userId);
+                              });
+                    })
+                    ->groupBy('u.brand_id')
+                    ->orderBy('b.name', 'asc')
+                    ->get();
+            } else {
+                return DB::table('user_brands as u')
+                    ->join('brands as b', 'b.id', '=', 'u.brand_id')
+                    ->where('u.user_id', $userId)
+                    ->groupBy('u.brand_id')
+                    ->orderBy('b.name', 'asc')
+                    ->get();
+            }
+        } else {
+            return DB::table('brands')->orderBy('name', 'asc')->get();
+        }
+    }
+
+    protected function getUsersList()
+    {
+        $userId = session('user_id');
+        $isAdmin = session('is_admin', 0);
+
+        if ($isAdmin == 0) {
+            $role = session('role');
+            if ($role == 1) {
+                $users1 = DB::table('users')->where('added_by', $userId)->orderBy('id', 'asc')->get();
+                $users2 = DB::table('users')->where('id', $userId)->orderBy('id', 'asc')->get();
+                return $users2->merge($users1);
+            } else {
+                $currentUser = DB::table('users')->where('id', $userId)->first();
+                $users1 = DB::table('users')->where('id', $userId)->get();
+                $users2 = DB::table('users')->where('added_by', $currentUser->added_by)->get();
+                $users3 = DB::table('users')->where('id', $currentUser->added_by)->get();
+                return $users3->merge($users2);
+            }
+        } else {
+            return DB::table('users')->orderBy('id', 'asc')->get();
+        }
+    }
+
+    protected function getTagsList()
+    {
+        $userId = session('user_id');
+        $isAdmin = session('is_admin', 0);
+
+        if ($isAdmin == 0) {
+            $role = session('role');
+            if ($role == 1) {
+                return DB::table('inbox_tags')
+                    ->where(function($query) use ($userId) {
+                        $query->whereIn('added_user_id', function($subQuery) use ($userId) {
+                            $subQuery->select('id')
+                                     ->from('users')
+                                     ->where('added_by', $userId);
+                        })->orWhere('added_user_id', $userId);
+                    })
+                    ->orderBy('id', 'asc')
+                    ->get();
+            } else {
+                $currentUser = DB::table('users')->where('id', $userId)->first();
+                return DB::table('inbox_tags')
+                    ->where(function($query) use ($userId, $currentUser) {
+                        $query->whereIn('added_user_id', function($subQuery) use ($userId) {
+                            $subQuery->select('id')
+                                     ->from('users')
+                                     ->where('added_by', $userId);
+                        })->orWhereIn('added_user_id', function($subQuery) use ($currentUser) {
+                            $subQuery->select('id')
+                                     ->from('users')
+                                     ->where('id', $currentUser->added_by);
+                        });
+                    })
+                    ->orderBy('id', 'asc')
+                    ->get();
+            }
+        } else {
+            return DB::table('inbox_tags')->orderBy('tag_name', 'asc')->get();
+        }
+    }
+
+    protected function getInboxData($wheres, $whereIn)
+    {
+        return Inbox::getInboxList($wheres, $whereIn);
+    }
+
+    protected function getInboxCommentsData($wheres, $whereIn)
+    {
+        return InboxComment::getInboxCommentsList($wheres, $whereIn);
+    }
+
+    protected function generatePagination($page, $totalPages)
+    {
+        $pagerContainer = '<div class="pagination">';
+        
+        if ($page == 1) {
+            $pagerContainer .= '';
+        } else {
+            $pagerContainer .= sprintf('<a href="javascript:void(0);" onclick="pagechange(%d)" style="color: #c00">&#171; prev </a>', $page - 1);
+        }
+        
+        $pagerContainer .= ' <span class="px-3"> page <strong>' . $page . '</strong> from ' . $totalPages . '</span>';
+        
+        if ($page == $totalPages) {
+            $pagerContainer .= '';
+        } else {
+            $pagerContainer .= sprintf('<a href="javascript:void(0);" onclick="pagechange(%d)" style="color: #c00"> next &#187; </a>', $page + 1);
+        }
+        
+        $pagerContainer .= '</div>';
+        
+        return $pagerContainer;
+    }
+
+    protected function getDetailView($item, $wheres, $whereIn)
+    {
+        // This method would generate the detail view based on the item type
+        // Implementation depends on your view structure
+        if (empty($item['conversation_id'])) {
+            return $this->getCommentDetailView($item, $wheres, $whereIn);
+        } else {
+            return $this->getMessageDetailView($item, $wheres, $whereIn);
+        }
+    }
+
+    protected function getCommentDetailView($item, $wheres, $whereIn)
+    {
+        // Implementation for comment detail view
+        return '';
+    }
+
+    protected function getMessageDetailView($item, $wheres, $whereIn)
+    {
+        // Implementation for message detail view
+        return '';
+    }
+
+    protected function getAccountsByBrand($brandDetailData)
+    {
+        // Implementation to get accounts
+        return [];
+    }
+
+    protected function getBrandName($brandId)
+    {
+        $brand = DB::table('brands')->where('id', $brandId)->first();
+        return $brand ? $brand->name : '';
+    }
+
+    protected function getUserName($userId)
+    {
+        $user = DB::table('users')->where('id', $userId)->first();
+        return $user ? $user->fullname : '';
+    }
+
+    protected function getTagName($tagId)
+    {
+        $tag = DB::table('inbox_tags')->where('id', $tagId)->first();
+        return $tag ? $tag->tag_name : '';
+    }
+
+    protected function getProfileName($accountId)
+    {
+        return DB::table('accounts')->where('id', $accountId)->first();
+    }
+
+    protected function generateProfileIcon($profile)
+    {
+        // Generate profile icon HTML
+        return '';
+    }
+
+    protected function generateNetworkIcon($network)
+    {
+        // Generate network icon HTML
+        return '';
+    }
+
+    protected function getPostDetail($postId)
+    {
+        // Implementation for getting Facebook post details
+        return [];
+    }
+
+    protected function getPostDetailInsta($postId)
+    {
+        // Implementation for getting Instagram post details
+        return [];
+    }
+
+    protected function postComment($id, $comment, $conversationId, $completeId)
+    {
+        // Implementation for posting comment
+        return ['status' => 'success', 'message' => 'Comment posted'];
+    }
+
+    protected function postMessage($id, $comment, $conversationId, $completeId)
+    {
+        // Implementation for posting message
+        return ['status' => 'success', 'message' => 'Message posted'];
+    }
+
+    protected function postLinkedinComment($accountId, $id, $comment, $conversationId, $completeId)
+    {
+        // Implementation for posting LinkedIn comment
+        return ['status' => 'success', 'message' => 'LinkedIn comment posted'];
+    }
+
+    protected function postTwitterMessage($accountId, $id, $comment, $conversationId, $completeId)
+    {
+        // Implementation for posting Twitter message
+        return ['status' => 'success', 'message' => 'Twitter message posted'];
+    }
+
+    protected function getInboxCount($brandId)
+    {
+        return DB::table('inbox')
+            ->where('brand_id', $brandId)
+            ->where('is_completed', 0)
+            ->where('is_deleted', 0)
+            ->count();
+    }
+}

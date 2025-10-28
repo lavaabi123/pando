@@ -1,0 +1,23 @@
+{
+    "name": "AppInbox",
+    "alias": "appinbox",
+    "description": "Social Media Inbox Management Module",
+    "keywords": ["inbox", "messages", "comments", "social media"],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppInbox\\Providers\\InboxServiceProvider"
+    ],
+    "files": [],
+    "permission": false,
+    "menu": {
+        "uri": "app/inbox",
+        "role": "client",
+        "platform": 1,
+        "section": "top",
+        "tab_id": 10,
+        "position": 500,
+        "name": "Inbox",
+        "color": "#4CAF50",
+        "icon": "fa-light fa-inbox"
+    }
+}
