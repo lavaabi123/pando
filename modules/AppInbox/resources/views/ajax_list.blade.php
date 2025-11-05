@@ -4,6 +4,9 @@
             <div class="inbox-item p-3 border-bottom {{ $item['is_completed'] ? 'completed' : '' }}" 
                  data-id="{{ $item['id'] }}" 
                  data-type="{{ empty($item['conversation_id']) ? 'comment' : 'message' }}"
+				 data-network="{{ $item['media_type'] }}"
+				 data-post-id="{{ $item['post_id'] }}"
+				 data-conversation-id="{{ $item['conversation_id'] }}"
                  onclick="loadDetail(this)">
                 <div class="d-flex align-items-center">
                     <img src="{{ $item['from_image'] }}" class="rounded-circle me-3" width="40" height="40" alt="">
@@ -12,7 +15,7 @@
                             <h6 class="mb-1">{{ $item['from_name'] }}</h6>
                             <small class="text-muted">{{ date('M d, Y', strtotime($item['created_time'])) }}</small>
                         </div>
-                        <p class="mb-1 text-truncate">{{ $item['message'] }}</p>
+                        <p class="mb-1">{{ $item['message'] }}</p>
                         <small class="text-muted">
                             <i class="fab fa-{{ strtolower($item['media_type']) }} me-1"></i>
                             {{ $item['inbox_type'] }}
@@ -43,15 +46,3 @@
     </div>
 @endif
 
-<script>
-function loadDetail(element) {
-    const id = $(element).data('id');
-    const type = $(element).data('type');
-    
-    $('.inbox-item').removeClass('active');
-    $(element).addClass('active');
-    
-    // Load detail view via AJAX
-    // Implementation depends on your specific requirements
-}
-</script>

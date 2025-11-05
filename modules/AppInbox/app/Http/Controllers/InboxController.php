@@ -11,6 +11,7 @@ use Modules\AppInbox\Models\InboxComment;
 use Modules\AppInbox\Models\InboxTag;
 use Modules\AppInbox\Models\InboxTagManage;
 use Modules\AppInbox\Models\InboxUserManage;
+use Modules\AppChannels\Models\Accounts;
 
 class InboxController extends Controller
 {
@@ -39,14 +40,13 @@ class InboxController extends Controller
 
         // Get accounts (you'll need to implement this based on your account model)
         $accounts = $this->getAccountsByBrand($brandDetailData);
-        
         // Get lists
         $inboxList = $this->getInboxList();
         $brandsList = $this->getBrandsList();
         $usersList = $this->getUsersList();
         $tagsList = $this->getTagsList();
 
-        return view(module('key') . '::index', [
+        return view('appinbox::index', [
             'title' => 'Inbox',
             'inbox_list' => $inboxList,
             'brands_list' => $brandsList,
@@ -169,11 +169,15 @@ class InboxController extends Controller
         }
 
         // Get inbox data
-        $inboxData = $this->getInboxData($wheres, $whereIn);
+        $inboxData = $this->getInboxData($wheres, $whereIn);		
         $inboxComments = $this->getInboxCommentsData($wheres, $whereIn);
 
+        // Convert collections to arrays (stdClass objects need to be cast to array)
+        $inboxArray = json_decode(json_encode($inboxData), true);
+        $commentsArray = json_decode(json_encode($inboxComments), true);
+
         // Merge and sort
-        $inboxList = array_merge($inboxData->toArray(), $inboxComments->toArray());
+        $inboxList = array_merge($inboxArray, $commentsArray);
         usort($inboxList, function ($a, $b) {
             return strtotime($b['created_time']) - strtotime($a['created_time']);
         });
@@ -196,7 +200,7 @@ class InboxController extends Controller
 
         return response()->json([
             'filter_text' => $filterText,
-            'list' => view(module('key') . '::ajax_list', [
+            'list' => view('appinbox::ajax_list', [
                 'inbox_list' => $inboxList,
                 'page' => $page,
                 'pagerContainer' => $pagerContainer
@@ -212,88 +216,16 @@ class InboxController extends Controller
     {
         $wheres = [];
         $whereIn = [];
-
-        if (empty($request->conversation_id)) {
-            // Comment detail
-            DB::table('inbox_comments')
-                ->where('post_id', $request->post_id)
-                ->update([
-                    'last_reviewed_user_id' => session('user_id'),
-                    'last_reviewed_date' => now()
-                ]);
-
-            $wheres['post_id'] = $request->post_id;
-            $wheres['is_child'] = 0;
-            $id = $request->id;
-
-            $inboxList = InboxComment::getInboxCommentsDetail($wheres, $whereIn)->toArray();
-
-            if (!empty($inboxList)) {
-                foreach ($inboxList as $key => $item) {
-                    if ($item['comment_count'] > 0) {
-                        $wheresChild = [
-                            'post_id' => $request->post_id,
-                            'parent_id' => $item['message_id'],
-                            'is_child' => 1
-                        ];
-                        $inboxList[$key]['child'] = InboxComment::getInboxCommentsDetail($wheresChild, [])->toArray();
-                    } else {
-                        $inboxList[$key]['child'] = [];
-                    }
-                }
-            }
-
-            $postDetail = [];
-            if ($request->network == 'facebook') {
-                if (!in_array($inboxList[0]['inbox_type'] ?? '', ['Comment', 'AdComment'])) {
-                    $postDetail = [];
-                } else {
-                    $postDetail = $this->getPostDetail($request->post_id);
-                }
-            } elseif ($request->network == 'linkedin') {
-                $postDetail = [];
-            } else {
-                $postDetail = $this->getPostDetailInsta($request->post_id);
-            }
-
-            return response()->json([
-                'list_detail' => view(module('key') . '::ajax_list_comment_detail', [
-                    'post_detail' => $postDetail,
-                    'lists' => $inboxList,
-                    'id' => $id,
-                    'conversation_id' => ''
-                ])->render()
-            ]);
+		$item = Inbox::where('id', $request->id)->get()->toArray();
+		if (empty($request->conversation_id)) {
+            $detailView = $this->getCommentDetailView($item[0], $wheres, $whereIn);
         } else {
-            // Message detail
-            $id = $request->id;
-            $wheres['conversation_id'] = $request->conversation_id;
-
-            $inboxDetail = DB::table('inbox')
-                ->select('account_id', 'from_user_id', 'to_user_id')
-                ->where('id', $id)
-                ->first();
-
-            $wheres['account_id'] = $inboxDetail->account_id;
-
-            $inboxList = Inbox::getInboxDetail($wheres, $whereIn, $inboxDetail->from_user_id, $inboxDetail->to_user_id)->toArray();
-
-            DB::table('inbox')
-                ->where('id', $id)
-                ->update([
-                    'last_reviewed_user_id' => session('user_id'),
-                    'last_reviewed_date' => now()
-                ]);
-
-            return response()->json([
-                'list_detail' => view(module('key') . '::ajax_list_detail', [
-                    'lists' => $inboxList,
-                    'id' => $id,
-                    'conversation_id' => $request->conversation_id
-                ])->render()
-            ]);
+            $detailView = $this->getMessageDetailView($item[0], $wheres, $whereIn);
         }
-    }
+		return response()->json([
+            'list_detail' => $detailView
+        ]);
+	}
 
     /**
      * Save comment/message
@@ -305,20 +237,21 @@ class InboxController extends Controller
         $conversationId = $request->conversation_id;
         $completeId = $request->complete_id ?? '';
 
-        if (empty($conversationId)) {
+        if ($request->inbox_type == 'comment') {
             // It's a comment
-            if (!empty($request->media_type) && $request->media_type == 'linkedin') {
-                $result = $this->postLinkedinComment($request->account_id, $id, $comment, $conversationId, $completeId);
-            } else {
-                $result = $this->postComment($id, $comment, $conversationId, $completeId);
-            }
-        } else {
+            $result = $this->postComment($id, $comment, $conversationId, $completeId);
+        } else if ($request->inbox_type == 'message'){
             // It's a message
-            if (!empty($request->media_type) && $request->media_type == 'twitter') {
-                $result = $this->postTwitterMessage($request->account_id, $id, $comment, $conversationId, $completeId);
-            } else {
-                $result = $this->postMessage($id, $comment, $conversationId, $completeId);
-            }
+            $result = $this->postMessage($id, $comment, $conversationId, $completeId);
+        }else if ($request->inbox_type == 'tag'){
+            // It's a Tag
+            $result = $this->postMessage($id, $comment, $conversationId, $completeId);
+        }else if ($request->inbox_type == 'mention'){
+            // It's a Mention
+            $result = $this->postMessage($id, $comment, $conversationId, $completeId);
+        }else if ($request->inbox_type == 'reviews'){
+            // It's a Review
+            $result = $this->postMessage($id, $comment, $conversationId, $completeId);
         }
 
         return response()->json($result);
@@ -666,35 +599,49 @@ class InboxController extends Controller
     protected function getBrandsList()
     {
         $userId = session('user_id');
-        $isAdmin = session('is_admin', 0);
+		
+		$role = DB::table('users')->where('id', $userId)->value('role');
+		if ((int)$role === 2) {
+			// SUPER ADMIN: see every brand
+			$brands = DB::table('brands')
+				->orderBy('name')
+				->get();
+		} else {
+			// Determine if this user is a team member and get effective team_id
+			$memberRow = DB::table('team_members')
+				->select('team_id')
+				->where('uid', $userId)
+				->first();
 
-        if ($isAdmin == 0) {
-            $role = session('role');
-            if ($role == 1) {
-                return DB::table('user_brands as u')
-                    ->join('brands as b', 'b.id', '=', 'u.brand_id')
-                    ->where(function($query) use ($userId) {
-                        $query->where('u.user_id', $userId)
-                              ->orWhereIn('u.user_id', function($subQuery) use ($userId) {
-                                  $subQuery->select('id')
-                                           ->from('users')
-                                           ->where('added_by', $userId);
-                              });
-                    })
-                    ->groupBy('u.brand_id')
-                    ->orderBy('b.name', 'asc')
-                    ->get();
-            } else {
-                return DB::table('user_brands as u')
-                    ->join('brands as b', 'b.id', '=', 'u.brand_id')
-                    ->where('u.user_id', $userId)
-                    ->groupBy('u.brand_id')
-                    ->orderBy('b.name', 'asc')
-                    ->get();
-            }
-        } else {
-            return DB::table('brands')->orderBy('name', 'asc')->get();
-        }
+			$isMember = (bool) $memberRow;
+			$teamId   = $isMember ? $memberRow->team_id : $userId;
+
+			if (!$isMember) {
+				// TEAM ADMIN: see all brands in this team
+				$brands = DB::table('brands')
+					->where('team_id', $teamId)
+					->orderBy('name')
+					->get();
+			} else {
+				// TEAM MEMBER: see brands created by me OR assigned to me (within team)
+				$brands = DB::table('brands as b')
+					->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
+						$join->on('ub.brand_id', '=', 'b.id')
+							 ->where('ub.user_id', '=', $userId)
+							 ->where('ub.team_id', '=', $teamId);
+					})
+					->where('b.team_id', $teamId)
+					->where(function ($q) use ($userId) {
+						$q->where('b.user_id', $userId)      // created by me
+						  ->orWhereNotNull('ub.user_id');     // assigned to me
+					})
+					->select('b.*')
+					->distinct()
+					->orderBy('b.name')
+					->get();
+			}
+		}
+		return $brands;
     }
 
     protected function getUsersList()
@@ -703,17 +650,17 @@ class InboxController extends Controller
         $isAdmin = session('is_admin', 0);
 
         if ($isAdmin == 0) {
-            $role = session('role');
+            $role = DB::table('users')->where('id', $userId)->value('role');
             if ($role == 1) {
                 $users1 = DB::table('users')->where('added_by', $userId)->orderBy('id', 'asc')->get();
-                $users2 = DB::table('users')->where('id', $userId)->orderBy('id', 'asc')->get();
-                return $users2->merge($users1);
+                //$users2 = DB::table('users')->where('id', $userId)->orderBy('id', 'asc')->get();
+                return $users2;
             } else {
                 $currentUser = DB::table('users')->where('id', $userId)->first();
                 $users1 = DB::table('users')->where('id', $userId)->get();
-                $users2 = DB::table('users')->where('added_by', $currentUser->added_by)->get();
-                $users3 = DB::table('users')->where('id', $currentUser->added_by)->get();
-                return $users3->merge($users2);
+                //$users2 = DB::table('users')->where('added_by', $currentUser->added_by)->get();
+                //$users3 = DB::table('users')->where('id', $currentUser->added_by)->get();
+                return $users1;
             }
         } else {
             return DB::table('users')->orderBy('id', 'asc')->get();
@@ -726,7 +673,7 @@ class InboxController extends Controller
         $isAdmin = session('is_admin', 0);
 
         if ($isAdmin == 0) {
-            $role = session('role');
+            $role = DB::table('users')->where('id', $userId)->value('role');
             if ($role == 1) {
                 return DB::table('inbox_tags')
                     ->where(function($query) use ($userId) {
@@ -744,12 +691,10 @@ class InboxController extends Controller
                     ->where(function($query) use ($userId, $currentUser) {
                         $query->whereIn('added_user_id', function($subQuery) use ($userId) {
                             $subQuery->select('id')
-                                     ->from('users')
-                                     ->where('added_by', $userId);
+                                     ->from('users');
                         })->orWhereIn('added_user_id', function($subQuery) use ($currentUser) {
                             $subQuery->select('id')
-                                     ->from('users')
-                                     ->where('id', $currentUser->added_by);
+                                     ->from('users');
                         });
                     })
                     ->orderBy('id', 'asc')
@@ -806,20 +751,113 @@ class InboxController extends Controller
 
     protected function getCommentDetailView($item, $wheres, $whereIn)
     {
-        // Implementation for comment detail view
-        return '';
+        // Update last reviewed information
+        DB::table('inbox_comments')
+            ->where('post_id', $item['post_id'])
+            ->update([
+                'last_reviewed_user_id' => session('user_id'),
+                'last_reviewed_date' => now()
+            ]);
+
+        // Get comment details
+        $commentWheres = [
+            'post_id' => $item['post_id'],
+            'is_child' => 0
+        ];
+        
+        $inboxLists = InboxComment::getInboxCommentsListDetail($commentWheres, []);
+        
+        // Get child comments for each parent comment
+        if (!empty($inboxLists)) {
+            $inboxArray = json_decode(json_encode($inboxLists), true);
+            foreach ($inboxArray as $key => $comment) {
+                if (!empty($comment['comment_count']) && $comment['comment_count'] > 0) {
+                    $childWheres = [
+                        'post_id' => $item['post_id'],
+                        'parent_id' => $comment['message_id'],
+                        'is_child' => 1
+                    ];
+                    $children = InboxComment::getInboxCommentsListDetail($childWheres, []);
+                    $inboxArray[$key]['child'] = json_decode(json_encode($children), true);
+                } else {
+                    $inboxArray[$key]['child'] = [];
+                }
+            }
+        } else {
+            $inboxArray = [];
+        }
+
+        // Get post details based on media type
+        $postDetail = [];
+        if ($item['media_type'] == 'facebook') {
+            if (!in_array($item['inbox_type'], ['Comment', 'AdComment'])) {
+                $postDetail = [];
+            } else {
+                $postDetail = $this->getPostDetail($item['post_id']);
+            }
+        } elseif ($item['media_type'] == 'linkedin') {
+            $postDetail = [];
+        } else {
+            // Instagram or other
+            $postDetail = $this->getPostDetailInsta($item['post_id']);
+        }
+
+        return view('appinbox::ajax_list_comment_detail', [
+            'post_detail' => $postDetail,
+            'lists' => $inboxArray,
+            'id' => $item['id'],
+            'conversation_id' => ''
+        ])->render();
     }
 
     protected function getMessageDetailView($item, $wheres, $whereIn)
     {
-        // Implementation for message detail view
-        return '';
+        // Get inbox detail to fetch account_id and user IDs
+        $inboxDetail = DB::table('inbox')
+            ->select('account_id', 'from_user_id', 'to_user_id')
+            ->where('id', $item['id'])
+            ->first();
+
+        if (!$inboxDetail) {
+            return '';
+        }
+
+        // Build where conditions for conversation
+        $conversationWheres = [
+            'conversation_id' => $item['conversation_id'],
+            'account_id' => $inboxDetail->account_id
+        ];
+
+        // Get full conversation list
+        $inboxLists = Inbox::getInboxDetail(
+            $conversationWheres,
+            [],
+            $inboxDetail->from_user_id,
+            $inboxDetail->to_user_id
+        );
+
+        // Convert to array
+        $inboxArray = json_decode(json_encode($inboxLists), true);
+
+        // Update last reviewed information
+        DB::table('inbox')
+            ->where('id', $item['id'])
+            ->update([
+                'last_reviewed_user_id' => session('user_id'),
+                'last_reviewed_date' => now()
+            ]);
+
+        return view('appinbox::ajax_list_detail', [
+            'lists' => $inboxArray,
+            'id' => $item['id'],
+            'conversation_id' => $item['conversation_id']
+        ])->render();
     }
 
     protected function getAccountsByBrand($brandDetailData)
     {
         // Implementation to get accounts
-        return [];
+		return Accounts::where("brand_id", session('brand_id'))->get();
     }
 
     protected function getBrandName($brandId)
@@ -872,13 +910,38 @@ class InboxController extends Controller
     protected function postComment($id, $comment, $conversationId, $completeId)
     {
         // Implementation for posting comment
-        return ['status' => 'success', 'message' => 'Comment posted'];
+		$inbox = Inbox::where('id', $id)->get()->toArray();
+		$account = Accounts::where("id", $inbox[0]['account_id'])->get();
+		
+		if($account[0]['social_network'] == 'linkedin'){
+			$inbox_list = $this->Linkedinmodel->post_comment($_POST["account_id"],$id,$comment,$conversation_id,$complete_id);
+		}else{
+			if($account[0]['social_network'] == 'facebook'){
+				$endpoint = "/".$inbox[0]['message_id']."/comments";
+				$token = $account[0]->token;
+			}else{
+				$endpoint = "/".$inbox[0]['message_id']."/replies";
+				$token = $account[0]->token;
+			}
+			return Inbox::postComment($token, $comment, $conversationId, $completeId, $endpoint); 
+		}
     }
 
-    protected function postMessage($id, $comment, $conversationId, $completeId)
+    protected function postMessage($id, $message, $conversationId, $completeId)
     {
         // Implementation for posting message
-        return ['status' => 'success', 'message' => 'Message posted'];
+		$inbox = Inbox::where('id', $id)->get()->toArray();
+		$account = Accounts::where("id", $inbox[0]['account_id'])->get();				
+		
+		if($account[0]['social_network'] == 'facebook'){
+			$endpoint = "/me/messages";
+			$token = $account[0]->token;
+		}else{
+			$endpoint = "/me/messages";
+			$token = $account[0]->fbtoken;
+		}
+		return Inbox::postMessage($token, $inbox[0], $message, $conversationId, $completeId, $endpoint);
+		       
     }
 
     protected function postLinkedinComment($accountId, $id, $comment, $conversationId, $completeId)
@@ -893,6 +956,7 @@ class InboxController extends Controller
         return ['status' => 'success', 'message' => 'Twitter message posted'];
     }
 
+    
     protected function getInboxCount($brandId)
     {
         return DB::table('inbox')

@@ -24,6 +24,7 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::post('preview', [AppPublishingController::class, 'preview'])->name('app.publishing.preview');
             Route::post('getLinkInfo', [AppPublishingController::class, 'getLinkInfo'])->name('app.publishing.getLinkInfo');
             Route::post('destroy', [AppPublishingController::class, 'destroy'])->name('app.publishing.destroy');
+            Route::post('move_to_queue', [AppPublishingController::class, 'move_to_queue'])->name('app.publishing.move_to_queue');
             Route::post('destroy-by-filters', [AppPublishingController::class, 'destroyByFilter'])->name('app.publishing.destroy_by_filter');
             Route::post('save', [AppPublishingController::class, 'save'])->name('app.publishing.save');
             Route::post('changePostDate', [AppPublishingController::class, 'changePostDate'])->name('app.publishing.changePostDate');

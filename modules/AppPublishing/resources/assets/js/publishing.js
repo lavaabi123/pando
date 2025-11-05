@@ -74,14 +74,22 @@ var AppPubishing = new (function ()
             if(type == 1){
                 $(".btnPostNow").removeClass("d-none");
                 $(".btnSchedulePost").addClass("d-none");
+                $(".btnSaveApproval").addClass("d-none");
                 $(".btnSaveDraft").addClass("d-none");
             }else if(type == 4){
                 $(".btnPostNow").addClass("d-none");
                 $(".btnSchedulePost").addClass("d-none");
+                $(".btnSaveApproval").addClass("d-none");
                 $(".btnSaveDraft").removeClass("d-none");
+            }else if(type == 5){
+                $(".btnPostNow").addClass("d-none");
+                $(".btnSchedulePost").addClass("d-none");
+                $(".btnSaveApproval").removeClass("d-none");
+                $(".btnSaveDraft").addClass("d-none");
             }else{
                 $(".btnPostNow").addClass("d-none");
                 $(".btnSchedulePost").removeClass("d-none");
+                $(".btnSaveApproval").addClass("d-none");
                 $(".btnSaveDraft").addClass("d-none");
             }
         });

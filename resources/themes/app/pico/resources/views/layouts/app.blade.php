@@ -31,7 +31,7 @@
     {!! Script::renderCss() !!}
     {!! Script::globals() !!}
     <link rel="stylesheet" href="{{ theme_public_asset('css/main.css') }}?version=9.0.3">	
-	<link rel="stylesheet" href="{{ theme_public_asset('css/custom.css') }}?version=1.0.1">
+	<link rel="stylesheet" href="{{ theme_public_asset('css/custom.css') }}?version=1.0.2">
 
     @yield('head_embed_code')
 	<style>
@@ -150,7 +150,7 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=9.0.6"></script>	
-    <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.16') }}"></script>
+    <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.20') }}"></script>
     @yield('script')
     {!! Script::renderJs() !!}
     {!! Script::renderRaw() !!}

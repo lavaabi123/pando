@@ -39,6 +39,13 @@
 
                     </a>
                 </li>
+				
+                <li class="nav-item">
+                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 <?php echo e(Request::segment(3)=="approval"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/approval")); ?>">
+                        <?php echo e(__("Approval")); ?>
+
+                    </a>
+                </li>
             </ul>
         </div>
     </div>

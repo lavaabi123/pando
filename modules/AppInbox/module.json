@@ -8,6 +8,12 @@
         "Modules\\AppInbox\\Providers\\InboxServiceProvider"
     ],
     "files": [],
+    "assets": {
+        "css": [],
+        "js": [
+            "resources/assets/js/inbox.js"
+        ]
+    },
     "permission": false,
     "menu": {
         "uri": "app/inbox",

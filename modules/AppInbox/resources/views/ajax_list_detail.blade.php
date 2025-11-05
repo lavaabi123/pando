@@ -23,7 +23,7 @@
         </div>
 
         <div class="reply-section p-3 border-top">
-            <form id="reply-form" onsubmit="sendReply(event, '{{ $id }}', '{{ $conversation_id }}')">
+            <form id="reply-form" onsubmit="sendReply(event, '{{ $id }}', '{{ $conversation_id }}', '{{$lists[0]['inbox_type']}}')">
                 <div class="input-group">
                     <textarea class="form-control" name="comment" rows="2" placeholder="Type your reply..." required></textarea>
                     <button class="btn btn-primary" type="submit">
@@ -46,10 +46,10 @@
 @endif
 
 <script>
-function sendReply(event, detailId, conversationId) {
+function sendReply(event, detailId, conversationId, inboxType) {
     event.preventDefault();
     const form = $(event.target);
-    const formData = form.serialize() + '&detail_id=' + detailId + '&conversation_id=' + conversationId;
+    const formData = form.serialize() + '&detail_id=' + detailId + '&conversation_id=' + conversationId + '&inbox_type=' + inboxType;
     
     $.ajax({
         url: '{{ route("inbox.save_comment") }}',

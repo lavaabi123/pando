@@ -21,10 +21,10 @@ class InboxServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->loadMigrationsFrom(__DIR__ . '/../../database/migrations');
-        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'inbox');
+        $this->loadViewsFrom(__DIR__ . '/../../resources/views', 'appinbox');
         
         // Load translations if needed
-        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'inbox');
+        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'appinbox');
 
         // Publish assets if needed
         $this->publishes([

@@ -94,10 +94,10 @@
 @endif
 
 <script>
-function sendCommentReply(event, detailId, conversationId) {
+function sendCommentReply(event, detailId, conversationId, inboxType) {
     event.preventDefault();
     const form = $(event.target);
-    const formData = form.serialize() + '&detail_id=' + detailId + '&conversation_id=' + conversationId;
+    const formData = form.serialize() + '&detail_id=' + detailId + '&conversation_id=' + conversationId + '&inbox_type=' + inboxType;
     
     $.ajax({
         url: '{{ route("inbox.save_comment") }}',

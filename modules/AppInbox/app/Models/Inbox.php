@@ -1,11 +1,12 @@
 <?php
 
-namespace Modules\Inbox\Models;
+namespace Modules\AppInbox\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
+use JanuSoftware\Facebook\Facebook;
 
 class Inbox extends Model
 {
@@ -228,4 +229,63 @@ class Inbox extends Model
             'last_reviewed_date' => now()
         ]);
     }
+	
+	public static function postMessage($token, $inbox, $message, $conversationId, $completeId, $endpoint)
+    {
+		$FB = new Facebook([
+            'app_id'              => get_option("facebook_app_id", ""),
+            'app_secret'          => get_option("facebook_app_secret", ""),
+            'default_graph_version' => get_option("facebook_graph_version", "v21.0"),
+        ]);
+		$uploadParams = [
+		   "recipient" => ["id" => $inbox['from_user_id']], 
+		   "messaging_type" => "MESSAGE_TAG", 
+		   "tag" => "POST_PURCHASE_UPDATE",
+		   "message" => [
+				 "text" => $message 
+			  ] 
+		];	
+		try {	
+			$response = $FB->post($endpoint, $uploadParams, $token)->getDecodedBody();
+			 // Check if message was sent successfully
+			if (!empty($response['recipient_id'])) {	
+				if($completeId == '1' || $completeId == 1){
+					DB::table('inbox')->where('conversation_id', $conversationId)->update(['is_completed' => 1]);
+				}			
+				return ['status' => 'success', 'message' => 'Message posted'];
+			} else {
+				return ['status' => 'error', 'message' => 'API not working'];
+			}
+			
+		} catch (\Exception $e) {
+			return ["status" => "error","message" => $e->getMessage()]; 
+		}
+	}
+	public static function postComment($token, $comment, $conversationId, $completeId, $endpoint)
+    {
+		$FB = new Facebook([
+            'app_id'              => get_option("facebook_app_id", ""),
+            'app_secret'          => get_option("facebook_app_secret", ""),
+            'default_graph_version' => get_option("facebook_graph_version", "v21.0"),
+        ]);
+        
+		$uploadParams = [
+		   "message" =>  $comment 
+		];
+		try {	
+			$response = $FB->post($endpoint, $uploadParams, $token)->getDecodedBody();
+			 // Check if message was sent successfully
+			if (!empty($response['id'])) {	
+				if($completeId == '1' || $completeId == 1){
+					DB::table('inbox_comments')->where('conversation_id', $conversationId)->update(['is_completed' => 1]);
+				}			
+				return ['status' => 'success', 'message' => 'Comment posted'];
+			} else {
+				return ['status' => 'error', 'message' => 'API not working'];
+			}
+			
+		} catch (\Exception $e) {
+			return ["status" => "error","message" => $e->getMessage()]; 
+		}
+	}
 }

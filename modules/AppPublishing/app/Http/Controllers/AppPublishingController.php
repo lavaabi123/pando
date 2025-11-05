@@ -349,7 +349,10 @@ class AppPublishingController extends Controller
             "result"           => "",
             "status"           => 3,
             "changed"          => $currentTime,
-            "created"          => $currentTime,
+            "created"          => $currentTime,			
+            "brand_id"         => session('brand_id'),
+			"user_id"          => session('user_id'),
+			"grouping_data"    => session('brand_id').''.session('user_id').''.time()
         ];
 
         if ($postBy === 2) {
@@ -363,6 +366,11 @@ class AppPublishingController extends Controller
             $data['status']      = 1;
             $data['delay']       = 5;
             $data['time_post']   = null;
+            $data['repost_until'] = null;
+        } elseif ($postBy === 5) {
+            $data['status']      = 2;
+            $data['delay']       = 5;
+            $data['time_post']   = $timePost;
             $data['repost_until'] = null;
         } else {
             $data['time_post'] = $currentTime;
@@ -444,4 +452,56 @@ class AppPublishingController extends Controller
         $response = \DBHelper::destroy(Posts::class, $request->input('id'));
         return response()->json($response);
     }
+	
+	public function move_to_queue(Request $request)
+    {
+		$postId = $request->input('id');
+		if (!empty($postId)) {
+			$id = explode(', ', $postId);
+			if (count($id) == 1) {
+				$post = Posts::where('grouping_data', $postId)->first();
+				
+				if ($post) {
+					$res = Posts::selectRaw("GROUP_CONCAT(id SEPARATOR ', ') as ids")
+						->where('grouping_data', $post->grouping_data)
+						->groupBy('grouping_data')
+						->first();
+						
+					$id = explode(', ', $res->ids);
+				}
+			}
+		} else {
+			$id = explode(', ', request()->input('id'));
+		}
+		
+		$checkDate = 0;
+		
+		// Get post details
+		$posts = Posts::whereIn('id', $id)->get();
+		
+		if ($posts->isNotEmpty()) {
+			foreach ($posts as $post) {
+				if (is_null($post->time_post) || $post->time_post <= time()) {
+					$checkDate++;
+				}
+			}
+		}
+		
+		if ($checkDate > 0) {
+			return response()->json([
+				'status' => 'error',
+				'message' => __('Date is not Scheduled or Past date is set, Please assign date and approve.')
+			]);
+		}
+		
+		// Update all posts at once (more efficient)
+		Posts::whereIn('id', $id)->update(['status' => 3]);
+		
+		return response()->json([
+			'status' => 'success',
+			'message' => __('Post Scheduled Successfully.')
+		]);
+	}
+	
+	
 }

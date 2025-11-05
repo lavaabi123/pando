@@ -1,32 +1,37 @@
-<section class="relative w-screen min-h-screen flex items-stretch overflow-hidden bg-white overflow-x-hidden">
+<section class="relative w-screen min-h-screen flex flex-column flex-sm-row items-stretch overflow-hidden bg-white overflow-x-hidden">
 
-    <?php echo $__env->make("partials/login-screen", ["name" => __("Sign In to Your Account")], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    <?php echo $__env->make("partials/login-screen", ["name" => __("A Social Media Management Platform")], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
-    <div class="flex flex-col justify-center flex-1 px-8 py-16 bg-blueGray-100 z-10" style="background-image: url(<?php echo e(theme_public_asset('images/pattern-light-big.svg')); ?>); background-position: center;">
+    <div class="flex content-right flex-col justify-center flex-1 px-8 py-16 bg-white z-10 ">
         <form class="actionForm max-w-md mx-auto w-full" action="<?php echo e(module_url('do_login')); ?>" method="POST">
-            <div class="show-on-mobile">
+            <!--<div class="show-on-mobile">
                 <a class="mb-4 inline-block" href="<?php echo e(url('')); ?>">
-                    <img class="h-10" src="<?php echo e(url( get_option("website_logo_brand_dark", asset('public/img/logo-brand-dark.png')) )); ?>" alt="">
+                    <img class="h-10" src="<?php echo e(url( get_option("website_logo_brand_dark", asset('public/img/logos.png')) )); ?>" alt="">
                 </a>
                 <h2 class="mb-16 text-4xl md:text-4xl font-bold font-heading tracking-px-n leading-tight">
                     <?php echo e($name ?? __("Welcome Back")); ?>
 
                 </h2>
-            </div>
-            <label class="block mb-4">
-                <p class="mb-2 text-gray-700 font-semibold leading-normal"><?php echo e(__("Email or Username")); ?></p>
-                <input type="text" id="username" name="username" class="px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" placeholder="<?php echo e(__('Enter username or email address')); ?>">
+            </div>-->
+			<h3 class="fw-bold fs-4 lh-sm mb-2">Sign in,<br/>
+we are building something special!</h3>
+<p>If you are seeing this,<br/>
+then you are a part of the journey!</p>
+<h4 class="fw-bold fs-5 mt-4 mb-3">Sign in to your Account</h4>
+            <label class="block mb-3">
+                <!--<p class="mb-2 text-gray-700 font-semibold leading-normal"><?php echo e(__("Email or Username")); ?></p>-->
+                <input type="text" id="username" name="username" class="form-control" placeholder="<?php echo e(__('Enter username or email address')); ?>">
             </label>
-            <label class="block mb-5">
-                <p class="mb-2 text-gray-700 font-semibold leading-normal"><?php echo e(__("Password")); ?></p>
-                <input id="password" type="password" name="password" class="px-4 py-3.5 w-full text-gray-400 font-medium placeholder-gray-400 bg-white outline-none border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300" placeholder="<?php echo e(__('Enter your Password')); ?>">
+            <label class="block mb-3">
+                <!--<p class="mb-2 text-gray-700 font-semibold leading-normal"><?php echo e(__("Password")); ?></p>-->
+                <input id="password" type="password" name="password" class="form-control" placeholder="<?php echo e(__('Enter your Password')); ?>">
             </label>
             <div class="mb-3">
                 <?php echo Captcha::render(); ?>
 
             </div>
 
-            <div class="flex flex-wrap justify-between mb-4">
+            <div class="flex flex-wrap justify-between mb-3">
                 <div class="flex justify-between w-full items-center">
                     <div class="flex items-center">
                         <input class="w-4 h-4" id="remember" type="checkbox" name="remember" value="1">
@@ -41,7 +46,7 @@
 
             <div class="msg-error mb-2"></div>
 
-            <button type="submit" class="mb-8 py-4 px-9 w-full text-white font-semibold border border-indigo-700 rounded-xl shadow-4xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200">
+            <button type="submit" class="w-full btn btn-primary">
                 <?php echo e(__("Sign In")); ?>
 
             </button>
@@ -88,12 +93,12 @@
         </form>
 
         <!-- Switch to signup -->
-        <?php if(get_option("auth_signup_page_status", 1)): ?>
+        <!--<?php if(get_option("auth_signup_page_status", 1)): ?>
             <p class="text-center pt-4">
                 <?php echo e(__("Don't have an account?")); ?>
 
                 <a href="<?php echo e(url('auth/signup')); ?>" class="text-indigo-600 hover:text-indigo-700 font-medium"><?php echo e(__("Sign up")); ?></a>
             </p>
-        <?php endif; ?>
+        <?php endif; ?>-->
     </div>
 </section><?php /**PATH C:\xampp82\htdocs\pando-laravel\resources\themes\guest\nova\resources\views/auth/login.blade.php ENDPATH**/ ?>

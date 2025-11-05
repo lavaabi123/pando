@@ -220,13 +220,14 @@ if($post){
                                             <option value="2" <?php echo e(old('post_by', $post->post_by ?? '') == 2 || isset($date) ? 'selected' : ''); ?>><?php echo e(__("Schedule & Repost")); ?></option>
                                             <option value="3" <?php echo e(old('post_by', $post->post_by ?? '') == 3 ? 'selected' : ''); ?>><?php echo e(__("Specific Days & Times")); ?></option>
                                             <option value="4" <?php echo e(old('post_by', $post->post_by ?? '') == 4 ? 'selected' : ''); ?>><?php echo e(__("Draft")); ?></option>
+                                            <option value="5" <?php echo e(old('post_by', $post->post_by ?? '') == 5 ? 'selected' : ''); ?>><?php echo e(__("Approval")); ?></option>
                                         </select>
                                     </div>
                                 </div>
 
                             <?php else: ?>
 
-                                <?php if($post->status==1): ?>
+                                <?php if($post->status==1 || $post->status==2): ?>
 
                                     <div class="card-header px-3">
                                         <div class="fs-12 fw-6 text-gray-700">
@@ -239,6 +240,7 @@ if($post){
                                                 <option value="2" <?php echo e(old('post_by', $post->post_by ?? '') == 2 ? 'selected' : ''); ?>><?php echo e(__("Schedule & Repost")); ?></option>
                                                 <option value="3" <?php echo e(old('post_by', $post->post_by ?? '') == 3 ? 'selected' : ''); ?>><?php echo e(__("Specific Days & Times")); ?></option>
                                                 <option value="4" <?php echo e(old('status', $post->status ?? '') == 1 ? 'selected' : ''); ?>><?php echo e(__("Draft")); ?></option>
+                                                <option value="5" <?php echo e(old('status', $post->status ?? '') == 2 ? 'selected' : ''); ?>><?php echo e(__("Approval")); ?></option>
                                             </select>
                                         </div>
                                     </div>
@@ -258,8 +260,7 @@ if($post){
 
                             <?php endif; ?>
 
-
-                            <div class="post-by <?php echo e(old('status', $post->status ?? '') == 1 || (empty($post) && empty($date))? 'd-none' : ''); ?>" data-by="2">
+                            <div class="post-by <?php echo e((old('status', $post->status ?? '') == 1 || old('status', $post->status ?? '') == 2) || (empty($post) && empty($date))? 'd-none' : ''); ?>" data-by="2">
                                 <div class="card-body px-3">
                                     <div class="post-by" data-by="2">
                                         <div class="row mb-3">
@@ -284,6 +285,18 @@ if($post){
                                             <div class="col-6">
                                                 <label class="form-label"><?php echo e(__('Repost until')); ?></label>
                                                 <input type="text" class="form-control datetime fs-12" autocomplete="off" name="repost_until" value="<?php echo e(isset($post->repost_until) ? datetime_show($post->repost_until) : $date); ?>">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+							<div class="post-by <?php echo e(old('status', $post->status ?? '') == 2 || (!empty($post) && !empty($date))? '' : 'd-none'); ?>" data-by="5">
+                                <div class="card-body px-3">
+                                    <div class="post-by" data-by="5">
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label"><?php echo e(__("Time post")); ?></label>
+                                                <input type="text" class="form-control datetime datetime fs-12" autocomplete="off" name="time_post" value="<?php echo e(isset($post->time_post) ? datetime_show($post->time_post) : $date); ?>">
                                             </div>
                                         </div>
                                     </div>
@@ -356,6 +369,8 @@ if($post){
                             }else{
                                 if ($post->status==1){
                                     $button = 3;
+                                }else if ($post->status==2){
+                                    $button = 4;
                                 }else{
                                     $button = 2;
                                 }
@@ -364,6 +379,7 @@ if($post){
                         <button class="btn btn-dark btnPostNow <?php echo e($button == 1 ? '' : 'd-none'); ?>"><?php echo e(__("Post now")); ?></button>
                         <button class="btn btn-dark btnSchedulePost <?php echo e($button == 2 ? '' : 'd-none'); ?>"><?php echo e(__("Schedule")); ?></button>
                         <button class="btn btn-dark btnSaveDraft <?php echo e($button == 3 ? '' : 'd-none'); ?>"><?php echo e(__(" Save as Draft")); ?></button>
+                        <button class="btn btn-dark btnSaveApproval <?php echo e($button == 4 ? '' : 'd-none'); ?>"><?php echo e(__(" Save as Approval")); ?></button>
                     </div>
                 </div>
             </div>

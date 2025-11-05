@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Inbox\Models;
+namespace Modules\AppInbox\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;

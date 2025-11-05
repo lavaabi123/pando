@@ -4,13 +4,13 @@
 
 @section('content')
 <div class="container-fluid p-x-25">
-    <div class="row">
+    <div class="row py-4">
         <!-- Filter Sidebar -->
-        <div class="col mw-300">
-            <div class="my-4">
-                <h2 class="d-flex icon-primary mb-0">
+        <div class="col-3 mw-300">
+            <div class="my-1">
+                <h3 class="d-flex icon-primary mb-0">
                     <i class="fa-light fa-filter me-2"></i> Filter
-                </h2>
+                </h3>
             </div>
             
             <div class="b-r-30 border bg-white p-20">
@@ -70,6 +70,100 @@
                                 </div>
                             </div>
                         </div>
+						
+						<div class="accordion-item b-r-25 border overflow-hidden mb-3">
+					<h2 class="accordion-header" id="flush-heading4">
+					  <div class="accordion-button fw-7 collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapse4" aria-expanded="false" aria-controls="flush-collapse4">
+						Profiles
+					  </div>
+					</h2>
+					<div id="flush-collapse4" class="accordion-collapse collapse" aria-labelledby="flush-heading4" data-bs-parent="#accordionFlushExample">
+					  <div class="accordion-body">
+					  @if(!empty($accounts))
+					  <ul class="list-unstyled symbol py-1">
+						@foreach($accounts as $value)
+						  <li class="py-0 d-flex align-items-center">
+						  <input type="checkbox" name="accounts[]" value="{{$value->id}}" class="me-2">
+						  <div class="symbol symbol-35px px-3 py-2" style="padding-left: 0 !important;">
+									<img src="{{ Media::url($value->avatar) }}" style="width:25px; height:25px" class="rounded-circle align-self-center" alt="">
+									{{ get_social_media_icon($value->social_network) }}							
+								</div><span data-toggle="tooltip" data-placement="top" title="{{$value->name}}" class="text-truncate">{{$value->name}}</span><!----><!---->
+						  
+						  </li>							  
+						@endforeach
+					  @endif
+					  </div>
+					</div>
+				  </div>
+                        <!-- Type Filter -->
+                        <div class="accordion-item b-r-25 border overflow-hidden mb-3">
+                            <h2 class="accordion-header" id="flush-headingType">
+                                <div class="accordion-button fw-7 collapsed" type="button" data-bs-toggle="collapse" 
+                                     data-bs-target="#flush-collapseType" aria-expanded="false">
+                                    Types
+                                </div>
+                            </h2>
+                            <div id="flush-collapseType" class="accordion-collapse collapse" aria-labelledby="flush-headingType">
+                                  <div class="accordion-body">
+									  <ul class="list-unstyled symbol pb-2">
+									  
+									  <!-- For Facebook -->
+									  
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_Comment">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBComments">
+									  <div class="post-account me-2">{{ get_social_media_image('facebook') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Comments</span></label></li>
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_AdComment">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBAdComments">
+									  <div class="post-account me-2">{{ get_social_media_image('facebook') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Ad Comments</span></label></li>
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_Messenger">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBM">
+									  <div class="post-account me-2">{{ get_social_media_image('facebook') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Messenger</span></label></li>
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_Mentions">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBME">
+									  <div class="post-account me-2">{{ get_social_media_image('facebook') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Mentions</span></label></li>
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_Review">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBR">
+									  <div class="post-account me-2">{{ get_social_media_image('facebook') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Reviews</span></label></li>
+									  
+									  <!-- For Instagram -->
+									  
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="instagram_Comment">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_IComments">
+									  <div class="post-account me-2">{{ get_social_media_image('instagram') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Comments</span></label></li>
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="instagram_Messenger">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_IM">
+									  <div class="post-account me-2">{{ get_social_media_image('instagram') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Messenger</span></label></li>
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="instagram_Tags">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_IT">
+									  <div class="post-account me-2">{{ get_social_media_image('instagram') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Tags</span></label></li>
+									  
+									  <!-- For X -->
+									 <!-- <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="twitter_Messenger">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_IM">
+									  <div class="post-account me-2">{{ get_social_media_image('x') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Direct Messages</span></label></li>-->
+									  
+									  <!-- For Linkedin -->
+									  
+									  <li class="text-truncate d-flex me-2 py-1">
+									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="linkedin_Comment">
+									  <label class="custom-control-label font-normal d-flex w-100" for="if_IComments">
+									  <div class="post-account me-2">{{ get_social_media_image('linkedin') }}</div><span class="text-truncate text-dark pr-1" style="top: auto;">Comments</span></label></li>
+									  
+									  
+									  </ul>
+									  </div>
+									
+                            </div>
+                        </div>
 
                         <!-- Tags Filter -->
                         <div class="accordion-item b-r-25 border overflow-hidden mb-3">
@@ -80,7 +174,13 @@
                                 </div>
                             </h2>
                             <div id="flush-collapseTags" class="accordion-collapse collapse" aria-labelledby="flush-headingTags">
-                                <div class="accordion-body">
+                                <div class="accordion-body"><div href="javascript: void(0)" onclick="add_tag_modal()" role="button" class="text-gray-400 text-hover-primary fs-14 fw-bold mb-2"><span>Add New Tag</span></div>
+								<div href="javascript: void(0)" class="text-gray-400 text-hover-primary fs-14 fw-bold mb-2" role="button" onclick="clear_tag_selected()"><span>Clear Selected</span></div>
+									<ul class="list-unstyled symbol py-1">
+										<li class="py-1 d-flex">
+										  <input type="checkbox" name="tags[]" value="0" class="me-2">
+										  <label class="form-check-label" for="Inbox">Untag items</label>
+										</li>
                                     @if(!empty($tags_list))
                                         <ul class="list-unstyled symbol py-1 load-tag-list">
                                             @foreach($tags_list as $tag)
@@ -91,38 +191,24 @@
                                             @endforeach
                                         </ul>
                                     @endif
+									</ul>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Accounts Filter -->
-                        <div class="accordion-item b-r-25 border overflow-hidden mb-3">
-                            <h2 class="accordion-header" id="flush-headingAccounts">
-                                <div class="accordion-button fw-7 collapsed" type="button" data-bs-toggle="collapse" 
-                                     data-bs-target="#flush-collapseAccounts" aria-expanded="false">
-                                    Profiles
-                                </div>
-                            </h2>
-                            <div id="flush-collapseAccounts" class="accordion-collapse collapse" aria-labelledby="flush-headingAccounts">
-                                <div class="accordion-body">
-                                    @if(!empty($accounts))
-                                        <ul class="list-unstyled symbol py-1">
-                                            @foreach($accounts as $account)
-                                                <li class="py-0 d-flex align-items-center">
-                                                    <input type="checkbox" name="accounts[]" value="{{ $account->id }}" class="me-2">
-                                                    <div class="symbol symbol-35px px-3 py-2">
-                                                        <img src="{{ $account->avatar }}" style="width:25px; height:25px" 
-                                                             class="rounded-circle align-self-center" alt="">
-                                                    </div>
-                                                    <span class="text-truncate">{{ $account->name }}</span>
-                                                </li>
-                                            @endforeach
-                                        </ul>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
                     </div>
+				<div class="form-check form-switch fw-7 fs-12 m-b-10">
+				  <input class="form-check-input" name="itemFilter" value="Inbox" type="radio" id="showAllChecked">
+				  <label class="form-check-label" for="showAllChecked">Show all</label>
+				</div>
+				<div class="form-check form-switch fw-7 fs-12 m-b-10">
+				  <input class="form-check-input" name="itemFilter" value="Pending" type="radio" id="showPending" checked>
+				  <label class="form-check-label" for="showPending">Show pending messages</label>
+				</div>
+				<div class="form-check form-switch fw-7 fs-12 m-b-10">
+				  <input class="form-check-input" name="itemFilter" value="Completed" type="radio" id="showCompleted">
+				  <label class="form-check-label" for="showCompleted">Show completed messages</label>
+				</div> 
 
                     <div class="mt-3">
                         <button type="button" class="btn btn-primary w-100" onclick="applyFilter()">
@@ -137,10 +223,10 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="col">
+        <div class="col-6">
             <div class="row">
                 <!-- Inbox List -->
-                <div class="col-md-5">
+                <div class="col-md-12">
                     <div class="bg-white b-r-30 p-20">
                         <h3 class="mb-3">Inbox</h3>
                         <div id="inbox-list-container">
@@ -152,71 +238,112 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Detail View -->
-                <div class="col-md-7">
-                    <div class="bg-white b-r-30 p-20">
-                        <div id="inbox-detail-container">
-                            <!-- Detail view will be loaded here via AJAX -->
-                            <div class="text-center py-5 text-muted">
-                                <i class="fa-light fa-inbox fa-3x"></i>
-                                <p class="mt-3">Select a conversation to view details</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
+		
+		
+		<!-- Detail View -->
+		<div class="col-md-3">
+			<div class="bg-white b-r-30 p-20">
+				<div id="inbox-detail-container">
+					<!-- Detail view will be loaded here via AJAX -->
+					<div class="text-center py-5 text-muted">
+						<i class="fa-light fa-inbox fa-3x"></i>
+						<p class="mt-3">Select a conversation to view details</p>
+					</div>
+				</div>
+			</div>
+		</div>
+				
     </div>
 </div>
 
-@push('scripts')
+<div id="addtagmodal" class="modal fade">
+	<div class="modal-dialog modal-dialog-centered modal-md">
+		<div class="modal-content">
+			<div class="modal-header bg-solid-warning">
+				<h5 class="modal-title">Add New Tag</h5>
+				<a href="javascript:void(0);" data-bs-dismiss="modal" class="btn btn-sm btn-light-danger w-35 h-35 b-r-40 d-flex justify-content-center align-items-center"><i class="fad fa-times pe-0"></i></a>
+			</div>
+			<div class="modal-body shadow-none">
+				<div class="">
+				<p>Use tags to create category or assign inbox items to a user. Once you tag an item, you can quickly find it with Tags Filter.</p>
+				<input type="text" placeholder="Enter a new tag (40 characters max)" class="fs-12 form-control" id="tag_name_add" value="" maxlength="40">
+				</div>
+			</div>
+			<div class="modal-footer">
+				<a href="javascript:void(0);" data-bs-dismiss="modal" class="btn btn-secondary">Cancel</a>
+				<a href="javascript:void(0);" class="btn btn-primary" onclick="add_tag()">Save</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="listtagmodal" class="modal fade">
+	<div class="modal-dialog modal-dialog-centered modal-md">
+		<div class="modal-content">
+			<div class="modal-header bg-solid-warning">
+				<h5 class="modal-title">Tags</h5>
+				<a href="javascript:void(0);" data-bs-dismiss="modal" class="btn btn-sm btn-light-danger w-35 h-35 b-r-40 d-flex justify-content-center align-items-center"><i class="fad fa-times pe-0"></i></a>
+			</div>
+			<div class="modal-body shadow-none">
+				<div class="selected_inbox" data-id="">
+				 <ul class="list-unstyled symbol py-1">
+					  <?php if(!empty($tags_list)){ ?>
+						  <?php foreach($tags_list as $tag){ ?>
+						  <li class="py-1 d-flex align-items-center">
+							  <input type="checkbox" name="select_tags[]" value="<?php echo $tag->id; ?>" class="me-2">
+							  <label class="form-check-label" for="Inbox"><?php echo $tag->tag_name; ?></label>
+						  </li>							  
+						<?php  }
+					  } ?>
+					  </ul>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<a href="javascript:void(0);" data-bs-dismiss="modal" class="btn btn-secondary">Cancel</a>
+				<a href="javascript:void(0);" class="btn btn-primary" onclick="assign_tag()">Ok</a>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+<div id="listusermodal" class="modal fade">
+	<div class="modal-dialog modal-dialog-centered modal-md">
+		<div class="modal-content">
+			<div class="modal-header bg-solid-warning">
+				<h5 class="modal-title">Assign to Users</h5>
+				<a href="javascript:void(0);" data-bs-dismiss="modal" class="btn btn-sm btn-light-danger w-35 h-35 b-r-40 d-flex justify-content-center align-items-center"><i class="fad fa-times pe-0"></i></a>
+			</div>
+			<div class="modal-body shadow-none">
+				<div class="selected_inbox" data-id="">
+				 <ul class="list-unstyled symbol py-1 d-flex flex-wrap">
+					  <?php if(!empty($users_list)){ ?>
+						  <?php foreach($users_list as $user){ ?>
+						  <li class="py-1 d-flex align-items-center col-6">
+							  <input type="checkbox" name="select_users[]" value="<?php echo $user->id; ?>" class="me-2">
+							  <label class="form-check-label" for="Inbox"><?php echo $user->fullname; ?></label>
+						  </li>							  
+						<?php  }
+					  } ?>
+					  </ul>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<a href="javascript:void(0);" data-bs-dismiss="modal" class="btn btn-secondary">Cancel</a>
+				<a href="javascript:void(0);" class="btn btn-primary" onclick="assign_user()">Ok</a>
+			</div>
+		</div>
+	</div>
+</div>
+
 <script>
-    $(document).ready(function() {
-        loadInboxList();
-    });
-
-    function loadInboxList(page = 1) {
-        const formData = $('#filter_form').serialize() + '&page=' + page;
-        
-        $.ajax({
-            url: '{{ route("inbox.ajax_list") }}',
-            type: 'POST',
-            data: formData,
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                $('#inbox-list-container').html(response.list);
-                $('#inbox-detail-container').html(response.list_detail);
-                
-                if (response.filter_text) {
-                    $('.filtered-list').show();
-                    $('.load-filter-text').html(response.filter_text);
-                } else {
-                    $('.filtered-list').hide();
-                }
-            },
-            error: function(xhr) {
-                console.error('Error loading inbox:', xhr);
-                $('#inbox-list-container').html('<div class="alert alert-danger">Error loading inbox. Please try again.</div>');
-            }
-        });
-    }
-
-    function applyFilter() {
-        loadInboxList(1);
-    }
-
-    function resetFilter() {
-        $('#filter_form')[0].reset();
-        loadInboxList(1);
-    }
-
-    function pagechange(page) {
-        $('#pagenos').val(page);
-        loadInboxList(page);
-    }
+window.routes = {
+inboxAjax: @json(route('inbox.ajax_list')),
+addTag: @json(route('inbox.add_tag')),
+inboxDetail: @json(route('inbox.ajax_list_detail')),
+};
 </script>
-@endpush
 @endsection

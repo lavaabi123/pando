@@ -216,13 +216,14 @@ if($post){
                                             <option value="2" {{ old('post_by', $post->post_by ?? '') == 2 || isset($date) ? 'selected' : '' }}>{{ __("Schedule & Repost") }}</option>
                                             <option value="3" {{ old('post_by', $post->post_by ?? '') == 3 ? 'selected' : '' }}>{{ __("Specific Days & Times") }}</option>
                                             <option value="4" {{ old('post_by', $post->post_by ?? '') == 4 ? 'selected' : '' }}>{{ __("Draft") }}</option>
+                                            <option value="5" {{ old('post_by', $post->post_by ?? '') == 5 ? 'selected' : '' }}>{{ __("Approval") }}</option>
                                         </select>
                                     </div>
                                 </div>
 
                             @else
 
-                                @if ($post->status==1)
+                                @if ($post->status==1 || $post->status==2)
 
                                     <div class="card-header px-3">
                                         <div class="fs-12 fw-6 text-gray-700">
@@ -234,6 +235,7 @@ if($post){
                                                 <option value="2" {{ old('post_by', $post->post_by ?? '') == 2 ? 'selected' : '' }}>{{ __("Schedule & Repost") }}</option>
                                                 <option value="3" {{ old('post_by', $post->post_by ?? '') == 3 ? 'selected' : '' }}>{{ __("Specific Days & Times") }}</option>
                                                 <option value="4" {{ old('status', $post->status ?? '') == 1 ? 'selected' : '' }}>{{ __("Draft") }}</option>
+                                                <option value="5" {{ old('status', $post->status ?? '') == 2 ? 'selected' : '' }}>{{ __("Approval") }}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -253,8 +255,7 @@ if($post){
 
                             @endif
 
-
-                            <div class="post-by {{ old('status', $post->status ?? '') == 1 || (empty($post) && empty($date))? 'd-none' : '' }}" data-by="2">
+                            <div class="post-by {{ (old('status', $post->status ?? '') == 1 || old('status', $post->status ?? '') == 2) || (empty($post) && empty($date))? 'd-none' : '' }}" data-by="2">
                                 <div class="card-body px-3">
                                     <div class="post-by" data-by="2">
                                         <div class="row mb-3">
@@ -279,6 +280,18 @@ if($post){
                                             <div class="col-6">
                                                 <label class="form-label">{{ __('Repost until') }}</label>
                                                 <input type="text" class="form-control datetime fs-12" autocomplete="off" name="repost_until" value="{{ isset($post->repost_until) ? datetime_show($post->repost_until) : $date }}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+							<div class="post-by {{ old('status', $post->status ?? '') == 2 || (!empty($post) && !empty($date))? '' : 'd-none' }}" data-by="5">
+                                <div class="card-body px-3">
+                                    <div class="post-by" data-by="5">
+                                        <div class="row mb-3">
+                                            <div class="col-6">
+                                                <label class="form-label">{{ __("Time post") }}</label>
+                                                <input type="text" class="form-control datetime datetime fs-12" autocomplete="off" name="time_post" value="{{ isset($post->time_post) ? datetime_show($post->time_post) : $date }}">
                                             </div>
                                         </div>
                                     </div>
@@ -349,6 +362,8 @@ if($post){
                             }else{
                                 if ($post->status==1){
                                     $button = 3;
+                                }else if ($post->status==2){
+                                    $button = 4;
                                 }else{
                                     $button = 2;
                                 }
@@ -357,6 +372,7 @@ if($post){
                         <button class="btn btn-dark btnPostNow {{ $button == 1 ? '' : 'd-none' }}">{{ __("Post now") }}</button>
                         <button class="btn btn-dark btnSchedulePost {{ $button == 2 ? '' : 'd-none' }}">{{ __("Schedule") }}</button>
                         <button class="btn btn-dark btnSaveDraft {{ $button == 3 ? '' : 'd-none' }}">{{ __(" Save as Draft") }}</button>
+                        <button class="btn btn-dark btnSaveApproval {{ $button == 4 ? '' : 'd-none' }}">{{ __(" Save as Approval") }}</button>
                     </div>
                 </div>
             </div>

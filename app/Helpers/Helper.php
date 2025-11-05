@@ -700,6 +700,58 @@ if(!function_exists('groupArray')){
     }
 }
 
+if (!function_exists("get_social_media_icon")) {
+    function get_social_media_icon($network)
+    {
+        if(strtolower($network) == 'facebook'){
+			echo '<i class="post-media fab fa-facebook-f" style="color: #0074fa;right: 13px;"></i>';
+		}elseif(strtolower($network) == 'twitter' || strtolower($network) == 'x'){
+			echo '<i class="post-media fab fa-x-twitter" style="color: #000;right: 13px;"></i>';
+		}elseif(strtolower($network) == 'instagram'){
+			echo '<i class="post-media fab fa-instagram" style="color: #fff;background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);right: 13px;"></i>';
+		}elseif(strtolower($network) == 'linkedin'){
+			echo '<i class="post-media fab fa-linkedin" style="color: #fff;background-color:#0077b5;right: 13px;"></i>';
+		}elseif(strtolower($network) == 'pinterest'){
+			echo '<i class="post-media fab fa-pinterest" style="color: #cd2029;right: 13px;"></i>';
+		}elseif(str_replace("_", " ", strtolower($network)) == 'google_business'){
+			echo '<i class="post-media fab fa-googlemybusiness" style="color: #4b88ef;right: 13px;"></i>';
+		}elseif(str_replace("_", " ", strtolower($network)) == 'tiktok'){
+			echo '<i class="post-media fab fa-tiktok" style="color: #4b88ef;right: 13px;"></i>';
+		}elseif(str_replace("_", " ", strtolower($network)) == 'youtube'){
+			echo '<i class="post-media fab fa-youtube" style="color: #4b88ef;right: 13px;"></i>';
+		}else{
+			echo '<i class="post-media fab fa-user"></i>';
+		}
+    }
+}
+
+if (!function_exists("get_social_media_image")) {
+    function get_social_media_image($network)
+    {
+        if(strtolower($network) == 'facebook'){
+			echo '<i class="fab fa-facebook-f" style="background-color: #0074fa;color: #fff;border-radius: 50%;height: 20px;width: 20px;text-align: center;line-height: 23px;font-size: 14px;"></i>';
+		}elseif(strtolower($network) == 'twitter' || strtolower($network) == 'x'){
+			echo '<i class="fab fa-x-twitter" style="color: #fff;background: #000;border-radius: 50%;height: 20px;width: 20px;text-align: center;line-height: 21px;font-size: 12px;"></i>';
+		}elseif(strtolower($network) == 'instagram'){
+			echo '<i class="fab fa-instagram" style="color: #fff;background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);border-radius: 50%;height: 20px;width: 20px;text-align: center;line-height: 22px;font-size: 14px;"></i>';
+		}elseif(strtolower($network) == 'linkedin'){
+			echo '<i class="fab fa-linkedin" style="color: #fff;background: #0077b5;border-radius: 50%;height: 20px;width: 20px;text-align: center;line-height: 22px;font-size: 14px;"></i>';
+		}elseif(strtolower($network) == 'pinterest'){
+			echo '<i class="post-media fab fa-pinterest" style="color: #cd2029;right: 13px;"></i>';
+		}elseif(str_replace("_", " ", strtolower($network)) == 'google_business'){
+			echo '<i class="post-media fab fa-googlemybusiness" style="color: #4b88ef;right: 13px;"></i>';
+		}elseif(str_replace("_", " ", strtolower($network)) == 'tiktok'){
+			echo '<i class="post-media fab fa-tiktok" style="color: #4b88ef;right: 13px;"></i>';
+		}elseif(str_replace("_", " ", strtolower($network)) == 'youtube'){
+			echo '<i class="post-media fab fa-youtube" style="color: #4b88ef;right: 13px;"></i>';
+		}else{
+			echo '<i class="post-media fab fa-user"></i>';
+		}
+    }
+}
+
+
+
 include_once "Language_Helper.php";
 include_once "AI_Helper.php";
 include_once "Date_Helper.php";
