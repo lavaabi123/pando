@@ -257,7 +257,9 @@ var AppPubishing = new (function ()
                 allMedias = Array.from(images);
             } else {
                 var previewMedias = document.querySelectorAll('.preview-list-medias img');
+			console.log(previewMedias);
                 allMedias = Array.from(previewMedias);
+			console.log(allMedias.length);
             }
             const previewHtml = allMedias.map(media => {
                 var type = media.dataset?.type || 'image';
@@ -587,6 +589,7 @@ var AppPubishing = new (function ()
 
                 const replacements = {
                     '[[id]]': data.id,
+                    '[[grouping_data]]': data.grouping_data,
                     '[[icon]]': data.icon,
                     '[[color]]': data.color,
                     '[[caption]]': data.caption,

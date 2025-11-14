@@ -32,7 +32,7 @@ class AppPublishingController extends Controller
      * @param  Request  $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function events(Request $request)
+	public function events(Request $request)
     {
         $teamId = $request->team_id;
 
@@ -83,6 +83,9 @@ class AppPublishingController extends Controller
 
         // Get the list of posts
         $posts = $query->get();
+		$posts = $query->get()->groupBy('grouping_data')->map(function($group) {
+			return $group->first(); // This gets the first item (most recent due to DESC order)
+		})->values();
 
         // Transform posts into FullCalendar event objects.
         $events = $posts->map(function($post) {
@@ -118,6 +121,7 @@ class AppPublishingController extends Controller
                 'className'       => '',
                 'extendedProps'   => [
                     'id'           => $post->id_secure,
+                    'grouping_data'=> $post->grouping_data,
                     'status'       => $post->status,
                     'type'         => $type,
                     'icon'         => $module['icon'] ?? '',
@@ -140,11 +144,12 @@ class AppPublishingController extends Controller
     public function preview(Request $request){
         $id = $request->id;
 
-        $post = Posts::with('account')->where("id_secure", $id)->where("team_id", $request->team_id)->first();
+        $post = Posts::with('account')->where("grouping_data", $id)->where("team_id", $request->team_id)->get();
 
         ms([
             "status" => 1,
             "data" => view(module("key") . '::preview', [
+				"frame_posts" => $post,
                 "post" => $post
             ])->render()
         ]);
