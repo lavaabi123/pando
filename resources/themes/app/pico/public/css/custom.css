@@ -13,6 +13,7 @@
     --sp-gray-700: #5E6278;
     --sp-gray-800: #3F4254;
     --sp-gray-900: #181C32;
+	--bs-border-color: #dedede;
 }
 body, html {
     font-family: "Open Sans", serif;
@@ -46,8 +47,36 @@ a {
 [type='color']::-webkit-color-swatch {
   border: none;
 }
+.bg-grey {
+	background: var(--sp-gray-100);
+}
 .colors .form-check-label {
     white-space: nowrap;
+}
+.btn.btn-primary, .btn.btn-secondary {
+    padding: 8px;
+    font-weight: 500;
+    font-size: 16px;
+    letter-spacing: 1px;
+    border-radius: 30px;
+	border: none;
+}
+.btn.btn-primary {
+	background: var(--d-primary);
+}
+.btn.btn-primary:hover {
+	background: #65c76c;
+}
+.btn.btn-secondary {
+    background-color: var(--sp-gray-300);
+    color: var(--white);
+}
+.btn.btn-secondary:hover {
+    background-color: var(--d-secondary);
+    color: var(--white);
+}
+.bg-primary {
+    background-color: var(--d-primary) !important;
 }
 /** Color Picker End **/
 
@@ -544,3 +573,43 @@ select.form-control {
     box-shadow: 0 0 0 2px var(--d-primary) inset !important;
 }
 
+/** Inbox Page **/
+.maxHeight-wos {
+    height: calc(100vh - 170px);
+}
+.h-100 {
+    height: 100% !important;
+}
+#inbox-detail-container .conversation-messages {
+    height: calc(100% - 150px);
+	margin-right: -15px;
+    padding-right: 15px;
+}
+#filter_form .accordion-button {
+    font-size: 14px;
+    padding: 0.8rem 1.25rem;
+    line-height: 1;
+}
+.scroll-bar::-webkit-scrollbar-track {
+    height: 90%;
+    margin: 30px 0 30px 10px;
+}
+#reply-form .input-group {
+    background: #e2e2e2;
+    border-radius: 10px;
+    border: 1px solid #c2c2c2;
+}
+#reply-form .btn {
+    background: transparent;
+    border: none;
+    color: #c2c2c2;
+}
+#reply-form .btn:hover {
+    box-shadow: none;
+    color: var(--primary);
+}
+#reply-form .input-group > .form-control {
+    background: transparent;
+    border: none;
+	resize: none;
+}

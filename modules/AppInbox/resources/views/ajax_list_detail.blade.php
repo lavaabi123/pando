@@ -1,16 +1,16 @@
 @if(!empty($lists))
-    <div class="conversation-detail">
-        <div class="conversation-header p-3 border-bottom">
+    <div class="conversation-detail h-100">
+        <div class="conversation-header py-3 border-bottom">
             <h5 class="mb-0">Conversation Details</h5>
         </div>
 
-        <div class="conversation-messages p-3" style="max-height: 500px; overflow-y: auto;">
+        <div class="conversation-messages pt-3" style="max-height: 500px; overflow-y: auto;">
             @foreach($lists as $message)
                 <div class="message-item mb-3 {{ $message['to_type'] == 'me' ? 'received' : 'sent' }}">
                     <div class="d-flex {{ $message['to_type'] == 'me' ? '' : 'flex-row-reverse' }}">
-                        <img src="{{ $message['from_image'] }}" class="rounded-circle me-3" width="35" height="35" alt="">
+                        <img src="{{ $message['from_image'] }}" class="rounded-circle {{ $message['to_type'] == 'me' ? 'me-2' : 'ms-2' }}" width="35" height="35" alt="">
                         <div class="message-content">
-                            <div class="message-bubble p-3 {{ $message['to_type'] == 'me' ? 'bg-light' : 'bg-primary text-white' }}">
+                            <div class="message-bubble p-2 b-r-10 {{ $message['to_type'] == 'me' ? 'bg-light' : 'bg-primary text-white' }}">
                                 <p class="mb-0">{{ $message['message'] }}</p>
                             </div>
                             <small class="text-muted d-block mt-1">
@@ -22,12 +22,12 @@
             @endforeach
         </div>
 
-        <div class="reply-section p-3 border-top">
+        <div class="reply-section py-3 border-top">
             <form id="reply-form" onsubmit="sendReply(event, '{{ $id }}', '{{ $conversation_id }}', '{{$lists[0]['inbox_type']}}')">
                 <div class="input-group">
-                    <textarea class="form-control" name="comment" rows="2" placeholder="Type your reply..." required></textarea>
+                    <textarea class="form-control" name="comment" rows="1" placeholder="Type your reply..." required></textarea>
                     <button class="btn btn-primary" type="submit">
-                        <i class="fa-light fa-paper-plane"></i> Send
+                        <i class="fa-light fa-paper-plane"></i>
                     </button>
                 </div>
                 <div class="form-check mt-2">

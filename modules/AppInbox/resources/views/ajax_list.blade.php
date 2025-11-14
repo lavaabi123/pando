@@ -1,15 +1,15 @@
 @if(!empty($inbox_list))
     <div class="inbox-messages-list">
         @foreach($inbox_list as $item)
-            <div class="inbox-item p-3 border-bottom {{ $item['is_completed'] ? 'completed' : '' }}" 
+            <div class="inbox-item py-3 border-bottom {{ $item['is_completed'] ? 'completed' : '' }}" 
                  data-id="{{ $item['id'] }}" 
                  data-type="{{ empty($item['conversation_id']) ? 'comment' : 'message' }}"
 				 data-network="{{ $item['media_type'] }}"
 				 data-post-id="{{ $item['post_id'] }}"
 				 data-conversation-id="{{ $item['conversation_id'] }}"
                  onclick="loadDetail(this)">
-                <div class="d-flex align-items-center">
-                    <img src="{{ $item['from_image'] }}" class="rounded-circle me-3" width="40" height="40" alt="">
+                <div class="d-flex align-items-start">
+                    <img src="{{ $item['from_image'] }}" class="rounded-circle me-3" width="35" height="35" alt="">
                     <div class="flex-grow-1">
                         <div class="d-flex justify-content-between">
                             <h6 class="mb-1">{{ $item['from_name'] }}</h6>

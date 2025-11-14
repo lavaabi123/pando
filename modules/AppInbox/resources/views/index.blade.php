@@ -3,17 +3,17 @@
 @section('title', $title ?? 'Inbox')
 
 @section('content')
-<div class="container-fluid p-x-25">
+<div class="container mw-100">
     <div class="row py-4">
         <!-- Filter Sidebar -->
         <div class="col-3 mw-300">
             <div class="my-1">
-                <h3 class="d-flex icon-primary mb-0">
-                    <i class="fa-light fa-filter me-2"></i> Filter
+                <h3 class="fw-7 mb-4 fs-22">
+                    <i class="fa-light fa-filter me-2"></i>Filter
                 </h3>
             </div>
             
-            <div class="b-r-30 border bg-white p-20">
+            <div class="b-r-30 border bg-white p-3">
                 <form id="filter_form">
                     <input type="hidden" id="pagenos" name="page" value="1" />
 
@@ -22,7 +22,7 @@
                         </ul>
                     </div>
 
-                    <div class="accordion accordion-flush my-2" id="accordionFlushExample">
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
                         <!-- Brand Filter -->
                         <div class="accordion-item b-r-25 border overflow-hidden mb-3">
                             <h2 class="accordion-header" id="flush-headingBrand">
@@ -210,11 +210,11 @@
 				  <label class="form-check-label" for="showCompleted">Show completed messages</label>
 				</div> 
 
-                    <div class="mt-3">
-                        <button type="button" class="btn btn-primary w-100" onclick="applyFilter()">
-                            Apply Filter
+                    <div class="d-flex align-item-center justify-content-center flex-wrap border-0 mt-4">
+                        <button type="button" class="btn btn-primary me-2 mb-1 w-110" onclick="applyFilter()">
+                            Filter
                         </button>
-                        <button type="button" class="btn btn-secondary w-100 mt-2" onclick="resetFilter()">
+                        <button type="button" class="btn btn-secondary mb-1 w-110" onclick="resetFilter()">
                             Reset
                         </button>
                     </div>
@@ -223,37 +223,41 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="col-6">
-            <div class="row">
-                <!-- Inbox List -->
-                <div class="col-md-12">
-                    <div class="bg-white b-r-30 p-20">
-                        <h3 class="mb-3">Inbox</h3>
-                        <div id="inbox-list-container">
-                            <!-- Inbox list will be loaded here via AJAX -->
-                            <div class="text-center py-5">
-                                <i class="fa-light fa-spinner fa-spin fa-3x"></i>
-                                <p class="mt-3">Loading inbox...</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-		
-		
-		<!-- Detail View -->
-		<div class="col-md-3">
-			<div class="bg-white b-r-30 p-20">
-				<div id="inbox-detail-container">
-					<!-- Detail view will be loaded here via AJAX -->
-					<div class="text-center py-5 text-muted">
-						<i class="fa-light fa-inbox fa-3x"></i>
-						<p class="mt-3">Select a conversation to view details</p>
+        <div class="col-9">
+			<h3 class="fw-7 mb-4 fs-22"><span class="d-inline-block w-22">{!! file_get_contents(public_path('img/post.svg')) !!}</span> Inbox</h3>
+			<div class="border b-r-30 p-3 fs-14 maxHeight-wos overflow-hidden">
+				<div class="row h-100">
+					<!-- Inbox List -->
+					<div class="col-md-6 h-100">
+						<div class="bg-white border b-r-30 p-3 h-100 overflow-auto scroll-bar">
+							
+							<div id="inbox-list-container">
+								<!-- Inbox list will be loaded here via AJAX -->
+								<div class="text-center py-5">
+									<i class="fa-light fa-spinner fa-spin fa-3x"></i>
+									<p class="mt-3">Loading inbox...</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Detail View -->
+					<div class="col-md-6 h-100">
+						<div class="bg-grey border b-r-30 px-3 pb-3 h-100">
+							<div id="inbox-detail-container" class="h-100">
+								<!-- Detail view will be loaded here via AJAX -->
+								<div class="text-center py-5 text-muted">
+									<i class="fa-light fa-inbox fa-3x"></i>
+									<p class="mt-3">Select a conversation to view details</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+        </div>
+		
+		
+		
 				
     </div>
 </div>
