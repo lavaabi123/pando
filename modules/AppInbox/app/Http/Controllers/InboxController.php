@@ -240,7 +240,7 @@ class InboxController extends Controller
         if ($request->inbox_type == 'comment') {
             // It's a comment
             $result = $this->postComment($id, $comment, $conversationId, $completeId);
-        } else if ($request->inbox_type == 'message'){
+        } else if ($request->inbox_type == 'message' || $request->inbox_type == 'Messenger'){
             // It's a message
             $result = $this->postMessage($id, $comment, $conversationId, $completeId);
         }else if ($request->inbox_type == 'tag'){
@@ -256,7 +256,7 @@ class InboxController extends Controller
 
         return response()->json($result);
     }
-
+	
     /**
      * Delete single message
      */
@@ -965,4 +965,9 @@ class InboxController extends Controller
             ->where('is_deleted', 0)
             ->count();
     }
+	
+	public function cron()
+    {
+		$messages = Inbox::get_message_conversation(3);
+	}
 }

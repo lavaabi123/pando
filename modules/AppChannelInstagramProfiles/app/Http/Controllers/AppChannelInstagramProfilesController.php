@@ -73,12 +73,16 @@ class AppChannelInstagramProfilesController extends Controller
             }
 
             $page_ids = [];
+			$fb_id = [];
+            $fbaccesstoken = [];
             if(isset($response['data']) && !empty($response['data']))
             {
                 foreach ($response['data'] as $value) 
                 {
                     if(isset($value['instagram_business_account']))
                     {
+						$fb_id[] = $value['id'];
+						$fbaccesstoken[] = $value['access_token'];
                         $page_ids[] = $value['instagram_business_account']['id'];
                     }
                 }
@@ -101,6 +105,8 @@ class AppChannelInstagramProfilesController extends Controller
 
                         $result[] = [
                             'id' => $response['id'],
+                            'fid' => (isset($fb_id[$key])) ? $fb_id[$key] :'',
+                            'ftoken' => (isset($fbaccesstoken[$key])) ? $fbaccesstoken[$key] :'',
                             'name' => isset($response['name'])?$response['name']:$response['username'],
                             'username' => $response['username'],
                             'avatar' => $response['profile_picture_url']??text2img($response['username'], 'rand'),

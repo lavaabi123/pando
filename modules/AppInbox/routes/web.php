@@ -30,5 +30,6 @@ Route::group(["prefix" => "app"], function () {
 		Route::post('/assign-tag', [InboxController::class, 'assignTag'])->name('inbox.assign_tag');
 		Route::post('/set-favourite', [InboxController::class, 'setFavourite'])->name('inbox.set_favourite');
 		Route::post('/assign-user', [InboxController::class, 'assignUser'])->name('inbox.assign_user');
+		Route::get('/cron', [InboxController::class, 'cron'])->name('inbox.cron');
 	});
 });
