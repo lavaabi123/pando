@@ -153,10 +153,6 @@
                             <small class="text-muted">{{ date('M d, Y, h:i a', strtotime($item['created_time'])) }}</small>
                         </div>
                         <p class="mb-1">{{ $item['message'] }}</p>
-                        <small class="text-muted">
-                            <i class="fab fa-{{ strtolower($item['media_type']) }} me-1"></i>
-                            {{ $item['inbox_type'] }}
-                        </small>
                     </div>
                 </div>
                 
