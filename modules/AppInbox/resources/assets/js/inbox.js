@@ -5,7 +5,12 @@ $(document).ready(function() {
     });
 
     function loadInboxList(page = 1) {
-        const formData = $('#filter_form').serialize() + '&page=' + page;
+        let formData = $('#filter_form').serialize() + '&page=' + page;
+		// Append date_range to the string
+		const dateRange = $('input[name="daterange"]').val();
+		if (dateRange) {
+			formData += '&dateRange=' + encodeURIComponent(dateRange);
+		}
         $.ajax({
             url: routes.inboxAjax,
             type: 'POST',
@@ -23,8 +28,10 @@ $(document).ready(function() {
                 } else {
                     $('.filtered-list').hide();
                 }
+				$(".loading").hide();
             },
             error: function(xhr) {
+				$(".loading").hide();
                 $('#inbox-list-container').html('<div class="alert alert-danger">Error loading inbox. Please try again.</div>');
             }
         });
@@ -412,4 +419,56 @@ function delete_inbox_message(id,table){
 			loadInboxList();
 		}
 	});
+}
+
+$(document).ready(function() {
+  datarangeinbox();
+});
+
+function datarangeinbox(){
+	if( $(".datarangeinbox").length > 0 && $("[name='daterange']").length == 0){
+		$(".datarangeinbox").html('<button type="button" id="daterange" class="bg-white px-3 py-2 border b-r-15 d-flex align-items-center gap-2"><div class="icon-primary" id="mySvgContainer"></div><span>Select date Range</span> <i class="fa fa-caret-down"></i> <input type="hidden" name="daterange" value=""></button><button type="submit" id="btn_daterange" class="d-none"></button>');
+		$('#mySvgContainer').load('assets/img/calender.svg');
+
+		var start = moment();
+		var end = moment();
+
+		function cb(start, end) {
+			//$('#daterange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+			$("[name='daterange']").val('');
+			setTimeout(function(){
+				if(!$(".datarangeinbox").hasClass("no-submit")){
+					$("#btn_daterange").trigger("click");
+				}
+			}, 200);
+		}
+
+		$('#daterange').daterangepicker({
+			startDate: start,
+			endDate: end
+		}, cb);
+
+		cb(start, end);
+
+		$('#daterange').on('apply.daterangepicker', function(e, picker) {
+			e.preventDefault();
+			$('#daterange span').html(picker.startDate.format('MMM D, YYYY') + ' - ' + picker.endDate.format('MMM D, YYYY'));
+			$("[name='daterange']").val(picker.startDate.format('YYYY-MM-DD')+","+picker.endDate.format('YYYY-MM-DD'));
+			filter_result(e);
+			
+		});
+		$('#daterange').on('cancel.daterangepicker', function(e, picker) {
+			e.preventDefault();
+			$('#daterange span').html('Select date Range');
+			$("[name='daterange']").val('');
+			filter_result(e);
+			
+		});
+	}
+};
+
+function filter_result(e){
+	e.preventDefault();
+	$('.loading').show();
+	loadInboxList();
 }

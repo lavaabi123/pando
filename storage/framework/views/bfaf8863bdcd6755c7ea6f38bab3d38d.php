@@ -1,17 +1,17 @@
 <?php $__env->startSection('title', $title ?? 'Inbox'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="container-fluid p-x-25">
+<div class="container mw-100">
     <div class="row py-4">
         <!-- Filter Sidebar -->
         <div class="col-3 mw-300">
             <div class="my-1">
-                <h3 class="d-flex icon-primary mb-0">
-                    <i class="fa-light fa-filter me-2"></i> Filter
+                <h3 class="fw-7 mb-4 fs-22">
+                    <i class="fa-light fa-filter me-2"></i>Filter
                 </h3>
             </div>
             
-            <div class="b-r-30 border bg-white p-20">
+            <div class="b-r-30 border bg-white p-3">
                 <form id="filter_form">
                     <input type="hidden" id="pagenos" name="page" value="1" />
 
@@ -20,7 +20,7 @@
                         </ul>
                     </div>
 
-                    <div class="accordion accordion-flush my-2" id="accordionFlushExample">
+                    <div class="accordion accordion-flush" id="accordionFlushExample">
                         <!-- Brand Filter -->
                         <div class="accordion-item b-r-25 border overflow-hidden mb-3">
                             <h2 class="accordion-header" id="flush-headingBrand">
@@ -84,7 +84,7 @@
 						  <input type="checkbox" name="accounts[]" value="<?php echo e($value->id); ?>" class="me-2">
 						  <div class="symbol symbol-35px px-3 py-2" style="padding-left: 0 !important;">
 									<img src="<?php echo e(Media::url($value->avatar)); ?>" style="width:25px; height:25px" class="rounded-circle align-self-center" alt="">
-									<?php echo e(get_social_media_icon($value->social_network)); ?>							
+									<?php echo get_social_media_icon($value->social_network); ?>							
 								</div><span data-toggle="tooltip" data-placement="top" title="<?php echo e($value->name); ?>" class="text-truncate"><?php echo e($value->name); ?></span><!----><!---->
 						  
 						  </li>							  
@@ -208,11 +208,11 @@
 				  <label class="form-check-label" for="showCompleted">Show completed messages</label>
 				</div> 
 
-                    <div class="mt-3">
-                        <button type="button" class="btn btn-primary w-100" onclick="applyFilter()">
-                            Apply Filter
+                    <div class="d-flex align-item-center justify-content-center flex-wrap border-0 mt-4">					
+                        <button type="button" class="btn btn-primary me-2 mb-1 w-110" onclick="applyFilter()">
+                            Filter
                         </button>
-                        <button type="button" class="btn btn-secondary w-100 mt-2" onclick="resetFilter()">
+                        <button type="button" class="btn btn-secondary mb-1 w-110" onclick="resetFilter()">
                             Reset
                         </button>
                     </div>
@@ -221,37 +221,120 @@
         </div>
 
         <!-- Main Content Area -->
-        <div class="col-6">
-            <div class="row">
-                <!-- Inbox List -->
-                <div class="col-md-12">
-                    <div class="bg-white b-r-30 p-20">
-                        <h3 class="mb-3">Inbox</h3>
-                        <div id="inbox-list-container">
-                            <!-- Inbox list will be loaded here via AJAX -->
-                            <div class="text-center py-5">
-                                <i class="fa-light fa-spinner fa-spin fa-3x"></i>
-                                <p class="mt-3">Loading inbox...</p>
-                            </div>
+        <div class="col-9">
+			<h3 class="fw-7 mb-4 fs-22"><span class="d-inline-block w-22"><?php echo file_get_contents(public_path('img/post.svg')); ?></span> Inbox</h3>
+			<div class="border b-r-30 p-3 fs-14 maxHeight-wos overflow-hidden">
+			<div id="fav-feed-header" class="mb-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="datarangeinbox"></div>
+        
+        <div class="dropdown">
+            <button class="btn btn-link text-muted d-flex align-items-center justify-content-center" 
+                    type="button" 
+                    id="dropdownMenuButton" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                    style="width: 30px; height: 30px;">
+                <i class="fa fa-ellipsis-v"></i>
+            </button>
+        
+            <ul class="dropdown-menu dropdown-menu-end" 
+                aria-labelledby="dropdownMenuButton" 
+                style="min-width: 240px;">
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 complete_selected_items" 
+                       href="javascript:void(0)" 
+                       onclick="complete_selected_items()">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
                         </div>
-                    </div>
-                </div>
-            </div>
+                        <span class="text-dark"><?php echo e(__('Complete selected items')); ?></span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 complete_all_items" 
+                       href="javascript:void(0)" 
+                       onclick="complete_all_items()">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
+                        </div>
+                        <span class="text-dark"><?php echo e(__('Complete all items')); ?></span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 incomplete_selected_items" 
+                       href="javascript:void(0)" 
+                       onclick="incomplete_selected_items()"
+                       style="display:none">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
+                        </div>
+                        <span class="text-dark"><?php echo e(__('Incomplete selected items')); ?></span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 incomplete_all_items" 
+                       href="javascript:void(0)" 
+                       onclick="incomplete_all_items()"
+                       style="display:none">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
+                        </div>
+                        <span class="text-dark"><?php echo e(__('Incomplete all items')); ?></span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3" 
+                       href="javascript:void(0)" 
+                       onclick="delete_selected_items()"
+                       data-confirm="<?php echo e(__('Are you sure to delete selected items?')); ?>">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-trash text-muted"></i>
+                        </div>
+                        <span class="text-dark"><?php echo e(__('Delete selected items')); ?></span>
+                    </a>
+                </li>
+            </ul>
         </div>
-		
-		
-		<!-- Detail View -->
-		<div class="col-md-3">
-			<div class="bg-white b-r-30 p-20">
-				<div id="inbox-detail-container">
-					<!-- Detail view will be loaded here via AJAX -->
-					<div class="text-center py-5 text-muted">
-						<i class="fa-light fa-inbox fa-3x"></i>
-						<p class="mt-3">Select a conversation to view details</p>
+    </div>
+</div>
+				<div class="row h-100">
+					<!-- Inbox List -->
+					<div class="col-md-6 h-100">
+						<div class="bg-white border b-r-30 p-3 h-100 overflow-auto scroll-bar">
+							
+							<div id="inbox-list-container">
+								<!-- Inbox list will be loaded here via AJAX -->
+								<div class="text-center py-5">
+									<i class="fa-light fa-spinner fa-spin fa-3x"></i>
+									<p class="mt-3">Loading inbox...</p>
+								</div>
+							</div>
+						</div>
+					</div>
+					<!-- Detail View -->
+					<div class="col-md-6 h-100">
+						<div class="bg-grey border b-r-30 px-3 pb-3 h-100">
+							<div id="inbox-detail-container" class="h-100">
+								<!-- Detail view will be loaded here via AJAX -->
+								<div class="text-center py-5 text-muted">
+									<i class="fa-light fa-inbox fa-3x"></i>
+									<p class="mt-3">Select a conversation to view details</p>
+								</div>
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
-		</div>
+        </div>
+		
+		
+		
 				
     </div>
 </div>
@@ -343,6 +426,9 @@ inboxAjax: <?php echo json_encode(route('inbox.ajax_list'), 15, 512) ?>,
 addTag: <?php echo json_encode(route('inbox.add_tag'), 15, 512) ?>,
 inboxDetail: <?php echo json_encode(route('inbox.ajax_list_detail'), 15, 512) ?>,
 };
+function clear_form(){
+	$('#filter_form')[0].reset();
+}
 </script>
 <?php $__env->stopSection(); ?>
 

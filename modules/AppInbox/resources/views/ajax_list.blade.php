@@ -6,8 +6,7 @@
                  data-type="{{ empty($item['conversation_id']) ? 'comment' : 'message' }}"
 				 data-network="{{ $item['media_type'] }}"
 				 data-post-id="{{ $item['post_id'] }}"
-				 data-conversation-id="{{ $item['conversation_id'] }}"
-                 onclick="loadDetail(this)">
+				 data-conversation-id="{{ $item['conversation_id'] }}">
 				 
 				<div class="d-flex" 
 					 data-id="{{ $item['id'] }}" 
@@ -27,7 +26,11 @@
 						</label>
 					</div>	
 										
-					<div onclick="load_detail(this)" class="post-account">
+					<div onclick="loadDetail(this)" data-id="{{ $item['id'] }}" 
+                 data-type="{{ empty($item['conversation_id']) ? 'comment' : 'message' }}"
+				 data-network="{{ $item['media_type'] }}"
+				 data-post-id="{{ $item['post_id'] }}"
+				 data-conversation-id="{{ $item['conversation_id'] }}" class="post-account">
 						<div class="text-gray-600 size-40 min-w-40 d-flex align-items-center justify-content-between position-relative">
 							<img data-src="{{ Media::url($item['to_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
 							<span class="size-17 border-1 b-r-100 position-absolute fs-9 d-flex align-items-center justify-content-between text-center text-white b-0 r-0">
@@ -37,11 +40,12 @@
 						
 					</div>
 					
-					<span onclick="load_detail(this)" 
+					<span onclick="loadDetail(this)" 
 						  data-id="{{ $item['id'] }}" 
-						  data-conversation-id="{{ $item['conversation_id'] }}" 
-						  data-post-id="{{ $item['post_id'] }}" 
-						  data-network="{{ $item['media_type'] }}" 
+                 data-type="{{ empty($item['conversation_id']) ? 'comment' : 'message' }}"
+				 data-network="{{ $item['media_type'] }}"
+				 data-post-id="{{ $item['post_id'] }}"
+				 data-conversation-id="{{ $item['conversation_id'] }}"
 						  style="cursor:pointer" 
 						  class="ml-2 fw-7 mb-0 fs-11">
 						@if($item['media_type'] == 'twitter')
@@ -58,7 +62,7 @@
 					</span>
 				</div> 
 				<span class="d-flex">
-					<a onclick="load_detail(this)" 
+					<a 
 					   data-id="{{ $item['id'] }}" 
 					   data-conversation-id="{{ $item['conversation_id'] }}" 
 					   data-post-id="{{ $item['post_id'] }}" 
@@ -126,7 +130,7 @@
 								 
 								 <a href="{{ $item['post_url'] }}" 
 								   target="_blank" 
-								   class="dropdown-item link d-flex py-3 px-3 align-items-center">
+								   class="dropdown-item link d-flex py-3 px-3 align-i r">
 									<div class="icon-container mx-2 d-flex">
 									{{get_social_media_image($item['media_type'])}}
 									</div>
@@ -139,7 +143,11 @@
 				</span>
 
 
-                <div class="d-flex align-items-start">
+                <div class="d-flex align-items-start" onclick="loadDetail(this)" data-id="{{ $item['id'] }}" 
+                 data-type="{{ empty($item['conversation_id']) ? 'comment' : 'message' }}"
+				 data-network="{{ $item['media_type'] }}"
+				 data-post-id="{{ $item['post_id'] }}"
+				 data-conversation-id="{{ $item['conversation_id'] }}">
 				
 					<div class="text-gray-600 size-40 min-w-40 d-flex align-items-center justify-content-between position-relative">
 						<img data-src="{{ Media::url($item['from_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">

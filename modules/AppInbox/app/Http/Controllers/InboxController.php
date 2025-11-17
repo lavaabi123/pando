@@ -153,10 +153,11 @@ class InboxController extends Controller
 
         // Date range filter
         if ($request->has('dateRange') && !empty($request->dateRange)) {
-            $dateRange = explode(' - ', $request->dateRange);
+            $dateRange = explode(',', $request->dateRange);
             if (count($dateRange) == 2) {
-                $wheres['(i.created_time - INTERVAL 7 HOUR) >='] = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
-                $wheres['(i.created_time - INTERVAL 7 HOUR) <='] = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+                // CORRECT - Use simple keys
+				$wheres['date_start'] = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+				$wheres['date_end'] = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
                 $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $request->dateRange . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Date:</span><span class="text-truncate me-3">' . $request->dateRange . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'dateRange\',\'' . $request->dateRange . '\')">x</span></div></li>';
             }
         }

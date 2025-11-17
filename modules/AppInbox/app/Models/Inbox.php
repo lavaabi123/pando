@@ -130,15 +130,25 @@ class Inbox extends Model
 			})
 			->orderBy('i.created_time', 'DESC');
 		
-		// Apply where conditions
-		if (!empty($wheres) && is_array($wheres)) {
-			foreach ($wheres as $key => $value) {
-				if (!in_array($key, ['(i.created_time - INTERVAL 7 HOUR) >=', '(i.created_time - INTERVAL 7 HOUR) <='])) {
-					$key = (strpos($key, 't.') !== false) ? $key : 'i.' . $key;
-				}
-				$query->where($key, $value);
-			}
-		}
+		 // Apply where conditions
+    if (!empty($wheres) && is_array($wheres)) {
+        foreach ($wheres as $key => $value) {
+            // Handle date filters FIRST
+            if ($key === 'date_start') {
+                $query->whereRaw('(i.created_time - INTERVAL 7 HOUR) >= ?', [$value]);
+            } elseif ($key === 'date_end') {
+                $query->whereRaw('(i.created_time - INTERVAL 7 HOUR) <= ?', [$value]);
+            } 
+            // Handle prefixed columns
+            elseif (strpos($key, 't.') !== false || strpos($key, 'u2.') !== false) {
+                $query->where($key, $value);
+            } 
+            // Regular columns
+            else {
+                $query->where('i.' . $key, $value);
+            }
+        }
+    }
 		
 		// Apply whereIn conditions
 		if (!empty($whereIn) && is_array($whereIn)) {

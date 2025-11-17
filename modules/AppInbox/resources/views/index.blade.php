@@ -226,6 +226,85 @@
         <div class="col-9">
 			<h3 class="fw-7 mb-4 fs-22"><span class="d-inline-block w-22">{!! file_get_contents(public_path('img/post.svg')) !!}</span> Inbox</h3>
 			<div class="border b-r-30 p-3 fs-14 maxHeight-wos overflow-hidden">
+			<div id="fav-feed-header" class="mb-4">
+    <div class="d-flex align-items-center justify-content-between">
+        <div class="datarangeinbox"></div>
+        
+        <div class="dropdown">
+            <button class="btn btn-link text-muted d-flex align-items-center justify-content-center" 
+                    type="button" 
+                    id="dropdownMenuButton" 
+                    data-bs-toggle="dropdown" 
+                    aria-expanded="false"
+                    style="width: 30px; height: 30px;">
+                <i class="fa fa-ellipsis-v"></i>
+            </button>
+        
+            <ul class="dropdown-menu dropdown-menu-end" 
+                aria-labelledby="dropdownMenuButton" 
+                style="min-width: 240px;">
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 complete_selected_items" 
+                       href="javascript:void(0)" 
+                       onclick="complete_selected_items()">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
+                        </div>
+                        <span class="text-dark">{{ __('Complete selected items') }}</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 complete_all_items" 
+                       href="javascript:void(0)" 
+                       onclick="complete_all_items()">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
+                        </div>
+                        <span class="text-dark">{{ __('Complete all items') }}</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 incomplete_selected_items" 
+                       href="javascript:void(0)" 
+                       onclick="incomplete_selected_items()"
+                       style="display:none">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
+                        </div>
+                        <span class="text-dark">{{ __('Incomplete selected items') }}</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3 incomplete_all_items" 
+                       href="javascript:void(0)" 
+                       onclick="incomplete_all_items()"
+                       style="display:none">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-check-circle text-muted"></i>
+                        </div>
+                        <span class="text-dark">{{ __('Incomplete all items') }}</span>
+                    </a>
+                </li>
+                
+                <li>
+                    <a class="dropdown-item align-items-center py-3 px-3" 
+                       href="javascript:void(0)" 
+                       onclick="delete_selected_items()"
+                       data-confirm="{{ __('Are you sure to delete selected items?') }}">
+                        <div class="icon-container mx-2">
+                            <i class="fal fa-trash text-muted"></i>
+                        </div>
+                        <span class="text-dark">{{ __('Delete selected items') }}</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
 				<div class="row h-100">
 					<!-- Inbox List -->
 					<div class="col-md-6 h-100">
