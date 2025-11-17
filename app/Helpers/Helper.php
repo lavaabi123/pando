@@ -703,25 +703,21 @@ if(!function_exists('groupArray')){
 if (!function_exists("get_social_media_icon")) {
     function get_social_media_icon($network)
     {
-        if(strtolower($network) == 'facebook'){
-			echo '<i class="post-media fab fa-facebook-f" style="color: #0074fa;right: 13px;"></i>';
-		}elseif(strtolower($network) == 'twitter' || strtolower($network) == 'x'){
-			echo '<i class="post-media fab fa-x-twitter" style="color: #000;right: 13px;"></i>';
-		}elseif(strtolower($network) == 'instagram'){
-			echo '<i class="post-media fab fa-instagram" style="color: #fff;background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);right: 13px;"></i>';
-		}elseif(strtolower($network) == 'linkedin'){
-			echo '<i class="post-media fab fa-linkedin" style="color: #fff;background-color:#0077b5;right: 13px;"></i>';
-		}elseif(strtolower($network) == 'pinterest'){
-			echo '<i class="post-media fab fa-pinterest" style="color: #cd2029;right: 13px;"></i>';
-		}elseif(str_replace("_", " ", strtolower($network)) == 'google_business'){
-			echo '<i class="post-media fab fa-googlemybusiness" style="color: #4b88ef;right: 13px;"></i>';
-		}elseif(str_replace("_", " ", strtolower($network)) == 'tiktok'){
-			echo '<i class="post-media fab fa-tiktok" style="color: #4b88ef;right: 13px;"></i>';
-		}elseif(str_replace("_", " ", strtolower($network)) == 'youtube'){
-			echo '<i class="post-media fab fa-youtube" style="color: #4b88ef;right: 13px;"></i>';
-		}else{
-			echo '<i class="post-media fab fa-user"></i>';
-		}
+        $network = strtolower(str_replace('_', ' ', $network));
+        
+        $icons = [
+            'facebook' => '<i class="post-media fab fa-facebook-f" style="color: #0074fa; right: 13px;"></i>',
+            'twitter' => '<i class="post-media fab fa-x-twitter" style="color: #000; right: 13px;"></i>',
+            'x' => '<i class="post-media fab fa-x-twitter" style="color: #000; right: 13px;"></i>',
+            'instagram' => '<i class="post-media fab fa-instagram" style="color: #fff; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); right: 13px;"></i>',
+            'linkedin' => '<i class="post-media fab fa-linkedin" style="color: #fff; background-color: #0077b5; right: 13px;"></i>',
+            'pinterest' => '<i class="post-media fab fa-pinterest" style="color: #cd2029; right: 13px;"></i>',
+            'google business' => '<i class="post-media fab fa-google" style="color: #4b88ef; right: 13px;"></i>',
+            'tiktok' => '<i class="post-media fab fa-tiktok" style="color: #000; right: 13px;"></i>',
+            'youtube' => '<i class="post-media fab fa-youtube" style="color: #ff0000; right: 13px;"></i>',
+        ];
+        
+        return $icons[$network] ?? '<i class="post-media fab fa-user"></i>';
     }
 }
 
@@ -775,6 +771,37 @@ if (!function_exists("get_social_media_icon_large")) {
     }
 }
 
+if (!function_exists('get_user_name')) {
+    function get_user_name($id = 0)
+    {
+        $user = DB::table('users')
+            ->select('fullname')
+            ->where('id', $id)
+            ->first();
+        
+        if ($user && isset($user->fullname)) {
+            return $user->fullname;
+        }
+        
+        return false;
+    }
+}
+
+if (!function_exists('get_profile_name')) {
+    function get_profile_name($id = 0)
+    {
+        $account = DB::table('accounts')
+            ->select('name', 'avatar', 'social_network')
+            ->where('id', $id)
+            ->first();
+        
+        if ($account) {
+            return $account;
+        }
+        
+        return false;
+    }
+}
 
 include_once "Language_Helper.php";
 include_once "AI_Helper.php";

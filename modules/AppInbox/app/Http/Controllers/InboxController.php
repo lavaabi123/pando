@@ -130,7 +130,7 @@ class InboxController extends Controller
             $whereIn['account_id'] = $request->accounts;
             foreach ($request->accounts as $account) {
                 $profile = $this->getProfileName($account);
-                $icon = $this->generateProfileIcon($profile);
+                $icon = get_social_media_icon($profile->social_network);
                 $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $profile->name . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Profile:</span><span class="text-truncate me-3">' . $icon . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'accounts[]\',' . $account . ')">x</span></div></li>';
             }
         }
@@ -489,47 +489,64 @@ class InboxController extends Controller
     /**
      * Assign tag to inbox item
      */
-    public function assignTag(Request $request)
-    {
-        $tagIds = !empty($request->selected_tags) ? implode(',', $request->selected_tags) : '';
-
-        DB::statement("
-            INSERT INTO inbox_tags_manage (inbox_id, tag_ids, table_name, added_user_id, brand_id) 
-            VALUES (?, ?, ?, ?, ?) 
-            ON DUPLICATE KEY UPDATE tag_ids = ?",
-            [
-                $request->inbox_id,
-                $tagIds,
-                $request->table,
-                session('user_id'),
-                session('brand_id'),
-                $tagIds
-            ]
-        );
-
-        $result = DB::table('inbox_tags_manage as t')
-            ->select('t.*', DB::raw('GROUP_CONCAT(t2.tag_name) AS tag_names'))
-            ->leftJoin('inbox_tags as t2', function($join) {
-                $join->whereRaw('FIND_IN_SET(t2.id, t.tag_ids)');
-            })
-            ->where('t.table_name', $request->table)
-            ->where('t.inbox_id', $request->inbox_id)
-            ->first();
-
-        $html = '';
-        if (!empty($result) && $result->tag_names != null) {
-            $tagNames = explode(',', $result->tag_names);
-            foreach ($tagNames as $tagName) {
-                $html .= '<span class="badge bg-secondary me-2"><i class="fa-tag fal me-1"></i><span>' . $tagName . '</span></span>';
-            }
-        }
-
-        return response()->json([
-            'message' => 'success',
-            'html' => $html,
-            'ids' => $tagIds
-        ]);
-    }
+	public function assignTag(Request $request)
+	{
+		$tagIds = !empty($request->selected_tags) ? implode(',', $request->selected_tags) : '';
+		
+		if (empty($tagIds)) {
+			DB::table('inbox_tags_manage')
+				->where('inbox_id', $request->inbox_id)
+				->where('table_name', $request->table)
+				->delete();
+			
+			return response()->json([
+				'message' => 'success',
+				'html' => '',
+				'ids' => ''
+			]);
+		}
+		
+		DB::statement("
+			INSERT INTO inbox_tags_manage (inbox_id, tag_ids, table_name, added_user_id, brand_id) 
+			VALUES (?, ?, ?, ?, ?) 
+			ON DUPLICATE KEY UPDATE 
+				tag_ids = ?,
+				added_user_id = ?",
+			[
+				$request->inbox_id,
+				$tagIds,
+				$request->table,
+				session('user_id'),
+				session('brand_id'),
+				$tagIds,
+				session('user_id')
+			]
+		);
+		
+		$html = '';
+		if (!empty($tagIds)) {
+			$tagIdArray = array_filter(explode(',', $tagIds));
+			
+			if (!empty($tagIdArray)) {
+				$tagNames = DB::table('inbox_tags')
+					->whereIn('id', $tagIdArray)
+					->pluck('tag_name');
+				
+				foreach ($tagNames as $tagName) {
+					$html .= '<span class="badge bg-secondary me-2">'
+						   . '<i class="fa-tag fal me-1"></i>'
+						   . '<span>' . e($tagName) . '</span>'
+						   . '</span>';
+				}
+			}
+		}
+		
+		return response()->json([
+			'message' => 'success',
+			'html' => $html,
+			'ids' => $tagIds
+		]);
+	}
 
     /**
      * Set favourite status
@@ -547,46 +564,68 @@ class InboxController extends Controller
      * Assign user to inbox item
      */
     public function assignUser(Request $request)
-    {
-        $userIds = !empty($request->selected_users) ? implode(',', $request->selected_users) : '';
-
-        DB::statement("
-            INSERT INTO inbox_users_manage (inbox_id, user_ids, table_name, added_user_id, brand_id) 
-            VALUES (?, ?, ?, ?, ?) 
-            ON DUPLICATE KEY UPDATE user_ids = ?",
-            [
-                $request->inbox_id,
-                $userIds,
-                $request->table,
-                session('user_id'),
-                session('brand_id'),
-                $userIds
-            ]
-        );
-
-        $result = DB::table('inbox_users_manage as t')
-            ->select('t.*', DB::raw('GROUP_CONCAT(t2.fullname) AS user_names'))
-            ->leftJoin('users as t2', function($join) {
-                $join->whereRaw('FIND_IN_SET(t2.id, t.user_ids)');
-            })
-            ->where('t.table_name', $request->table)
-            ->where('t.inbox_id', $request->inbox_id)
-            ->first();
-
-        $html = '';
-        if (!empty($result) && $result->user_names != null) {
-            $userNames = explode(',', $result->user_names);
-            foreach ($userNames as $userName) {
-                $html .= '<span class="badge bg-secondary me-2"><i class="fa-user fal me-1"></i><span>' . $userName . '</span></span>';
-            }
-        }
-
-        return response()->json([
-            'message' => 'success',
-            'html' => $html,
-            'ids' => $userIds
-        ]);
-    }
+	{
+		// Get selected user IDs (could be empty if all unchecked)
+		$userIds = !empty($request->selected_users) ? implode(',', $request->selected_users) : '';
+		
+		// If no users selected, delete the entire record
+		if (empty($userIds)) {
+			DB::table('inbox_users_manage')
+				->where('inbox_id', $request->inbox_id)
+				->where('table_name', $request->table)
+				->delete();
+			
+			return response()->json([
+				'message' => 'success',
+				'html' => '',
+				'ids' => ''
+			]);
+		}
+		
+		// Insert new record or UPDATE existing record with new user_ids
+		// This will replace "2,4,6" with "2,6" automatically
+		DB::statement("
+			INSERT INTO inbox_users_manage (inbox_id, user_ids, table_name, added_user_id, brand_id) 
+			VALUES (?, ?, ?, ?, ?) 
+			ON DUPLICATE KEY UPDATE 
+				user_ids = ?,
+				added_user_id = ?",
+			[
+				$request->inbox_id,
+				$userIds,
+				$request->table,
+				session('user_id'),
+				session('brand_id'),
+				$userIds,  // This replaces the old value
+				session('user_id')
+			]
+		);
+		
+		$html = '';
+		if (!empty($userIds)) {
+			$userIdArray = array_filter(explode(',', $userIds));
+			
+			if (!empty($userIdArray)) {
+				$userNames = DB::table('users')
+					->whereIn('id', $userIdArray)
+					->orderByRaw('FIELD(id, ' . implode(',', $userIdArray) . ')')
+					->pluck('fullname');
+				
+				foreach ($userNames as $userName) {
+					$html .= '<span class="badge bg-secondary me-2">'
+						   . '<i class="fa-user fal me-1"></i>'
+						   . '<span>' . e($userName) . '</span>'
+						   . '</span>';
+				}
+			}
+		}
+		
+		return response()->json([
+			'message' => 'success',
+			'html' => $html,
+			'ids' => $userIds
+		]);
+	}
 
     // Helper methods would go here
     // These would need to be implemented based on your specific application logic
@@ -644,67 +683,123 @@ class InboxController extends Controller
 		return $brands;
     }
 
-    protected function getUsersList()
-    {
-        $userId = session('user_id');
-        $isAdmin = session('is_admin', 0);
-
-        if ($isAdmin == 0) {
-            $role = DB::table('users')->where('id', $userId)->value('role');
-            if ($role == 1) {
-                $users1 = DB::table('users')->where('added_by', $userId)->orderBy('id', 'asc')->get();
-                //$users2 = DB::table('users')->where('id', $userId)->orderBy('id', 'asc')->get();
-                return $users2;
-            } else {
-                $currentUser = DB::table('users')->where('id', $userId)->first();
-                $users1 = DB::table('users')->where('id', $userId)->get();
-                //$users2 = DB::table('users')->where('added_by', $currentUser->added_by)->get();
-                //$users3 = DB::table('users')->where('id', $currentUser->added_by)->get();
-                return $users1;
-            }
+   public function getUsersList()
+{
+    $search = request()->input('keyword');
+    $userId = session('user_id');
+    $role = DB::table('users')->where('id', $userId)->value('role');
+    
+    if ((int)$role === 2) {
+        $query = DB::table('users')
+            ->select('id', 'fullname', 'username', 'email', 'role')
+            ->where('id', '!=', $userId)
+            ->orderBy('fullname');
+    } else {
+        $memberRow = DB::table('team_members')
+            ->select('team_id')
+            ->where('uid', $userId)
+            ->first();
+        
+        $isMember = (bool) $memberRow;
+        $teamId = $isMember ? $memberRow->team_id : $userId;
+        
+        if (!$isMember) {
+            $query = DB::table('users as u')
+                ->leftJoin('team_members as tm', 'tm.uid', '=', 'u.id')
+                ->select('u.id', 'u.fullname', 'u.username', 'u.email', 'u.role')
+                ->where(function($q) use ($teamId) {
+                    $q->where('tm.team_id', $teamId)
+                      ->orWhere('u.id', $teamId);
+                })
+                ->where('u.id', '!=', $userId)
+                ->distinct()
+                ->orderBy('u.fullname');
         } else {
-            return DB::table('users')->orderBy('id', 'asc')->get();
+            $query = DB::table('users as u')
+                ->join('team_members as tm', 'tm.uid', '=', 'u.id')
+                ->select('u.id', 'u.fullname', 'u.username', 'u.email', 'u.role')
+                ->where('tm.team_id', $teamId)
+                ->where('u.id', '!=', $userId)
+                ->orderBy('u.fullname');
         }
     }
+    
+    if ($search) {
+        $query->where(function($q) use ($search) {
+            $q->where('fullname', 'like', "%$search%")
+              ->orWhere('username', 'like', "%$search%")
+              ->orWhere('email', 'like', "%$search%");
+        });
+    }
+    
+    // Return data directly, not a JSON response
+    return $query->get();
+}
 
-    protected function getTagsList()
-    {
-        $userId = session('user_id');
-        $isAdmin = session('is_admin', 0);
-
-        if ($isAdmin == 0) {
-            $role = DB::table('users')->where('id', $userId)->value('role');
-            if ($role == 1) {
-                return DB::table('inbox_tags')
-                    ->where(function($query) use ($userId) {
-                        $query->whereIn('added_user_id', function($subQuery) use ($userId) {
-                            $subQuery->select('id')
-                                     ->from('users')
-                                     ->where('added_by', $userId);
-                        })->orWhere('added_user_id', $userId);
-                    })
-                    ->orderBy('id', 'asc')
-                    ->get();
-            } else {
-                $currentUser = DB::table('users')->where('id', $userId)->first();
-                return DB::table('inbox_tags')
-                    ->where(function($query) use ($userId, $currentUser) {
-                        $query->whereIn('added_user_id', function($subQuery) use ($userId) {
-                            $subQuery->select('id')
-                                     ->from('users');
-                        })->orWhereIn('added_user_id', function($subQuery) use ($currentUser) {
-                            $subQuery->select('id')
-                                     ->from('users');
-                        });
-                    })
-                    ->orderBy('id', 'asc')
-                    ->get();
+public function getTagsList()
+{
+    $search = request()->input('keyword');
+    $userId = session('user_id');
+    $brandId = session('brand_id');
+    $role = DB::table('users')->where('id', $userId)->value('role');
+    
+    if ((int)$role === 2) {
+        // SUPER ADMIN: see all tags
+        $query = DB::table('inbox_tags')
+            ->select('id', 'tag_name', 'brand_id')  // Removed team_id
+            ->orderBy('tag_name');
+    } else {
+        // Determine if this user is a team member and get effective team_id
+        $memberRow = DB::table('team_members')
+            ->select('team_id')
+            ->where('uid', $userId)
+            ->first();
+        
+        $isMember = (bool) $memberRow;
+        $teamId = $isMember ? $memberRow->team_id : $userId;
+        
+        if (!$isMember) {
+            // TEAM ADMIN: see tags in brands belonging to their team
+            $query = DB::table('inbox_tags as t')
+                ->join('brands as b', 'b.id', '=', 't.brand_id')
+                ->select('t.id', 't.tag_name', 't.brand_id')  // Removed team_id
+                ->where('b.team_id', $teamId);  // Filter by brand's team_id
+            
+            if ($brandId) {
+                $query->where('t.brand_id', $brandId);
             }
+            
+            $query->orderBy('t.tag_name');
         } else {
-            return DB::table('inbox_tags')->orderBy('tag_name', 'asc')->get();
+            // TEAM MEMBER: see tags for brands they have access to
+            $query = DB::table('inbox_tags as t')
+                ->join('brands as b', 'b.id', '=', 't.brand_id')
+                ->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
+                    $join->on('ub.brand_id', '=', 'b.id')
+                         ->where('ub.user_id', '=', $userId)
+                         ->where('ub.team_id', '=', $teamId);
+                })
+                ->select('t.id', 't.tag_name', 't.brand_id')  // Removed team_id
+                ->where('b.team_id', $teamId)  // Filter by brand's team_id
+                ->where(function ($q) use ($userId, $brandId) {
+                    $q->where('b.user_id', $userId)
+                      ->orWhereNotNull('ub.user_id');
+                    
+                    if ($brandId) {
+                        $q->where('t.brand_id', $brandId);
+                    }
+                })
+                ->distinct()
+                ->orderBy('t.tag_name');
         }
     }
-
+    
+    if ($search) {
+        $query->where('t.tag_name', 'like', "%$search%");
+    }
+    
+    return $query->get();
+}
     protected function getInboxData($wheres, $whereIn)
     {
         return Inbox::getInboxList($wheres, $whereIn);

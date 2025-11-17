@@ -202,7 +202,7 @@ class AppChannelsController extends Controller
                     "team_id" => $team_id
                 ])->get()->first();
 
-                $avatar_url = 'channel_avatars/'.rand_string(10).'.png';
+                $avatar_url = theme_public_asset('img/default.png');
 
 
                 try 

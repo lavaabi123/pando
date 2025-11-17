@@ -64,8 +64,8 @@ a {
 .btn.btn-primary {
 	background: var(--d-primary);
 }
-.btn.btn-primary:hover {
-	background: #65c76c;
+.btn.btn-primary:hover, .btn.btn-primary:focus, .btn.btn-primary:active, .btn.btn-primary.active {
+	background: var(--d-secondary);
 }
 .btn.btn-secondary {
     background-color: var(--sp-gray-300);
@@ -612,4 +612,19 @@ select.form-control {
     background: transparent;
     border: none;
 	resize: none;
+}
+
+/*** Approval Page **/
+
+.scheduleDetails svg {
+    fill: var(--d-primary);
+    width: 18px;
+    flex: 0 0 18px;
+    margin: 0;
+}
+.scheduleDetails a.btn-sm {
+    font-size: 10px !important;
+        min-width: 70px;
+    padding: 6px 10px;
+    height: auto !important;
 }

@@ -86,7 +86,7 @@
 						  <input type="checkbox" name="accounts[]" value="{{$value->id}}" class="me-2">
 						  <div class="symbol symbol-35px px-3 py-2" style="padding-left: 0 !important;">
 									<img src="{{ Media::url($value->avatar) }}" style="width:25px; height:25px" class="rounded-circle align-self-center" alt="">
-									{{ get_social_media_icon($value->social_network) }}							
+									{!! get_social_media_icon($value->social_network) !!}							
 								</div><span data-toggle="tooltip" data-placement="top" title="{{$value->name}}" class="text-truncate">{{$value->name}}</span><!----><!---->
 						  
 						  </li>							  
@@ -210,7 +210,7 @@
 				  <label class="form-check-label" for="showCompleted">Show completed messages</label>
 				</div> 
 
-                    <div class="d-flex align-item-center justify-content-center flex-wrap border-0 mt-4">
+                    <div class="d-flex align-item-center justify-content-center flex-wrap border-0 mt-4">					
                         <button type="button" class="btn btn-primary me-2 mb-1 w-110" onclick="applyFilter()">
                             Filter
                         </button>
@@ -349,5 +349,8 @@ inboxAjax: @json(route('inbox.ajax_list')),
 addTag: @json(route('inbox.add_tag')),
 inboxDetail: @json(route('inbox.ajax_list_detail')),
 };
+function clear_form(){
+	$('#filter_form')[0].reset();
+}
 </script>
 @endsection

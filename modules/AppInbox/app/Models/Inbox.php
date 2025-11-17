@@ -80,108 +80,110 @@ class Inbox extends Model
      * Get inbox list with tags and users
      */
     public static function getInboxList($wheres = [], $whereIn = [])
-    {
-        $query = DB::table('inbox as i')
-            ->select([
-                'i.id',
-                'i.user_id',
-                'i.account_id',
-                'i.post_id',
-                'i.conversation_id',
-                'i.media_type',
-                'i.inbox_type',
-                'i.message',
-                'i.from_name',
-                'i.to_name',
-                'i.to_user_id',
-                'i.to_type',
-                'i.from_user_id',
-                'i.from_image',
-                'i.to_image',
-                'i.message_id',
-                'i.created_time',
-                'i.brand_id',
-                'i.team_id',
-                'i.is_completed',
-                'i.is_sent',
-                'i.is_deleted',
-                'i.is_favourite',
-                'i.last_reviewed_user_id',
-                'i.last_reviewed_date',
-                'i.story',
-                'i.attachments',
-                'i.shares',
-                'i.created_at',
-                'i.updated_at',
-                DB::raw('MAX(t.tag_ids) as tag_ids'),
-                DB::raw('GROUP_CONCAT(DISTINCT t2.tag_name) AS tag_names'),
-                DB::raw('MAX(u.user_ids) as user_ids'),
-                DB::raw('GROUP_CONCAT(DISTINCT u2.fullname) AS user_names')
-            ])
-            ->leftJoin(DB::raw('(SELECT * FROM inbox_tags_manage WHERE table_name = "inbox") as t'), 't.inbox_id', '=', 'i.id')
-            ->leftJoin('inbox_tags as t2', function($join) {
-                $join->whereRaw('FIND_IN_SET(t2.id, t.tag_ids) > 0');
-            })
-            ->leftJoin(DB::raw('(SELECT * FROM inbox_users_manage WHERE table_name = "inbox") as u'), 'u.inbox_id', '=', 'i.id')
-            ->leftJoin('users as u2', function($join) {
-                $join->whereRaw('FIND_IN_SET(u2.id, u.user_ids) > 0');
-            })
-            ->orderBy('i.created_time', 'DESC');
-
-        // Apply where conditions
-        if (!empty($wheres) && is_array($wheres)) {
-            foreach ($wheres as $key => $value) {
-                if (!in_array($key, ['(i.created_time - INTERVAL 7 HOUR) >=', '(i.created_time - INTERVAL 7 HOUR) <='])) {
-                    $key = (strpos($key, 't.') !== false) ? $key : 'i.' . $key;
-                }
-                $query->where($key, $value);
-            }
-        }
-
-        // Apply whereIn conditions
-        if (!empty($whereIn) && is_array($whereIn)) {
-            foreach ($whereIn as $key => $value) {
-                $key = (strpos($key, 'u2.') !== false) ? $key : 
-                       ((strpos($key, 't2.') !== false) ? $key : 'i.' . $key);
-                $query->whereIn($key, $value);
-            }
-        }
-
-        $query->groupBy([
-            'i.id',
-            'i.user_id',
-            'i.account_id',
-            'i.post_id',
-            'i.conversation_id',
-            'i.media_type',
-            'i.inbox_type',
-            'i.message',
-            'i.from_name',
-            'i.to_name',
-            'i.to_user_id',
-            'i.to_type',
-            'i.from_user_id',
-            'i.from_image',
-            'i.to_image',
-            'i.message_id',
-            'i.created_time',
-            'i.brand_id',
-            'i.team_id',
-            'i.is_completed',
-            'i.is_sent',
-            'i.is_deleted',
-            'i.is_favourite',
-            'i.last_reviewed_user_id',
-            'i.last_reviewed_date',
-            'i.story',
-            'i.attachments',
-            'i.shares',
-            'i.created_at',
-            'i.updated_at'
-        ]);
-
-        return $query->get();
-    }
+	{
+		$query = DB::table('inbox as i')
+			->select([
+				'i.id',
+				'i.user_id',
+				'i.account_id',
+				'i.post_id',
+				'i.conversation_id',
+				'i.media_type',
+				'i.inbox_type',
+				'i.message',
+				'i.from_name',
+				'i.to_name',
+				'i.to_user_id',
+				'i.to_type',
+				'i.from_user_id',
+				'i.from_image',
+				'i.to_image',
+				'i.message_id',
+				'i.created_time',
+				'i.brand_id',
+				'i.team_id',
+				'i.is_completed',
+				'i.is_sent',
+				'i.is_deleted',
+				'i.is_favourite',
+				'i.last_reviewed_user_id',
+				'i.last_reviewed_date',
+				'i.story',
+				'i.attachments',
+				'i.shares',
+				'i.created_at',
+				'i.updated_at',
+				DB::raw('MAX(t.tag_ids) as tag_ids'),
+				DB::raw('GROUP_CONCAT(DISTINCT t2.tag_name) AS tag_names'),
+				DB::raw('MAX(u.user_ids) as user_ids'),
+				DB::raw('GROUP_CONCAT(DISTINCT u2.fullname) AS user_names')
+			])
+			// FIX: Change "inbox" to "sp_inbox"
+			->leftJoin(DB::raw('(SELECT * FROM inbox_tags_manage WHERE table_name = "sp_inbox") as t'), 't.inbox_id', '=', 'i.id')
+			->leftJoin('inbox_tags as t2', function($join) {
+				$join->whereRaw('FIND_IN_SET(t2.id, t.tag_ids) > 0');
+			})
+			// FIX: Change "inbox" to "sp_inbox"
+			->leftJoin(DB::raw('(SELECT * FROM inbox_users_manage WHERE table_name = "sp_inbox") as u'), 'u.inbox_id', '=', 'i.id')
+			->leftJoin('users as u2', function($join) {
+				$join->whereRaw('FIND_IN_SET(u2.id, u.user_ids) > 0');
+			})
+			->orderBy('i.created_time', 'DESC');
+		
+		// Apply where conditions
+		if (!empty($wheres) && is_array($wheres)) {
+			foreach ($wheres as $key => $value) {
+				if (!in_array($key, ['(i.created_time - INTERVAL 7 HOUR) >=', '(i.created_time - INTERVAL 7 HOUR) <='])) {
+					$key = (strpos($key, 't.') !== false) ? $key : 'i.' . $key;
+				}
+				$query->where($key, $value);
+			}
+		}
+		
+		// Apply whereIn conditions
+		if (!empty($whereIn) && is_array($whereIn)) {
+			foreach ($whereIn as $key => $value) {
+				$key = (strpos($key, 'u2.') !== false) ? $key : 
+					   ((strpos($key, 't2.') !== false) ? $key : 'i.' . $key);
+				$query->whereIn($key, $value);
+			}
+		}
+		
+		$query->groupBy([
+			'i.id',
+			'i.user_id',
+			'i.account_id',
+			'i.post_id',
+			'i.conversation_id',
+			'i.media_type',
+			'i.inbox_type',
+			'i.message',
+			'i.from_name',
+			'i.to_name',
+			'i.to_user_id',
+			'i.to_type',
+			'i.from_user_id',
+			'i.from_image',
+			'i.to_image',
+			'i.message_id',
+			'i.created_time',
+			'i.brand_id',
+			'i.team_id',
+			'i.is_completed',
+			'i.is_sent',
+			'i.is_deleted',
+			'i.is_favourite',
+			'i.last_reviewed_user_id',
+			'i.last_reviewed_date',
+			'i.story',
+			'i.attachments',
+			'i.shares',
+			'i.created_at',
+			'i.updated_at'
+		]);
+		
+		return $query->get();
+	}
 
     /**
      * Get inbox conversation details
