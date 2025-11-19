@@ -7,7 +7,7 @@
 				 data-network="<?php echo e($item['media_type']); ?>"
 				 data-post-id="<?php echo e($item['post_id']); ?>"
 				 data-conversation-id="<?php echo e($item['conversation_id']); ?>">
-				 
+				 <div class="d-flex align-items-center gap-4 justify-content-between">
 				<div class="d-flex" 
 					 data-id="<?php echo e($item['id']); ?>" 
 					 data-conversation-id="<?php echo e($item['conversation_id']); ?>" 
@@ -31,9 +31,9 @@
 				 data-network="<?php echo e($item['media_type']); ?>"
 				 data-post-id="<?php echo e($item['post_id']); ?>"
 				 data-conversation-id="<?php echo e($item['conversation_id']); ?>" class="post-account">
-						<div class="text-gray-600 size-40 min-w-40 d-flex align-items-center justify-content-between position-relative">
+						<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
 							<img data-src="<?php echo e(Media::url($item['to_image'])); ?>" src="<?php echo e(theme_public_asset('img/default.png')); ?>" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='<?php echo e(theme_public_asset('img/default.png')); ?>'">
-							<span class="size-17 border-1 b-r-100 position-absolute fs-9 d-flex align-items-center justify-content-between text-center text-white b-0 r-0">
+							<span class="position-absolute b-0 r-0">
 								<div class="w-100"><?php echo get_social_media_icon($item['media_type']); ?></div>
 							</span>
 						</div>
@@ -47,16 +47,16 @@
 				 data-post-id="<?php echo e($item['post_id']); ?>"
 				 data-conversation-id="<?php echo e($item['conversation_id']); ?>"
 						  style="cursor:pointer" 
-						  class="ml-2 fw-7 mb-0 fs-11">
+						  class="ms-2 fw-7 mb-0 fs-11">
 						<?php if($item['media_type'] == 'twitter'): ?>
 							<?php echo e($item['to_name']); ?>
 
-							<span class="chip chip-blue ml-2">
+							<span class="chip chip-blue">
 								<span>Direct Message</span>
 							</span>
 						<?php else: ?>
 							<?php echo e($item['to_name']); ?> (Page) 
-							<span class="chip chip-blue ml-2 fs-10 fw-5">
+							<span class="chip chip-blue d-block fs-10 fw-5">
 								<span><?php echo e($item['inbox_type']); ?></span>
 							</span>
 						<?php endif; ?>
@@ -117,7 +117,7 @@
 					   data-placement="top" 
 					   title="Delete" 
 					   href="javascript:void(0)" 
-					   class="icon-with-circle me-2" 
+					   class="icon-with-circle" 
 					   onclick="delete_inbox_message('<?php echo e($item['id']); ?>','<?php echo e(empty($item['conversation_id']) ? 'inbox_comments' : 'inbox'); ?>')">
 						<?php echo file_get_contents(theme_public_asset('img/delete.svg')); ?>
 
@@ -148,24 +148,25 @@
 						</div>
 					<?php endif; ?>
 				</span>
+				</div>
 
 
-                <div class="d-flex align-items-start" onclick="loadDetail(this)" data-id="<?php echo e($item['id']); ?>" 
+                <div class="d-flex align-items-start mt-4" onclick="loadDetail(this)" data-id="<?php echo e($item['id']); ?>" 
                  data-type="<?php echo e(empty($item['conversation_id']) ? 'comment' : 'message'); ?>"
 				 data-network="<?php echo e($item['media_type']); ?>"
 				 data-post-id="<?php echo e($item['post_id']); ?>"
 				 data-conversation-id="<?php echo e($item['conversation_id']); ?>">
 				
-					<div class="text-gray-600 size-40 min-w-40 d-flex align-items-center justify-content-between position-relative">
+					<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
 						<img data-src="<?php echo e(Media::url($item['from_image'])); ?>" src="<?php echo e(theme_public_asset('img/default.png')); ?>" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='<?php echo e(theme_public_asset('img/default.png')); ?>'">
-						<span class="size-17 border-1 b-r-100 position-absolute fs-9 d-flex align-items-center justify-content-between text-center text-white b-0 r-0">
+						<span class="position-absolute b-0 r-0">
 							<div class="w-100"><?php echo get_social_media_icon($item['media_type']); ?></div>
 						</span>
 					</div>
-                    <div class="flex-grow-1">
+                    <div class="flex-grow-1 ms-2">
                         <div class="">
-                            <h6 class="mb-1"><?php echo e($item['from_name']); ?></h6>
-                            <small class="text-muted"><?php echo e(date('M d, Y, h:i a', strtotime($item['created_time']))); ?></small>
+                            <h6 class="fw-7 mb-0 fs-11"><?php echo e($item['from_name']); ?></h6>
+                            <small class="text-muted fs-10"><?php echo e(date('M d, Y, h:i a', strtotime($item['created_time']))); ?></small>
                         </div>
                         <p class="mb-1"><?php echo e($item['message']); ?></p>
                     </div>
@@ -212,7 +213,7 @@
 						   data-completed="<?php echo e($item['is_completed']); ?>" 
 						   data-id="<?php echo e($item['id']); ?>" 
 						   data-conversation-id="<?php echo e($item['conversation_id']); ?>" 
-						   class="btn btn-primary btn-sm" 
+						   class="btn btn-primary btn-sm text-nowrap" 
 						   onclick="click_complete(this)">
 							Mark Complete
 						</a>
@@ -221,7 +222,7 @@
 						   data-completed="<?php echo e($item['is_completed']); ?>" 
 						   data-id="<?php echo e($item['id']); ?>" 
 						   data-conversation-id="<?php echo e($item['conversation_id']); ?>" 
-						   class="btn btn-primary btn-sm" 
+						   class="btn btn-primary btn-sm text-nowrap" 
 						   onclick="click_complete(this)">
 							Mark Incomplete
 						</a>

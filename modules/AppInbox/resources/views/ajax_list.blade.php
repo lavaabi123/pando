@@ -7,7 +7,7 @@
 				 data-network="{{ $item['media_type'] }}"
 				 data-post-id="{{ $item['post_id'] }}"
 				 data-conversation-id="{{ $item['conversation_id'] }}">
-				 
+				 <div class="d-flex align-items-center gap-4 justify-content-between">
 				<div class="d-flex" 
 					 data-id="{{ $item['id'] }}" 
 					 data-conversation-id="{{ $item['conversation_id'] }}" 
@@ -31,9 +31,9 @@
 				 data-network="{{ $item['media_type'] }}"
 				 data-post-id="{{ $item['post_id'] }}"
 				 data-conversation-id="{{ $item['conversation_id'] }}" class="post-account">
-						<div class="text-gray-600 size-40 min-w-40 d-flex align-items-center justify-content-between position-relative">
+						<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
 							<img data-src="{{ Media::url($item['to_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
-							<span class="size-17 border-1 b-r-100 position-absolute fs-9 d-flex align-items-center justify-content-between text-center text-white b-0 r-0">
+							<span class="position-absolute b-0 r-0">
 								<div class="w-100">{!! get_social_media_icon($item['media_type']) !!}</div>
 							</span>
 						</div>
@@ -47,15 +47,15 @@
 				 data-post-id="{{ $item['post_id'] }}"
 				 data-conversation-id="{{ $item['conversation_id'] }}"
 						  style="cursor:pointer" 
-						  class="ml-2 fw-7 mb-0 fs-11">
+						  class="ms-2 fw-7 mb-0 fs-11">
 						@if($item['media_type'] == 'twitter')
 							{{ $item['to_name'] }}
-							<span class="chip chip-blue ml-2">
+							<span class="chip chip-blue">
 								<span>Direct Message</span>
 							</span>
 						@else
 							{{ $item['to_name'] }} (Page) 
-							<span class="chip chip-blue ml-2 fs-10 fw-5">
+							<span class="chip chip-blue d-block fs-10 fw-5">
 								<span>{{ $item['inbox_type'] }}</span>
 							</span>
 						@endif
@@ -112,7 +112,7 @@
 					   data-placement="top" 
 					   title="Delete" 
 					   href="javascript:void(0)" 
-					   class="icon-with-circle me-2" 
+					   class="icon-with-circle" 
 					   onclick="delete_inbox_message('{{ $item['id'] }}','{{ empty($item['conversation_id']) ? 'inbox_comments' : 'inbox' }}')">
 						{!! file_get_contents(theme_public_asset('img/delete.svg')) !!}
 					</a>
@@ -141,24 +141,25 @@
 						</div>
 					@endif
 				</span>
+				</div>
 
 
-                <div class="d-flex align-items-start" onclick="loadDetail(this)" data-id="{{ $item['id'] }}" 
+                <div class="d-flex align-items-start mt-4" onclick="loadDetail(this)" data-id="{{ $item['id'] }}" 
                  data-type="{{ empty($item['conversation_id']) ? 'comment' : 'message' }}"
 				 data-network="{{ $item['media_type'] }}"
 				 data-post-id="{{ $item['post_id'] }}"
 				 data-conversation-id="{{ $item['conversation_id'] }}">
 				
-					<div class="text-gray-600 size-40 min-w-40 d-flex align-items-center justify-content-between position-relative">
+					<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
 						<img data-src="{{ Media::url($item['from_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
-						<span class="size-17 border-1 b-r-100 position-absolute fs-9 d-flex align-items-center justify-content-between text-center text-white b-0 r-0">
+						<span class="position-absolute b-0 r-0">
 							<div class="w-100">{!! get_social_media_icon($item['media_type']) !!}</div>
 						</span>
 					</div>
-                    <div class="flex-grow-1">
+                    <div class="flex-grow-1 ms-2">
                         <div class="">
-                            <h6 class="mb-1">{{ $item['from_name'] }}</h6>
-                            <small class="text-muted">{{ date('M d, Y, h:i a', strtotime($item['created_time'])) }}</small>
+                            <h6 class="fw-7 mb-0 fs-11">{{ $item['from_name'] }}</h6>
+                            <small class="text-muted fs-10">{{ date('M d, Y, h:i a', strtotime($item['created_time'])) }}</small>
                         </div>
                         <p class="mb-1">{{ $item['message'] }}</p>
                     </div>
@@ -202,7 +203,7 @@
 						   data-completed="{{ $item['is_completed'] }}" 
 						   data-id="{{ $item['id'] }}" 
 						   data-conversation-id="{{ $item['conversation_id'] }}" 
-						   class="btn btn-primary btn-sm" 
+						   class="btn btn-primary btn-sm text-nowrap" 
 						   onclick="click_complete(this)">
 							Mark Complete
 						</a>
@@ -211,7 +212,7 @@
 						   data-completed="{{ $item['is_completed'] }}" 
 						   data-id="{{ $item['id'] }}" 
 						   data-conversation-id="{{ $item['conversation_id'] }}" 
-						   class="btn btn-primary btn-sm" 
+						   class="btn btn-primary btn-sm text-nowrap" 
 						   onclick="click_complete(this)">
 							Mark Incomplete
 						</a>

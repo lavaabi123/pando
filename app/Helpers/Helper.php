@@ -706,9 +706,9 @@ if (!function_exists("get_social_media_icon")) {
         $network = strtolower(str_replace('_', ' ', $network));
         
         $icons = [
-            'facebook' => '<i class="post-media fab fa-facebook-f" style="color: #0074fa; right: 13px;"></i>',
-            'twitter' => '<i class="post-media fab fa-x-twitter" style="color: #000; right: 13px;"></i>',
-            'x' => '<i class="post-media fab fa-x-twitter" style="color: #000; right: 13px;"></i>',
+            'facebook' => '<i class="post-media fab fa-facebook-f" style="background-color: #0074fa;color: #fff;"></i>',
+            'twitter' => '<i class="post-media fab fa-x-twitter" style="background-color: #000000;color: #fff;"></i>',
+            'x' => '<i class="post-media fab fa-x-twitter" style="background-color: #000000;color: #fff;"></i>',
             'instagram' => '<i class="post-media fab fa-instagram" style="color: #fff; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); right: 13px;"></i>',
             'linkedin' => '<i class="post-media fab fa-linkedin" style="color: #fff; background-color: #0077b5; right: 13px;"></i>',
             'pinterest' => '<i class="post-media fab fa-pinterest" style="color: #cd2029; right: 13px;"></i>',
@@ -750,9 +750,9 @@ if (!function_exists("get_social_media_icon_large")) {
     function get_social_media_icon_large($network)
     {
         if(strtolower($network) == 'facebook'){
-			echo '<i class="fab fa-facebook-f" style="color: #0074fa;right: 13px;"></i>';
+			echo '<i class="fab fa-facebook-f" style="background-color: #0074fa;color: #fff;"></i>';
 		}elseif(strtolower($network) == 'twitter' || strtolower($network) == 'x'){
-			echo '<i class="fab fa-x-twitter" style="color: #000;right: 13px;"></i>';
+			echo '<i class="fab fa-x-twitter" style="background-color: #000000;color: #fff;"></i>';
 		}elseif(strtolower($network) == 'instagram'){
 			echo '<i class="fab fa-instagram" style="color: #fff;background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);right: 13px;"></i>';
 		}elseif(strtolower($network) == 'linkedin'){

@@ -2,7 +2,7 @@
 
 <?php $__env->startSection('content'); ?>
 <div class="container mw-100">
-    <div class="row py-4">
+    <div class="row pb-4 pt-3">
         <!-- Filter Sidebar -->
         <div class="col-3 mw-300">
             <div class="my-1">
@@ -222,14 +222,18 @@
 
         <!-- Main Content Area -->
         <div class="col-9">
-			<h3 class="fw-7 mb-4 fs-22"><span class="d-inline-block w-22"><?php echo file_get_contents(public_path('img/post.svg')); ?></span> Inbox</h3>
+			<h3 class="fw-7 mb-4 fs-22"><span class="d-inline-block w-22"><?php echo file_get_contents(public_path('img/inbox.svg')); ?></span> Inbox</h3>
 			<div class="border b-r-30 p-3 fs-14 maxHeight-wos overflow-hidden">
-			<div id="fav-feed-header" class="mb-4">
+
+				<div class="row h-100">
+					<!-- Inbox List -->
+					<div class="col-md-6 h-100">
+									<div id="fav-feed-header" class="mb-4">
     <div class="d-flex align-items-center justify-content-between">
         <div class="datarangeinbox"></div>
         
         <div class="dropdown">
-            <button class="btn btn-link text-muted d-flex align-items-center justify-content-center" 
+            <button class="icon-with-circle fs-20 p-0" 
                     type="button" 
                     id="dropdownMenuButton" 
                     data-bs-toggle="dropdown" 
@@ -246,7 +250,7 @@
                     <a class="dropdown-item align-items-center py-3 px-3 complete_selected_items" 
                        href="javascript:void(0)" 
                        onclick="complete_selected_items()">
-                        <div class="icon-container mx-2">
+                        <div class="icon-container me-2 d-inline-block">
                             <i class="fal fa-check-circle text-muted"></i>
                         </div>
                         <span class="text-dark"><?php echo e(__('Complete selected items')); ?></span>
@@ -257,7 +261,7 @@
                     <a class="dropdown-item align-items-center py-3 px-3 complete_all_items" 
                        href="javascript:void(0)" 
                        onclick="complete_all_items()">
-                        <div class="icon-container mx-2">
+                        <div class="icon-container me-2 d-inline-block">
                             <i class="fal fa-check-circle text-muted"></i>
                         </div>
                         <span class="text-dark"><?php echo e(__('Complete all items')); ?></span>
@@ -269,7 +273,7 @@
                        href="javascript:void(0)" 
                        onclick="incomplete_selected_items()"
                        style="display:none">
-                        <div class="icon-container mx-2">
+                        <div class="icon-container me-2 d-inline-block">
                             <i class="fal fa-check-circle text-muted"></i>
                         </div>
                         <span class="text-dark"><?php echo e(__('Incomplete selected items')); ?></span>
@@ -281,7 +285,7 @@
                        href="javascript:void(0)" 
                        onclick="incomplete_all_items()"
                        style="display:none">
-                        <div class="icon-container mx-2">
+                        <div class="icon-container me-2 d-inline-block">
                             <i class="fal fa-check-circle text-muted"></i>
                         </div>
                         <span class="text-dark"><?php echo e(__('Incomplete all items')); ?></span>
@@ -293,7 +297,7 @@
                        href="javascript:void(0)" 
                        onclick="delete_selected_items()"
                        data-confirm="<?php echo e(__('Are you sure to delete selected items?')); ?>">
-                        <div class="icon-container mx-2">
+                        <div class="icon-container me-2 d-inline-block">
                             <i class="fal fa-trash text-muted"></i>
                         </div>
                         <span class="text-dark"><?php echo e(__('Delete selected items')); ?></span>
@@ -303,10 +307,7 @@
         </div>
     </div>
 </div>
-				<div class="row h-100">
-					<!-- Inbox List -->
-					<div class="col-md-6 h-100">
-						<div class="bg-white border b-r-30 p-3 h-100 overflow-auto scroll-bar">
+						<div class="bg-white border b-r-30 p-3 inbox-msg overflow-auto scroll-bar">
 							
 							<div id="inbox-list-container">
 								<!-- Inbox list will be loaded here via AJAX -->
