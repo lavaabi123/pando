@@ -8,12 +8,12 @@
             </div>
             <div class="modal-body">
                 @if(isset($frame_posts) && $frame_posts->count() > 0)
-                    <div class="mt-1">
+                    <div class="d-flex justify-content-between">
                         {{-- Navigation Pills --}}
-                        <ul class="nav nav-pills" style="float:left" role="tablist">
+                        <ul class="nav nav-pills ms-3" style="float:left" role="tablist">
                             @foreach($frame_posts as $key => $value)                                
                                 <li class="nav-item">
-                                    <a class="btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-0 p-l-14 p-r-14 p-t-14 p-b-14 text-center nav-link {{ $key == 0 ? 'active' : '' }}" 
+                                    <a class="btn btn-active-light text-center border-0 {{ $key == 0 ? 'active' : '' }}" 
                                        data-bs-toggle="pill" 
                                        data-bs-target="#pills-{{ $value->id }}" 
                                        role="tab">
@@ -25,10 +25,10 @@
 
                         {{-- Dropdown Menu --}}
                         @if(empty(request()->input('from')))
-                            <div class="col-1" style="float: left;">
+                            <div class="">
                                 <div class="sp-menu-dropdown dropdown dropdown-hide-arrow" data-dropdown-spacing="0">
-                                    <a class="dropdown-toggle text-gray-800" style="font-size:25px;float: right;" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fal fa-ellipsis-v" style="vertical-align: bottom;"></i>
+                                    <a class="dropdown-toggle text-gray-800 d-flex w-30 h-30 icon-with-circle fs-18 justify-content-center" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fal fa-ellipsis-v fw-bold"></i>
                                     </a>
                                     <ul class="dropdown-menu" data-dropdown-spacing="0">
                                         @foreach($frame_posts as $key => $value)
@@ -40,12 +40,12 @@
                                             
                                             <li class="p-3">
                                                 @if(!empty($resApi['url']))
-                                                    <a class="dropdown-item" target="_blank" href="{{ $resApi['url'] }}">
+                                                    <a class="dropdown-item p-0" target="_blank" href="{{ $resApi['url'] }}">
                                                         {{ get_social_media_icon_large($value->social_network) }}
                                                         Show in {{ $displayName }}
                                                     </a>
                                                 @else
-                                                    <a class="dropdown-item disabled" href="javascript:void(0);">
+                                                    <a class="dropdown-item p-0 disabled" href="javascript:void(0);">
                                                         {{ get_social_media_icon_large($value->social_network) }}
                                                         Show in {{ $displayName }}
                                                     </a>
@@ -62,7 +62,7 @@
                     <div class="tab-content" style="clear: both;">
                         @foreach($frame_posts as $key => $value)
                             
-                            <div class="tab-pane p-3 {{ $key == 0 ? 'active' : '' }}" id="pills-{{ $value->id }}" role="tabpanel">
+                            <div class="tab-pane {{ $key == 0 ? 'active' : '' }}" id="pills-{{ $value->id }}" role="tabpanel">
                                 @if($value)
                                      @php
 										$postType = 'media';

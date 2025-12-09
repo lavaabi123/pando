@@ -3,8 +3,9 @@
 var AppPubishing = new (function () 
 {
     var AppPubishing = this;
-    var Calendar = this;
-
+    var CalendarMain = null;      // Main calendar instance
+    var CalendarCompose = null;   // Compose calendar instance
+    
     /*
     * FULL CALENDAR
      */
@@ -30,6 +31,31 @@ var AppPubishing = new (function ()
             AppPubishing.CalendarHeight();
             AppPubishing.CalendarAction();
             AppPubishing.Actions();
+        }
+
+        if ( $(".composer-scheduling").length > 0 )
+        {
+            AppPubishing.previewAction();
+            AppPubishing.preview();
+        }
+
+    },
+	
+	AppPubishing.initn = function( reload ) 
+    {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': VARIABLES.csrf
+            }
+        });
+
+        if(reload || reload == undefined){
+            
+            AppPubishing.CalendarCompose();
+            AppPubishing.CalendarTitleCompose();
+			AppPubishing.CalendarEventsCompose();
+            AppPubishing.CalendarHeightCompose();
+            AppPubishing.CalendarActionCompose();
         }
 
         if ( $(".composer-scheduling").length > 0 )
@@ -257,9 +283,7 @@ var AppPubishing = new (function ()
                 allMedias = Array.from(images);
             } else {
                 var previewMedias = document.querySelectorAll('.preview-list-medias img');
-			console.log(previewMedias);
                 allMedias = Array.from(previewMedias);
-			console.log(allMedias.length);
             }
             const previewHtml = allMedias.map(media => {
                 var type = media.dataset?.type || 'image';
@@ -333,6 +357,12 @@ var AppPubishing = new (function ()
     AppPubishing.closeCompose = function(){
         $(".compose,.compose_header").addClass("d-none");
         $(".composer-scheduling").addClass("d-none").html("");
+        
+        // Destroy compose calendar when closing
+        if(CalendarCompose) {
+            CalendarCompose.destroy();
+            CalendarCompose = null;
+        }
     },
 
     AppPubishing.openCompose = function(){
@@ -340,6 +370,7 @@ var AppPubishing = new (function ()
         .removeClass("d-none")
         .fadeIn(300);
         $(".compose,.compose_header").removeClass("d-none");
+		AppPubishing.initn();
     },
 
     AppPubishing.composeType = function(type){
@@ -380,7 +411,16 @@ var AppPubishing = new (function ()
 
     AppPubishing.reloadCalendar = function(){
         if($(".compose-calendar").length == 0) return false;
-        Calendar.refetchEvents();
+        if(CalendarMain) {
+            CalendarMain.refetchEvents();
+        }
+    },
+	
+	AppPubishing.reloadCalendarCompose = function(){
+        if($(".compose-calendar-new").length == 0) return false;
+        if(CalendarCompose) {
+            CalendarCompose.refetchEvents();
+        }
     },
 
     AppPubishing.closePopoverCalendar = function(){
@@ -390,6 +430,12 @@ var AppPubishing = new (function ()
     AppPubishing.CalendarAction = function() {
         $(document).on('change', '.calendar-filter', function() {
             AppPubishing.reloadCalendar();
+        });
+    },
+	
+	AppPubishing.CalendarActionCompose = function() {
+        $(document).on('change', '.calendar-filter', function() {
+            AppPubishing.reloadCalendarCompose();
         });
     },
 
@@ -406,16 +452,29 @@ var AppPubishing = new (function ()
         });
         return filters;
     },
+	
+	AppPubishing.getCalendarFiltersCompose = function() {
+        if($(".compose-calendar-new").length == 0) return false;
+
+        let filters = {};
+        $('.calendar-filter').each(function() {
+            let name = $(this).attr('name');
+            let value = $(this).val();
+            if (name) {
+                filters[name] = value;
+            }
+        });
+        return filters;
+    },
 
     AppPubishing.Calendar = function() {
         if($(".compose-calendar").length == 0) return false;
 
-        // Calculate the calendar height based on the main container and header
         var calendarHeight = $(CALENDAR_SELECTORS.MAIN).outerHeight() - $(CALENDAR_SELECTORS.HEADER).outerHeight() - Main.getScrollbarWidth();
         var calendarEl = document.getElementById('calendar');
         var countClick = 0;
 
-        Calendar = Main.Calendar(calendarEl, {
+        CalendarMain = Main.Calendar(calendarEl, {
             timeZone: 'local',
             themeSystem: 'bootstrap5',
             initialView: 'dayGridMonth',
@@ -443,7 +502,6 @@ var AppPubishing = new (function ()
                 omitZeroMinute: true,
                 meridiem: true
             },
-            // Fetch events dynamically via AJAX from Laravel
             events: function(fetchInfo, successCallback, failureCallback) {
                 let filters = AppPubishing.getCalendarFilters();
 
@@ -451,13 +509,11 @@ var AppPubishing = new (function ()
                     url: VARIABLES.url + 'app/publishing/events', 
                     dataType: 'json',
                     data: {
-                        // Pass start and end dates to the backend if needed
                         start: fetchInfo.startStr,
                         end: fetchInfo.endStr,
                         ...filters
                     },
                     success: function(response) {
-                        // Assuming response.data is an array of event objects
                         successCallback(response.data);
                     },
                     error: function() {
@@ -486,7 +542,7 @@ var AppPubishing = new (function ()
             },
             eventDragStart: function(info) {
                 if ( $(info.el).parents(".fc-day").hasClass('past-day') ) {
-                    Calendar.refetchEvents();
+                    CalendarMain.refetchEvents();
                 }
             },
             eventDrop: function(info) {
@@ -610,7 +666,6 @@ var AppPubishing = new (function ()
                     eventEl.html(eventItemEl);
                 }
 
-                //Check Pass Day
                 var date = new Date();
                 date.setHours(0, 0, 0, 0);
 
@@ -624,7 +679,6 @@ var AppPubishing = new (function ()
                 
             },
             eventChange: function() {
-                // Optional: Handle event drag-n-drop or resize actions
             },
             eventClick: function(info) {
                 var eventEl = $(info.el);
@@ -663,7 +717,6 @@ var AppPubishing = new (function ()
                 hoverDate.setHours(0, 0, 0, 0);
 
                 if (hoverDate >= today && $day.find(".add-button").length === 0) {
-                    // Add 15 minutes from now to hovered date
                     const now = new Date();
                     const plus15 = new Date(now.getTime() + 15 * 60000);
 
@@ -681,7 +734,265 @@ var AppPubishing = new (function ()
             });
         }, 200);
 
-        return Calendar;
+        return CalendarMain;
+    },
+
+    AppPubishing.CalendarCompose = function() {
+        if($(".compose-calendar-new").length == 0) return false;
+
+        var calendarHeight = $(CALENDAR_SELECTORS.MAIN).outerHeight() - $(CALENDAR_SELECTORS.HEADER).outerHeight() - Main.getScrollbarWidth();
+        var calendarEl = document.getElementById('calendar-new');
+        var countClick = 0;
+
+        CalendarCompose = Main.Calendar(calendarEl, {
+            timeZone: 'local',
+            themeSystem: 'bootstrap5',
+            initialView: 'dayGridMonth',
+			showNonCurrentDates: false,
+			fixedWeekCount: false,
+            editable: true,
+            direction: document.querySelector('html').getAttribute('dir'),
+            headerToolbar: {
+                center: 'title'
+            },
+            height: calendarHeight,
+            dayMaxEvents: 2,
+            displayEventTime: false,
+            stickyHeaderDates: false,
+            views: {
+                dayGridMonth: {
+                    dayMaxEvents: 3
+                },
+                week: {
+                    dayMaxEvents: 100
+                },
+                day: {}
+            },
+            eventTimeFormat: {
+                hour: 'numeric',
+                minute: '2-digit',
+                omitZeroMinute: true,
+                meridiem: true
+            },
+            events: function(fetchInfo, successCallback, failureCallback) {
+                let filters = AppPubishing.getCalendarFiltersCompose();
+
+                $.ajax({
+                    url: VARIABLES.url + 'app/publishing/events_count', 
+                    dataType: 'json',
+                    data: {
+                        start: fetchInfo.startStr,
+                        end: fetchInfo.endStr,
+                        ...filters
+                    },
+                    success: function(response) {
+                        successCallback(response.data);
+                    },
+                    error: function() {
+                        failureCallback();
+                    },
+
+                });
+            },
+            eventsSet: function(events) {
+                var currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+
+                document.querySelectorAll('.fc-day').forEach(function(dayEl) {
+                    var dateAttr = dayEl.getAttribute('data-date');
+                    if (dateAttr) {
+                        var date = new Date(dateAttr);
+                        date.setHours(0, 0, 0, 0);
+                        if (date < currentDate) {
+                            dayEl.classList.add('past-day');
+                        }
+                    }
+                });
+            },
+            eventAllow: function(dropInfo, draggedEvent) {
+                return !draggedEvent.extendedProps.isPastDay;
+            },
+            eventDragStart: function(info) {
+                if ( $(info.el).parents(".fc-day").hasClass('past-day') ) {
+                    CalendarCompose.refetchEvents();
+                }
+            },
+            eventDrop: function(info) {
+                var $new_date = info.event.start;
+                var currentDate = new Date();
+                currentDate.setHours(0, 0, 0, 0);
+
+                if ($new_date < currentDate) {
+                    info.revert();
+                }else{
+                    Main.ConfirmDialog("Are you sure about this change?", function(s){
+                        if(!s){
+                            info.revert();
+                            return false;
+                        }
+
+                        var $el = $(info.el).find('.event-item');
+                        var $id = $el.data("id");
+                        var $action = $el.data("url");
+
+                        var data   = new FormData();
+                        if($id != undefined) data.append("id", $id);
+                        if($new_date != undefined) data.append("new_date", $new_date);
+
+                        Main.ajaxPost( $el, $action, data, function(){
+
+                        });
+                    });
+                }
+            },
+			eventDidMount: function(info) {
+				var eventEl = $(info.el);
+				var eventItemEl = $('.calendar-event-item-new').html();
+				var data = info.event.extendedProps;
+				
+				// Debug - check what data you're getting
+				console.log('Event extendedProps:', data);
+				console.log('Grouping data:', data.grouping_data);
+				
+				// Ensure grouping_data exists and convert to string
+				var groupingData = data.grouping_data ? String(data.grouping_data) : '';
+				
+				const replacements = {
+					'[[post_count]]': String(data.post_count || 0),
+					'[[post_plural]]': (data.post_count || 0) > 1 ? 's' : '',
+					'[[date]]': String(data.date || ''),
+					'[[grouping_data]]': groupingData,
+				};
+				
+				console.log('Replacements:', replacements);
+
+				// Replace the placeholders
+				for (const [key, value] of Object.entries(replacements)) {
+					eventItemEl = eventItemEl.replaceAll(key, value);
+				}
+				
+				console.log('Final HTML:', eventItemEl);
+
+				if(info.view.type == "listWeek"){
+					eventEl.html('<td>' + eventItemEl + '</td>');
+				} else {
+					eventEl.html(eventItemEl);
+				}
+
+				return false;
+			},            eventContent: function(info) {
+                
+            },
+            eventChange: function() {
+            },
+            eventClick: function(info) {
+				var eventEl = $(info.el);
+				eventEl.parent().css('z-index', countClick + 10000);
+				countClick++;
+				
+				// Get the date from the event
+				var selectedDate = info.event.start;
+				var selectedDateStr = moment(selectedDate).format('YYYY-MM-DD');
+				
+				var data = info.event.extendedProps;
+				// Ensure grouping_data exists and convert to string
+				var groupingData = data.grouping_data ? String(data.grouping_data) : '';
+				
+				// Highlight the selected day
+				$('.fc-day').removeClass('fc-highlight-day');
+				$('.fc-day[data-date="' + selectedDateStr + '"]').addClass('fc-highlight-day');
+				
+				// Show loading
+				$('.schedule-list').html('<div class="text-center p-5"><i class="fa fa-spinner fa-spin"></i> Loading...</div>');
+				
+				// Fetch the posts for this date
+				$.ajax({
+					url: VARIABLES.url + 'app/publishing/alllist/all/all/' + selectedDateStr,
+					type: 'POST',
+					data: {
+						ids: groupingData,
+						f_status: '',
+						f_account_ids: '',
+						_token: VARIABLES.csrf
+					},
+					dataType: 'html',
+					success: function(res) {
+						$('.schedule-list').html(res);
+						
+						// Initialize owl carousel if needed
+						if ($('.owl-carousel').length > 0) {
+							if ($('.owl-carousel').hasClass('owl-theme')) {
+								$('.owl-carousel').trigger('destroy.owl.carousel');
+								$('.owl-carousel').find('.owl-stage-outer').children().unwrap();
+								$('.owl-carousel').removeClass("owl-center owl-loaded owl-text-select-on");
+							}
+							
+							$(".owl-carousel").owlCarousel({
+								loop: true,
+								nav: true,
+								responsive: {
+									0: { items: 1 },
+									600: { items: 1 },
+									1000: { items: 1 }
+								}
+							});
+						}
+					},
+					error: function(xhr) {
+						$('.schedule-list').html('<div class="alert alert-danger">Error loading posts</div>');
+					}
+				});
+			},
+            moreLinkClick: function(info) {
+                setTimeout(function() {
+                    var eventEl = $(info.el);
+                    $(".fc-popover").wrap('<div class="fc-popover-overplay"></div>');
+                    $(".fc-popover").removeClass("d-none");
+
+                    const observer = new MutationObserver(function(mutationsList) {
+                        mutationsList.forEach(function(mutation) {
+                            mutation.removedNodes.forEach(function(removed_node) {
+                                $(".fc-popover-overplay").remove();
+                            });
+                        });
+                    });
+
+                    observer.observe(document.querySelector(".fc-popover-overplay"), { subtree: false, childList: true });
+                }, 10);
+            }
+        });
+
+        setTimeout(() => {
+            $(document).on("mouseenter", "#calendar-new .fc-daygrid-day", function () {
+                const $day = $(this);
+                const dateStr = $day.data("date");
+                if (!dateStr) return;
+
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const hoverDate = new Date(dateStr);
+                hoverDate.setHours(0, 0, 0, 0);
+
+                /*if (hoverDate >= today && $day.find(".add-button").length === 0) {
+                    const now = new Date();
+                    const plus15 = new Date(now.getTime() + 15 * 60000);
+
+                    const fullDate = new Date(hoverDate);
+                    fullDate.setHours(plus15.getHours());
+                    fullDate.setMinutes(plus15.getMinutes());
+
+                    const formatted = Main.formatDateTime(fullDate);
+
+                    let addBtnHtml = $('.calendar-add-button').html();
+                    addBtnHtml = addBtnHtml.replaceAll('[[date]]', encodeURIComponent(formatted));
+
+                    $day.css("position", "relative").append($(addBtnHtml));
+                }*/
+            });
+        }, 200);
+
+        return CalendarCompose;
     },
 
     AppPubishing.isImage = function(url) {
@@ -694,7 +1005,8 @@ var AppPubishing = new (function ()
 
     AppPubishing.CalendarTitle = function(){
         if($(".compose-calendar").length == 0) return false;
-        var target = document.querySelector('.fc-toolbar-title');
+        var target = document.querySelector('#calendar .fc-toolbar-title');
+        if(!target) return false;
         $(CALENDAR_SELECTORS.TITLE).html(target.innerText);
         var observer = new MutationObserver(function(mutations) {
             $(CALENDAR_SELECTORS.TITLE).html(target.innerText);  
@@ -705,41 +1017,101 @@ var AppPubishing = new (function ()
             characterDataOldValue: true
         });
     },
+	
+	AppPubishing.CalendarTitleCompose = function(){
+        if($(".compose-calendar-new").length == 0) return false;
+        var target = document.querySelector('#calendar-new .fc-toolbar-title');
+        if(!target) return false;
+        $(".compose-calendar-new").find(CALENDAR_SELECTORS.TITLE).html(target.innerText);
+        var observer = new MutationObserver(function(mutations) {
+            $(".compose-calendar-new").find(CALENDAR_SELECTORS.TITLE).html(target.innerText);  
+        });
+        observer.observe(target, {
+            childList: true,
+            subtree: true,
+            characterDataOldValue: true
+        });
+    },
 
     AppPubishing.CalendarEvents = function(){
-        $(document).on("click", ".calendar-event", function(){
+        $(document).on("click", ".compose-calendar .calendar-event", function(){
             var type = $(this).data("calendar-type");
+            if(!CalendarMain) return;
+            
             switch (type) {
                 case 'prev':
-                    Calendar.prev();
+                    CalendarMain.prev();
                     break;
                 case 'next':
-                    Calendar.next();
+                    CalendarMain.next();
                     break;
                 case 'today':
-                    Calendar.today();
+                    CalendarMain.today();
                     break;
                 case 'dayGridMonth':
-                    Calendar.changeView(type);
+                    CalendarMain.changeView(type);
                     break;
                 case 'timeGridWeek':
-                    Calendar.changeView(type);
+                    CalendarMain.changeView(type);
                     break;
                 case 'listWeek':
-                    Calendar.changeView(type);
+                    CalendarMain.changeView(type);
                     break;
                 default:
-                    Calendar.today();
+                    CalendarMain.today();
                     break;
             }
         });
     },
-
+    
+	AppPubishing.CalendarEventsCompose = function(){
+        $(document).on("click", ".compose-calendar-new .calendar-event-new", function(){
+            var type = $(this).data("calendar-type");
+            if(!CalendarCompose) return;
+            
+            switch (type) {
+                case 'prev':
+                    CalendarCompose.prev();
+                    break;
+                case 'next':
+                    CalendarCompose.next();
+                    break;
+                case 'today':
+                    CalendarCompose.today();
+                    break;
+                case 'dayGridMonth':
+                    CalendarCompose.changeView(type);
+                    break;
+                case 'timeGridWeek':
+                    CalendarCompose.changeView(type);
+                    break;
+                case 'listWeek':
+                    CalendarCompose.changeView(type);
+                    break;
+                default:
+                    CalendarCompose.today();
+                    break;
+            }
+        });
+    },
+    
     AppPubishing.CalendarHeight = function(){
         if($(".compose-calendar").length == 0) return false;
         $(window).resize(function() {
             var calendarHeight = $(CALENDAR_SELECTORS.MAIN).outerHeight() - $(CALENDAR_SELECTORS.HEADER).outerHeight() - Main.getScrollbarWidth();
-            Calendar.setOption('height', calendarHeight);
+            if(CalendarMain) {
+                CalendarMain.setOption('height', calendarHeight);
+            }
+        });
+    },
+	
+	AppPubishing.CalendarHeightCompose = function(){
+        if($(".compose-calendar-new").length == 0) return false;
+        $(window).resize(function() {
+            var calendarHeight = $(CALENDAR_SELECTORS.MAIN).outerHeight() - $(CALENDAR_SELECTORS.HEADER).outerHeight() - Main.getScrollbarWidth();
+            if(CalendarCompose) {
+                CalendarCompose.setOption('height', calendarHeight);
+            }
         });
     }
 

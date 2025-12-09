@@ -15,15 +15,39 @@
         ]
     },
     "permission": true,
-    "menu": {
+	"menu": {
         "uri": "app/publishing",
         "role": "client",
         "platform": 1,
         "section": "top",
         "tab_id": 1,
+        "tab_name": "More",
         "position": 250000,
-        "name": "Publishing",
-        "color": "#14373b",
-        "icon": "fa-light fa-paper-plane"
+        "name": "Publishing & Scheduling",
+        "color": "#5e60ee",
+        "icon": "fa-light fa-paper-plane",
+        "sub_menu": [
+            {
+                "uri": "app/publishing",
+                "name": "Publishing & Scheduling",
+                "position": 40,
+                "icon": "fa-light fa-paper-plane",
+                "color": "#992527"
+            },
+            {
+                "uri": "app/publishing",
+                "name": "Calendar",
+                "position": 30,
+                "icon": "fa-light fa-calendar",
+                "color": "#c143f2"
+            },
+            {
+                "uri": "app/approvals",
+                "name": "Approvals",
+                "position": 30,
+                "icon": "fa-light fa-check",
+                "color": "#c143f2"
+            }
+        ]
     }
 }

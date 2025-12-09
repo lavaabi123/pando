@@ -34,51 +34,63 @@ class AppBrandsController extends Controller
 
         Paginator::currentPageResolver(fn() => $current_page);
 
+		$userId = session('user_id');
 
+		// Get role once (role=2 => Super Admin)
+		$role = DB::table('users')->where('id', $userId)->value('role');
 
-$userId = session('user_id');
+		if ((int)$role === 2) {
+			// SUPER ADMIN: see every brand
+			$query = DB::table('brands as b')
+						->leftJoin('brands_favorites as bf', function ($join) use ($userId, $teamId) {
+						$join->on('bf.brand_id', '=', 'b.id')
+							 ->where('bf.user_id', '=', $userId);
+						})
+				->select('b.*','bf.id as is_favorite')
+				->orderBy('name');
 
-// Get role once (role=2 => Super Admin)
-$role = DB::table('users')->where('id', $userId)->value('role');
+		} else {
+			// Determine if this user is a team member and get effective team_id
+			$memberRow = DB::table('team_members')
+				->select('team_id')
+				->where('uid', $userId)
+				->first();
 
-if ((int)$role === 2) {
-    // SUPER ADMIN: see every brand
-    $query = DB::table('brands')
-        ->orderBy('name');
+			$isMember = (bool) $memberRow;
+			$teamId   = $isMember ? $memberRow->team_id : $userId;
 
-} else {
-    // Determine if this user is a team member and get effective team_id
-    $memberRow = DB::table('team_members')
-        ->select('team_id')
-        ->where('uid', $userId)
-        ->first();
-
-    $isMember = (bool) $memberRow;
-    $teamId   = $isMember ? $memberRow->team_id : $userId;
-
-    if (!$isMember) {
-        // TEAM ADMIN: see all brands in this team
-        $query = DB::table('brands')
-            ->where('team_id', $teamId)
-            ->orderBy('name');
-    } else {
-        // TEAM MEMBER: see brands created by me OR assigned to me (within team)
-        $query = DB::table('brands as b')
-            ->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
-                $join->on('ub.brand_id', '=', 'b.id')
-                     ->where('ub.user_id', '=', $userId)
-                     ->where('ub.team_id', '=', $teamId);
-            })
-            ->where('b.team_id', $teamId)
-            ->where(function ($q) use ($userId) {
-                $q->where('b.user_id', $userId)      // created by me
-                  ->orWhereNotNull('ub.user_id');     // assigned to me
-            })
-            ->select('b.*')
-            ->distinct()
-            ->orderBy('b.name');
-    }
-}
+			if (!$isMember) {
+				// TEAM ADMIN: see all brands in this team
+				$query = DB::table('brands as b')
+						->leftJoin('brands_favorites as bf', function ($join) use ($userId, $teamId) {
+						$join->on('bf.brand_id', '=', 'b.id')
+							 ->where('bf.user_id', '=', $userId);
+						})
+					->where('team_id', $teamId)
+					->select('b.*','bf.id as is_favorite')
+					->orderBy('name');
+			} else {
+				// TEAM MEMBER: see brands created by me OR assigned to me (within team)
+				$query = DB::table('brands as b')
+					->leftJoin('brands_favorites as bf', function ($join) use ($userId, $teamId) {
+					$join->on('bf.brand_id', '=', 'b.id')
+						 ->where('bf.user_id', '=', $userId);
+					})
+					->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
+						$join->on('ub.brand_id', '=', 'b.id')
+							 ->where('ub.user_id', '=', $userId)
+							 ->where('ub.team_id', '=', $teamId);
+					})
+					->where('b.team_id', $teamId)
+					->where(function ($q) use ($userId) {
+						$q->where('b.user_id', $userId)      // created by me
+						  ->orWhereNotNull('ub.user_id');     // assigned to me
+					})
+					->select('b.*','bf.id as is_favorite')
+					->distinct()
+					->orderBy('b.name');
+			}
+		}
         //$query = DB::table($this->table)->where('team_id', $request->team_id);
 
         if ($search) {
@@ -86,17 +98,26 @@ if ((int)$role === 2) {
         }
 
         $items = $query->paginate(30);
-//print_r($items);exit;
+		//print_r($items);exit;
         if ($items->total() === 0 && $current_page > 1) {
             return ms(['status' => 0]);
         }
 
-        return ms([
-            'status' => 1,
-            'data' => view('appbrands::list', [
-                'captions' => $items
-            ])->render(),
-        ]);
+		if(!empty($request->input('from')) && $request->input('from') == 'header'){
+			return ms([
+				'status' => 1,
+				'data' => view('appbrands::headerlist', [
+					'captions' => $items
+				])->render(),
+			]);			
+		}else{
+			return ms([
+				'status' => 1,
+				'data' => view('appbrands::list', [
+					'captions' => $items
+				])->render(),
+			]);			
+		}
     }
 
     public function update(Request $request)

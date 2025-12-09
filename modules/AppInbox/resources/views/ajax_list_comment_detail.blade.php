@@ -60,10 +60,10 @@
                                     @endforeach
                                 </div>
                             @endif
-
+<!--
                             <button class="btn btn-sm btn-link p-0" onclick="showReplyForm({{ $comment['id'] }})">
                                 <i class="fa-light fa-reply"></i> Reply
-                            </button>
+                            </button>-->
                         </div>
                     </div>
                 </div>
@@ -71,7 +71,7 @@
         </div>
 
         <div class="reply-section p-3 border-top">
-            <form id="comment-reply-form" onsubmit="sendCommentReply(event, '{{ $id }}', '')">
+            <form id="comment-reply-form" onsubmit="sendCommentReply(event, '{{ $id }}', '', 'comment')">
                 <div class="input-group">
                     <textarea class="form-control" name="comment" rows="2" placeholder="Type your reply..." required></textarea>
                     <button class="btn btn-primary" type="submit">

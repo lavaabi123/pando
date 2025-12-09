@@ -29,18 +29,18 @@ if($post){
 
 @endphp
 
-<div class="compose position-absolute l-0 t-0 wp-100 hp-100 bg-white zIndex-9 d-none">
+<div class="compose position-absolute l-0 t-0 wp-100 hp-100 bg-white zIndex-9 overflow-hidden d-none">
 
     <div class="d-flex hp-100">
         @can("appfiles")
-        <div class="compose-media d-flex flex-column flex-fill max-w-400 min-w-300 bg-white">
+        <div class="compose-media d-flex flex-column flex-fill max-w-400 min-w-300 bg-white d-none">
             @include('appfiles::block_files')
         </div>
         @endcan
 
         <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white" action="{{ url_app("publishing/save") }}" id="compose-editor" data-call-after="AppPubishing.confirmPostModal(result);" data-call-success="AppPubishing.closeCompose(); AppPubishing.reloadCalendar(); Main.ajaxScroll(true);">
 
-            <div class="d-flex flex-column flex-column-fluid overflow-y-auto py-5">
+            <div class="d-flex flex-column flex-column-fluid overflow-y-auto py-2">
                 <div class="max-w-750 wp-100 mx-auto p-3">
                     <div class="mb-3">
                         @include('appchannels::block_channels', [
@@ -51,8 +51,8 @@ if($post){
 
                     <div class="mb-3">
                         <div class="mb-3 wrap-input-emoji">
-                            <textarea class="form-control input-emoji post-caption fw-4 border" name="caption" placeholder="{{ __("Enter caption") }}">{{ $caption }}</textarea>
-                            <div class="p-3 border-end border-start border-bottom compose-type-media">
+                            <textarea class="form-control btl-r-15 btr-r-15 input-emoji post-caption fw-4" name="caption" placeholder="{{ __("Enter caption") }}">{{ $caption }}</textarea>
+                            <div class="p-3 border-end border-start border-bottom border-gray-400 compose-type-media">
                                 <div class="compose-type-link {{ $postType == 'link' ? '' : 'd-none' }}">
                                     <div class="form-control mb-3">
                                         <input placeholder="{{ __("Enter url") }}" class="actionChange" data-url="{{ module_url("getLinkInfo") }}" data-call-success="AppPubishing.previewLink(result);" name="link" type="text" value="{{ $link }}" data-loading="false">
@@ -78,23 +78,23 @@ if($post){
                                 </div>
                                 @endcan
                             </div>
-                            <div class="d-flex justify-content-between align-items-center overflow-x-auto border border-top-0 bbr-r-6 bbl-r-6">
+                            <div class="d-flex justify-content-between align-items-center overflow-x-auto border-gray-400 border border-top-0 bbr-r-15 bbl-r-15">
                                 <div class="d-flex compose-type">
                                     @can("appfiles")
-                                    <div class="border-end">
+                                    <div class="border-end border-gray-400">
                                         <label for="compose_type_media" class="px-3 py-2 d-block text-gray-700 activeItem {{ $postType=="media"?"bg-primary-100 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-camera"></i>
                                         </label>
                                         <input type="radio" name="type" class="d-none" id="compose_type_media" value="media" {{ $postType=="media"?"checked":"" }}>
                                     </div>
                                     @endcan
-                                    <div class="border-end">
+                                    <div class="border-end border-gray-400">
                                         <label for="compose_type_link" class="px-3 py-2 d-block text-gray-700 activeItem {{ $postType=="link"?"bg-primary-100 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-link"></i>
                                         </label>
                                         <input type="radio" name="type" class="d-none" id="compose_type_link" value="link" {{ $postType=="link"?"checked":"" }}>
                                     </div>
-                                    <div class="border-end">
+                                    <div class="border-end border-gray-400">
                                         <label for="compose_type_text" class="px-3 py-2 d-block text-gray-700 activeItem {{ $postType=="text"?"bg-primary-100 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-align-center"></i>
                                             <input type="radio" name="type" class="d-none" id="compose_type_text" value="text" {{ $postType=="text"?"checked":"" }}>
@@ -110,26 +110,26 @@ if($post){
                                     @endif
 
                                     @if(get_option("url_shorteners_platform", 0) && Gate::allows('appmediasearch'))
-                                    <div class="border-start">
+                                    <div class="border-start border-gray-400">
                                         <a href="{{ url_app("url-shorteners/shorten") }}" class="px-3 py-2 d-block text-gray-700 text-nowrap actionMultiItem" data-call-success="AppPubishing.shorten(result);" data-bs-title="{{ __("Shorten Links") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fa-light fa-link-simple"></i></a>
                                     </div>
                                     @endif
 
                                     @if(Gate::allows('appcaptions'))
-                                    <div class="border-start">
+                                    <div class="border-start border-gray-400">
                                         <a href="{{ route('app.captions.get_cation') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getCaptionOffCanvas" data-bs-title="{{ __("Get Hashtag") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-comment-alt-lines p-0"></i></a>
                                     </div>
-                                    <div class="border-start">
+                                    <div class="border-start border-gray-400">
                                         <a href="{{ route('app.handles.get_handle') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getHandleOffCanvas" data-bs-title="{{ __("Get Handle") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-comment-alt-lines p-0"></i></a>
                                     </div>
-                                    <div class="border-start">
+                                    <div class="border-start border-gray-400">
                                         <a href="{{ route('app.replies.get_reply') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getReplyOffCanvas" data-bs-title="{{ __("Get Replies") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-comment-alt-lines p-0"></i></a>
                                     </div>
                                     <!--<div class="border-start">
                                         <a href="{{ route('app.captions.save_cation') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-popup="saveCaptionModal" data-bs-title="{{ __("Save caption") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-save p-0"></i></a>
                                     </div>-->
                                     @endif
-                                    <div class="count-word px-3 d-block d-flex align-items-center justify-content-center text-gray-700 gap-8 py-2 border-start">
+                                    <div class="count-word px-3 text-gray-700 border-gray-400 py-2 border-start">
                                         <span>0</span>
                                     </div>
                                 </div>
@@ -155,7 +155,7 @@ if($post){
 
                     @canany('apppublishingcampaigns', 'apppublishinglabels')
                     <div class="mb-3">
-                        <div class="card shadow-none b-r-6">
+                        <div class="card shadow-none b-r-15 border-gray-400">
                             <div class="card-header px-3">
                                 <div class="fs-12 fw-6 text-gray-700">
                                     @if( Gate::allows('apppublishingcampaigns') && Gate::allows('apppublishinglabels'))
@@ -202,7 +202,7 @@ if($post){
                     @endcanany
 
                     <div class="mb-3">
-                        <div class="card shadow-none b-r-6 {{ in_array($post->status??0, [-1,4,5,6]) ? 'd-none' : '' }}">
+                        <div class="card shadow-none b-r-15 border-gray-400 {{ in_array($post->status??0, [-1,4,5,6]) ? 'd-none' : '' }}">
 
                             @if( empty($post) )
 
@@ -378,18 +378,181 @@ if($post){
             </div>
             
         </form>
-        <div class="compose-preview d-flex flex-column flex-fill bg-gray-100 bg-white min-w-300">
+		<div class="max-w-750 position-relative p-4">
+		<ul class="nav nav-tabs position-relative" id="myTab" role="tablist">
+			  <li class="nav-item" role="presentation">
+				<button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><span class="text">Scheduled Post</span></button>
+			  </li>
+			  <li class="nav-item" role="presentation">
+				<button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">Draft Post</button>
+			  </li>
+			  <li class="nav-item" role="presentation">
+				<button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">Approval List</button>
+			  </li>
+			  <li class="nav-item" role="presentation">
+				<button class="nav-link preview_modal" id="preview-tab" data-bs-toggle="tab" data-bs-target="#preview" type="button" role="tab" aria-controls="preview" aria-selected="false">Preview</button>
+			  </li>
+			</ul>
+			<div class="tab-content" id="myTabContent">	
+			<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div class="compose-calendar-new compose-preview d-flex flex-column flex-fill bg-gray-100 bg-white min-w-300">
+		<div class="max-w-750 wp-100 mx-auto ">
+				<div class="calendar-header d-flex flex-wrap gap-8 justify-content-between align-items-center px-4 py-3 border-bottom">
+					<div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
+						<div>
+							<div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event-new" data-calendar-type="prev">
+								<i class="fa-light fa-angle-left"></i>
+							</div>
+						</div>
+						<div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
+						<div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
+						<div>
+							<div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event-new" data-calendar-type="next">
+								<i class="fa-light fa-angle-right"></i>
+							</div>
+						</div>
+						<!--<div class="d-none d-md-block">
+							<div class="btn btn-sm btn-light b-r-50 border-gray-300 calendar-event-new" data-calendar-type="today">{{ __("Today") }}</div>
+						</div>-->
+					</div>
+					<div class="d-flex flex-wrap gap-8 justify-content-center align-items-center w-sm-100">
+						<div class="btn-group btn-group-sm d-none d-sm-block">
+							<button type="button" class="btn btn-light calendar-event-new" data-calendar-type="dayGridMonth" data-bs-title="{{ __("Month view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+								<i class="fa-light fa-calendar-days"></i>
+							</button>
+							<button type="button" class="btn btn-light calendar-event-new" data-calendar-type="timeGridWeek" data-bs-title="{{ __("Week view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+								<i class="fa-light fa-columns-3"></i>
+							</button>
+							<button type="button" class="btn btn-light calendar-event-new" data-calendar-type="listWeek" data-bs-title="{{ __("List view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+								<i class="fa-duotone fa-light fa-list-ul"></i>
+							</button>
+						</div>
 
-            <div class="d-flex justify-content-between flex-colum align-items-center p-3 border-bottom border-gray-300 bg-white">
-                <div class="fs-18 fw-5">{{ __("Network Preview") }}</div>
-                <div class="d-block d-sm-block d-md-none">
-                    <div class="btn btn-icon btn-sm btn-light btn-hover-danger b-r-50 a-rotate showCompose">
-                        <i class="fa-light fa-xmark"></i>
-                    </div>
-                </div>
-            </div>
+						<div class="d-flex">
+							<div class="btn-group position-static">
+								<button type="button" class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
+									<i class="fa-light fa-filter"></i> {{ __("Filters") }}
+								</button>
+								<div class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-full max-w-250" data-popper-placement="bottom-end">
+									<div class="d-flex border-bottom px-3 py-2 fw-6 fs-16 gap-8">
+										<span><i class="fa-light fa-filter"></i></span>
+										<span>{{ __("Filters") }}</span>
+									</div>
+									<div class="p-3">
+										<div class="mb-3">
+											<label class="form-label">{{ __("Status") }}</label>
+											<select class="form-select calendar-filter" name="status">
+												<option value="">{{ __("All") }}</option>
+												<option value="3">{{ __("Processing") }}</option>
+												<option value="4">{{ __("Published") }}</option>
+												<option value="5">{{ __("Unpublished") }}</option>
+												<option value="1">{{ __("Active") }}</option>
+												<option value="2">{{ __("Waiting Approve") }}</option>
+												<option value="6">{{ __("Pause/Stop") }}</option>
+											</select>
+										</div>
+										<div class="mb-3">
+											<label class="form-label">{{ __("Social network") }}</label>
+											<select class="form-select calendar-filter" name="module_name">
+												<option value="">{{ __("All") }}</option>
+												@if( !empty( Channels::channels() ) )
+													@foreach( Channels::channels() as $channel )
+														
+														@if( !empty( $channel ) && isset( $channel['items']  ) )
+															@foreach( $channel['items'] as $item )
+																<option value="{{ $item['id'] }}">{{ $item['module_name'] }}</option>
+															@endforeach
+														@endif
+											   
+													@endforeach
+												@endif
+											</select>
+										</div>
 
-            <div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 hp-100">
+										<div class="mb-3">
+											<label class="form-label">{{ __("Campaign") }}</label>
+											<select class="form-select calendar-filter" name="campaign">
+												<option value="">{{ __("All") }}</option>
+												@if( !empty( $campaigns ) )
+													@foreach( $campaigns as $value )
+														<option value="{{ $value->id }}">{{ $value->name }}</option>
+													@endforeach
+												@endif
+											</select>
+										</div>
+
+										<div class="mb-3">
+											<label class="form-label">{{ __("Labels") }}</label>
+											<select class="form-select calendar-filter" name="label">
+												<option value="">{{ __("All") }}</option>
+												@if( !empty( $labels ) )
+													@foreach( $labels as $value )
+														<option value="{{ $value->id }}">{{ $value->name }}</option>
+													@endforeach
+												@endif
+											</select>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						
+						<div class="d-flex">
+							<div class="btn-group">	
+								<button data-toggle="tooltip" data-placement="bottom" title="" data-bs-original-title="Add a note to a calendar date" class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide">
+									<i class="fa-light fa-notes"></i> {{ __('Take Notes') }}
+								</button>
+							</div>
+						</div>
+						<div class="d-flex">
+							<div class="btn-group">
+								<button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
+									<i class="fa-light fa-grid-2"></i> {{ __('Actions') }}
+								</button>
+								<ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-2 w-100 max-w-150">
+									<li>
+										<a class="dropdown-item p-2 rounded d-flex gap-8 fw-5 fs-14 actionMultiItem" href="{{ module_url("destroy-by-filters") }}" data-confirm="{{ __("Delete all scheduled posts matching your filters. Are you sure?") }}" data-call-success="AppPubishing.reloadCalendar();">
+											<span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can-list"></i></span>
+											<span>{{ __('Delete') }}</span>
+										</a>
+									</li>
+								</ul>
+							</div>
+						</div>
+
+					</div>
+				</div>
+				<div class="calendar-scroll">
+					<div id='calendar-new'></div>
+				</div>
+				<div class="schedule-list mt-4">
+        {{-- Posts will be loaded here when clicking on a date --}}
+    </div>
+				
+				
+            <div class="calendar-event-item-new d-none">
+				<div class="card text-wrap border-2 mb-1 shadow-none border-primary-200 event-item wp-100" 
+					 data-date="[[date]]" 
+					 data-grouping-data="[[grouping_data]]">
+					<div class="card-body px-2 py-2">
+						<div class="d-flex flex-grow-1 align-items-center justify-content-center gap-8 w-100">
+							<div class="text-center">
+								
+									<div class="fw-bold fs-20">[[post_count]]</div>
+								
+							</div>
+						</div>	
+					</div>
+				</div>
+			</div>
+
+			</div>			
+			
+</div></div>
+<div class="tab-pane fade" id="preview" role="tabpanel" aria-labelledby="preview-tab">
+				
+			
+            <div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 hp-100">			
                 
                 <div class="max-w-450 wp-100 mx-auto ">
 
@@ -412,7 +575,7 @@ if($post){
                         
                     @endforeach
 
-                    <div class="cpv-empty mt-5">
+                    <div class="cpv-empty mt-0">
                         <div class="py-2 text-gray-700 fs-13">{{ __('Choose a profile and enter your post to see a preview.') }}</div>
                         <div class="border border-gray-400 rounded bg-white">
         
@@ -450,9 +613,12 @@ if($post){
                 </div>
 
             </div>
-
+			
+			  </div>
         </div>
     </div>
+
+</div>
 
 </div>
 
@@ -481,3 +647,16 @@ if($post){
     AppPubishing.init(false);
     Files.init(false);
 </script>
+
+<style>
+.fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{
+	min-height:0em;
+}
+.fc {
+    min-width: auto;
+}
+.fc-highlight-day {
+    background-color: #e3f2fd !important;
+    border: 2px solid #2196f3 !important;
+}
+</style>

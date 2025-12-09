@@ -14,10 +14,10 @@
         "role": "client",
         "platform": 1,
         "section": "top",
-        "tab_id": 20,
-        "position": 600,
+        "tab_id": 30,
+        "position": 500,
         "name": "Handles",
         "color": "#18939a",
-        "icon": "fa-light fa-message-lines"
+        "icon": "fa-light fa-grip"
     }
 }

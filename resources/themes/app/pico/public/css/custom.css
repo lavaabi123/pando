@@ -543,8 +543,9 @@ a.menu-link.text-primary {
 	border-color: var(--d-primary);
 	background: var(--d-primary);
 }
-.icon-with-circle:hover svg{
+.icon-with-circle:hover svg, .icon-with-circle:hover i {
 	fill:var(--white);
+	color:var(--white);
 }
 .icon-with-circle svg.feather-flag {
     stroke: var(--sp-gray-400) !important;
@@ -641,6 +642,9 @@ i.post-media {
 .inbox-msg {
 	height: calc(100% - 63px);
 }
+#filter_form label {
+    align-items: center;
+}
 
 /*** Approval Page **/
 
@@ -658,4 +662,75 @@ i.post-media {
 }
 .pagination { 
 	justify-content: center;
+}
+
+.loader {
+    background: var(--d-primary);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--d-primary) 10%, transparent);
+}
+.loader::before, .loader::after {
+	box-shadow: 0 0 0 0 color-mix(in srgb, var(--d-primary) 10%, transparent);
+}
+/** Publishing **/
+.bg-primary-100, .fc table tr > td.fc-day.fc-day-today {
+    background-color: color-mix(in srgb, var(--d-primary) 10%, transparent) !important;
+}
+.emojionearea, .emojionearea.form-control { 
+	border-color: #c4cada !important;
+	border-radius: 15px 15px 0 0;
+}
+.fc table tr > td.fc-day.fc-day-today .fc-daygrid-day-top a {
+    background-color: var(--d-primary);
+}
+ul#myTab {
+	gap:0;
+}
+ul#myTab li:first-child {
+	z-index:2;
+}
+ul#myTab li:nth-child(2) {
+	z-index:1;
+}
+ul#myTab li:first-child button {
+    margin-left: 0;
+    padding-left: 15px;
+}
+ul#myTab li:last-child {
+    position: absolute;
+    right: 0;
+}
+ul#myTab li:last-child button {
+	padding-left: 15px;
+}
+ul#myTab li button {
+    margin-bottom: 0;
+    border-radius: 1rem 1rem 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    padding: 10px 15px 10px 2.5rem;
+    background: #ffffff;
+    border: 1px solid #dedede;
+    margin-left: -1.5rem;
+    color: var(--sp-gray-600);
+}
+ul#myTab li button.active {
+    background: var(--d-primary);
+    color: var(--white);
+}
+/** Publishing Popup **/
+
+.modal-content {
+ border-radius: 1.5rem;
+}
+.modal-content .rounded {
+	border-radius: var(--bs-border-radius-xl) !important;
+}
+.modal-content .dropdown-toggle::after {
+	display: none;
+}
+.modal-content a.btn.active, .modal-content a.btn:hover {
+    background: var(--sp-gray-300);
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }

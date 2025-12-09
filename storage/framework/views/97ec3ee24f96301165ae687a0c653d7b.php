@@ -178,62 +178,19 @@ if ((int)$role === 2) {
 			</div>
             
             <!-- Brand List -->
-            <div class="brand-list" id="brandList">
-                <?php if(!empty($brands)): ?>
-                    <?php $__currentLoopData = $brands; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $brand): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <div class="brand-item" 
-						 data-brand-id="<?php echo e($brand->id); ?>"
-						 data-brand-name="<?php echo e(strtolower($brand->name)); ?>"
-						 data-is-favorite="<?php echo e(!empty($brand->is_favorite) ? '1' : '0'); ?>"
-						 data-is-recent="<?php echo e(!empty($brand->is_recent) ? '1' : '0'); ?>"
-						 data-last-used-at="<?php echo e($brand->last_used_at ?? '0'); ?>">
-						
-						<!-- Avatar -->
-						<div class="brand-avatar-wrapper">
-							<?php if($brand->image): ?>
-								<img src="<?php echo e(Media::url($brand->image)); ?>" class="brand-avatar" alt="<?php echo e($brand->name); ?>">
-							<?php else: ?>
-								<div class="brand-avatar-placeholder"><?php echo e(strtoupper(substr($brand->name, 0, 1))); ?></div>
-							<?php endif; ?>
-							
-							<?php if(!empty($brand->unread_count) && $brand->unread_count > 0): ?>
-								<span class="brand-badge"><?php echo e($brand->unread_count); ?></span>
-							<?php endif; ?>
-						</div>
-						
-						<!-- Brand Name (clickable area for selection) -->
-						<span class="brand-name-text"><?php echo e($brand->name); ?></span>
-						
-						<!-- Action Buttons -->
-						<div class="brand-actions">
-							<button type="button" 
-									class="brand-action-btn favorite-btn <?php echo e(!empty($brand->is_favorite) ? 'active' : ''); ?>" 
-									data-brand-id="<?php echo e($brand->id); ?>"
-									title="Toggle Favorite">
-								<i class="<?php echo e(!empty($brand->is_favorite) ? 'fas' : 'far'); ?> fa-star"></i>
-							</button>
-							<button type="button" 
-									class="brand-action-btn edit-btn" 
-									data-brand-id="<?php echo e($brand->id); ?>"
-									title="Edit Brand">
-								<i class="far fa-edit"></i>
-							</button>
-							<button type="button" 
-									class="brand-action-btn delete-btn" 
-									data-brand-id="<?php echo e($brand->id); ?>"
-									title="Delete Brand">
-								<i class="far fa-trash-alt"></i>
-							</button>
-						</div>
-					</div>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                <?php endif; ?>
+			<div class="ajax-scroll-brands" data-url="<?php echo e(route("app.brands.list")); ?>?from=header"  data-resp=".brand-list"  data-scroll="document">
+				<div class="brand-list" id="brandList">
+					
+				</div>
             </div>
             
             <!-- Add Brand Button -->
-            <button type="button" class="add-brand-btn" id="addBrandBtn">
+            <!--<button type="button" class="add-brand-btn" id="addBrandBtn">
                 <i class="fas fa-plus"></i> Add Brand
-            </button>
+            </button>-->
+			<a class="btn btn-dark add-brand-btn actionItem" href="<?php echo e(route("app.brands.update")); ?>" data-popup="groupModal" data-call-success="Main.ajaxScroll(true,'brands');">
+				<i class="fas fa-plus"></i> Add Brand
+			</a>
         </div>
     </div>
 </div>

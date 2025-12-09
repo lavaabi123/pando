@@ -110,5 +110,6 @@
     "InboxModule": true,
     "AppInbox": true,
     "AppInbox.zip": true,
-    "AppPublishingApproval": true
+    "AppPublishingApproval": true,
+    "AppApprovals": true
 }

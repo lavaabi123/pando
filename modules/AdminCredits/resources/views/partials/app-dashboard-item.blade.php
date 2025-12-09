@@ -36,7 +36,7 @@
 @endphp
 <div class="d-flex justify-content-between">
 	<div class=" fw-6 text-black fs-22">
-		<i class="fa-solid fa-face-smile text-primary"></i> Hi Royalink!
+		<i class="fa-solid fa-face-smile text-primary"></i>{{ __(' Hi :name', ['name' => $user->fullname ?? __('No User')]) }}!
 	</div>
 	<div class="colors d-flex align-items-center gap-1">
 		<div class="form-check form-check-inline ml-10">
@@ -52,168 +52,7 @@
 	</div>
 </div>
 
-
-<div class="gradient-bg main-services text-center my-4 p-4 b-r-20 justify-content-xl-evenly">
-	<div class="p-4 d-flex gap-25 justify-content-xl-evenly">
-		<a class="icons" href="">
-			<div class="mb-3" style="fill:var(--d-primary);">
-				{!! file_get_contents(public_path('img/post.svg')) !!}
-			</div>
-			<div class="fw-6 text-black">
-				Create Post
-			</div>
-		</a>
-		<a class="icons" href="">
-			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 75%,var(--d-secondary) 25%)">
-				{!! file_get_contents(public_path('img/account.svg')) !!}
-			</div>
-			<div class="fw-6 text-black">
-				Manage Accounts
-			</div>
-		</a>
-		<a class="icons" href="">
-			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 60%,var(--d-secondary) 40%)">
-				{!! file_get_contents(public_path('img/calender.svg')) !!}
-			</div>
-			<div class="fw-6 text-black">
-				Calender
-			</div>
-		</a>
-		<a class="icons" href="">
-			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 50%,var(--d-secondary) 50%)">
-				{!! file_get_contents(public_path('img/Reports.svg')) !!}
-			</div>
-			<div class="fw-6 text-black">
-				Reports
-			</div>
-		</a>
-		<a class="icons" href="">
-			<div class="mb-3" style="fill:color-mix(in srgb,var(--d-primary) 20%,var(--d-secondary) 80%)">
-				{!! file_get_contents(public_path('img/inbox.svg')) !!}
-			</div>
-			<div class="fw-6 text-black">
-				Inbox
-			</div>
-		</a>
-		<a class="icons" href="">
-			<div class="mb-3" style="fill:var(--d-secondary);">
-				{!! file_get_contents(public_path('img/note.svg')) !!}
-			</div>
-			<div class="fw-6 text-black">
-				Notes
-			</div>
-		</a>
-	</div>
-</div>
-
-<div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
-    <div class="card-body py-4 px-4">
-		<div class="text-black mb-3">
-			<h5 class="fw-6">Daily Alerts!</h5>
-			<p class="mb-0">Stay up to date on all your accounts!</p>
-		</div>
-		<div class="row row-gap-4">
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Accounts with no scheduled posts today</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">1</h3>
-					<h5 class="mb-0 fw-bold">Accounts with inbox not cleared for more than 24 hours</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">7</h3>
-					<h5 class="mb-0 fw-bold">Posts pending approval</h5>
-				</div>
-				</a>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
-    <div class="card-body py-4 px-4">
-		<div class="text-black mb-3">
-			<h5 class="fw-6">Today! October 14, 2025</h5>
-			<p class="mb-0">What’s happening on your accounts today!</p>
-		</div>
-		<div class="row row-gap-4">
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">4</h3>
-					<h5 class="mb-0 fw-bold">Amount of total scheduled posts</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Inbox Messages</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Total Reviews</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">4</h3>
-					<h5 class="mb-0 fw-bold">Number of New People added</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Total failed posts</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Holidays</h5>
-				</div>
-				</a>
-			</div>
-		</div>
-	</div>
-</div>
-
-<div class="card position-relative overflow-hidden hp-100 mb-4">
-    <div class="card-body d-flex align-items-center justify-content-between py-4 px-4">
-		<div class="text-black">
-			<h5 class="fw-6 d-flex icon-primary"><span>{!! file_get_contents(public_path('img/Reports.svg')) !!}</span> Post Analytics</h5>
-		</div>
-		<div class="align-self-end">
-			<select class="form-control">
-				<option>All Platform</option>
-				<option>Facebook</option>
-			</select>
-		</div>
-	</div>
-</div>
-
+<!--
 <div class="row">
 
     <div class="col-md-8 mb-4">
@@ -330,6 +169,9 @@
 	</div>
 
 </div>
+
+-->
+
 
   <script>
   window.routes = {

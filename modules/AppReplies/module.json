@@ -9,15 +9,16 @@
     ],
     "files": [],
     "permission": false,
-    "menu": {
+	"menu": {
         "uri": "app/replies",
         "role": "client",
         "platform": 1,
         "section": "top",
-        "tab_id": 20,
-        "position": 600,
+        "tab_id": 30,
+        "tab_name": "Tools",
+        "position": 3000,
         "name": "Replies",
-        "color": "#18939a",
-        "icon": "fa-light fa-message-lines"
+        "color": "#5e60ee",
+        "icon": "fa-light fa-message-lines"        
     }
 }

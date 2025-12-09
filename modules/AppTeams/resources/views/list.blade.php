@@ -90,10 +90,10 @@
         {{ __('No Team Members Yet') }}
     </div>
     <div class="text-body-secondary mb-4 text-center max-w-500">
-        {{ __('Invite teammates to collaborate, assign roles, and work together efficiently. Shared access makes teamwork seamless and organized.') }}
+        {{ __('Add teammates to collaborate, assign roles, and work together efficiently. Shared access makes teamwork seamless and organized.') }}
     </div>
     <a class="btn btn-dark actionItem" href="{{ module_url('invite') }}" data-popup="inviteModal" >
-        <i class="fa-light fa-user-plus me-1"></i> {{ __('Invite member') }}
+        <i class="fa-light fa-user-plus me-1"></i> {{ __('Add member') }}
     </a>
 </div>
 @endif

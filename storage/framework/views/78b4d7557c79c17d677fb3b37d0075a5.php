@@ -181,7 +181,7 @@
                         <div class="d-flex justify-content-between fs-11 gap-8">
                             [[status]]
                             <div class="d-flex gap-8">
-                                <a href="<?php echo e(url_app("publishing/preview")); ?>" class="text-gray-900 actionItem" data-popup="pubishingPreviewModal" data-id="[[id]]" data-call-success="AppPubishing.closePopoverCalendar();"><i class="fa-light fa-eye"></i></a>
+                                <a href="<?php echo e(url_app("publishing/preview")); ?>" class="text-gray-900 actionItem" data-popup="pubishingPreviewModal" data-id="[[grouping_data]]" data-call-success="AppPubishing.closePopoverCalendar();"><i class="fa-light fa-eye"></i></a>
                                 <a href="<?php echo e(url_app("publishing/composer")); ?>" class="text-gray-900 actionItem" data-append-content="composer-scheduling" data-id="[[id]]" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();"><i class="fa-light fa-pen-to-square"></i></a>
                                 <div class="btn-group position-static">
                                     <div class="dropdown-toggle dropdown-arrow-hide text-gray-900 fs-11" data-bs-toggle="dropdown" aria-expanded="true">

@@ -47,6 +47,7 @@ var Main = new (function ()
         Main.ajaxPages();
         Main.ajaxPageActions();
         Main.ajaxScroll();
+        Main.ajaxScroll(false,'brands');
         Main.dataScroll();
         Main.ajaxScrollTop();
         Main.dataScrollTop();
@@ -1979,6 +1980,8 @@ var Main = new (function ()
 
         // Abort if the element does not exist
         if (that.length == 0) return false;
+		
+		console.log(loading);
         // Abort if already loading content
         if (loading != undefined && loading != 0) return false;
 

@@ -1,18 +1,18 @@
-<section x-data="{ mobileNavOpen: false }" class="bg-blueGray-50 z-60 relative">
-    <div class="container mx-auto">
-        <div class="flex items-center justify-between px-4 py-5 bg-blueGray-50">
+<section x-data="{ mobileNavOpen: false }" class="z-60 relative header">
+    <div class="container-fluid mx-auto py-2">
+        <div class="flex items-center justify-between">
             <div class="w-auto">
                 <div class="flex flex-wrap items-center">
-                    <div class="w-auto mr-14">
+                    <div class="w-auto">
                         <a href="<?php echo e(url("")); ?>">
-                            <img class="h-9" src="<?php echo e(url( get_option("website_logo_brand_dark", asset('public/img/logo-brand-dark.png')) )); ?>" alt="">
+                            <img class="h-14" src="<?php echo e(url( get_option("website_logo_brand_dark", asset('public/img/logo-brand-dark.png')) )); ?>" alt="">
                         </a>
                     </div>
                 </div>
             </div>
             <div class="w-auto">
                 <div class="flex items-center justify-between">
-                    <div class="w-auto hidden lg:block">
+                    <div class="w-auto hidden">
                         <ul class="flex items-center mr-16">
                             <li class="mr-9 font-medium hover:text-gray-700">
                                 <a href="<?php echo e(url('')); ?>"
@@ -61,7 +61,7 @@
                     <div class="w-auto">
                         <div class="flex flex-wrap items-center">
                             <!-- Language Dropdown -->
-                            <div class="dropdown dropdown-hover dropdown-center">
+                            <div class="dropdown dropdown-hover dropdown-center d-none">
                                 <div tabindex="0" class="flex items-center gap-1 px-3 min-h-[2rem] h-[2rem] cursor-pointer">
                                     <!-- Globe Icon -->
                                     <svg class="size-6 text-base-content" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -98,22 +98,22 @@
                             </div>
 
                             <?php if(Auth::check()): ?>
-                                <div class="w-auto mr-5 hidden lg:block">
-                                    <a href="<?php echo e(url('app/dashboard')); ?>" class="py-3 px-5 w-full text-white font-semibold rounded-xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200">
+                                <div class="w-auto mr-0 hidden lg:block">
+                                    <a href="<?php echo e(url('app/dashboard')); ?>" class="btn btn-primary">
                                         <?php echo e(__('Dashboard')); ?>
 
                                     </a>
                                 </div>
                             <?php else: ?>
-                                <div class="w-auto hidden mr-5 hidden lg:block">
-                                    <a href="<?php echo e(url('auth/login')); ?>" class="py-3 px-5 w-full hover:text-gray-700 font-medium rounded-xl bg-transparent transition ease-in-out duration-200">
+                                <div class="w-auto hidden hidden lg:block">
+                                    <a href="<?php echo e(url('auth/login')); ?>" class="btn btn-primary">
                                         <?php echo e(__("Sign In")); ?>
 
                                     </a>
                                 </div>
                                 <?php if(get_option("auth_signup_page_status", 1)): ?>
                                 <div class="w-auto hidden lg:block">
-                                    <a href="<?php echo e(url('auth/signup')); ?>" class="py-3 px-5 w-full text-white font-semibold rounded-xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200">
+                                    <a href="<?php echo e(url('auth/signup')); ?>" class="btn btn-primary">
                                         <?php echo e(__("Sign Up")); ?>
 
                                     </a>

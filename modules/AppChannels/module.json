@@ -14,9 +14,9 @@
         "role": "client",
         "platform": 1,
         "section": "top",
-        "tab_id": 10,
-        "position": 50000,
-        "name": "Channels",
+        "tab_id": 1,
+        "position": 250000,
+        "name": "Manage Accounts",
         "color": "#2d0b24",
         "icon": "fa-light fa-chart-network"
     }

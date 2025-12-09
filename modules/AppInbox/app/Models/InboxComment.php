@@ -4,6 +4,7 @@ namespace Modules\AppInbox\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use JanuSoftware\Facebook\Facebook;
 
 class InboxComment extends Model
 {
@@ -308,4 +309,324 @@ class InboxComment extends Model
             'last_reviewed_date' => now()
         ]);
     }
+
+	public static function getComments($brandId = '')
+	{
+		$FB = new Facebook([
+            'app_id'              => get_option("facebook_app_id", ""),
+            'app_secret'          => get_option("facebook_app_secret", ""),
+            'default_graph_version' => get_option("facebook_graph_version", "v21.0"),
+        ]);
+
+		$query = DB::table('accounts')
+			->whereIn('social_network', ['facebook','instagram']);
+
+		if (!empty($brandId)) {
+			$query->where('brand_id', $brandId);
+		}
+
+		$result = $query->orderBy('created', 'ASC')->get();		
+
+		if ($result->isNotEmpty()) {
+			foreach ($result as $fbresult) {
+				try {
+					if ($fbresult->social_network == 'facebook') {
+						$response = $FB->get("me/feed?fields=permalink_url,comments{message,from,created_time,is_hidden,is_private,comment_count,comments}&limit=100", $fbresult->token)->getDecodedBody();
+					} else {
+						$response = $FB->get($fbresult->pid . "/media?fields=id,permalink,comments_count,children{media_url},comments.limit(50){id,timestamp,from,username,text,comments,replies{from,username,text,id,timestamp}}&limit=100", $fbresult->token)->getDecodedBody();
+					}
+//echo "<pre>";print_r($response);exit;
+					$commentIds = [];
+					
+					if (!empty($response['data'])) {
+						foreach ($response['data'] as $row) {
+							if (!empty($row['comments']) && !empty($row['comments']['data'])) {
+								foreach ($row['comments']['data'] as $message) {
+									// Facebook comments
+									if ($fbresult->social_network == 'facebook' && !empty($message['id'])) {
+										if ($message['is_hidden'] == false) {
+											$toType = ((!empty($message['from']) && $message['from']['id'] != $fbresult->pid) || empty($message['from'])) ? 'me' : '';
+											$fromName = (!empty($message['from']) && $message['from']['name']) ? $message['from']['name'] : '';
+											$ctime = (!empty($message['created_time'])) ? $message['created_time'] : '';
+											$fromUserId = (!empty($message['from']) && $message['from']['id']) ? $message['from']['id'] : '';
+											
+											if($fromUserId == $fbresult->pid){
+												$fromImage = $fbresult->avatar;
+												$toImage = theme_public_asset('img/default.png');
+											}else{
+												$fromImage = theme_public_asset('img/default.png');
+												$toImage = $fbresult->avatar;
+											}
+											
+											$commentIds[] = !empty($message['id']) ? $message['id'] : '';
+											
+											$d = [
+												'user_id' => 1,
+												'account_id' => $fbresult->id,
+												'brand_id' => $fbresult->brand_id,
+												'team_id' => $fbresult->team_id,
+												'conversation_id' => '',
+												'media_type' => 'facebook',
+												'inbox_type' => 'Comment',
+												'post_id' => $row['id'],
+												'post_url' => !empty($row['permalink_url']) ? $row['permalink_url'] : '',
+												'message' => $message['message'],
+												'media_url' => '',
+												'from_name' => $fromName,
+												'from_user_id' => $fromUserId,
+												'message_id' => !empty($message['id']) ? $message['id'] : '',
+												'to_type' => $toType,
+												'to_name' => $fbresult->name,
+												'from_image' => $fromImage,
+												'to_image' => $toImage,
+												'to_user_id' => $fbresult->pid,
+												'created_time' => $ctime,
+												'comment_count' => $message['comment_count'],
+											];
+
+											DB::statement("
+												INSERT INTO inbox_comments 
+												(user_id, account_id, post_id, post_url, brand_id, team_id, conversation_id, media_type, inbox_type, message, media_url, from_name, from_user_id, to_name, to_type, to_user_id, from_image, to_image, message_id, created_time, comment_count)
+												VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+												ON DUPLICATE KEY UPDATE message = VALUES(message), comment_count = VALUES(comment_count), post_url = VALUES(post_url)",
+												[
+													$d['user_id'], $d['account_id'], $d['post_id'], $d['post_url'], $d['brand_id'], $d['team_id'], $d['conversation_id'],
+													$d['media_type'], $d['inbox_type'], $d['message'], $d['media_url'], $d['from_name'], $d['from_user_id'],
+													$d['to_name'], $d['to_type'], $d['to_user_id'], $d['from_image'], $d['to_image'], $d['message_id'],
+													$d['created_time'], $d['comment_count']
+												]
+											);
+											
+											// Handle nested comments
+											if ($message['comment_count'] > 0) {
+												if (!empty($message['comments']) && !empty($message['comments']['data'])) {
+													foreach ($message['comments']['data'] as $messageC) {
+														$toType = ((!empty($messageC['from']) && $messageC['from']['id'] != $fbresult->pid) || empty($messageC['from'])) ? 'me' : '';
+														$fromName = (!empty($messageC['from']) && $messageC['from']['name']) ? $messageC['from']['name'] : '';
+														$fromUserId = (!empty($messageC['from']) && $messageC['from']['id']) ? $messageC['from']['id'] : '';
+														
+														if($fromUserId == $fbresult->pid){
+															$fromImage = $fbresult->avatar;
+															$toImage = theme_public_asset('img/default.png');
+														}else{
+															$fromImage = theme_public_asset('img/default.png');
+															$toImage = $fbresult->avatar;
+														}
+														
+														$commentIds[] = !empty($messageC['id']) ? $messageC['id'] : '';
+														
+														$d = [
+															'user_id' => 1,
+															'account_id' => $fbresult->id,
+															'brand_id' => $fbresult->brand_id,
+															'team_id' => $fbresult->team_id,
+															'conversation_id' => '',
+															'media_type' => 'facebook',
+															'inbox_type' => 'Comment',
+															'post_id' => $row['id'],
+															'post_url' => !empty($row['permalink_url']) ? $row['permalink_url'] : '',
+															'message' => $messageC['message'],
+															'media_url' => '',
+															'from_name' => $fromName,
+															'from_user_id' => $fromUserId,
+															'message_id' => !empty($messageC['id']) ? $messageC['id'] : '',
+															'to_type' => $toType,
+															'to_name' => $fbresult->name,
+															'to_user_id' => $fbresult->pid,
+															'from_image' => $fromImage,
+															'to_image' => $toImage,
+															'created_time' => $messageC['created_time'],
+															'is_child' => 1,
+															'parent_id' => !empty($message['id']) ? $message['id'] : ''
+														];
+
+														DB::statement("
+															INSERT IGNORE INTO inbox_comments 
+															(user_id, account_id, post_id, post_url, brand_id, team_id, conversation_id, media_type, inbox_type, message, media_url, from_name, from_user_id, to_name, to_type, to_user_id, from_image, to_image, message_id, created_time, is_child, parent_id)
+															VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+															[
+																$d['user_id'], $d['account_id'], $d['post_id'], $d['post_url'], $d['brand_id'], $d['team_id'], $d['conversation_id'],
+																$d['media_type'], $d['inbox_type'], $d['message'], $d['media_url'], $d['from_name'], $d['from_user_id'],
+																$d['to_name'], $d['to_type'], $d['to_user_id'], $d['from_image'], $d['to_image'], $d['message_id'],
+																$d['created_time'], $d['is_child'], $d['parent_id']
+															]
+														);
+													}
+												}
+											}
+										}
+									} 
+									// Instagram comments
+									else {
+										if (!empty($message['id'])) {
+											$toType = ((!empty($message['from']) && $message['from']['id'] != $fbresult->pid) || empty($message['from'])) ? 'me' : '';
+											$fromName = (!empty($message['from']) && $message['from']['username']) ? $message['from']['username'] : '';
+											$ctime = (!empty($message['timestamp'])) ? $message['timestamp'] : '';
+											$fromUserId = (!empty($message['from']) && $message['from']['id']) ? $message['from']['id'] : '';
+											
+											if($fromUserId == $fbresult->pid){
+												$fromImage = $fbresult->avatar;
+												$toImage = theme_public_asset('img/default.png');
+											}else{
+												$fromImage = theme_public_asset('img/default.png');
+												$toImage = $fbresult->avatar;
+											}
+											
+											$commentIds[] = !empty($message['id']) ? $message['id'] : '';
+											
+											$data = [
+												'user_id' => 1,
+												'account_id' => $fbresult->id,
+												'brand_id' => $fbresult->brand_id,
+												'team_id' => $fbresult->team_id,
+												'conversation_id' => '',
+												'media_type' => 'instagram',
+												'inbox_type' => 'Comment',
+												'post_id' => $row['id'],
+												'post_url' => !empty($row['permalink']) ? $row['permalink'] : '',
+												'message' => !empty($message['text']) ? $message['text'] : '',
+												'from_name' => $fromName,
+												'from_user_id' => $fromUserId,
+												'message_id' => $message['id'],
+												'media_url' => '',
+												'to_type' => $toType,
+												'to_name' => $fbresult->name,
+												'to_user_id' => $fbresult->pid,
+												'from_image' => $fromImage,
+												'to_image' => $toImage,
+												'created_time' => $ctime,
+												'comment_count' => (!empty($message['replies']) && !empty($message['replies']['data'])) ? count($message['replies']['data']) : 0,
+											];
+
+											// Check if exists and update or insert
+											$exists = DB::table('inbox_comments')
+												->where('message_id', $data['message_id'])
+												->exists();
+
+											if ($exists) {
+												DB::table('inbox_comments')
+													->where('message_id', $data['message_id'])
+													->update($data);
+											} else {
+												DB::table('inbox_comments')->insert($data);
+											}
+											
+											// Handle Instagram replies
+											if (!empty($message['replies'])) {
+												if (!empty($message['replies']) && !empty($message['replies']['data'])) {
+													foreach ($message['replies']['data'] as $messageC) {
+														$toType = ((!empty($messageC['from']) && $messageC['from']['id'] != $fbresult->pid) || empty($messageC['from'])) ? 'me' : '';
+														$fromName = (!empty($messageC['from']) && $messageC['from']['username']) ? $messageC['from']['username'] : '';
+														$fromUserId = (!empty($messageC['from']) && $messageC['from']['id']) ? $messageC['from']['id'] : '';
+														
+														if($fromUserId == $fbresult->pid){
+															$fromImage = $fbresult->avatar;
+															$toImage = theme_public_asset('img/default.png');
+														}else{
+															$fromImage = theme_public_asset('img/default.png');
+															$toImage = $fbresult->avatar;
+														}
+														
+														$commentIds[] = !empty($messageC['id']) ? $messageC['id'] : '';
+														
+														$d = [
+															'user_id' => 1,
+															'account_id' => $fbresult->id,
+															'brand_id' => $fbresult->brand_id,
+															'team_id' => $fbresult->team_id,
+															'conversation_id' => '',
+															'media_type' => 'instagram',
+															'inbox_type' => 'Comment',
+															'post_id' => $row['id'],
+															'post_url' => !empty($row['permalink']) ? $row['permalink'] : '',
+															'message' => $messageC['text'],
+															'media_url' => '',
+															'from_name' => $fromName,
+															'from_user_id' => $fromUserId,
+															'message_id' => $messageC['id'],
+															'to_type' => $toType,
+															'to_name' => $fbresult->name,
+															'to_user_id' => $fbresult->pid,
+															'from_image' => $fromImage,
+															'to_image' => $toImage,
+															'created_time' => $messageC['timestamp'],
+															'is_child' => 1,
+															'parent_id' => $message['id'],
+															'comment_count' => 0,
+														];
+
+														DB::statement("
+															INSERT INTO inbox_comments 
+															(user_id, account_id, post_id, post_url, brand_id, team_id, conversation_id, media_type, inbox_type, message, media_url, from_name, from_user_id, to_name, to_type, to_user_id, from_image, to_image, message_id, created_time, is_child, parent_id, comment_count)
+															VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+															ON DUPLICATE KEY UPDATE message = VALUES(message), comment_count = VALUES(comment_count), post_url = VALUES(post_url)",
+															[
+																$d['user_id'], $d['account_id'], $d['post_id'], $d['post_url'], $d['brand_id'], $d['team_id'], $d['conversation_id'],
+																$d['media_type'], $d['inbox_type'], $d['message'], $d['media_url'], $d['from_name'], $d['from_user_id'],
+																$d['to_name'], $d['to_type'], $d['to_user_id'], $d['from_image'], $d['to_image'], $d['message_id'],
+																$d['created_time'], $d['is_child'], $d['parent_id'], $d['comment_count']
+															]
+														);
+													}
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+						
+						// Delete old comments
+						if (!empty($commentIds)) {
+							DB::table('inbox')
+								->whereNotIn('message_id', $commentIds)
+								->where('inbox_type', 'Comment')
+								->delete();
+						}
+					} else {
+						echo 'API not working';
+					}
+					
+				} catch (\Exception $e) {
+					// Don't use print_r on exception - it exhausts memory
+					echo '<pre>';
+					echo 'Error: ' . $fbresult->id . '<br>';
+					echo 'Message: ' . $e->getMessage() . '<br>';
+					echo 'File: ' . $e->getFile() . '<br>';
+					echo 'Line: ' . $e->getLine() . '<br>';
+					echo '</pre>';
+				}
+			}
+		}
+	}
+	
+	public static function postComment($token, $comment, $conversationId, $completeId, $endpoint)
+    {
+		$FB = new Facebook([
+            'app_id'              => get_option("facebook_app_id", ""),
+            'app_secret'          => get_option("facebook_app_secret", ""),
+            'default_graph_version' => get_option("facebook_graph_version", "v21.0"),
+        ]);
+        
+		$uploadParams = [
+		   "message" =>  $comment 
+		];
+		try {	
+			$response = $FB->post($endpoint, $uploadParams, $token)->getDecodedBody();
+			 // Check if message was sent successfully
+			if (!empty($response['id'])) {	
+				if($completeId == '1' || $completeId == 1){
+					DB::table('inbox_comments')->where('conversation_id', $conversationId)->update(['is_completed' => 1]);
+				}			
+				return ['status' => 'success', 'message' => 'Comment posted'];
+			} else {
+				return ['status' => 'error', 'message' => 'API not working'];
+			}
+			
+		} catch (\Exception $e) {
+			return ["status" => "error","message" => $e->getMessage()]; 
+		}
+	}
+	
 }
+

@@ -1,0 +1,23 @@
+{
+    "name": "AppApprovals",
+    "alias": "appapprovals",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppApprovals\\Providers\\AppApprovalsServiceProvider"
+    ],
+    "files": [],
+    "permission": false,
+    "_disabled_menu": {
+        "uri": "app/approvals",
+        "role": "client",
+        "platform": 1,
+        "section": "top",
+        "tab_id": 20,
+        "position": 600,
+        "name": "Approvals",
+        "color": "#18939a",
+        "icon": "fa-light fa-message-lines"
+    }
+}

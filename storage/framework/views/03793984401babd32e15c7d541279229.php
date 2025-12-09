@@ -19,6 +19,7 @@
     <meta name="description" content="<?php echo e(get_option("website_description", config('site.description'))); ?>">
     <meta name="csrf-token" content="<?php echo e(csrf_token()); ?>">
     <link rel="icon" type="image/x-icon" href="<?php echo e(url( get_option("website_favicon", asset('public/img/favicon.png')) )); ?>">
+	<link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Staatliches&display=swap" rel="stylesheet">
     <title>
         <?php if (! empty(trim($__env->yieldContent('pagetitle')))): ?>
             <?php echo $__env->yieldContent('pagetitle'); ?>
@@ -154,7 +155,7 @@
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/lazysizes/lazysizes.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/datatables/datatables.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/fullcalendar/index.global.min.js')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=9.0.6"></script>	
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=9.0.8"></script>	
     <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js?v=1.20')); ?>"></script>
     <?php echo $__env->yieldContent('script'); ?>
     <?php echo Script::renderJs(); ?>

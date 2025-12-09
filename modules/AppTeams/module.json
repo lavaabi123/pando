@@ -14,9 +14,9 @@
         "role": "client",
         "platform": 1,
         "section": "top",
-        "tab_id": 20,
+        "tab_id": 40,
         "position": 1500,
-        "name": "Teams",
+        "name": "Team Members",
         "color": "#e17879",
         "icon": "fa-light fa-users-line"
     }

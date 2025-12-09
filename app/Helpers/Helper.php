@@ -750,13 +750,13 @@ if (!function_exists("get_social_media_icon_large")) {
     function get_social_media_icon_large($network)
     {
         if(strtolower($network) == 'facebook'){
-			echo '<i class="fab fa-facebook-f" style="background-color: #0074fa;color: #fff;"></i>';
+			echo '<i class="fab fa-facebook-f" style="color: #0074fa;"></i>';
 		}elseif(strtolower($network) == 'twitter' || strtolower($network) == 'x'){
-			echo '<i class="fab fa-x-twitter" style="background-color: #000000;color: #fff;"></i>';
+			echo '<i class="fab fa-x-twitter" style="color: #000000;"></i>';
 		}elseif(strtolower($network) == 'instagram'){
 			echo '<i class="fab fa-instagram" style="color: #fff;background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);right: 13px;"></i>';
 		}elseif(strtolower($network) == 'linkedin'){
-			echo '<i class="fab fa-linkedin" style="color: #fff;background-color:#0077b5;right: 13px;"></i>';
+			echo '<i class="fab fa-linkedin" style="color:#0077b5;right: 13px;"></i>';
 		}elseif(strtolower($network) == 'pinterest'){
 			echo '<i class="fab fa-pinterest" style="color: #cd2029;right: 13px;"></i>';
 		}elseif(str_replace("_", " ", strtolower($network)) == 'google_business'){
@@ -800,6 +800,24 @@ if (!function_exists('get_profile_name')) {
         }
         
         return false;
+    }
+}
+
+if (!function_exists('is_image')) {
+    function is_image($filename) {
+        $imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg'];
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        return in_array($extension, $imageExtensions);
+    }
+}
+
+if (!function_exists('get_file_url')) {
+    function get_file_url($path) {
+        if (empty($path)) return '';
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+        return asset('storage/' . ltrim($path, '/'));
     }
 }
 

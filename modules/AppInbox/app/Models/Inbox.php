@@ -273,33 +273,6 @@ class Inbox extends Model
 			return ["status" => "error","message" => $e->getMessage()]; 
 		}
 	}
-	public static function postComment($token, $comment, $conversationId, $completeId, $endpoint)
-    {
-		$FB = new Facebook([
-            'app_id'              => get_option("facebook_app_id", ""),
-            'app_secret'          => get_option("facebook_app_secret", ""),
-            'default_graph_version' => get_option("facebook_graph_version", "v21.0"),
-        ]);
-        
-		$uploadParams = [
-		   "message" =>  $comment 
-		];
-		try {	
-			$response = $FB->post($endpoint, $uploadParams, $token)->getDecodedBody();
-			 // Check if message was sent successfully
-			if (!empty($response['id'])) {	
-				if($completeId == '1' || $completeId == 1){
-					DB::table('inbox_comments')->where('conversation_id', $conversationId)->update(['is_completed' => 1]);
-				}			
-				return ['status' => 'success', 'message' => 'Comment posted'];
-			} else {
-				return ['status' => 'error', 'message' => 'API not working'];
-			}
-			
-		} catch (\Exception $e) {
-			return ["status" => "error","message" => $e->getMessage()]; 
-		}
-	}
 	
 	public static function get_message_conversation($brand_id = ''){ 
 		$FB = new Facebook([
@@ -445,4 +418,6 @@ class Inbox extends Model
 			}
 		}	 
     }
+	
+
 }

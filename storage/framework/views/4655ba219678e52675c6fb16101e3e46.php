@@ -8,7 +8,7 @@
             <ul class="navbar-nav py-2">
                 <?php if (\Illuminate\Support\Facades\Blade::check('canany', 'apppublishingcampaigns', 'apppublishinglabels')): ?>
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12  <?php echo e(Request::segment(3)==""?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing")); ?>">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12  <?php echo e(Request::segment(3)==""?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing")); ?>">
                         <?php echo e(__("Schedules")); ?>
 
                     </a>
@@ -17,7 +17,7 @@
 
                 <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check("apppublishingcampaigns")): ?>
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 <?php echo e(Request::segment(3)=="campaigns"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/campaigns")); ?>">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 <?php echo e(Request::segment(3)=="campaigns"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/campaigns")); ?>">
                         <?php echo e(__("Campaigns")); ?>
 
                     </a>
@@ -26,7 +26,7 @@
 
                 <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check("apppublishinglabels")): ?>
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 <?php echo e(Request::segment(3)=="labels"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/labels")); ?>">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 <?php echo e(Request::segment(3)=="labels"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/labels")); ?>">
                         <?php echo e(__("Labels")); ?>
 
                     </a>
@@ -34,14 +34,14 @@
                 <?php endif; ?>
 
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 <?php echo e(Request::segment(3)=="draft"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/draft")); ?>">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 <?php echo e(Request::segment(3)=="draft"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/draft")); ?>">
                         <?php echo e(__("Draft")); ?>
 
                     </a>
                 </li>
 				
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 <?php echo e(Request::segment(3)=="approval"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/approval")); ?>">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 <?php echo e(Request::segment(3)=="approval"?"text-primary":""); ?>" aria-current="page" href="<?php echo e(url_app("publishing/approval")); ?>">
                         <?php echo e(__("Approval")); ?>
 
                     </a>

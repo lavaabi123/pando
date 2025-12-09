@@ -8,7 +8,7 @@
             <ul class="navbar-nav py-2">
                 @canany('apppublishingcampaigns', 'apppublishinglabels')
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12  {{ Request::segment(3)==""?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing") }}">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12  {{ Request::segment(3)==""?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing") }}">
                         {{ __("Schedules") }}
                     </a>
                 </li>
@@ -16,7 +16,7 @@
 
                 @can("apppublishingcampaigns")
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 {{ Request::segment(3)=="campaigns"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/campaigns") }}">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 {{ Request::segment(3)=="campaigns"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/campaigns") }}">
                         {{ __("Campaigns") }}
                     </a>
                 </li>
@@ -24,20 +24,20 @@
 
                 @can("apppublishinglabels")
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 {{ Request::segment(3)=="labels"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/labels") }}">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 {{ Request::segment(3)=="labels"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/labels") }}">
                         {{ __("Labels") }}
                     </a>
                 </li>
                 @endcan
 
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 {{ Request::segment(3)=="draft"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/draft") }}">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 {{ Request::segment(3)=="draft"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/draft") }}">
                         {{ __("Draft") }}
                     </a>
                 </li>
 				
                 <li class="nav-item">
-                    <a class="nav-link px-3 py-2 fw-6 text-uppercase fs-12 {{ Request::segment(3)=="approval"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/approval") }}">
+                    <a class="nav-link px-3 py-2 fw-6 fs-12 {{ Request::segment(3)=="approval"?"text-primary":"" }}" aria-current="page" href="{{ url_app("publishing/approval") }}">
                         {{ __("Approval") }}
                     </a>
                 </li>

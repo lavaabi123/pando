@@ -1,6 +1,6 @@
 <div class="modal fade" id="groupModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
 	<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-		<form class="modal-content actionForm" action="{{ module_url("save") }}" data-call-success="Main.closeModal('groupModal'); Main.ajaxScroll(true);">
+		<form class="modal-content actionForm" action="{{ module_url("save") }}" data-call-success="Main.closeModal('groupModal');Main.ajaxScroll(true,'brands'); Main.ajaxScroll(true);">
 			<div class="modal-header">
 				<h1 class="modal-title fs-16">{{ __("Create brand") }}</h1>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

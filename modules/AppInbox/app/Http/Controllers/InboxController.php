@@ -209,15 +209,20 @@ class InboxController extends Controller
             'list_detail' => $detailView
         ]);
     }
-
-    /**
+	
+	/**
      * Get detail view for AJAX
      */
     public function ajaxListDetail(Request $request)
     {
         $wheres = [];
         $whereIn = [];
-		$item = Inbox::where('id', $request->id)->get()->toArray();
+		if (empty($request->conversation_id)) {
+            $item = InboxComment::where('id', $request->id)->get()->toArray();
+        } else {
+            $item = Inbox::where('id', $request->id)->get()->toArray();
+        }
+		
 		if (empty($request->conversation_id)) {
             $detailView = $this->getCommentDetailView($item[0], $wheres, $whereIn);
         } else {
@@ -847,13 +852,15 @@ public function getTagsList()
 
     protected function getCommentDetailView($item, $wheres, $whereIn)
     {
-        // Update last reviewed information
-        DB::table('inbox_comments')
-            ->where('post_id', $item['post_id'])
-            ->update([
-                'last_reviewed_user_id' => session('user_id'),
-                'last_reviewed_date' => now()
-            ]);
+        // Get inbox detail to fetch account_id and user IDs
+        $inboxDetail = DB::table('inbox_comments')
+            ->select('account_id', 'from_user_id', 'to_user_id')
+            ->where('id', $item['id'])
+            ->first();
+
+        if (!$inboxDetail) {
+            return '';
+        }
 
         // Get comment details
         $commentWheres = [
@@ -861,7 +868,7 @@ public function getTagsList()
             'is_child' => 0
         ];
         
-        $inboxLists = InboxComment::getInboxCommentsListDetail($commentWheres, []);
+        $inboxLists = InboxComment::getInboxCommentsDetail($commentWheres, []);
         
         // Get child comments for each parent comment
         if (!empty($inboxLists)) {
@@ -873,7 +880,7 @@ public function getTagsList()
                         'parent_id' => $comment['message_id'],
                         'is_child' => 1
                     ];
-                    $children = InboxComment::getInboxCommentsListDetail($childWheres, []);
+                    $children = InboxComment::getInboxCommentsDetail($childWheres, []);
                     $inboxArray[$key]['child'] = json_decode(json_encode($children), true);
                 } else {
                     $inboxArray[$key]['child'] = [];
@@ -1006,7 +1013,7 @@ public function getTagsList()
     protected function postComment($id, $comment, $conversationId, $completeId)
     {
         // Implementation for posting comment
-		$inbox = Inbox::where('id', $id)->get()->toArray();
+		$inbox = InboxComment::where('id', $id)->get()->toArray();
 		$account = Accounts::where("id", $inbox[0]['account_id'])->get();
 		
 		if($account[0]['social_network'] == 'linkedin'){
@@ -1019,7 +1026,7 @@ public function getTagsList()
 				$endpoint = "/".$inbox[0]['message_id']."/replies";
 				$token = $account[0]->token;
 			}
-			return Inbox::postComment($token, $comment, $conversationId, $completeId, $endpoint); 
+			return InboxComment::postComment($token, $comment, $conversationId, $completeId, $endpoint); 
 		}
     }
 
@@ -1064,6 +1071,7 @@ public function getTagsList()
 	
 	public function cron()
     {
-		$messages = Inbox::get_message_conversation(3);
+		//$messages = Inbox::get_message_conversation(3);
+		$comments = InboxComment::getComments(3);
 	}
 }

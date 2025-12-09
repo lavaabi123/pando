@@ -4,6 +4,7 @@ namespace Modules\Auth\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
@@ -276,7 +277,41 @@ class AuthController extends Controller
                     $user = Auth::user();
                     $user->last_login = time();
                     $user->save();
-					session(['brand_id' => $user->recent_brand_id]);
+					
+					// Get the brand_id to set in session
+					$brandId = $user->recent_brand_id;
+
+					// Check if recent_brand_id exists in brands table (or if it's 0/null)
+					if ($brandId) {
+						$brandExists = DB::table('brands')->where('id', $brandId)->exists();
+						if (!$brandExists) {
+							$brandId = 0; // Reset if brand was deleted
+						}
+					}
+
+					// If recent_brand_id is 0, null, or was deleted, get the most recent brand from user_brands
+					if (!$brandId) {
+						$userBrand = DB::table('user_brands')
+							->join('brands', 'user_brands.brand_id', '=', 'brands.id')
+							->where('user_brands.user_id', $user->id)
+							->orderBy('user_brands.id', 'desc')
+							->select('user_brands.brand_id')
+							->first();
+						
+						$brandId = $userBrand ? $userBrand->brand_id : 0;
+						
+						// Update user's recent_brand_id if a valid brand was found
+						if ($brandId) {
+							$user->recent_brand_id = $brandId;
+							$user->save();
+						} else {
+							// Set to 0 if no brands exist
+							$user->recent_brand_id = 0;
+							$user->save();
+						}
+					}
+
+					session(['brand_id' => $brandId]);
 					session(['user_id' => $user->id]);
                     if($user->language){
                         \Cookie::queue('locale', $user->language, 60 * 24 * 365 * 10);

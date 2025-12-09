@@ -15,8 +15,8 @@
             "resources/assets/js/files.js"
         ]
     },
-    "permission": true,
-    "menu": {
+    "_disabled_permission": true,
+    "_disabled_menu": {
         "uri": "app/files",
         "role": "client",
         "platform": 1,
