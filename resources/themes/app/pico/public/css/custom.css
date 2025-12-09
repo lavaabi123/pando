@@ -684,6 +684,7 @@ i.post-media {
 }
 ul#myTab {
 	gap:0;
+	border: none;
 }
 ul#myTab li:first-child {
 	z-index:2;
@@ -717,6 +718,34 @@ ul#myTab li button {
 ul#myTab li button.active {
     background: var(--d-primary);
     color: var(--white);
+	border-color: var(--d-primary);
+}
+#myTabContent {
+    border: 1px solid var(--d-primary);
+	border-radius: 0 0 2rem 2rem;
+    overflow: hidden;
+}
+
+.calendar-scroll {
+	background: #f9f9f9;
+	    border-radius: 1.5rem;
+}
+.calendar-scroll .fc-theme-standard th, .calendar-scroll .fc-theme-standard td {
+    border: 0px;
+}
+.calendar-scroll .add-button {
+    padding: 5px !important;
+    font-size: 12px !important;
+    text-transform: capitalize;
+}
+
+.calendar-scroll .fc-highlight-day {
+    background-color: color-mix(in srgb, var(--d-secondary) 10%, transparent) !important;
+    border-color: var(--d-secondary) !important;
+}
+.compose .fc-daygrid-day-events .card {
+	background: var(--d-primary);
+	border-color: var(--d-primary);
 }
 /** Publishing Popup **/
 

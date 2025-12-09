@@ -38,7 +38,7 @@ if($post){
         </div>
         @endcan
 
-        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white" action="{{ url_app("publishing/save") }}" id="compose-editor" data-call-after="AppPubishing.confirmPostModal(result);" data-call-success="AppPubishing.closeCompose(); AppPubishing.reloadCalendar(); Main.ajaxScroll(true);">
+        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-600" action="{{ url_app("publishing/save") }}" id="compose-editor" data-call-after="AppPubishing.confirmPostModal(result);" data-call-success="AppPubishing.closeCompose(); AppPubishing.reloadCalendar(); Main.ajaxScroll(true);">
 
             <div class="d-flex flex-column flex-column-fluid overflow-y-auto py-2">
                 <div class="max-w-750 wp-100 mx-auto p-3">
@@ -378,7 +378,7 @@ if($post){
             </div>
             
         </form>
-		<div class="max-w-750 position-relative p-4">
+		<div class="w-100 position-relative p-4 overflow-auto">
 		<ul class="nav nav-tabs position-relative" id="myTab" role="tablist">
 			  <li class="nav-item" role="presentation">
 				<button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><span class="text">Scheduled Post</span></button>
@@ -395,9 +395,9 @@ if($post){
 			</ul>
 			<div class="tab-content" id="myTabContent">	
 			<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-        <div class="compose-calendar-new compose-preview d-flex flex-column flex-fill bg-gray-100 bg-white min-w-300">
-		<div class="max-w-750 wp-100 mx-auto ">
-				<div class="calendar-header d-flex flex-wrap gap-8 justify-content-between align-items-center px-4 py-3 border-bottom">
+        <div class="compose-calendar-new compose-preview d-flex flex-column flex-fill bg-white min-w-300">
+		<div class="wp-100 mx-auto p-4">
+				<div class="calendar-header">
 					<div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
 						<div>
 							<div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event-new" data-calendar-type="prev">
@@ -534,11 +534,10 @@ if($post){
 				<div class="card text-wrap border-2 mb-1 shadow-none border-primary-200 event-item wp-100" 
 					 data-date="[[date]]" 
 					 data-grouping-data="[[grouping_data]]">
-					<div class="card-body px-2 py-2">
+					<div class="card-body px-2 py-0">
 						<div class="d-flex flex-grow-1 align-items-center justify-content-center gap-8 w-100">
 							<div class="text-center">
-								
-									<div class="fw-bold fs-20">[[post_count]]</div>
+								<div class="fw-bold fs-12">[[post_count]]</div>
 								
 							</div>
 						</div>	
