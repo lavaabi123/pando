@@ -993,6 +993,8 @@ var Main = new (function ()
     },
 
     Main.dateRange = function() {
+		console.log($(".daterange").length);
+		console.log($("[name='daterange']").length);
         if ($(".daterange").length > 0 && $("[name='daterange']").length === 0) {
             $(".daterange").removeClass("d-none");
             var $class = $(".daterange").attr("class");
@@ -1059,15 +1061,25 @@ var Main = new (function ()
             cb(start, end);
 
             $('#daterange').on('apply.daterangepicker', function(e, picker) {
-                e.preventDefault();
-                $("[name='daterange']").val(picker.startDate.format('YYYY-MM-DD') + "," + picker.endDate.format('YYYY-MM-DD')).trigger('change');
-
-                setTimeout(function() {
-                    if (!$(".daterange").hasClass("no-submit")) {
-                        $("#btn_daterange").trigger("click");
-                    }
-                }, 200);
-            });
+				e.preventDefault();
+				
+				var newDateRange = picker.startDate.format('YYYY-MM-DD') + "," + picker.endDate.format('YYYY-MM-DD');
+				$("[name='daterange']").val(newDateRange);
+				
+				// Update URL with new daterange parameter
+				var url = new URL(window.location.href);
+				url.searchParams.set('daterange', newDateRange);
+				window.history.pushState({}, '', url);
+				
+				// Trigger change for AJAX reload
+				$("[name='daterange']").trigger('change');
+				
+				setTimeout(function() {
+					if (!$(".daterange").hasClass("no-submit")) {
+						$("#btn_daterange").trigger("click");
+					}
+				}, 200);
+			});
         }
     },
 
@@ -1981,7 +1993,6 @@ var Main = new (function ()
         // Abort if the element does not exist
         if (that.length == 0) return false;
 		
-		console.log(loading);
         // Abort if already loading content
         if (loading != undefined && loading != 0) return false;
 

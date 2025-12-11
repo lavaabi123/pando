@@ -42,7 +42,7 @@ class AppBrandsController extends Controller
 		if ((int)$role === 2) {
 			// SUPER ADMIN: see every brand
 			$query = DB::table('brands as b')
-						->leftJoin('brands_favorites as bf', function ($join) use ($userId, $teamId) {
+						->leftJoin('brands_favorites as bf', function ($join) use ($userId) {
 						$join->on('bf.brand_id', '=', 'b.id')
 							 ->where('bf.user_id', '=', $userId);
 						})
