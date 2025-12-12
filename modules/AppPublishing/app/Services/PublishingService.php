@@ -388,6 +388,7 @@ class PublishingService
             'post_social_id' => $post_social_id,
             'created'        => $data['created'] ?? time(),
             'message'        => $message,
+			'brand_id' => session('brand_id'),
         ]);
     }
 
@@ -411,7 +412,7 @@ class PublishingService
         $startTimestamp = $quotaResetAt ? intval($quotaResetAt) : now()->startOfMonth()->timestamp;
         $endTimestamp = $nextQuotaResetAt;
 
-        $used = PostStat::where('team_id', $teamId)
+        $used = PostStat::where('team_id', $teamId)->where('brand_id', session('brand_id'))
             ->where('status', 4)
             ->whereBetween('created', [$startTimestamp, $endTimestamp])
             ->count();

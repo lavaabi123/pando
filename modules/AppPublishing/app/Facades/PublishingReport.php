@@ -28,14 +28,14 @@ class PublishingReport extends Facade
 		$successQuery = PostStat::query()
 			->selectRaw('FROM_UNIXTIME(created, "%Y-%m-%d") as date, COUNT(*) as total')
 			->whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
-			->where('status', 4);
+			->where('status', 4)->where('brand_id',session('brand_id'));
 		if ($teamId) $successQuery->where('team_id', $teamId);
 		$successData = $successQuery->groupBy('date')->pluck('total', 'date')->toArray();
 		
 		$failQuery = PostStat::query()
 			->selectRaw('FROM_UNIXTIME(created, "%Y-%m-%d") as date, COUNT(*) as total')
 			->whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
-			->where('status', 5);
+			->where('status', 5)->where('brand_id',session('brand_id'));
 		if ($teamId) $failQuery->where('team_id', $teamId);
 		$failData = $failQuery->groupBy('date')->pluck('total', 'date')->toArray();
 		
@@ -74,6 +74,7 @@ class PublishingReport extends Facade
     public static function postsByTeamForChart(Carbon $startDate, Carbon $endDate)
     {
         $data = Posts::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
+			->where('brand_id',session('brand_id'))
             ->select('team_id', \DB::raw('COUNT(*) as total'))
             ->groupBy('team_id')
             // ->with('team') // Nếu có relation team
@@ -96,6 +97,7 @@ class PublishingReport extends Facade
     public static function postsBySocialForChart(Carbon $startDate, Carbon $endDate)
     {
         $data = Posts::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
+			->where('brand_id',session('brand_id'))
             ->select('social_network', \DB::raw('COUNT(*) as total'))
             ->groupBy('social_network')
             ->get();
@@ -129,6 +131,7 @@ class PublishingReport extends Facade
     {
         $totalPosts = Posts::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
+			->where('brand_id',session('brand_id'))
             ->count();
 
         $rangeDays = $startDate->diffInDays($endDate);
@@ -136,12 +139,14 @@ class PublishingReport extends Facade
         $prevEnd = $startDate;
         $prevTotal = Posts::whereBetween('created', [$prevStart->timestamp, $prevEnd->timestamp])
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
+			->where('brand_id',session('brand_id'))
             ->count();
         $totalGrowth = static::calcGrowth($prevTotal, $totalPosts);
 
         $statusMap = static::statusMap();
         $statusCounts = Posts::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
+			->where('brand_id',session('brand_id'))
             ->select('status', \DB::raw('COUNT(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')->toArray();
@@ -152,12 +157,14 @@ class PublishingReport extends Facade
             $prev = Posts::whereBetween('created', [$prevStart->timestamp, $prevEnd->timestamp])
                 ->when($teamId, fn($q) => $q->where('team_id', $teamId))
                 ->where('status', $code)
+				->where('brand_id',session('brand_id'))
                 ->count();
             $statusGrowth[$code] = static::calcGrowth($prev, $current);
         }
 
         $topAccount = Posts::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
+			->where('brand_id',session('brand_id'))
             ->select('account_id', \DB::raw('COUNT(*) as total'))
             ->groupBy('account_id')
             ->orderByDesc('total')
@@ -165,6 +172,7 @@ class PublishingReport extends Facade
             ->first();
 
         $socialDistribution = Posts::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
+			->where('brand_id',session('brand_id'))
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
             ->select('social_network', \DB::raw('COUNT(*) as total'))
             ->groupBy('social_network')
@@ -191,6 +199,7 @@ class PublishingReport extends Facade
         $totalPosts = PostStat::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
             ->whereIn('status', [4, 5])
+			->where('brand_id',session('brand_id'))
             ->count();
 
         $rangeDays = $startDate->diffInDays($endDate);
@@ -200,6 +209,7 @@ class PublishingReport extends Facade
         $prevTotal = PostStat::whereBetween('created', [$prevStart->timestamp, $prevEnd->timestamp])
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
             ->whereIn('status', [4, 5])
+			->where('brand_id',session('brand_id'))
             ->count();
 
         $totalGrowth = static::calcGrowth($prevTotal, $totalPosts);
@@ -207,6 +217,7 @@ class PublishingReport extends Facade
         $statusCounts = PostStat::whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
             ->when($teamId, fn($q) => $q->where('team_id', $teamId))
             ->whereIn('status', [4, 5])
+			->where('brand_id',session('brand_id'))
             ->select('status', \DB::raw('COUNT(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status')->toArray();
@@ -217,6 +228,7 @@ class PublishingReport extends Facade
             $prev = PostStat::whereBetween('created', [$prevStart->timestamp, $prevEnd->timestamp])
                 ->when($teamId, fn($q) => $q->where('team_id', $teamId))
                 ->where('status', $code)
+				->where('brand_id',session('brand_id'))
                 ->count();
             $statusGrowth[$code] = static::calcGrowth($prev, $current);
         }
@@ -236,7 +248,8 @@ class PublishingReport extends Facade
 
         $query = Posts::query()
             ->select('status', \DB::raw('COUNT(*) as total'))
-            ->whereBetween('created', [$startDate->timestamp, $endDate->timestamp]);
+            ->whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
+			->where('brand_id',session('brand_id'));
         if ($teamId) $query->where('team_id', $teamId);
 
         $statusData = $query->groupBy('status')->pluck('total', 'status')->toArray();
@@ -264,6 +277,7 @@ class PublishingReport extends Facade
 		$subQuery = Posts::query()
 			->select('grouping_data', DB::raw('MAX(created) as max_created'))
 			->whereIn('status', [4, 5])
+			->where('brand_id',session('brand_id'))
 			->whereNotNull('grouping_data');
 		
 		if ($teamId) {
@@ -300,6 +314,7 @@ class PublishingReport extends Facade
 			])
 			->join('accounts', 'posts.account_id', '=', 'accounts.id')
 			->whereIn('posts.grouping_data', $groupingDataList)
+			->where('posts.brand_id',session('brand_id'))
 			->groupBy('posts.grouping_data')
 			->get();
 		
@@ -375,7 +390,8 @@ class PublishingReport extends Facade
 		$query = PostStat::query()
 			->selectRaw('social_network, COUNT(*) as total')
 			->whereBetween('created', [$startDate->timestamp, $endDate->timestamp])
-			->whereIn('status', [3, 4, 5]); // Published, failed, or success
+			->whereIn('status', [3, 4, 5])->where('brand_id',session('brand_id')); // Published, failed, or success
+			
 		
 		if ($teamId) {
 			$query->where('team_id', $teamId);
@@ -407,6 +423,192 @@ class PublishingReport extends Facade
 		}
 		
 		return $socialMediaData;
+	}
+	
+	public static function getDailyAlerts($teamId = null)
+	{
+		$brandId = session('brand_id');
+		$today = now()->format('Y-m-d');
+		$yesterday = now()->subDay()->format('Y-m-d');
+		
+		// Accounts with no scheduled posts today
+		$noScheduledPosts = DB::table('accounts as a')
+			->leftJoin(DB::raw("(
+				SELECT COUNT(id) as post_count, account_id, social_network 
+				FROM posts 
+				WHERE brand_id = {$brandId}
+				AND FROM_UNIXTIME(time_post, '%Y-%m-%d') = '{$today}'
+				GROUP BY account_id, social_network
+			) as b"), function($join) {
+				$join->on('b.account_id', '=', 'a.id')
+					 ->on('b.social_network', '=', 'a.social_network');
+			})
+			->select('a.id', 'a.social_network', 'a.name', 'a.avatar', 'b.post_count')
+			->where('a.brand_id', $brandId)
+			->whereNull('b.post_count')
+			->get();
+		
+		// Accounts with inbox not cleared for more than 24 hours
+		// Use subquery to get one record per account_id
+		$inboxNotClearedIds = DB::table('inbox')
+			->select('account_id', DB::raw('MAX(id) as max_id'))
+			->where('brand_id', $brandId)
+			->where('created_time', '>', $yesterday)
+			->where('is_completed', 0)
+			->groupBy('account_id')
+			->pluck('max_id');
+		
+		$inboxNotCleared = DB::table('inbox as i')
+			->leftJoin('accounts as a', 'a.id', '=', 'i.account_id')
+			->select('i.*', 'a.social_network', 'a.name', 'a.avatar')
+			->whereIn('i.id', $inboxNotClearedIds)
+			->orderByDesc('i.created_time')
+			->get();
+		
+		// Posts pending approval
+		$pendingApproval = DB::table('posts as p')
+			->leftJoin('accounts as a', 'a.id', '=', 'p.account_id')
+			->select('p.id', 'p.account_id', 'p.status', 'p.data', 'p.type', 'a.social_network', 'a.name', 'a.avatar')
+			->where('p.brand_id', $brandId)
+			->where('p.status', 2)
+			->where('p.account_id', '>', 0)
+			->get();
+		
+		return [
+			'no_scheduled_posts' => $noScheduledPosts,
+			'inbox_not_cleared' => $inboxNotCleared,
+			'pending_approval' => $pendingApproval,
+			'no_scheduled_posts_count' => count($noScheduledPosts),
+			'inbox_not_cleared_count' => count($inboxNotCleared),
+			'pending_approval_count' => count($pendingApproval),
+		];
+	}
+
+	public static function getTodayCounts($dayType = 'daily', $teamId = null)
+	{
+		$brandId = session('brand_id');
+		$today = now()->format('Y-m-d');
+		
+		$result = [
+			'total_scheduled_post' => 0,
+			'inbox_messages' => 0,
+			'total_reviews' => 0,
+			'new_people' => 0,
+			'total_failed_post' => 0,
+			'total_holidays' => 0,
+			'date_range_text' => 'today',
+			'day_type_text' => 'today',
+		];
+		
+		if ($dayType === 'daily') {
+			// Daily counts
+			$result['total_scheduled_post'] = DB::table('posts')
+				->where('brand_id', $brandId)
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') = ?", [$today])
+				->count();
+			
+			$result['inbox_messages'] = DB::table('inbox')
+				->where('brand_id', $brandId)
+				->where('created_time', $today)
+				->where('is_completed', 0)
+				->count();
+			
+			$result['total_failed_post'] = DB::table('posts')
+				->where('brand_id', $brandId)
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') = ?", [$today])
+				->where('status', 5)
+				->count();
+			
+			$result['total_holidays'] = DB::table('calendar_holidays')
+				->where('brand_id', $brandId)
+				->where('date', $today)
+				->count();
+			
+			$result['date_range_text'] = now()->format('F d, Y');
+			$result['day_type_text'] = 'today';
+			
+		} elseif ($dayType === 'weekly') {
+			// Weekly counts
+			$startOfWeek = now()->startOfWeek()->format('Y-m-d');
+			$endOfWeek = now()->format('Y-m-d');
+			
+			$result['total_scheduled_post'] = DB::table('posts')
+				->where('brand_id', $brandId)
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') >= ?", [$startOfWeek])
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') <= ?", [$endOfWeek])
+				->count();
+			
+			$result['inbox_messages'] = DB::table('inbox')
+				->where('brand_id', $brandId)
+				->where('created_time', '>=', $startOfWeek)
+				->where('created_time', '<=', $endOfWeek)
+				->where('is_completed', 0)
+				->count();
+			
+			$result['total_failed_post'] = DB::table('posts')
+				->where('brand_id', $brandId)
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') >= ?", [$startOfWeek])
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') <= ?", [$endOfWeek])
+				->where('status', 5)
+				->count();
+			
+			$result['total_holidays'] = DB::table('calendar_holidays')
+				->where('brand_id', $brandId)
+				->where('date', '>=', $startOfWeek)
+				->where('date', '<=', $endOfWeek)
+				->count();
+			
+			$result['date_range_text'] = now()->startOfWeek()->format('F d, Y') . ' - ' . now()->format('F d, Y');
+			$result['day_type_text'] = 'this week';
+			
+		} elseif ($dayType === 'monthly') {
+			// Monthly counts
+			$startOfMonth = now()->startOfMonth()->format('Y-m-d');
+			$today = now()->format('Y-m-d');
+			
+			$result['total_scheduled_post'] = DB::table('posts')
+				->where('brand_id', $brandId)
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') >= ?", [$startOfMonth])
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') <= ?", [$today])
+				->count();
+			
+			$result['inbox_messages'] = DB::table('inbox')
+				->where('brand_id', $brandId)
+				->where('created_time', '>=', $startOfMonth)
+				->where('created_time', '<=', $today)
+				->where('is_completed', 0)
+				->count();
+			
+			$result['total_failed_post'] = DB::table('posts')
+				->where('brand_id', $brandId)
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') >= ?", [$startOfMonth])
+				->whereRaw("FROM_UNIXTIME(time_post, '%Y-%m-%d') <= ?", [$today])
+				->where('status', 5)
+				->count();
+			
+			$result['total_holidays'] = DB::table('calendar_holidays')
+				->where('brand_id', $brandId)
+				->where('date', '>=', $startOfMonth)
+				->where('date', '<=', $today)
+				->count();
+			
+			$result['date_range_text'] = now()->startOfMonth()->format('F d, Y') . ' - ' . now()->format('F d, Y');
+			$result['day_type_text'] = 'this month';
+		}
+		
+		// Total Reviews (from calendar_holidays - seems like placeholder in your code)
+		$result['total_reviews'] = DB::table('reviews')
+			->where('brand_id', $brandId)
+			->where('date', $today)
+			->count();
+		
+		// New People (from calendar_holidays - seems like placeholder in your code)
+		$result['new_people'] = DB::table('people')
+			->where('brand_id', $brandId)
+			->whereDate('created_at', $today)
+			->count();
+		
+		return $result;
 	}
 
     public static function calcGrowth($previous, $current)

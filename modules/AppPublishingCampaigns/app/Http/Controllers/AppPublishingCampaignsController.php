@@ -90,7 +90,7 @@ class AppPublishingCampaignsController extends Controller
 
         $campaign_ids = $pagination->pluck('id')->toArray();
 
-        $post_stats = PostStat::where('team_id', $request->team_id)
+        $post_stats = PostStat::where('team_id', $request->team_id)->where('brand_id', session('brand_id'))
             ->whereIn('campaign', $campaign_ids)
             ->whereIn('status', [4, 5])
             ->selectRaw('campaign, status, COUNT(*) as total')

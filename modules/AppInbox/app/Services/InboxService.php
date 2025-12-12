@@ -307,6 +307,7 @@ class InboxService
             'post_social_id' => $post_social_id,
             'created'        => $data['created'] ?? time(),
             'message'        => $message,
+			'brand_id' => session('brand_id'),
         ]);
     }
 
@@ -331,6 +332,7 @@ class InboxService
         $endTimestamp = $nextQuotaResetAt;
 
         $used = PostStat::where('team_id', $teamId)
+		->where('brand_id', session('brand_id'))
             ->where('status', 4)
             ->whereBetween('created', [$startTimestamp, $endTimestamp])
             ->count();

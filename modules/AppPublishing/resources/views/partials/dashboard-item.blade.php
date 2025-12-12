@@ -27,6 +27,12 @@
     $errorSuccessSummary = $errorSuccessChart['summary'];
     $recentPosts = PublishingReport::recentPostsStatus(10, $teamId ?? null);
 	$socialMediaStats = PublishingReport::postsBySocialMedia($startDate, $endDate, $teamId ?? null);
+	
+	// Get daily alerts (independent of date range)
+    $dailyAlerts = PublishingReport::getDailyAlerts($teamId ?? null);
+    
+    // Get today counts (independent of date range)
+    $todayCounts = PublishingReport::getTodayCounts('daily', $teamId ?? null);
 
     $statusMap    = $reportStat['status_map'];
     $statusCounts = $reportStat['status_counts'];
@@ -99,99 +105,130 @@
 		</a>
 	</div>
 </div>
-
+{{-- Daily Alerts Section --}}
 <div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
     <div class="card-body py-4 px-4">
-		<div class="text-black mb-3">
-			<h5 class="fw-6">Daily Alerts!</h5>
-			<p class="mb-0">Stay up to date on all your accounts!</p>
-		</div>
-		<div class="row row-gap-4">
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Accounts with no scheduled posts today</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">1</h3>
-					<h5 class="mb-0 fw-bold">Accounts with inbox not cleared for more than 24 hours</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">7</h3>
-					<h5 class="mb-0 fw-bold">Posts pending approval</h5>
-				</div>
-				</a>
-			</div>
-		</div>
-	</div>
+        <div class="text-black mb-3">
+            <h5 class="fw-6">{{ __('Daily Alerts!') }}</h5>
+            <p class="mb-0">{{ __('Stay up to date on all your accounts!') }}</p>
+        </div>
+        <div class="row row-gap-4">
+            {{-- Accounts with no scheduled posts today --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('publishing') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0">{{ $dailyAlerts['no_scheduled_posts_count'] }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Accounts with no scheduled posts today') }}</h5>
+                    </div>
+                </a>
+            </div>
+            
+            {{-- Accounts with inbox not cleared --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('inbox') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0">{{ $dailyAlerts['inbox_not_cleared_count'] }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Accounts with inbox not cleared for more than 24 hours') }}</h5>
+                    </div>
+                </a>
+            </div>
+            
+            {{-- Posts pending approval --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('publishing/approvals') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0">{{ $dailyAlerts['pending_approval_count'] }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Posts pending approval') }}</h5>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
+{{-- Today Section --}}
 <div class="card d-alert position-relative overflow-hidden hp-100 mb-4">
     <div class="card-body py-4 px-4">
-		<div class="text-black mb-3">
-			<h5 class="fw-6">Today! {{ date("F d, Y") }}</h5>
-			<p class="mb-0">What’s happening on your accounts today!</p>
-		</div>
-		<div class="row row-gap-4">
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">{{ number_format($processingTotal) }}</h3>
-					<h5 class="mb-0 fw-bold">Amount of total scheduled posts</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Inbox Messages</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Total Reviews</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">4</h3>
-					<h5 class="mb-0 fw-bold">Number of New People added</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">{{number_format($failedTotal)}}</h3>
-					<h5 class="mb-0 fw-bold">Total failed posts</h5>
-				</div>
-				</a>
-			</div>
-			<div class="col-md-4">
-				<a href="#">
-				<div class="card p-3 d-flex flex-row align-items-center">
-					<h3 class="count text-primary mb-0">0</h3>
-					<h5 class="mb-0 fw-bold">Holidays</h5>
-				</div>
-				</a>
-			</div>
-		</div>
-	</div>
+        <div class="gap-3 mb-3 d-flex justify-content-between align-items-start align-items-md-end flex-column flex-md-row">
+            <div class="text-black">
+                <h5 class="fw-6" id="date_text">{{ __('Today!') }} {{ now()->format('F d, Y') }}</h5>
+                <p class="mb-0">{{ __("What's happening on your accounts") }} <span id="load_day_type">today</span>!</p>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" onclick="changeTodayCounts('daily', this)" class="today_report btn btn-primary btn-sm active">
+                    {{ __('Daily') }}
+                </button>
+                <button type="button" onclick="changeTodayCounts('weekly', this)" class="today_report btn btn-outline-primary btn-sm">
+                    {{ __('Weekly') }}
+                </button>
+                <button type="button" onclick="changeTodayCounts('monthly', this)" class="today_report btn btn-outline-primary btn-sm">
+                    {{ __('Monthly') }}
+                </button>
+            </div>
+        </div>
+        
+        <div class="row row-gap-4">
+            {{-- Total Scheduled Posts --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('publishing') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0" id="total_scheduled_post">{{ number_format($todayCounts['total_scheduled_post']) }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Amount of total scheduled posts') }}</h5>
+                    </div>
+                </a>
+            </div>
+            
+            {{-- Inbox Messages --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('inbox') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0" id="inbox_messages">{{ number_format($todayCounts['inbox_messages']) }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Inbox Messages') }}</h5>
+                    </div>
+                </a>
+            </div>
+            
+            {{-- Total Reviews --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('reviews') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0" id="top_performing_post">{{ number_format($todayCounts['total_reviews']) }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Total Reviews') }}</h5>
+                    </div>
+                </a>
+            </div>
+            
+            {{-- New People --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('people') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0" id="top_performing_video">{{ number_format($todayCounts['new_people']) }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Number of New People added') }}</h5>
+                    </div>
+                </a>
+            </div>
+            
+            {{-- Total Failed Posts --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('publishing') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0" id="total_video_post">{{ number_format($todayCounts['total_failed_post']) }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Total failed posts') }}</h5>
+                    </div>
+                </a>
+            </div>
+            
+            {{-- Holidays --}}
+            <div class="col-md-4">
+                <a href="{{ url_app('holidays') }}">
+                    <div class="card p-3 d-flex flex-row align-items-center">
+                        <h3 class="count text-primary mb-0" id="total_holidays">{{ number_format($todayCounts['total_holidays']) }}</h3>
+                        <h5 class="mb-0 fw-bold">{{ __('Holidays') }}</h5>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
 </div>
 
 <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
@@ -524,7 +561,7 @@
 
                             {{-- Card Header: Multiple Accounts --}}
                             <div class="card-header border-0 bg-white p-3">
-                                @if(count($post->accounts) > 0)
+                                @if( !empty($post->accounts) && count($post->accounts) > 0)
                                     {{-- Show first 2-3 accounts with avatars --}}
                                     <div class="d-flex align-items-center">
                                         {{-- Account Avatars Stack --}}
@@ -545,7 +582,7 @@
                                             @endforeach
                                             
                                             {{-- Show +N indicator if more than 4 accounts --}}
-                                            @if(count($post->accounts) > 4)
+                                            @if(!empty($post->accounts) && count($post->accounts) > 4)
                                                 <div class="rounded-circle border border-2 border-white bg-light d-flex align-items-center justify-content-center" 
                                                      style="width: 32px; height: 32px; margin-left: -12px; z-index: 1;">
                                                     <span class="fs-10 fw-bold text-muted">+{{ count($post->accounts) - 4 }}</span>
@@ -704,7 +741,68 @@
 .fs-11 {
     font-size: 11px;
 }
+.today_report {
+    transition: all 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.card a {
+    text-decoration: none;
+    color: inherit;
+}
 </style>
+<script>
+function changeTodayCounts(dayType, button) {
+    // Update button states
+    $('.today_report').removeClass('active btn-primary').addClass('btn-outline-primary');
+    $(button).removeClass('btn-outline-primary').addClass('active btn-primary');
+    
+    // Show loading
+    if (typeof $(".loading").show === 'function') {
+        $(".loading").show();
+    }
+    
+    $.ajax({
+        url: '{{ route("dashboard.today-counts") }}',
+        type: 'GET',
+        data: {
+            day_type: dayType,
+            team_id: '{{ $teamId ?? "" }}'
+        },
+        success: function(response) {
+            console.log('Response:', response);
+            
+            // Update counts
+            $('#total_scheduled_post').text(response.total_scheduled_post.toLocaleString());
+            $('#inbox_messages').text(response.inbox_messages.toLocaleString());
+            $('#top_performing_post').text(response.total_reviews.toLocaleString());
+            $('#top_performing_video').text(response.new_people.toLocaleString());
+            $('#total_video_post').text(response.total_failed_post.toLocaleString());
+            $('#total_holidays').text(response.total_holidays.toLocaleString());
+            
+            // Update date text
+            $('#date_text').html(response.date_text_html);
+            $('#load_day_type').text(response.day_type_text);
+            
+            if (typeof $(".loading").hide === 'function') {
+                $(".loading").hide();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error loading today counts:', error);
+            if (typeof $(".loading").hide === 'function') {
+                $(".loading").hide();
+            }
+            alert('Error loading data. Please try again.');
+        }
+    });
+}
+</script>
 <script>
     // Social Media Pie Chart
     var socialMediaData = {!! json_encode($socialMediaStats) !!};

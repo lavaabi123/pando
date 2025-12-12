@@ -45,6 +45,7 @@ class AIPosts extends Model
         $ai_post_ids = $posts->pluck('id')->toArray();
 
         $post_stats = PostStat::where('method', 'ai')
+		->where('brand_id', session('brand_id'))
             ->whereIn('query_id', $ai_post_ids)
             ->whereIn('status', [4, 5])
             ->selectRaw('query_id, status, COUNT(*) as total')

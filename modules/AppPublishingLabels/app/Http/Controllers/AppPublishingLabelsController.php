@@ -85,7 +85,7 @@ class AppPublishingLabelsController extends Controller
         $pagination = $pagination->paginate($per_page);
         $label_ids = $pagination->pluck('id')->toArray();
 
-        $stats = PostStat::where('team_id', $request->team_id)
+        $stats = PostStat::where('team_id', $request->team_id)->where('brand_id', session('brand_id'))
             ->where(function($q) use ($label_ids) {
                 foreach ($label_ids as $lid) {
                     $q->orWhereJsonContains('labels', (int)$lid);

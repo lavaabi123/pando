@@ -31,6 +31,23 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::post('destroy-by-filters', [AppPublishingController::class, 'destroyByFilter'])->name('app.publishing.destroy_by_filter');
             Route::post('save', [AppPublishingController::class, 'save'])->name('app.publishing.save');
             Route::post('changePostDate', [AppPublishingController::class, 'changePostDate'])->name('app.publishing.changePostDate');
+			Route::get('/dashboard/today-counts', function() {
+    $dayType = request()->day_type ?? 'daily';
+    $teamId = request()->team_id;
+    
+    $counts = \PublishingReport::getTodayCounts($dayType, $teamId);
+    
+    return response()->json([
+        'total_scheduled_post' => $counts['total_scheduled_post'],
+        'inbox_messages' => $counts['inbox_messages'],
+        'total_reviews' => $counts['total_reviews'],
+        'new_people' => $counts['new_people'],
+        'total_failed_post' => $counts['total_failed_post'],
+        'total_holidays' => $counts['total_holidays'],
+        'date_text_html' => $counts['date_range_text'],
+        'day_type_text' => $counts['day_type_text'],
+    ]);
+})->name('dashboard.today-counts');
 
         });
     });

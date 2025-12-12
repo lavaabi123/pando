@@ -60,7 +60,7 @@ class AppRssSchedulesController extends Controller
 
         $rss_ids = $schedules->pluck('id')->toArray();
 
-        $post_stats = PostStat::where('method', 'rss')
+        $post_stats = PostStat::where('method', 'rss')->where('brand_id', session('brand_id'))
             ->whereIn('query_id', $rss_ids)
             ->whereIn('status', [4, 5]) // 4: success, 5: failed
             ->selectRaw('query_id, status, COUNT(*) as total')
