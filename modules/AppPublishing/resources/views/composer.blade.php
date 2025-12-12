@@ -398,40 +398,46 @@ if($post){
         <div class="compose-calendar-new compose-preview d-flex flex-column flex-fill bg-white min-w-300">
 		<div class="wp-100 mx-auto p-4">
 				<div class="calendar-header">
-					<div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
-						<div>
-							<div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event-new" data-calendar-type="prev">
-								<i class="fa-light fa-angle-left"></i>
+					
+					<div class="border p-2 b-r-20 d-flex flex-wrap gap-8 justify-content-between align-items-center w-sm-100">
+						<div class="btn-group btn-group-sm d-none d-sm-flex gap-10">
+							<button type="button" class="btn btn-light calendar-event-new active" data-calendar-type="dayGridMonth" data-bs-title="{{ __("Month view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+								Monthly
+							</button>
+							<button type="button" class="btn btn-light calendar-event-new" data-calendar-type="timeGridWeek" data-bs-title="{{ __("Week view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+								Weekly
+							</button>
+							<button type="button" class="btn btn-light calendar-event-new d-none" data-calendar-type="listWeek" data-bs-title="{{ __("List view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+								List
+							</button>
+						</div>
+						<div class="d-flex">
+							<div class="btn-group">	
+								<button data-toggle="tooltip" data-placement="bottom" title="" data-bs-original-title="Add a note to a calendar date" class="bg-transparent d-flex align-items-center dropdown-toggle dropdown-arrow-hide">
+									<span class="add-icon">{!! file_get_contents(public_path('img/note.svg')) !!}</span> {{ __('Take Notes') }}
+								</button>
 							</div>
 						</div>
-						<div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
-						<div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
-						<div>
-							<div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event-new" data-calendar-type="next">
+					</div>
+						
+					<div class="w-sm-100 position-relative my-3">
+						<div class="cTitle d-flex justify-content-center align-items-center gap-20">
+							<div class="fs-20 calendar-event-new" data-calendar-type="prev">
+								<i class="fa-light fa-angle-left"></i>
+							</div>
+							<div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
+							<div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
+							<div class="fs-20 calendar-event-new" data-calendar-type="next">
 								<i class="fa-light fa-angle-right"></i>
 							</div>
 						</div>
 						<!--<div class="d-none d-md-block">
 							<div class="btn btn-sm btn-light b-r-50 border-gray-300 calendar-event-new" data-calendar-type="today">{{ __("Today") }}</div>
 						</div>-->
-					</div>
-					<div class="d-flex flex-wrap gap-8 justify-content-center align-items-center w-sm-100">
-						<div class="btn-group btn-group-sm d-none d-sm-block">
-							<button type="button" class="btn btn-light calendar-event-new" data-calendar-type="dayGridMonth" data-bs-title="{{ __("Month view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
-								<i class="fa-light fa-calendar-days"></i>
-							</button>
-							<button type="button" class="btn btn-light calendar-event-new" data-calendar-type="timeGridWeek" data-bs-title="{{ __("Week view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
-								<i class="fa-light fa-columns-3"></i>
-							</button>
-							<button type="button" class="btn btn-light calendar-event-new" data-calendar-type="listWeek" data-bs-title="{{ __("List view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
-								<i class="fa-duotone fa-light fa-list-ul"></i>
-							</button>
-						</div>
-
-						<div class="d-flex">
-							<div class="btn-group position-static">
-								<button type="button" class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
-									<i class="fa-light fa-filter"></i> {{ __("Filters") }}
+						<div class="d-flex position-absolute end-0 top-0">
+							<div class="btn-group position-static mr-12">
+								<button type="button" class="bg-transparent dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
+									<i class="fa-light fa-filter text-gray-500"></i> <!--{{ __("Filters") }}-->
 								</button>
 								<div class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-full max-w-250" data-popper-placement="bottom-end">
 									<div class="d-flex border-bottom px-3 py-2 fw-6 fs-16 gap-8">
@@ -495,19 +501,9 @@ if($post){
 									</div>
 								</div>
 							</div>
-						</div>
-						
-						<div class="d-flex">
-							<div class="btn-group">	
-								<button data-toggle="tooltip" data-placement="bottom" title="" data-bs-original-title="Add a note to a calendar date" class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide">
-									<i class="fa-light fa-notes"></i> {{ __('Take Notes') }}
-								</button>
-							</div>
-						</div>
-						<div class="d-flex">
 							<div class="btn-group">
-								<button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
-									<i class="fa-light fa-grid-2"></i> {{ __('Actions') }}
+								<button class="bg-transparent dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
+									<i class="fa fa-ellipsis-v fw-bolder text-gray-500"></i> <!--{{ __('Actions') }}-->
 								</button>
 								<ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-2 w-100 max-w-150">
 									<li>
@@ -519,7 +515,6 @@ if($post){
 								</ul>
 							</div>
 						</div>
-
 					</div>
 				</div>
 				<div class="calendar-scroll">
@@ -537,7 +532,7 @@ if($post){
 					<div class="card-body px-2 py-0">
 						<div class="d-flex flex-grow-1 align-items-center justify-content-center gap-8 w-100">
 							<div class="text-center">
-								<div class="fw-bold fs-12">[[post_count]]</div>
+								<div class="fw-bold fs-10">[[post_count]]</div>
 								
 							</div>
 						</div>	
