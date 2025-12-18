@@ -182,7 +182,7 @@ class AppRepliesController extends Controller
         ms(["status" => 1, "message" => __("Succeed")]);
     }
 
-    public function saveCation(Request $request){
+    public function saveReply(Request $request){
 
         $id = $request->id;
 
@@ -196,7 +196,7 @@ class AppRepliesController extends Controller
         ]);
     }
 
-    public function getCation(){
+    public function getReply(){
         ms([
             "status" => 1,
             "data" => view( module('key') .'::get_reply', [

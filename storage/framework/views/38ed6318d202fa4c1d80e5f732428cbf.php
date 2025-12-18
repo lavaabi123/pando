@@ -5,7 +5,7 @@
 <?php $__env->startSection('sub_header'); ?>
     <?php if (isset($component)) { $__componentOriginal6bfd7fd5c294530066e0efb20ff4cd9a = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal6bfd7fd5c294530066e0efb20ff4cd9a = $attributes; } ?>
-<?php $component = App\View\Components\SubHeader::resolve(['title' => ''.e(__('Manage Hashtags')).'','description' => ''.e(__('Effortlessly Manage and Organize All Your Hashtags')).'','count' => $total] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = App\View\Components\SubHeader::resolve(['title' => ''.e(__('Manage Captions')).'','description' => ''.e(__('Effortlessly Manage and Organize All Your Captions')).'','count' => $total] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('sub-header'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>

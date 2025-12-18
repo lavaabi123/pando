@@ -111,10 +111,10 @@
 									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_Comment">
 									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBComments">
 									  <div class="post-account me-2"><?php echo e(get_social_media_image('facebook')); ?></div><span class="text-truncate text-dark pr-1" style="top: auto;">Comments</span></label></li>
-									  <li class="text-truncate d-flex me-2 py-1">
+									  <!--<li class="text-truncate d-flex me-2 py-1">
 									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_AdComment">
 									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBAdComments">
-									  <div class="post-account me-2"><?php echo e(get_social_media_image('facebook')); ?></div><span class="text-truncate text-dark pr-1" style="top: auto;">Ad Comments</span></label></li>
+									  <div class="post-account me-2"><?php echo e(get_social_media_image('facebook')); ?></div><span class="text-truncate text-dark pr-1" style="top: auto;">Ad Comments</span></label></li>-->
 									  <li class="text-truncate d-flex me-2 py-1">
 									  <input type="checkbox" name="eventType[]" class="custom-control-input me-2" value="facebook_Messenger">
 									  <label class="custom-control-label font-normal d-flex w-100" for="if_FBM">

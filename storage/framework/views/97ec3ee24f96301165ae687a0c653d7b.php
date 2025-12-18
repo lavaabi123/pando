@@ -135,66 +135,67 @@ if ((int)$role === 2) {
 
                 <?php echo $__env->yieldContent('header_center'); ?>
             </div>
+			<?php if(session('login_as') != "admin"): ?>
 			<div class="d-flex align-items-center">
-    <p class="fs-14 fw-bold mb-0">Brand:</p>
-    
-    <!-- Custom Brand Dropdown -->
-    <div class="custom-brand-dropdown" id="customBrandDropdown">
-        <button type="button" class="brand-dropdown-toggle" id="brandDropdownToggle">
-            <?php if(session('brand_id') && !empty($brands)): ?>
-                <?php
-                    $selectedBrand = collect($brands)->firstWhere('id', session('brand_id'));
-                ?>
-                <?php if($selectedBrand): ?>
-                    <div class="selected-brand-display">
-                        <?php if($selectedBrand->image): ?>
-                            <img src="<?php echo e($selectedBrand->image); ?>" class="brand-avatar-small" alt="<?php echo e($selectedBrand->name); ?>">
-                        <?php else: ?>
-                            <div class="brand-avatar-placeholder-small"><?php echo e(strtoupper(substr($selectedBrand->name, 0, 1))); ?></div>
-                        <?php endif; ?>
-                        <span><?php echo e($selectedBrand->name); ?></span>
-                    </div>
-                <?php else: ?>
-                    <span class="placeholder-text">Select Brand</span>
-                <?php endif; ?>
-            <?php else: ?>
-                <span class="placeholder-text">Select Brand</span>
-            <?php endif; ?>
-            <i class="fas fa-chevron-down ms-auto"></i>
-        </button>
-        
-        <div class="brand-dropdown-menu" id="brandDropdownMenu">
-            <!-- Search Box -->
-            <div class="brand-search-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" class="brand-search-input" id="brandSearchInput" placeholder="Search">
-            </div>
-            
-            <!-- Filter Tabs -->
-            <div class="brand-filters">
-				<button type="button" class="filter-btn active" data-filter="alphabetic">Alphabetic</button>
-				<button type="button" class="filter-btn" data-filter="recent">Recent</button>
-				<button type="button" class="filter-btn" data-filter="favorite">Favorite</button>
-			</div>
-            
-            <!-- Brand List -->
-			<div class="ajax-scroll-brands" data-url="<?php echo e(route("app.brands.list")); ?>?from=header"  data-resp=".brand-list"  data-scroll="document">
-				<div class="brand-list" id="brandList">
+				<p class="fs-14 fw-bold mb-0">Brand:</p>
+				
+				<!-- Custom Brand Dropdown -->
+				<div class="custom-brand-dropdown" id="customBrandDropdown">
+					<button type="button" class="brand-dropdown-toggle" id="brandDropdownToggle">
+						<?php if(session('brand_id') && !empty($brands)): ?>
+							<?php
+								$selectedBrand = collect($brands)->firstWhere('id', session('brand_id'));
+							?>
+							<?php if($selectedBrand): ?>
+								<div class="selected-brand-display">
+									<?php if($selectedBrand->image): ?>
+										<img src="<?php echo e($selectedBrand->image); ?>" class="brand-avatar-small" alt="<?php echo e($selectedBrand->name); ?>">
+									<?php else: ?>
+										<div class="brand-avatar-placeholder-small"><?php echo e(strtoupper(substr($selectedBrand->name, 0, 1))); ?></div>
+									<?php endif; ?>
+									<span><?php echo e($selectedBrand->name); ?></span>
+								</div>
+							<?php else: ?>
+								<span class="placeholder-text">Select Brand</span>
+							<?php endif; ?>
+						<?php else: ?>
+							<span class="placeholder-text">Select Brand</span>
+						<?php endif; ?>
+						<i class="fas fa-chevron-down ms-auto"></i>
+					</button>
 					
+					<div class="brand-dropdown-menu" id="brandDropdownMenu">
+						<!-- Search Box -->
+						<div class="brand-search-wrapper">
+							<i class="fas fa-search"></i>
+							<input type="text" class="brand-search-input" id="brandSearchInput" placeholder="Search">
+						</div>
+						
+						<!-- Filter Tabs -->
+						<div class="brand-filters">
+							<button type="button" class="filter-btn active" data-filter="alphabetic">Alphabetic</button>
+							<button type="button" class="filter-btn" data-filter="recent">Recent</button>
+							<button type="button" class="filter-btn" data-filter="favorite">Favorite</button>
+						</div>
+						
+						<!-- Brand List -->
+						<div class="ajax-scroll-brands" data-url="<?php echo e(route("app.brands.list")); ?>?from=header"  data-resp=".brand-list"  data-scroll="document">
+							<div class="brand-list" id="brandList">
+								
+							</div>
+						</div>
+						
+						<!-- Add Brand Button -->
+						<!--<button type="button" class="add-brand-btn" id="addBrandBtn">
+							<i class="fas fa-plus"></i> Add Brand
+						</button>-->
+						<a class="btn btn-dark add-brand-btn actionItem" href="<?php echo e(route("app.brands.update")); ?>" data-popup="groupModal" data-call-success="Main.ajaxScroll(true,'brands');">
+							<i class="fas fa-plus"></i> Add Brand
+						</a>
+					</div>
 				</div>
-            </div>
-            
-            <!-- Add Brand Button -->
-            <!--<button type="button" class="add-brand-btn" id="addBrandBtn">
-                <i class="fas fa-plus"></i> Add Brand
-            </button>-->
-			<a class="btn btn-dark add-brand-btn actionItem" href="<?php echo e(route("app.brands.update")); ?>" data-popup="groupModal" data-call-success="Main.ajaxScroll(true,'brands');">
-				<i class="fas fa-plus"></i> Add Brand
-			</a>
-        </div>
-    </div>
-</div>
-
+			</div>
+			<?php endif; ?>
 <!-- Hidden input to store selected brand (for form submission if needed) -->
 <input type="hidden" name="brand_id" id="selectedBrandId" value="<?php echo e(session('brand_id')); ?>">
             <div class="d-flex align-items-center gap-16">

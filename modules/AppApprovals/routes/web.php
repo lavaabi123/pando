@@ -21,8 +21,8 @@ Route::group(["prefix" => "app"], function () {
         Route::post('save', [AppApprovalsController::class, 'save'])->name('app.approvals.save');
         Route::post('list', [AppApprovalsController::class, 'list'])->name('app.approvals.list');
         Route::post('list/popup', [AppApprovalsController::class, 'list'])->name('app.approvals.popup_list');
-        Route::post('save_approval', [AppApprovalsController::class, 'saveCation'])->name('app.approvals.save_approval');
-        Route::post('get_approval', [AppApprovalsController::class, 'getCation'])->name('app.approvals.get_approval');
+        Route::post('save_approval', [AppApprovalsController::class, 'saveApproval'])->name('app.approvals.save_approval');
+        Route::post('get_approval', [AppApprovalsController::class, 'getApproval'])->name('app.approvals.get_approval');
         Route::post('destroy', [AppApprovalsController::class, 'destroy'])->name('app.approvals.destroy');
     });
 });

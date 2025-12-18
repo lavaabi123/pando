@@ -21,8 +21,8 @@ Route::group(["prefix" => "app"], function () {
         Route::post('save', [AppHandlesController::class, 'save'])->name('app.handles.save');
         Route::post('list', [AppHandlesController::class, 'list'])->name('app.handles.list');
         Route::post('list/popup', [AppHandlesController::class, 'list'])->name('app.handles.popup_list');
-        Route::post('save_handle', [AppHandlesController::class, 'saveCation'])->name('app.handles.save_handle');
-        Route::post('get_handle', [AppHandlesController::class, 'getCation'])->name('app.handles.get_handle');
+        Route::post('save_handle', [AppHandlesController::class, 'saveHandle'])->name('app.handles.save_handle');
+        Route::post('get_handle', [AppHandlesController::class, 'getHandle'])->name('app.handles.get_handle');
         Route::post('destroy', [AppHandlesController::class, 'destroy'])->name('app.handles.destroy');
     });
 });

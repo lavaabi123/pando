@@ -61,13 +61,13 @@
 	        <i class="fa-light fa-quote-right"></i>
 	    </span>
 	    <div class="fw-semibold fs-5 mb-2 text-gray-900">
-	        {{ __('No Hashtags Yet') }}
+	        {{ __('No Captions Yet') }}
 	    </div>
 	    <div class="text-body-secondary mb-4 text-center max-w-500">
-	        {{ __('Start saving your favorite hashtags to reuse and streamline your content creation process.') }}
+	        {{ __('Start saving your favorite captions to reuse and streamline your content creation process.') }}
 	    </div>
 	    <a class="btn btn-dark actionItem" href="{{ module_url("update") }}" data-popup="captionModal" data-call-success="Main.ajaxScroll(true);">
-	        <i class="fa-light fa-plus me-1"></i> {{ __('Add new hashtag') }}
+	        <i class="fa-light fa-plus me-1"></i> {{ __('Add new caption') }}
 	    </a>
 	</div>
 @endif

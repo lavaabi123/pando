@@ -35,14 +35,7 @@
                 "color": "#992527"
             },
             {
-                "uri": "app/publishing",
-                "name": "Calendar",
-                "position": 30,
-                "icon": "fa-light fa-calendar",
-                "color": "#c143f2"
-            },
-            {
-                "uri": "app/approvals",
+                "uri": "app/publishing/approval",
                 "name": "Approvals",
                 "position": 30,
                 "icon": "fa-light fa-check",

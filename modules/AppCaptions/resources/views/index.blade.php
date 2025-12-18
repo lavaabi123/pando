@@ -6,8 +6,8 @@
 
 @section('sub_header')
     <x-sub-header
-        title="{{ __('Manage Hashtags') }}"
-        description="{{ __('Effortlessly Manage and Organize All Your Hashtags') }}"
+        title="{{ __('Manage Captions') }}"
+        description="{{ __('Effortlessly Manage and Organize All Your Captions') }}"
         :count="$total"
     >
         <div class="d-flex gap-8">

@@ -406,70 +406,107 @@ var Main = new (function ()
     Main.Uncheckbox = function(_el)
     {
         $(_el).find('input.checkbox-all').prop('checked',false).removeClass('checked');
-    }
-
-    Main.addToField = function(){
-        $(document).on("click", ".addToField", function(){
-            var field = $(this).data("field");
-            var content = $(this).data("content");
-            var refresh = $(this).data("refresh");
-
-            if(refresh && refresh != undefined){
-                $(field).val("");
-            }
-
-            clearTimeout(typeText);
-            Main.typeText(field, content);
-        });
     },
+	
+	Main.insertToEmojiOneArea = function(el, content) {
+		const $el = $(el);
+		const emojiArea = $el[0].emojioneArea;
 
-    Main.typeText = function(el, text, index = 0, clear = true) {
-        const $el = $(el);
-        const isEmojiInput = $el.data("emojioneArea") !== undefined;
-        const emojiArea = isEmojiInput ? $el[0].emojioneArea : null;
-        const elementId = $el.attr("id") || $el.data("typing-id") || Date.now();
+		const current = emojiArea.getText() || "";
+		content = String(content || "");
 
-        $el.data("typing-id", elementId); // assign id if not exists
+		// add a space if needed (caption or hashtag)
+		const needsSpace = current.length > 0 && !/\s$/.test(current);
+		const toAdd = (needsSpace ? " " : "") + content.replace(/\s+/g, " ");
 
-        text = String(text ?? "");
+		emojiArea.setText(current + toAdd);
+		$el.val(emojiArea.getText()); // keep textarea synced
+	},
+	
+    Main.addToField = function () {
+		console.count("addToField click");
+	  $(document)
+		.off("click.addToField", ".addToField")   // remove old handler(s)
+		.on("click.addToField", ".addToField", function (e) {
+		  e.preventDefault();
 
-        // Clear existing timer if running
-        if (typingTimers.has(elementId)) {
-            clearTimeout(typingTimers.get(elementId));
-            typingTimers.delete(elementId);
-        }
+		  var field   = $(this).data("field");
+		  var content = $(this).data("content");
 
-        if (clear) {
-            if (isEmojiInput) {
-                emojiArea.setText("");
-            } else {
-                $el.val("");
-            }
-        }
+		  const $el = $(field);
+		  const isEmojiInput = $el.data("emojioneArea") !== undefined;
 
-        function stepType(i) {
-            if (i < text.length) {
-                const current = isEmojiInput ? emojiArea.getText() : $el.val();
-                const nextChar = text.charAt(i);
+		  if (isEmojiInput) {
+			Main.insertToEmojiOneArea(field, content);
+		  } else {
+			Main.typeText(field, content, 0, false);
+		  }
+		});
+	},
 
-                if (isEmojiInput) {
-                    emojiArea.setText(current + nextChar);
-                } else {
-                    $el.val(current + nextChar);
-                }
+    Main.typeText = function (el, text, index = 0, clear = true) {
+	  const $el = $(el);
+	  const isEmojiInput = $el.data("emojioneArea") !== undefined;
+	  const emojiArea = isEmojiInput ? $el[0].emojioneArea : null;
 
-                const timer = setTimeout(() => {
-                    stepType(i + 1);
-                }, 10);
+	  const elementId = $el.attr("id") || $el.data("typing-id") || Date.now();
+	  $el.data("typing-id", elementId);
 
-                typingTimers.set(elementId, timer);
-            } else {
-                typingTimers.delete(elementId);
-            }
-        }
+	  text = String(text ?? "");
 
-        stepType(index);
-    },
+	  // stop previous typing on this element
+	  if (typingTimers.has(elementId)) {
+		clearTimeout(typingTimers.get(elementId));
+		typingTimers.delete(elementId);
+	  }
+
+	  if (clear) {
+		if (isEmojiInput) {
+		  emojiArea.setText("");
+		  $el.val("");
+		} else {
+		  $el.val("");
+		}
+	  }
+
+	  // IMPORTANT: base text must come from emojiArea, not textarea
+	  const baseText = isEmojiInput ? emojiArea.getText() : $el.val();
+
+	  // add a space before hashtag if needed
+	  const normalized = text.replace(/^#+/, '#'); // "#happy" or "##happy" -> "#happy"
+	  const needsSpace =
+		baseText.length > 0 &&
+		!/\s$/.test(baseText) &&
+		normalized.startsWith("#");
+
+	  const finalTextToType = (needsSpace ? " " : "") + normalized;
+
+	  function stepType(i) {
+		if (i < finalTextToType.length) {
+		  const current = isEmojiInput ? emojiArea.getText() : $el.val();
+		  const nextChar = finalTextToType.charAt(i);
+
+		  // prevent "##"
+		  if (nextChar === "#" && current.endsWith("#")) {
+			return stepType(i + 1);
+		  }
+
+		  if (isEmojiInput) {
+			emojiArea.setText(current + nextChar);
+			$el.val(emojiArea.getText()); // keep textarea synced
+		  } else {
+			$el.val(current + nextChar);
+		  }
+
+		  const timer = setTimeout(() => stepType(i + 1), 10);
+		  typingTimers.set(elementId, timer);
+		} else {
+		  typingTimers.delete(elementId);
+		}
+	  }
+
+	  stepType(index);
+	},
 
     Main.Dropdown = function(){
         $('[data-bs-dropdown-close="true"]').on('click', function() {

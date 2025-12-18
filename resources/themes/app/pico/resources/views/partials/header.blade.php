@@ -133,66 +133,67 @@ if ((int)$role === 2) {
 
                 @yield('header_center')
             </div>
+			@if(session('login_as') != "admin")
 			<div class="d-flex align-items-center">
-    <p class="fs-14 fw-bold mb-0">Brand:</p>
-    
-    <!-- Custom Brand Dropdown -->
-    <div class="custom-brand-dropdown" id="customBrandDropdown">
-        <button type="button" class="brand-dropdown-toggle" id="brandDropdownToggle">
-            @if(session('brand_id') && !empty($brands))
-                @php
-                    $selectedBrand = collect($brands)->firstWhere('id', session('brand_id'));
-                @endphp
-                @if($selectedBrand)
-                    <div class="selected-brand-display">
-                        @if($selectedBrand->image)
-                            <img src="{{ $selectedBrand->image }}" class="brand-avatar-small" alt="{{ $selectedBrand->name }}">
-                        @else
-                            <div class="brand-avatar-placeholder-small">{{ strtoupper(substr($selectedBrand->name, 0, 1)) }}</div>
-                        @endif
-                        <span>{{ $selectedBrand->name }}</span>
-                    </div>
-                @else
-                    <span class="placeholder-text">Select Brand</span>
-                @endif
-            @else
-                <span class="placeholder-text">Select Brand</span>
-            @endif
-            <i class="fas fa-chevron-down ms-auto"></i>
-        </button>
-        
-        <div class="brand-dropdown-menu" id="brandDropdownMenu">
-            <!-- Search Box -->
-            <div class="brand-search-wrapper">
-                <i class="fas fa-search"></i>
-                <input type="text" class="brand-search-input" id="brandSearchInput" placeholder="Search">
-            </div>
-            
-            <!-- Filter Tabs -->
-            <div class="brand-filters">
-				<button type="button" class="filter-btn active" data-filter="alphabetic">Alphabetic</button>
-				<button type="button" class="filter-btn" data-filter="recent">Recent</button>
-				<button type="button" class="filter-btn" data-filter="favorite">Favorite</button>
-			</div>
-            
-            <!-- Brand List -->
-			<div class="ajax-scroll-brands" data-url="{{ route("app.brands.list") }}?from=header"  data-resp=".brand-list"  data-scroll="document">
-				<div class="brand-list" id="brandList">
+				<p class="fs-14 fw-bold mb-0">Brand:</p>
+				
+				<!-- Custom Brand Dropdown -->
+				<div class="custom-brand-dropdown" id="customBrandDropdown">
+					<button type="button" class="brand-dropdown-toggle" id="brandDropdownToggle">
+						@if(session('brand_id') && !empty($brands))
+							@php
+								$selectedBrand = collect($brands)->firstWhere('id', session('brand_id'));
+							@endphp
+							@if($selectedBrand)
+								<div class="selected-brand-display">
+									@if($selectedBrand->image)
+										<img src="{{ $selectedBrand->image }}" class="brand-avatar-small" alt="{{ $selectedBrand->name }}">
+									@else
+										<div class="brand-avatar-placeholder-small">{{ strtoupper(substr($selectedBrand->name, 0, 1)) }}</div>
+									@endif
+									<span>{{ $selectedBrand->name }}</span>
+								</div>
+							@else
+								<span class="placeholder-text">Select Brand</span>
+							@endif
+						@else
+							<span class="placeholder-text">Select Brand</span>
+						@endif
+						<i class="fas fa-chevron-down ms-auto"></i>
+					</button>
 					
+					<div class="brand-dropdown-menu" id="brandDropdownMenu">
+						<!-- Search Box -->
+						<div class="brand-search-wrapper">
+							<i class="fas fa-search"></i>
+							<input type="text" class="brand-search-input" id="brandSearchInput" placeholder="Search">
+						</div>
+						
+						<!-- Filter Tabs -->
+						<div class="brand-filters">
+							<button type="button" class="filter-btn active" data-filter="alphabetic">Alphabetic</button>
+							<button type="button" class="filter-btn" data-filter="recent">Recent</button>
+							<button type="button" class="filter-btn" data-filter="favorite">Favorite</button>
+						</div>
+						
+						<!-- Brand List -->
+						<div class="ajax-scroll-brands" data-url="{{ route("app.brands.list") }}?from=header"  data-resp=".brand-list"  data-scroll="document">
+							<div class="brand-list" id="brandList">
+								
+							</div>
+						</div>
+						
+						<!-- Add Brand Button -->
+						<!--<button type="button" class="add-brand-btn" id="addBrandBtn">
+							<i class="fas fa-plus"></i> Add Brand
+						</button>-->
+						<a class="btn btn-dark add-brand-btn actionItem" href="{{ route("app.brands.update") }}" data-popup="groupModal" data-call-success="Main.ajaxScroll(true,'brands');">
+							<i class="fas fa-plus"></i> Add Brand
+						</a>
+					</div>
 				</div>
-            </div>
-            
-            <!-- Add Brand Button -->
-            <!--<button type="button" class="add-brand-btn" id="addBrandBtn">
-                <i class="fas fa-plus"></i> Add Brand
-            </button>-->
-			<a class="btn btn-dark add-brand-btn actionItem" href="{{ route("app.brands.update") }}" data-popup="groupModal" data-call-success="Main.ajaxScroll(true,'brands');">
-				<i class="fas fa-plus"></i> Add Brand
-			</a>
-        </div>
-    </div>
-</div>
-
+			</div>
+			@endif
 <!-- Hidden input to store selected brand (for form submission if needed) -->
 <input type="hidden" name="brand_id" id="selectedBrandId" value="{{ session('brand_id') }}">
             <div class="d-flex align-items-center gap-16">

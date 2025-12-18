@@ -5,7 +5,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('header_end'); ?>
-    <div class="compose_header position-absolute w-100 t-0 l-0 d-flex justify-content-between align-items-center zIndex-9 bg-white h-70 border-bottom px-4 d-none">
+    <div class="compose_header position-absolute w-100 t-0 l-0 d-flex justify-content-between align-items-center zIndex-9 bg-white h-70 border-bottom px-4 d-none ms-4">
         <div class="fw-6 fs-18"><?php echo e(__("New Post")); ?></div>
         <div class="fw-6 fs-18">
             <div class="btn btn-icon btn-light btn-hover-danger b-r-50 a-rotate closeCompose">
@@ -25,24 +25,7 @@
         <form method="POST">
             
             <div class="calendar-header d-flex flex-wrap gap-8 justify-content-between align-items-center px-4 py-3 border-bottom">
-                <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
-                    <div>
-                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="prev">
-                            <i class="fa-light fa-angle-left"></i>
-                        </div>
-                    </div>
-                    <div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
-                    <div>
-                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="next">
-                            <i class="fa-light fa-angle-right"></i>
-                        </div>
-                    </div>
-                    <div class="d-none d-md-block">
-                        <div class="btn btn-sm btn-light b-r-50 border-gray-300 calendar-event" data-calendar-type="today"><?php echo e(__("Today")); ?></div>
-                    </div>
-                </div>
-                <div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
-                <div class="d-flex flex-wrap gap-8 justify-content-center align-items-center w-sm-100">
+				<div class="d-flex flex-wrap gap-8 justify-content-center align-items-center w-sm-100">
                     <div class="btn-group btn-group-sm d-none d-sm-block">
                         <button type="button" class="btn btn-light calendar-event" data-calendar-type="dayGridMonth" data-bs-title="<?php echo e(__("Month view")); ?>" data-bs-toggle="tooltip" data-bs-placement="top">
                             <i class="fa-light fa-calendar-days"></i>
@@ -142,6 +125,24 @@
                         </div>
                     </div>
                 </div>
+                <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
+                    <div>
+                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="prev">
+                            <i class="fa-light fa-angle-left"></i>
+                        </div>
+                    </div>
+                    <div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
+                    <div>
+                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="next">
+                            <i class="fa-light fa-angle-right"></i>
+                        </div>
+                    </div>
+                    <div class="d-none d-md-block">
+                        <div class="btn btn-sm btn-light b-r-50 border-gray-300 calendar-event" data-calendar-type="today"><?php echo e(__("Today")); ?></div>
+                    </div>
+                </div>
+                <div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
+                
             </div>
             <div class="calendar-scroll">
                 <div id='calendar'></div>

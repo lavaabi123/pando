@@ -150,7 +150,7 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/lazysizes/lazysizes.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
-    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=9.0.10"></script>	
+    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=9.0.21"></script>	
     <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.20') }}"></script>
     @yield('script')
     {!! Script::renderJs() !!}

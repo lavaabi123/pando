@@ -14,7 +14,12 @@
     --sp-gray-800: #3F4254;
     --sp-gray-900: #181C32;
 	--bs-border-color: #dedede;
+	--threshold: 0.5;
+	--perceived-lightness: calc(var(--d-primary) / 255);
+	--l: hsl(from var(--d-primary) l);
 }
+
+/* color: hsl(0 0% calc((var(--l) > 50%) * 0% + (var(--l) <= 50%) * 100%)); */
 body, html {
     font-family: "Open Sans", serif;
 }
@@ -25,6 +30,7 @@ a {
     text-decoration: none;
     transition: all 0.4s;
 }
+
 /** Color Picker Start **/
 [type='color'] {
     -moz-appearance: none;
@@ -53,13 +59,13 @@ a {
 .colors .form-check-label {
     white-space: nowrap;
 }
-.btn.btn-primary, .btn.btn-secondary {
-    padding: 8px;
-    font-weight: 500;
-    font-size: 16px;
-    letter-spacing: 1px;
-    border-radius: 30px;
-	border: none;
+.btn.btn-primary, .btn.btn-secondary,
+.btn.btn-sm, .btn-group-sm > .btn {
+    padding: 5px 20px !important;
+    font-weight: 500 !important;
+    font-size: 14px !important;
+    border-radius: 30px !important;
+	border: none !important;
 }
 .btn.btn-primary {
 	background: var(--d-primary);
@@ -78,6 +84,16 @@ a {
 .bg-primary {
     background-color: var(--d-primary) !important;
 }
+.btn.btn-light {
+	background: #c7c3c366;
+    color: var(--white);
+}
+.btn.btn-light:hover, .btn.btn-light:focus, .btn.btn-light:active, .btn.btn-light.active {
+    background: var(--d-primary);
+    color: var(--white);
+    box-shadow: none;
+}
+
 /** Color Picker End **/
 
 /** Input Fields Start **/
@@ -159,6 +175,12 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 }
 .top-menu a:hover svg, .top-menu a:focus svg, .top-menu a.active svg {
     fill: var(--white);
+}
+.sidebar .menu .menu-item:first-child {
+	border-bottom: 1px solid #1e2626;
+    padding-bottom: 10px;
+    box-shadow: 0 1px 0px #4f5b5b;
+    margin-bottom: 10px;
 }
 /* Custom Brand Dropdown */
 .custom-brand-dropdown {
@@ -362,6 +384,7 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s;
+	padding:10px;
 }
 .brand-action-btn:hover {
     border-color: #999;
@@ -454,19 +477,23 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 .sidebar .menu .menu-item .menu-link:hover, .sidebar .menu .menu-item .menu-link:hover .menu-icon {
     color: var(--d-primary) !important;
 }
-.sidebar .menu .menu-item .menu-link.text-primary:hover, .sidebar .menu .menu-item .menu-link.text-primary:hover .menu-icon {
+.sidebar .menu .menu-item .menu-link:hover, .sidebar .menu .menu-item .menu-link:hover .menu-icon {
 	color: var(--white) !important;
 }
 .sidebar .nav-line {
 	background: #1e2626 !important;
     box-shadow: 0 1px 0px #4f5b5b;
 }
-a.menu-link.text-primary {
+a.menu-link.active {
     background: var(--d-primary);
     border-radius: 3rem;
     color: var(--white) !important;
 }
-
+.sidebar .menu .menu-item .menu-accordion:before,
+.sidebar .menu .menu-item .menu-item .menu-link:before,
+.sidebar .menu .menu-item .menu-link .menu-arrow {
+	display: none;
+}
 /** Home Page **/
 .developer {
     background: #ffffff88;
@@ -672,6 +699,9 @@ i.post-media {
 	box-shadow: 0 0 0 0 color-mix(in srgb, var(--d-primary) 10%, transparent);
 }
 /** Publishing **/
+.account_manager .am-choice-box .am-selected-box {
+    border-radius: 15px !important;
+}
 .bg-primary-100, .fc table tr > td.fc-day.fc-day-today {
     background-color: color-mix(in srgb, var(--d-primary) 10%, transparent) !important;
 }
@@ -679,8 +709,25 @@ i.post-media {
 	border-color: #c4cada !important;
 	border-radius: 15px 15px 0 0;
 }
+.select2-container--bootstrap-5 .select2-selection {
+	border-radius: 15px;
+}
+.select2-container--bootstrap-5.select2-container--focus .select2-selection, .select2-container--bootstrap-5.select2-container--open .select2-selection,
+.select2-container--bootstrap-5 .select2-dropdown {
+    border-color: var(--d-primary);
+}
 .fc table tr > td.fc-day.fc-day-today .fc-daygrid-day-top a {
     background-color: var(--d-primary);
+}
+.fc table tr > th.fc-day a {
+    color: var(--black);
+    font-weight: 700;
+    font-size: 16px;
+    padding: 0;
+    line-height: 1;
+}
+.fc table tr > td.fc-day {
+    padding: .5rem 0.5rem 0.5rem;
 }
 ul#myTab {
 	gap:0;
@@ -745,8 +792,33 @@ ul#myTab li button.active {
 }
 .compose .fc-daygrid-day-events .card {
 	background: var(--d-primary);
-	border-color: var(--d-primary);
+	border: none;
+	color: var(--white);
 }
+.compose .fc-daygrid-day-events .card * {
+	color: hsl(0, 0%, calc((var(--perceived-lightness) - var(--threshold)) * -10000000%));
+}
+.add-icon {
+    width: 30px;
+    height: 30px;
+    background: var(--d-primary);
+    border-radius: 100%;
+    margin-right: 5px;
+    display: inline-block;
+}
+.add-icon svg {
+    width: 30px;
+    height: 30px;
+    fill: var(--white);
+    padding: 6px 4px 6px 8px;
+}
+
+.schedule-list {
+	margin-left: -25px;
+    margin-right: -25px;
+	margin-bottom: -25px;
+}
+
 /** Publishing Popup **/
 
 .modal-content {

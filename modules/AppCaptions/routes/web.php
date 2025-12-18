@@ -21,8 +21,8 @@ Route::group(["prefix" => "app"], function () {
         Route::post('save', [AppCaptionsController::class, 'save'])->name('app.captions.save');
         Route::post('list', [AppCaptionsController::class, 'list'])->name('app.captions.list');
         Route::post('list/popup', [AppCaptionsController::class, 'list'])->name('app.captions.popup_list');
-        Route::post('save_cation', [AppCaptionsController::class, 'saveCation'])->name('app.captions.save_cation');
-        Route::post('get_cation', [AppCaptionsController::class, 'getCation'])->name('app.captions.get_cation');
+        Route::post('save_caption', [AppCaptionsController::class, 'saveCaption'])->name('app.captions.save_caption');
+        Route::post('get_caption', [AppCaptionsController::class, 'getCaption'])->name('app.captions.get_caption');
         Route::post('destroy', [AppCaptionsController::class, 'destroy'])->name('app.captions.destroy');
     });
 });

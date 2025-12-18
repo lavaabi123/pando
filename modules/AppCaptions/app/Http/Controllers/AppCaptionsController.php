@@ -182,7 +182,7 @@ class AppCaptionsController extends Controller
         ms(["status" => 1, "message" => __("Succeed")]);
     }
 
-    public function saveCation(Request $request){
+    public function saveCaption(Request $request){
 
         $id = $request->id;
 
@@ -196,7 +196,7 @@ class AppCaptionsController extends Controller
         ]);
     }
 
-    public function getCation(){
+    public function getCaption(){
         ms([
             "status" => 1,
             "data" => view( module('key') .'::get_caption', [

@@ -1,0 +1,23 @@
+{
+    "name": "AppHashtags",
+    "alias": "apphashtags",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\AppHashtags\\Providers\\AppHashtagsServiceProvider"
+    ],
+    "files": [],
+    "permission": false,
+    "menu": {
+        "uri": "app/hashtags",
+        "role": "client",
+        "platform": 1,
+        "section": "top",
+        "tab_id": 30,
+        "position": 300,
+        "name": "Hashtags",
+        "color": "#18939a",
+        "icon": "fa-light fa-hashtag"
+    }
+}

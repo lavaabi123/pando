@@ -111,5 +111,8 @@
     "AppInbox": true,
     "AppInbox.zip": true,
     "AppPublishingApproval": true,
-    "AppApprovals": true
+    "AppApprovals": true,
+    "PaymentStripeRecurring.zip": true,
+    "AppHashtags": true,
+    "AppPublishing.zip": true
 }

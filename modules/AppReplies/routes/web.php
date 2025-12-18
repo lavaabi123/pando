@@ -21,8 +21,8 @@ Route::group(["prefix" => "app"], function () {
         Route::post('save', [AppRepliesController::class, 'save'])->name('app.replies.save');
         Route::post('list', [AppRepliesController::class, 'list'])->name('app.replies.list');
         Route::post('list/popup', [AppRepliesController::class, 'list'])->name('app.replies.popup_list');
-        Route::post('save_reply', [AppRepliesController::class, 'saveCation'])->name('app.replies.save_reply');
-        Route::post('get_reply', [AppRepliesController::class, 'getCation'])->name('app.replies.get_reply');
+        Route::post('save_reply', [AppRepliesController::class, 'saveReply'])->name('app.replies.save_reply');
+        Route::post('get_reply', [AppRepliesController::class, 'getReply'])->name('app.replies.get_reply');
         Route::post('destroy', [AppRepliesController::class, 'destroy'])->name('app.replies.destroy');
     });
 });

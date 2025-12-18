@@ -16,8 +16,8 @@
         "section": "top",
         "tab_id": 30,
         "position": 400,
-        "name": "Hashtags",
+        "name": "Captions",
         "color": "#18939a",
-        "icon": "fa-light fa-hashtag"
+        "icon": "fa-light fa-closed-captioning"
     }
 }
