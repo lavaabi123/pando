@@ -315,23 +315,35 @@ class AuthController extends Controller
 
 					// If recent_brand_id is 0, null, or was deleted, get the most recent brand from user_brands
 					if (!$brandId) {
-						$userBrand = DB::table('user_brands')
-							->join('brands', 'user_brands.brand_id', '=', 'brands.id')
-							->where('user_brands.user_id', $user->id)
-							->orderBy('user_brands.id', 'desc')
-							->select('user_brands.brand_id')
+						
+						$recentBrand = DB::table('brands_recents')
+							->join('brands', 'brands_recents.brand_id', '=', 'brands.id')
+							->where('brands_recents.user_id', $user->id)
+							->orderBy('brands_recents.changed', 'desc')
+							->select('brands_recents.brand_id')
 							->first();
 						
-						$brandId = $userBrand ? $userBrand->brand_id : 0;
+						$brandId = $recentBrand ? $recentBrand->brand_id : 0;
 						
-						// Update user's recent_brand_id if a valid brand was found
-						if ($brandId) {
-							$user->recent_brand_id = $brandId;
-							$user->save();
-						} else {
-							// Set to 0 if no brands exist
-							$user->recent_brand_id = 0;
-							$user->save();
+						if (!$brandId) {
+							$userBrand = DB::table('user_brands')
+								->join('brands', 'user_brands.brand_id', '=', 'brands.id')
+								->where('user_brands.user_id', $user->id)
+								->orderBy('user_brands.id', 'desc')
+								->select('user_brands.brand_id')
+								->first();
+							
+							$brandId = $userBrand ? $userBrand->brand_id : 0;
+							
+							// Update user's recent_brand_id if a valid brand was found
+							if ($brandId) {
+								$user->recent_brand_id = $brandId;
+								$user->save();
+							} else {
+								// Set to 0 if no brands exist
+								$user->recent_brand_id = 0;
+								$user->save();
+							}
 						}
 					}
 

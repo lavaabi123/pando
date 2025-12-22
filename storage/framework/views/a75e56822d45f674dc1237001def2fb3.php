@@ -21,7 +21,7 @@ $groups = DB::table('groups')->where('team_id', $teamId)->get();
                 <div class="am-selected-empty">
                     <div class="d-flex gap-8  align-items-center">
                         <i class="fa-light fa-chart-network"></i>
-                        <span class="fw-5 text-gray-700 fs-14"><?php echo e(__("Please select a channel")); ?></span>
+                        <span class="fw-5 text-gray-700 fs-14"><?php echo e(__("Please select a account")); ?></span>
                     </div>
                 </div>
                 <div class="am-selected-list">
@@ -136,7 +136,7 @@ $groups = DB::table('groups')->where('team_id', $teamId)->get();
 
             <div class="am-choice-footer border-top pf-15">
                 <a href="<?php echo e(route("app.channels.add")); ?>" class="btn btn-dark w-100">
-                    <i class="fal fa-plus"></i> <?php echo e(__("Connect a channel")); ?>
+                    <i class="fal fa-plus"></i> <?php echo e(__("Connect a account")); ?>
 
                 </a>
             </div>

@@ -23,6 +23,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 			Route::post('alllist/{type}/{category}/{date}', [AppPublishingController::class, 'alllist']);
             Route::get('events_count', [AppPublishingController::class, 'events_count'])->name('app.publishing.events_count');
             Route::post('composer', [AppPublishingController::class, 'composer'])->name('app.publishing.composer');
+			Route::get('composer', [AppPublishingController::class, 'composerPage'])->name('app.publishing.composer');
             Route::post('preview', [AppPublishingController::class, 'preview'])->name('app.publishing.preview');
             Route::post('preview_calendar', [AppPublishingController::class, 'preview_calendar'])->name('app.publishing.preview_calendar');
             Route::post('getLinkInfo', [AppPublishingController::class, 'getLinkInfo'])->name('app.publishing.getLinkInfo');

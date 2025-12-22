@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Pagination\Paginator;
+use Auth;
 
 class AppBrandsController extends Controller
 {
@@ -261,6 +262,9 @@ class AppBrandsController extends Controller
 						'created' => DB::raw('COALESCE(created, ' . time() . ')')
 					]
 				);
+			$user = Auth::user();
+			$user->recent_brand_id = $brandId;
+			$user->save();
 			
 			// Optional: Keep only last 20 recent brands per user
 			$this->cleanupOldRecents($userId, 20);

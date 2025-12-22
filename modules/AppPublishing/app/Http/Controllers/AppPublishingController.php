@@ -475,6 +475,37 @@ class AppPublishingController extends Controller
             ])->render()
         ]);
     }
+	
+	public function composerPage(Request $request)
+    {
+        // Check if brand is selected
+        if (!session('brand_id')) {
+            return redirect()->route('app.publishing.index')
+                ->with('error', __('Please select a brand first.'));
+        }
+
+        $id = $request->input("id");
+        $date = $request->input("date");
+        $post = null;
+        
+        if ($id) {
+            $post = Posts::where("id_secure", $id)
+                ->where("team_id", $request->team_id)
+                ->where("brand_id", session('brand_id'))
+                ->first();
+        }
+
+        $campaigns = DB::table("post_campaigns")->where("team_id", $request->team_id)->get();
+        $labels = DB::table("post_labels")->where("team_id", $request->team_id)->get();
+
+        return view(module("key") . '::index', [
+            "campaigns" => $campaigns,
+            "labels" => $labels,
+            "post"      => $post,
+            "date"      => $date,
+        ]);
+    }
+
 
     public function getLinkInfo(Request $request){
         $url = $request->input('value');
