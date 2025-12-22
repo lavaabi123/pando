@@ -3,19 +3,19 @@
         <div class="form-check">
             <input class="form-check-input prevent-toggle" type="checkbox" value="1" id="appchannels" name="permissions[appchannels]" @checked( array_key_exists("appchannels", $permissions ) )>
             <label class="fw-6 fs-14 text-gray-700 ms-2" for="appchannels">
-                {{ __("Channels") }}
+                {{ __("Accounts") }}
             </label>
         </div>
-        <input class="form-control d-none" name="labels[appchannels]" type="text" value="Channels">
+        <input class="form-control d-none" name="labels[appchannels]" type="text" value="Accounts">
     </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-12">
                 <div class="mb-4">
-                    <label for="max_channels" class="form-label">{{ __('Max channels') }}</label>
-                    <div class="text-gray-600 fs-12 mb-2">{{ __("Enter the maximum number of channels allowed in this package. Set the value to -1 for unlimited channels.") }}</div>
+                    <label for="max_channels" class="form-label">{{ __('Max accounts') }}</label>
+                    <div class="text-gray-600 fs-12 mb-2">{{ __("Enter the maximum number of accounts allowed in this package. Set the value to -1 for unlimited accounts.") }}</div>
                     <input class="form-control" name="permissions[max_channels]" id="max_channels" type="number" required value="{{ $permissions['max_channels'] ?? -1 }}">
-                    <input class="form-control d-none" name="labels[max_channels]" type="text" value="Max channels">
+                    <input class="form-control d-none" name="labels[max_channels]" type="text" value="Max accounts">
                 </div>
             </div>
             <div class="col-md-12">
@@ -40,7 +40,7 @@
             <div class="col-md-12 allow_channels">
                 <div class="mb-0">
                     <div class="d-flex gap-8 justify-content-between border-bottom mb-3 pb-2">
-                        <div class="fw-5 text-gray-800 fs-14 mb-2">{{ __('Allow channels') }}</div>
+                        <div class="fw-5 text-gray-800 fs-14 mb-2">{{ __('Allow accounts') }}</div>
                         <div class="form-check">
                             <input class="form-check-input checkbox-all" data-checkbox-parent=".allow_channels" type="checkbox" value="" id="allow_channels">
                             <label class="form-check-label" for="allow_channels">

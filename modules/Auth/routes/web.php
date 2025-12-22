@@ -36,6 +36,9 @@ Route::group(['middleware' => 'web'], function () {
             Route::post('do_login', [AuthController::class, 'doLogin'])->name("auth.do-login"); 
             Route::post('do_forgot_password', [AuthController::class, 'doForgotPassword'])->name("auth.do_forgot_password");
             Route::post('do_recovery_password', [AuthController::class, 'doRecoveryPassword'])->name("auth.do_recovery_password");
+			
+			Route::post('check-email', [AuthController::class, 'checkEmail'])->name('auth.check.email');
+			Route::post('check-username', [AuthController::class, 'checkUsername'])->name('auth.check.username');
         });
 
         Route::get('login-as-user', [AuthController::class, 'loginAsUser']);

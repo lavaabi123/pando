@@ -7,7 +7,7 @@
             <div class="d-flex flex-column flex-lg-row flex-md-column align-items-md-start align-items-lg-center justify-content-between">
                 <div class="my-3 d-flex flex-column gap-8">
                     <h1 class="fs-20 font-medium lh-1 text-gray-900">
-                        {{ __("Add new channels") }}
+                        {{ __("Add new accounts") }}
                     </h1>
                     <div class="d-flex align-items-center gap-20 fw-5 fs-14">
                         <div class="d-flex gap-8">

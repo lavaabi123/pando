@@ -105,14 +105,11 @@
     "AdminCache": true,
     "AppHandles": true,
     "AppReplies": true,
-    "AppReplies.zip": true,
-    "AppHandles.zip": true,
-    "InboxModule": true,
     "AppInbox": true,
-    "AppInbox.zip": true,
     "AppPublishingApproval": true,
+    "AppInbox.zip": true,
+    "AppInboxold.zip": true,
     "AppApprovals": true,
-    "PaymentStripeRecurring.zip": true,
     "AppHashtags": true,
     "AppPublishing.zip": true
 }

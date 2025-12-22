@@ -18,28 +18,62 @@ class AppChannelsController extends Controller
     public function __construct(Request $request)
     {
         $this->maxChannels = \Access::permission('max_channels');
-        $this->totalAccounts = Accounts::where('team_id',  $request->team_id)->where("brand_id", session('brand_id'))->where('status', '!=', 0)->count();
+        // Only count if brand is selected
+        if (session('brand_id')) {
+            $this->totalAccounts = Accounts::where('team_id', $request->team_id)
+                ->where("brand_id", session('brand_id'))
+                ->where('status', '!=', 0)
+                ->count();
+        } else {
+            $this->totalAccounts = 0;
+        }
     }
 
     public function index(Request $request)
     {
-        $total = Accounts::where("team_id", $request->team_id)->where("brand_id", session('brand_id'))->count();
+        // Check if brand is selected
+        if (!session('brand_id')) {
+            // Return view with warning - don't redirect
+            return view('appchannels::index', [
+                'total' => 0,
+                'module' => $request->module,
+                'brandSelected' => false,
+            ]);
+        }
+
+        $total = Accounts::where("team_id", $request->team_id)
+            ->where("brand_id", session('brand_id'))
+            ->count();
         
         return view('appchannels::index', [
             'total' => $total,
             'module' => $request->module,
+            'brandSelected' => true,
         ]);
     }
 
-    public function list(Request $request){
+    public function list(Request $request)
+    {
+        // Check if brand is selected
+        if (!session('brand_id')) {
+            return ms([
+                "status" => 0,
+                "message" => __("Please select a brand first.")
+            ]);
+        }
+
         $search = $request->input("keyword");
         $status = $request->input("status");
         $module_name = $request->input("module_name");
         $current_page = $request->input("page") + 1;
         $per_page = 30;
 
-        $wheres = ["team_id" => $request->team_id ];
-		$wheres = ["brand_id" => session('brand_id') ];
+        // FIXED: Was overwriting team_id with brand_id
+        $wheres = [
+            "team_id" => $request->team_id,
+            "brand_id" => session('brand_id')
+        ];
+        
         if($module_name != "" && Module::find($module_name))
         {
             $wheres['module'] = $module_name;
@@ -100,6 +134,14 @@ class AppChannelsController extends Controller
 
     public function status(Request $request, $status = "active")
     {
+        // Check if brand is selected
+        if (!session('brand_id')) {
+            return ms([
+                "status" => 0,
+                "message" => __("Please select a brand first.")
+            ]);
+        }
+
         $ids = $request->input('id');
         $id_arr = [];
 
@@ -137,15 +179,23 @@ class AppChannelsController extends Controller
                 break;
         }
 
+        // Only update accounts belonging to current brand and team
         DB::table('accounts')
             ->whereIn('id_secure', $id_arr)
+            ->where('team_id', $request->team_id)
+            ->where('brand_id', session('brand_id'))
             ->update(['status' => $status]);
 
-        ms(["status" => 1, "message" => "Succeeded"]);
+        ms(["status" => 1, "message" => __("Succeeded")]);
     }
 
     public function add(Request $request)
     {
+        // Check if brand is selected
+        if (!session('brand_id')) {
+            return redirect(module_url())->with('error', __('Please select a brand first.'));
+        }
+
         $result = session("channels"); 
 
         if (!$result) 
@@ -167,6 +217,14 @@ class AppChannelsController extends Controller
 
     public function save(Request $request)
     {
+        // Check if brand is selected
+        if (!session('brand_id')) {
+            return ms([
+                'status' => 0,
+                'message' => __("Please select a brand first.")
+            ]);
+        }
+
         $result = session('channels'); 
         $channels = $request->input("channels");
         $team_id = $request->team_id;
@@ -199,11 +257,11 @@ class AppChannelsController extends Controller
                 $channel_item = Accounts::where([
                     "pid" => $channel_id, 
                     "login_type" => $channel['login_type'], 
-                    "team_id" => $team_id
+                    "team_id" => $team_id,
+                    "brand_id" => session('brand_id') // Also check brand
                 ])->get()->first();
 
                 $avatar_url = theme_public_asset('img/default.png');
-
 
                 try 
                 {
@@ -280,20 +338,36 @@ class AppChannelsController extends Controller
 
     public function destroy(Request $request)
     {
+        // Check if brand is selected
+        if (!session('brand_id')) {
+            return ms([
+                "status" => 0,
+                "message" => __("Please select a brand first.")
+            ]);
+        }
+
         $id_arr = id_arr( $request->input('id') );
         if(empty($id_arr))
-              ms(["status" => 0, "message" => __("Please select at least one item")]);
+            ms(["status" => 0, "message" => __("Please select at least one item")]);
 
+        // Only delete accounts belonging to current brand and team
         foreach ($id_arr as $key => $id) {
             $channel_item = Accounts::where([
                 "id_secure" => $id, 
-                "team_id" => $request->team_id
+                "team_id" => $request->team_id,
+                "brand_id" => session('brand_id')
             ])->get()->first();
 
-            \UploadFile::deleteFileFromServer($channel_item->avatar);
+            if ($channel_item) {
+                \UploadFile::deleteFileFromServer($channel_item->avatar);
+            }
         }
 
-        Accounts::whereIn('id_secure', $id_arr)->delete();
+        Accounts::whereIn('id_secure', $id_arr)
+            ->where('team_id', $request->team_id)
+            ->where('brand_id', session('brand_id'))
+            ->delete();
+            
         ms(["status" => 1, "message" => __("Succeeded")]);
     }
 }

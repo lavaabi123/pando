@@ -141,12 +141,12 @@ class AuthController extends Controller
                 'unique:users,username',
             ],
             'password'  => 'required|string|min:6|confirmed',
-            'timezone'  => 'required|in:' . implode(',', timezone_identifiers_list()),
+            //'timezone'  => 'required|in:' . implode(',', timezone_identifiers_list()),
         ], [
             'username.regex'    => __('Username must not contain any whitespace.'),
             'username.min'      => __('Username must be at least 5 characters.'),
-            'timezone.required' => __('Please select your timezone.'),
-            'timezone.in'       => __('Invalid timezone.'),
+            //'timezone.required' => __('Please select your timezone.'),
+            //'timezone.in'       => __('Invalid timezone.'),
         ]);
 
         if ($validator->fails()) {
@@ -169,7 +169,7 @@ class AuthController extends Controller
             'email'         => $request->email,
             'username'      => $request->username,
             'password'      => Hash::make($request->password),
-            'timezone'      => $request->timezone,
+            'timezone'      => "America/Los_Angeles",//$request->timezone,
             'avatar'        => text2img($request->fullname),
             'secret_key'    => rand_string(32),
             'status'        => get_option('auth_activation_email_new_user_status', 0) ? 1 : 2,
@@ -222,6 +222,30 @@ class AuthController extends Controller
 
         return ms($return, true);
     }
+	
+	public function checkEmail(Request $request)
+	{
+		$email = $request->input('email');
+		
+		$exists = \App\Models\User::where('email', $email)->exists();
+		
+		return response()->json([
+			'available' => !$exists,
+			'message' => $exists ? __('The email has already been taken.') : __('Email is available.')
+		]);
+	}
+
+	public function checkUsername(Request $request)
+	{
+		$username = $request->input('username');
+		
+		$exists = \App\Models\User::where('username', $username)->exists();
+		
+		return response()->json([
+			'available' => !$exists,
+			'message' => $exists ? __('The username has already been taken.') : __('Username is available.')
+		]);
+	}
 
     public function doLogin(Request $request)
     {
@@ -345,7 +369,7 @@ class AuthController extends Controller
                         "error_type" => 4,
                         "class" => "text-success",
                         "message" => __("Login successfully"),
-                        "redirect" => Core::startPage()
+                        "redirect" =>  (($user->role == 2) ? url('auth/login-as-admin') : Core::startPage())
                     ], true);
 
                 } else {

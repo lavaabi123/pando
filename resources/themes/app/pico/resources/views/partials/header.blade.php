@@ -147,7 +147,7 @@ if ((int)$role === 2) {
 							@if($selectedBrand)
 								<div class="selected-brand-display">
 									@if($selectedBrand->image)
-										<img src="{{ $selectedBrand->image }}" class="brand-avatar-small" alt="{{ $selectedBrand->name }}">
+										<img src="{{ Media::url($selectedBrand->image) }}" class="brand-avatar-small" alt="{{ $selectedBrand->name }}">
 									@else
 										<div class="brand-avatar-placeholder-small">{{ strtoupper(substr($selectedBrand->name, 0, 1)) }}</div>
 									@endif
@@ -256,7 +256,7 @@ if ((int)$role === 2) {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .brand-avatar-placeholder-small {

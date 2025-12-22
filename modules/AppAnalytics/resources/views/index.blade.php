@@ -9,15 +9,20 @@
 @endsection
 
 @section('content')
-    <div class="container pb-5">
-
+    <div class="container pb-5 row">
+	<div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+		<a href="{{ route('export.all.pdf') }}?date_range=last_30_days" 
+		   class="btn btn-primary">
+			Export All Analytics PDF
+		</a>
+	</div>
         @forelse ($analytics as $network => $data)
-            <div class="mb-5">
+            <div class="mb-5 col-md-3">
                 <h4 class="fw-6 fs-18 mb-4">{{ $network }}</h4>
                 <div class="row">
                     @foreach ($data as $key => $value)
-                    <div class="col-md-3">
-                        <div class="card">
+                    <div class="col-md-12">
+                        <div class="card mb-2">
                             <div class="card-body">
                                 <div class="d-flex flex-grow-1 align-items-top gap-8">
                                     

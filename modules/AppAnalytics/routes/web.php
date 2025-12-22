@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\AppAnalytics\Http\Controllers\AppAnalyticsController;
+use Modules\AppAnalytics\Http\Controllers\AllAccountsAnalyticsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,6 +21,8 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::resource('/', AppAnalyticsController::class)->names('app.analytics');
             Route::get('{social}/{id_secure}', [AppAnalyticsController::class, 'show'])->name('app.analytics.show');
             Route::post('{social}/{id_secure}/export-pdf', [AppAnalyticsController::class, 'exportPdf'])->name('analytics.export.pdf');
+			Route::get('/export-all-pdf', [AllAccountsAnalyticsController::class, 'exportAllAccountsPdf'])
+			->name('export.all.pdf');
         });
     });
 });
