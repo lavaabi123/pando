@@ -64,18 +64,18 @@
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
-                                <div class="d-flex flex-column align-items-center justify-content-center py-5 my-5">
-                                    <span class="fs-70 mb-3 text-primary">
+                                <div class="d-flex flex-column align-items-center justify-content-center py-1">
+                                    <!--<span class="fs-70 mb-3 text-primary">
                                         <i class="fa-light fa-chart-mixed"></i>
-                                    </span>
+                                    </span>-->
                                     <div class="fw-semibold fs-5 mb-2 text-gray-800">
                                         {{ __('No accounts yet') }}
                                     </div>
-                                    <div class="text-body-secondary mb-4">
+                                    <!--<div class="text-body-secondary mb-4">
                                         {{ __('Connect your social accounts to start tracking analytics and gain insights into your performance.') }}
-                                    </div>
+                                    </div>-->
                                     <a href="{{ route('app.channels.index') }}" class="btn btn-dark">
-                                        <i class="fa-light fa-plus me-1"></i> {{ __('Add channel') }}
+                                        <i class="fa-light fa-plus me-1"></i> {{ __('Add an account') }}
                                     </a>
                                 </div>
                             </div>

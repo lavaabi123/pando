@@ -22,7 +22,7 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 
     public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("social_network", "linkedin")->where('login_type', 1)->where("category", "page")->orderBy('id')->get();
+		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "linkedin")->where('login_type', 1)->where("category", "page")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {

@@ -47,7 +47,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 
     public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("social_network", "instagram")->where("category", "profile")->where("login_type", 1)->orderBy('id')->get();
+		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "instagram")->where("category", "profile")->where("login_type", 1)->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {

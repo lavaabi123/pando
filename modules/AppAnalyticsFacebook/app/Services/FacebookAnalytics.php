@@ -42,7 +42,7 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 
 	public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("social_network", "facebook")->where("category", "page")->orderBy('id')->get();
+		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "facebook")->where("category", "page")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {
@@ -125,7 +125,7 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	public function getFacebookOverview(int $accountId, string $since, string $until): array
 	{
 	    $metrics = [
-	        'page_impressions',
+	        //'page_impressions',
 	        'page_impressions_unique',
 	        'page_post_engagements',
 	        'page_views_total',
@@ -177,8 +177,8 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	            'change' => $calculateChange($data['page_impressions_unique'] ?? 0, $dataCompare['page_impressions_unique'] ?? 0),
 	        ],
 	        'impressions' => [
-	            'value' => (int) ($data['page_impressions'] ?? 0),
-	            'change' => $calculateChange($data['page_impressions'] ?? 0, $dataCompare['page_impressions'] ?? 0),
+	            'value' => (int) ($data['page_impressions_unique'] ?? 0),
+	            'change' => $calculateChange($data['page_impressions_unique'] ?? 0, $dataCompare['page_impressions_unique'] ?? 0),
 	        ],
 	        'engagements' => [
 	            'value' => (int) ($data['page_post_engagements'] ?? 0),
@@ -194,11 +194,32 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	        ],
 	    ];
 	}
+	
+	protected function estimateTotalImpressions($accountId, $dateRange)
+	{
+		// Get unique impressions (reach)
+		$uniqueImpressions = \Analytics::getMetricSum($accountId, 'facebook', 'page_impressions_unique', $dateRange);
+		
+		// Get engagements
+		$engagements = \Analytics::getMetricSum($accountId, 'facebook', 'page_post_engagements', $dateRange);
+		
+		// Estimate: People who engaged likely saw the content multiple times
+		// Average multiplier: 1.5x to 3x (industry standard)
+		// More engagement = higher impression multiplier
+		
+		if ($uniqueImpressions > 0) {
+			$engagementRate = $engagements / $uniqueImpressions;
+			$multiplier = 1 + min($engagementRate * 0.5, 2); // Cap at 3x
+			return round($uniqueImpressions * $multiplier);
+		}
+		
+		return $uniqueImpressions;
+	}
 
 	public function getOverviewChartData(int $accountId, string $since, string $until): array
 	{
 	    $metrics = [
-	        'page_impressions'        => __('Impressions'),
+	        //'page_impressions'        => __('Impressions'),
 	        'page_impressions_unique' => __('Reach'),
 	        'page_post_engagements'   => __('Engagements'),
 	    ];
@@ -806,23 +827,23 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	    return null;
 	}
 
-	protected function syncPageInsights(int $accountId, string $pageId, string $token, string $since, string $until): void
+/*	protected function syncPageInsights(int $accountId, string $pageId, string $token, string $since, string $until): void
 	{
 	    $social = 'facebook';
 
 	    $metrics = [
-	        'page_impressions',
-	        'page_impressions_paid',
+	        //'page_impressions',
+	        //'page_impressions_paid',
 	        'page_impressions_unique',
 	        'page_impressions_paid_unique',
 	        'page_actions_post_reactions_total',
 	        'page_post_engagements',
 	        'page_views_total',
-	        'page_fan_adds_unique',
-	        'page_fan_removes_unique',
+	        //'page_fan_adds_unique',
+	        //'page_fan_removes_unique',
 	        'page_follows',
-	        'page_fans_locale',
-	        'page_fans_country',
+	        //'page_fans_locale',
+	        //'page_fans_country',
 	        'page_video_complete_views_30s_organic',
 	        'page_video_views_organic',
 	        'page_video_views_paid',
@@ -885,6 +906,134 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	        logger()->error("[FacebookAnalytics] syncPageInsights error: " . $e->getMessage());
 	    }
 	}
+	
+	*/
+	
+	
+	protected function syncPageInsights(int $accountId, string $pageId, string $token, string $since, string $until): void
+	{
+		$social = 'facebook';
+		
+		// Only metrics confirmed to work with period=day
+		$validMetrics = [
+			'page_impressions_unique',
+			'page_impressions_paid_unique',
+			'page_actions_post_reactions_total',
+			'page_post_engagements',
+			'page_views_total',
+			'page_follows',
+			'page_video_complete_views_30s_organic',
+			'page_video_views_organic',
+			'page_video_views_paid',
+			'page_video_views_autoplayed',
+			'page_video_views_click_to_play',
+		];
+		
+		if (!\Analytics::shouldFetchSocialAnalytics($accountId, $social, 'page')) {
+			return;
+		}
+		
+		try {
+			$endpoint = "/{$pageId}/insights?metric=" . implode(',', $validMetrics) .
+				"&since={$since}&until={$until}&period=day";
+			
+			$response = $this->fb->get($endpoint, $token);
+			$result = $response->getDecodedBody();
+			
+			$insights = [];
+			
+			foreach ($result['data'] ?? [] as $item) {
+				$metric = $item['name'];
+				foreach ($item['values'] as $entry) {
+					$date = Carbon::parse($entry['end_time'])->toDateString();
+					
+					if (is_array($entry['value'])) {
+						foreach ($entry['value'] as $key => $count) {
+							if ((float) $count > 0) {
+								$insights["{$metric}.{$key}"][$date] = (float) $count;
+							}
+						}
+					} else {
+						$value = (float) $entry['value'];
+						if ($value > 0) {
+							$insights[$metric][$date] = $value;
+						}
+					}
+				}
+			}
+			
+			// Get total fans count from the page object (not insights)
+			$this->fetchPageFansCount($pageId, $token, $insights);
+			$this->fetchPageDemographics($pageId, $token, $insights);
+			
+			if (!empty($insights)) {
+				\Analytics::saveInsightsToDatabase($accountId, $social, $insights);
+				\Analytics::markSynced($accountId, $social, 'page');
+				logger()->info("[FacebookAnalytics] Successfully synced page insights", [
+					'account_id' => $accountId,
+					'metrics_count' => count($insights)
+				]);
+			}
+			
+		} catch (\Exception $e) {
+			logger()->error("[FacebookAnalytics] syncPageInsights error: " . $e->getMessage(), [
+				'account_id' => $accountId,
+				'page_id' => $pageId,
+			]);
+		}
+	}
+
+	/**
+	 * Get total fans count from the page object (not from insights API)
+	 * This is more reliable than the insights endpoint
+	 */
+	protected function fetchPageFansCount(string $pageId, string $token, array &$insights): void
+	{
+		try {
+			// Get fans count directly from page object
+			$endpoint = "/{$pageId}?fields=followers_count,fan_count";
+			$response = $this->fb->get($endpoint, $token);
+			$result = $response->getDecodedBody();
+			
+			$date = Carbon::now()->toDateString();
+			
+			if (isset($result['followers_count'])) {
+				$insights['page_followers_count'][$date] = (float) $result['followers_count'];
+			}
+			
+			if (isset($result['fan_count'])) {
+				$insights['page_fan_count'][$date] = (float) $result['fan_count'];
+			}
+			
+		} catch (\Exception $e) {
+			logger()->warning("[FacebookAnalytics] Could not fetch page fans count: " . $e->getMessage());
+		}
+	}
+	
+	protected function fetchPageDemographics(string $pageId, string $token, array &$insights): void
+	{
+		try {
+			// Get page audience data
+			$endpoint = "/{$pageId}?fields=audience,global_brand_page_name,country_page_likes";
+			$response = $this->fb->get($endpoint, $token);
+			$result = $response->getDecodedBody();
+			
+			$date = Carbon::now()->toDateString();
+			
+			// Store any available demographic data
+			if (isset($result['audience'])) {
+				foreach ($result['audience'] as $key => $value) {
+					if (!empty($value)) {
+						$insights["page_audience.{$key}"][$date] = $value;
+					}
+				}
+			}
+			
+		} catch (\Exception $e) {
+			// Silently fail - demographics may not be available
+			logger()->debug("[FacebookAnalytics] Could not fetch demographics: " . $e->getMessage());
+		}
+	}
 
 	protected function syncPostInsights(int $accountId, string $pageId, string $token, string $since, string $until): void
 	{
@@ -892,9 +1041,9 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	    $now = time();
 
 	    $metricList = [
-	        'post_impressions',
-	        'post_impressions_paid',
-	        'post_impressions_organic',
+	        //'post_impressions',
+	        //'post_impressions_paid',
+	        //'post_impressions_organic',
 	        'post_impressions_unique',
 	        'post_impressions_paid_unique',
 	        'post_impressions_organic_unique',

@@ -22,7 +22,7 @@ class TiktokAnalytics implements SocialAnalyticsInterface
 
     public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("social_network", "tiktok")->where("category", "profile")->orderBy('id')->get();
+		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "tiktok")->where("category", "profile")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {
