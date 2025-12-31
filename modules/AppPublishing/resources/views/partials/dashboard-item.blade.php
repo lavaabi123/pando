@@ -154,7 +154,7 @@
                 <h5 class="fw-6" id="date_text">{{ __('Today!') }} {{ now()->format('F d, Y') }}</h5>
                 <p class="mb-0">{{ __("What's happening on your accounts") }} <span id="load_day_type">today</span>!</p>
             </div>
-            <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-6 renew-plan">
                 <button type="button" onclick="changeTodayCounts('daily', this)" class="today_report btn btn-primary btn-sm active">
                     {{ __('Daily') }}
                 </button>
@@ -235,7 +235,7 @@
 
     {{-- Quota --}}
     <div class="col-md-6">
-        <div class="card border-0 shadow-sm rounded-4 hp-100 min-h-350">
+        <div class="card shadow-sm rounded-4 hp-100 min-h-350">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4 h-100">
                 <div class="d-flex flex-column mb-3 gap-12">
                     <span class="d-inline-flex align-items-center justify-content-center b-r-12 size-50 bg-primary-100 border border-primary-200">
@@ -278,15 +278,15 @@
 
     {{-- Add Channels --}}
     <div class="col-md-6">
-        <div class="card border-0 shadow-sm">
+        <div class="card shadow-sm">
             <div class="card-header">
                 <div class="fw-5">{{ __("Add Channels") }}</div>
             </div>
-            <div class="card-body max-h-300 overflow-y-scroll">
-                <div class="row">
+            <div class="card-body">
+                <div class="row max-h-300 overflow-y-scroll row-gap-4">
                     @if( !empty( $channels ) )
                         @foreach( $channels as $channel )
-                            <div class="col-md-6 mb-4">
+                            <div class="col-md-6">
                                 <div class="card border-gray-300">
                                     <div class="card-body text-center d-flex flex-column justify-content-center align-items-center gap-10">
                                         <div class="d-flex align-items-center justify-content-center size-50 text-white border-1 b-r-100 fs-16" style="background-color: {{ $channel['color'] }};">
@@ -312,25 +312,25 @@
     </div>
 
 
-	<div class="col-md-12 card position-relative overflow-hidden hp-100 mb-4">
-		<div class="card-body d-flex align-items-center justify-content-between py-4 px-4">
-			<div class="text-black">
-				<h5 class="fw-6 d-flex icon-primary"><span>{!! file_get_contents(public_path('img/Reports.svg')) !!}</span> Post Analytics</h5>
+	<div class="col-md-12">
+		<div class="card position-relative overflow-hidden">
+			<div class="card-body d-flex align-items-center justify-content-between py-3 px-4">
+				<div class="text-black">
+					<h5 class="fw-6 d-flex icon-primary"><span>{!! file_get_contents(public_path('img/Reports.svg')) !!}</span> Post Analytics</h5>
+				</div>
+				
+				<div class="d-flex gap-8">
+					<div class="align-self-end">
+						<select class="form-control">
+							<option>All Platform</option>
+							<option>Facebook</option>
+						</select>
+					</div>
+					<div class="d-flex align-items-center justify-content-between gap-8">
+						<div class="daterange d-none bg-white b-r-20 fs-12 border-gray-300 border" data-open="left"></div>
+					</div>
+				</div>
 			</div>
-			<div class="align-self-end">
-				<select class="form-control">
-					<option>All Platform</option>
-					<option>Facebook</option>
-				</select>
-			</div>
-			<div class="">
-                <div></div>
-                <div class="d-flex align-items-center justify-content-between gap-8">
-                    <div>
-                        <div class="daterange d-none bg-white b-r-4 fs-12 border-gray-300 border" data-open="left"></div>
-                    </div>
-                </div>
-            </div>
 		</div>
 	</div>
     {{-- Success --}}
@@ -405,7 +405,7 @@
     <div class="row g-3">
         {{-- Success Chart --}}
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-3">
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-100" style="width: 48px; height: 48px;">
@@ -424,7 +424,7 @@
 
         {{-- Failed Chart --}}
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-3">
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-danger-100" style="width: 48px; height: 48px;">
@@ -443,7 +443,7 @@
 
         {{-- Total Chart --}}
         <div class="col-md-4">
-            <div class="card border-0 shadow-sm h-100">
+            <div class="card h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-3">
                         <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-100" style="width: 48px; height: 48px;">
@@ -464,8 +464,8 @@
 
 {{-- Main Chart Section (Report post by status) --}}
 <div class="col-md-12">
-    <div class="card border-0 shadow-sm">
-        <div class="card-header bg-white">
+    <div class="card">
+        <div class="card-header">
             <h5 class="fs-5 fs-16 mb-0">{{ __('Report post by status') }}</h5>
         </div>
         <div class="card-body">
@@ -495,14 +495,14 @@
     <div class="row g-4">
         {{-- Left Column: Pie Chart (Report post by type) --}}
         <div class="col-md-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-white border-0">
+            <div class="card h-100">
+                <div class="card-header">
                     <h5 class="fs-5 fs-16 mb-0">{{ __('Report post by social media') }}</h5>
                 </div>
                 <div class="card-body d-flex align-items-center justify-content-center">
                     <div id="social-media-pie-chart" style="height: 400px; width: 100%;"></div>
                 </div>
-                <div class="card-footer bg-white border-top">
+                <div class="card-footer border-top">
                     <div class="table-responsive">
                         <table class="table table-sm table-borderless mb-0">
                             <thead>
@@ -530,12 +530,12 @@
 
         {{-- Right Column: Recent Publications --}}
 <div class="col-md-6">
-    <div class="card border-0 shadow-sm h-100">
-        <div class="card-header bg-white border-0">
+    <div class="card h-100">
+        <div class="card-header">
             <h5 class="fs-5 fs-16 mb-0">{{ __('Recent publications') }}</h5>
         </div>
         <div class="card-body p-0">
-            <div class="schedules-main overflow-auto" style="max-height: 600px;">
+            <div class="schedules-main overflow-auto row mt-4 mh-600 h-100">
                 <div class="schedule-list p-3">
                     @forelse($recentPosts as $post)
                         @php
@@ -699,6 +699,40 @@
 </div>
 	</div>
 </div>
+</div>
+<div class="footer pt-50 mt-20">
+	<div class="container">
+		<div class="row">
+			<div class="col-md-2 mb-4">
+				<div class="fw-7 fs-18 mb-4">Publishing</div>
+				<ul>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/post">Create post</a></li>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/schedules">Calendar</a></li>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/drafts">Drafts</a></li>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/approvals">Approvals</a></li>
+				</ul>
+			</div>
+			<div class="col-md-2 mb-4">
+				<div class="fw-7 fs-18 mb-4">Quick Links</div>
+				<ul>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/account_manager">Account Manager</a></li>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/reports">Reports</a></li>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/inbox">Inbox</a></li>
+					<li class="mb-2"><a class="text-black" href="https://itspando.com/users">Users</a></li>
+				</ul>
+			</div>
+			<div class="col-md-2 mb-4">
+				<div class="fw-7 fs-18 mb-4">Connect Profile</div>
+				<ul>
+					<li class="mb-2"><a class="text-black" target="_blank" href="https://itspando.com/facebook_pages/oauth">Facebook</a></li>
+					<li class="mb-2"><a class="text-black" target="_blank" href="https://itspando.com/instagram_profiles/oauth">Instagram</a></li>
+					<li class="mb-2"><a class="text-black" target="_blank" href="https://itspando.com/linkedin_pages/oauth">Linkedin</a></li>
+					<li class="mb-2"><a class="text-black" target="_blank" href="https://itspando.com/twitter_profiles/oauth">X</a></li>
+					<li class="mb-2"><a class="text-black" target="_blank" href="https://itspando.com/pinterest_boards/oauth">Pinterest</a></li>
+				</ul>
+			</div>
+		</div>
+	</div>
 </div>
 <style>
 /* Stacked avatars hover effect */

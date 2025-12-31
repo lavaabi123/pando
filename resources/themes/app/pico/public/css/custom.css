@@ -93,7 +93,23 @@ a {
     color: var(--white);
     box-shadow: none;
 }
-
+.renew-plan .btn-sm {
+	font-size: 12px !important;
+    line-height: 1;
+    padding: 8px 12px !important;
+    letter-spacing: 0.5px;
+	min-width:100px;
+	height: auto !important;
+	color: var(--white);
+	background: var(--d-grey);
+}
+.renew-plan .btn-sm:hover {
+	background: var(--d-primary);
+	color: var(--white);
+}
+.card .card-body {
+    padding: 1.25rem 1.25rem;
+}
 /** Color Picker End **/
 
 /** Input Fields Start **/
@@ -521,11 +537,14 @@ a.menu-link.active {
 }
 .main {
     width: calc(100% - 250px);
+	background: #fbfdff;
+	overflow-y: auto;
 }
 .card {
     border-color: #dedede !important;
-    box-shadow: none;
-    border-radius: 20px;
+    box-shadow: none !important;
+    border-radius: 20px !important;
+    transform: none !important;
 }
 .d-alert .card h5 {
 	font-size:14px;
@@ -834,4 +853,9 @@ ul#myTab li button.active {
     background: var(--sp-gray-300);
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
+}
+
+/** Footer **/
+.footer {
+    border-top: 2px solid #767676;
 }
