@@ -81,7 +81,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
         // SYNC
         $this->syncProfileInsights($accountId, $instagramId, $accessToken, $since, $until);
         $this->syncPostInsights($accountId, $instagramId, $accessToken, $since, $until);
-
+		//echo "<pre>";print_r($this->getReachByFollowTypeData($accountId, $since, $until));exit;
         return [
             'status' => 'success',
             'account' => $accountInfo,
@@ -640,8 +640,8 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	public function getReachByFollowTypeData(int $accountId, string $since, string $until): array
 	{
 	    $metrics = [
-	        'reach.followers'      => __('Followers'),
-	        'reach.non_followers'  => __('Non-Followers'),
+	        'reach.FOLLOWER'      => __('Followers'),
+	        'reach.NON_FOLLOWER'  => __('Non-Followers'),
 	    ];
 
 	    $latestDate = SocialAnalytics::where('account_id', $accountId)
@@ -657,8 +657,8 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	        ->pluck('value', 'metric')
 	        ->toArray();
 
-	    $followers = (int) ($raw['reach.followers'] ?? 0);
-	    $nonFollowers = (int) ($raw['reach.non_followers'] ?? 0);
+	    $followers = (int) ($raw['reach.FOLLOWER'] ?? 0);
+	    $nonFollowers = (int) ($raw['reach.NON_FOLLOWER'] ?? 0);
 	    $total = $followers + $nonFollowers;
 
 	    return [
@@ -820,15 +820,46 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 
             $sinceStr = $rangeStart->toDateString();
             $untilStr = $rangeEnd->toDateString();
-
             // Request 1
             try {
 	            $metrics = [ 
-			    	'reach', 
-			    	'follower_count' 
+			    	'reach'
 			    ];
 	            if (!empty($metrics)) {
 	                $endpoint = "/{$instagramId}/insights?metric=" . implode(',', $metrics) . "&period=day&since={$sinceStr}&until={$untilStr}";
+	                $response = $this->fb->get($endpoint, $token);
+	                $result = $response->getDecodedBody();
+
+	                foreach ($result['data'] ?? [] as $item) {
+
+					    $metric = $item['name'] ?? null;
+					    if (!$metric) continue;
+
+					    foreach ($item['values'] as $entry) {
+					        if (empty($entry['end_time'])) continue;
+					        $date = Carbon::parse($entry['end_time'])->toDateString();
+					        $value = $entry['value'] ?? 0;
+					        if (is_numeric($value) && $value > 0) {
+					            $insights[$metric][$date] = (float) $value;
+					        }
+					    }
+					}
+	            }
+
+            } catch (\Exception $e) {
+		        logger()->error("[InstagramAnalytics] syncProfileInsights error: " . $e->getMessage());
+		    }
+			
+			try {
+	            $metrics = [  
+			    	'follower_count' 
+			    ];
+	            if (!empty($metrics)) {					
+					
+					$sin = date("Y-m-d",strtotime("today - 29 days"));
+					$uns = date("Y-m-d",strtotime("today"));
+			
+	                $endpoint = "/{$instagramId}/insights?metric=" . implode(',', $metrics) . "&period=day&since={$sin}&until={$uns}";
 	                $response = $this->fb->get($endpoint, $token);
 	                $result = $response->getDecodedBody();
 
@@ -939,11 +970,11 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 				    $saveKey = $metricMap[$metricName];
 
 				    if (
-				        isset($item['total_value']['breakdowns']['results']) 
-				        && isset($item['dimension_keys'])
-				        && $item['dimension_keys'] === ['age']
+				        isset($item['total_value']['breakdowns'][0]['results']) 
+				        && isset($item['total_value']['breakdowns'][0]['dimension_keys'])
+				        && $item['total_value']['breakdowns'][0]['dimension_keys'] === ['age']
 				    ) {
-				        foreach ($item['total_value']['breakdowns']['results'] as $row) {
+				        foreach ($item['total_value']['breakdowns'][0]['results'] as $row) {
 				            $age = $row['dimension_values'][0] ?? null;
 				            $value = $row['value'] ?? 0;
 				            if ($age && $value > 0) {
@@ -974,11 +1005,11 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 				    $saveKey = $metricMap[$metric];
 
 				    if (
-				        isset($item['total_value']['breakdowns']['results']) &&
-				        isset($item['dimension_keys']) &&
-				        $item['dimension_keys'] === ['gender']
+				        isset($item['total_value']['breakdowns'][0]['results']) &&
+				        isset($item['total_value']['breakdowns'][0]['dimension_keys']) &&
+				        $item['total_value']['breakdowns'][0]['dimension_keys'] === ['gender']
 				    ) {
-				        foreach ($item['total_value']['breakdowns']['results'] as $row) {
+				        foreach ($item['total_value']['breakdowns'][0]['results'] as $row) {
 				            $gender = $row['dimension_values'][0] ?? null;
 				            $value = $row['value'] ?? 0;
 				            if ($gender) {
@@ -1009,11 +1040,11 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 				    $saveKey = $metricMap[$metric];
 
 				    if (
-				        isset($item['total_value']['breakdowns']['results']) &&
-				        isset($item['dimension_keys']) &&
-				        $item['dimension_keys'] === ['country']
+				        isset($item['total_value']['breakdowns'][0]['results']) &&
+				        isset($item['total_value']['breakdowns'][0]['dimension_keys']) &&
+				        $item['total_value']['breakdowns'][0]['dimension_keys'] === ['country']
 				    ) {
-				        foreach ($item['total_value']['breakdowns']['results'] as $row) {
+				        foreach ($item['total_value']['breakdowns'][0]['results'] as $row) {
 				            $country = $row['dimension_values'][0] ?? null;
 				            $value = $row['value'] ?? 0;
 				            if ($country) {
@@ -1044,11 +1075,11 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 				    $saveKey = $metricMap[$metric];
 
 				    if (
-				        isset($item['total_value']['breakdowns']['results']) &&
-				        isset($item['dimension_keys']) &&
-				        $item['dimension_keys'] === ['city']
+				        isset($item['total_value']['breakdowns'][0]['results']) &&
+				        isset($item['total_value']['breakdowns'][0]['dimension_keys']) &&
+				        $item['total_value']['breakdowns'][0]['dimension_keys'] === ['city']
 				    ) {
-				        foreach ($item['total_value']['breakdowns']['results'] as $row) {
+				        foreach ($item['total_value']['breakdowns'][0]['results'] as $row) {
 				            $city = ucwords(strtolower($row['dimension_values'][0] ?? ''));
 				            $value = $row['value'] ?? 0;
 				            if ($city) {

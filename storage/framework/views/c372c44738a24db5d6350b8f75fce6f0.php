@@ -22,15 +22,20 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
-    <div class="container pb-5">
-
+    <div class="container pb-5 row">
+	<div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+		<a href="<?php echo e(route('export.all.pdf')); ?>?date_range=last_30_days" 
+		   class="btn btn-primary">
+			Export All Analytics PDF
+		</a>
+	</div>
         <?php $__empty_1 = true; $__currentLoopData = $analytics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $network => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div class="mb-5">
+            <div class="mb-5 col-md-3">
                 <h4 class="fw-6 fs-18 mb-4"><?php echo e($network); ?></h4>
                 <div class="row">
                     <?php $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <div class="col-md-3">
-                        <div class="card">
+                    <div class="col-md-12">
+                        <div class="card mb-2">
                             <div class="card-body">
                                 <div class="d-flex flex-grow-1 align-items-top gap-8">
                                     
@@ -74,20 +79,20 @@
                     <div class="col-md-12">
                         <div class="card">
                             <div class="card-body">
-                                <div class="d-flex flex-column align-items-center justify-content-center py-5 my-5">
-                                    <span class="fs-70 mb-3 text-primary">
+                                <div class="d-flex flex-column align-items-center justify-content-center py-1">
+                                    <!--<span class="fs-70 mb-3 text-primary">
                                         <i class="fa-light fa-chart-mixed"></i>
-                                    </span>
+                                    </span>-->
                                     <div class="fw-semibold fs-5 mb-2 text-gray-800">
                                         <?php echo e(__('No accounts yet')); ?>
 
                                     </div>
-                                    <div class="text-body-secondary mb-4">
+                                    <!--<div class="text-body-secondary mb-4">
                                         <?php echo e(__('Connect your social accounts to start tracking analytics and gain insights into your performance.')); ?>
 
-                                    </div>
+                                    </div>-->
                                     <a href="<?php echo e(route('app.channels.index')); ?>" class="btn btn-dark">
-                                        <i class="fa-light fa-plus me-1"></i> <?php echo e(__('Add channel')); ?>
+                                        <i class="fa-light fa-plus me-1"></i> <?php echo e(__('Add an account')); ?>
 
                                     </a>
                                 </div>

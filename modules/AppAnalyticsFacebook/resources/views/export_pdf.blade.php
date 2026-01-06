@@ -60,7 +60,7 @@
             display: table-cell;
             padding: 12px;
             border: 1px solid #ddd;
-            width: 33.33%;
+            width: 33%;
             vertical-align: top;
         }
 
@@ -98,13 +98,6 @@
             background-color: #fafafa;
         }
 
-        img.chart {
-            display: block;
-            margin: 0 auto;
-            max-width: 95%;
-            margin-top: 12px;
-            margin-bottom: 30px;
-        }
 
         .highlight {
             font-weight: bold;
@@ -121,6 +114,32 @@
         .page-break {
             page-break-after: always;
         }
+		/* Chart styling - 2 per row */
+		/* Charts in 2 columns with proper spacing */
+		.chart-container {
+			display: inline-block;
+			width: 45%;
+			margin-bottom: 20px;
+			margin-right: 0;
+			padding: 10px;
+			vertical-align: top;
+			page-break-inside: avoid;
+			box-sizing: border-box;
+			border: 1px solid #e0e0e0;
+		}
+
+		.chart-container:nth-child(odd) {
+			margin-right: 2%;
+		}
+
+		img.chart {
+			display: block;
+			width: 100%;
+			height: auto;
+			border: none;
+			background: #fff;
+		}
+
     </style>
 </head>
 <body>
@@ -141,50 +160,64 @@
     <div class="section">
         <h3>{{ __('Key Performance Metrics') }}</h3>
         <div class="metrics-grid">
-            <div class="metric-row">
-                <div class="metric-cell">
-                    <div class="metric-label">{{ __('Unique Reach') }}</div>
-                    <div class="metric-value">{{ number_format($analytics['metrics']['page_impressions_unique'] ?? 0) }}</div>
-                </div>
-                <div class="metric-cell">
-                    <div class="metric-label">{{ __('Paid Reach') }}</div>
-                    <div class="metric-value">{{ number_format($analytics['metrics']['page_impressions_paid_unique'] ?? 0) }}</div>
-                </div>
-                <div class="metric-cell">
-                    <div class="metric-label">{{ __('Total Engagements') }}</div>
-                    <div class="metric-value">{{ number_format($analytics['metrics']['page_post_engagements'] ?? 0) }}</div>
-                </div>
-            </div>
-            <div class="metric-row">
-                <div class="metric-cell">
-                    <div class="metric-label">{{ __('Total Reactions') }}</div>
-                    <div class="metric-value">{{ number_format($analytics['metrics']['page_actions_post_reactions_total'] ?? 0) }}</div>
-                </div>
-                <div class="metric-cell">
-                    <div class="metric-label">{{ __('Page Views') }}</div>
-                    <div class="metric-value">{{ number_format($analytics['metrics']['page_views_total'] ?? 0) }}</div>
-                </div>
-                <div class="metric-cell">
-                    <div class="metric-label">{{ __('New Follows') }}</div>
-                    <div class="metric-value">{{ number_format($analytics['metrics']['page_follows'] ?? 0) }}</div>
-                </div>
-            </div>
-        </div>
+			@php
+				$overview = $analytics['overview'];
+				$icons = [
+					'likes' => 'fa-light fa-thumbs-up', 
+					'follows' => 'fa-light fa-users', 
+					'reach' => 'fa-light fa-eye',
+					'impressions' => 'fa-light fa-repeat', 
+					'engagements' => 'fa-light fa-comment',
+					'page_views' => 'fa-light fa-binoculars', 
+					'published_posts' => 'fa-light fa-paper-plane',
+				];
+				$colors = [
+					'likes' => 'primary', 
+					'follows' => 'info', 
+					'reach' => 'success',
+					'impressions' => 'warning', 
+					'engagements' => 'danger',
+					'page_views' => 'dark', 
+					'published_posts' => 'pink',
+				];
+				
+				// Chunk into groups of 3
+				$metricsChunks = array_chunk($overview, 3, true);
+			@endphp
+			
+			@foreach($metricsChunks as $chunk)
+				<div class="metric-row">
+					@foreach($chunk as $key => $item)
+						<div class="metric-cell">
+							<div class="metric-label">{{ __(ucwords(str_replace('_', ' ', $key))) }}</div>
+							<div class="metric-value">{{ number_format($item['value']) }}</div>
+						</div>
+					@endforeach
+					
+					@for($i = count($chunk); $i < 3; $i++)
+						<div class="metric-cell" style="border: none;"></div>
+					@endfor
+				</div>
+			@endforeach
+		</div>
     </div>
 
+     <!-- Performance Trends -->
     @if (!empty($charts) && is_array($charts))
         <div class="section">
             <h3>{{ __('Performance Trends') }}</h3>
             @foreach ($charts as $chart)
-                @if(isset($chart['base64']))
-                    <img class="chart" src="{{ $chart['base64'] }}" alt="Chart">
+                @if(isset($chart['base64']) && isset($chart['id']))
+                    <div class="chart-container">
+                        <img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}">
+                    </div>
                 @endif
             @endforeach
         </div>
     @endif
 
     <!-- Daily Breakdown -->
-    <div class="section page-break">
+    <!--<div class="section page-break">
         <h3>{{ __('Daily Performance Breakdown') }}</h3>
         <table class="table">
             <thead>
@@ -212,11 +245,11 @@
                 @endforeach
             </tbody>
         </table>
-    </div>
+    </div>-->
 
     <!-- Video Metrics (if available) -->
     @if (($analytics['metrics']['page_video_views_organic'] ?? 0) > 0 || ($analytics['metrics']['page_video_views_paid'] ?? 0) > 0)
-    <div class="section">
+    <!--<div class="section">
         <h3>{{ __('Video Performance') }}</h3>
         <table class="table">
             <thead>
@@ -248,7 +281,7 @@
                 </tr>
             </tbody>
         </table>
-    </div>
+    </div>-->
     @endif
 
     <!-- Summary -->

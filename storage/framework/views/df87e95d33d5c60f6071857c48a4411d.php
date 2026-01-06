@@ -8,12 +8,12 @@
             </div>
             <div class="modal-body">
                 <?php if(isset($frame_posts) && $frame_posts->count() > 0): ?>
-                    <div class="mt-1">
+                    <div class="d-flex justify-content-between">
                         
-                        <ul class="nav nav-pills" style="float:left" role="tablist">
+                        <ul class="nav nav-pills ms-3" style="float:left" role="tablist">
                             <?php $__currentLoopData = $frame_posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>                                
                                 <li class="nav-item">
-                                    <a class="btn btn-active-light btn-color-gray-600 btn-active-color-primary rounded-0 p-l-14 p-r-14 p-t-14 p-b-14 text-center nav-link <?php echo e($key == 0 ? 'active' : ''); ?>" 
+                                    <a class="btn btn-active-light text-center border-0 <?php echo e($key == 0 ? 'active' : ''); ?>" 
                                        data-bs-toggle="pill" 
                                        data-bs-target="#pills-<?php echo e($value->id); ?>" 
                                        role="tab">
@@ -26,40 +26,43 @@
 
                         
                         <?php if(empty(request()->input('from'))): ?>
-                            <div class="col-1" style="float: left;">
-                                <div class="sp-menu-dropdown dropdown dropdown-hide-arrow" data-dropdown-spacing="0">
-                                    <a class="dropdown-toggle text-gray-800" style="font-size:25px;float: right;" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fal fa-ellipsis-v" style="vertical-align: bottom;"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" data-dropdown-spacing="0">
-                                        <?php $__currentLoopData = $frame_posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <?php
-                                                $module = $value->module ?? '';
-                                                $resApi = json_decode($value->result, true) ?? [];
-                                                $displayName = $module == 'twitter' ? 'X' : ucfirst($module);
-                                            ?>
-                                            
-                                            <li class="p-3">
-                                                <?php if(!empty($resApi['url'])): ?>
-                                                    <a class="dropdown-item" target="_blank" href="<?php echo e($resApi['url']); ?>">
-                                                        <?php echo e(get_social_media_icon_large($value->social_network)); ?>
+                            <?php
+								// Check if any post has a URL
+								$hasAnyUrl = $frame_posts->contains(function($post) {
+									$resApi = json_decode($post->result, true) ?? [];
+									return !empty($resApi['url']);
+								});
+							?>
 
-                                                        Show in <?php echo e($displayName); ?>
+							<?php if($hasAnyUrl): ?>
+								<div class="">
+									<div class="sp-menu-dropdown dropdown dropdown-hide-arrow" data-dropdown-spacing="0">
+										<a class="dropdown-toggle text-gray-800 d-flex w-30 h-30 icon-with-circle fs-18 justify-content-center" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+											<i class="fal fa-ellipsis-v fw-bold"></i>
+										</a>
+										<ul class="dropdown-menu" data-dropdown-spacing="0">
+											<?php $__currentLoopData = $frame_posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+												<?php
+													$module = $value->social_network ?? '';
+													$resApi = json_decode($value->result, true) ?? [];
+													$displayName = $module == 'twitter' ? 'X' : ucfirst($module);
+												?>
+												
+												<?php if(!empty($resApi['url'])): ?>
+													<li class="p-3">
+														<a class="dropdown-item p-0" target="_blank" href="<?php echo e($resApi['url']); ?>">
+															<?php echo e(get_social_media_icon_large($value->social_network)); ?>
 
-                                                    </a>
-                                                <?php else: ?>
-                                                    <a class="dropdown-item disabled" href="javascript:void(0);">
-                                                        <?php echo e(get_social_media_icon_large($value->social_network)); ?>
+															Show in <?php echo e($displayName); ?>
 
-                                                        Show in <?php echo e($displayName); ?>
-
-                                                    </a>
-                                                <?php endif; ?>
-                                            </li>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                    </ul>
-                                </div>
-                            </div>
+														</a>
+													</li>
+												<?php endif; ?>
+											<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+										</ul>
+									</div>
+								</div>
+							<?php endif; ?>
                         <?php endif; ?>
                     </div>
 
@@ -67,7 +70,7 @@
                     <div class="tab-content" style="clear: both;">
                         <?php $__currentLoopData = $frame_posts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             
-                            <div class="tab-pane p-3 <?php echo e($key == 0 ? 'active' : ''); ?>" id="pills-<?php echo e($value->id); ?>" role="tabpanel">
+                            <div class="tab-pane <?php echo e($key == 0 ? 'active' : ''); ?>" id="pills-<?php echo e($value->id); ?>" role="tabpanel">
                                 <?php if($value): ?>
                                      <?php
 										$postType = 'media';

@@ -42,7 +42,10 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 
 	public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "facebook")->where("category", "page")->orderBy('id')->get();
+		$accounts = Accounts::when(session('role_id') != 2, function ($query) use ($teamId) {
+        $query->where("team_id", $teamId)
+              ->where("brand_id", session('brand_id'));
+    })->where("social_network", "facebook")->where("category", "page")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {
@@ -125,21 +128,28 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	public function getFacebookOverview(int $accountId, string $since, string $until): array
 	{
 	    $metrics = [
-	        //'page_impressions',
 	        'page_impressions_unique',
+			'page_impressions_paid_unique',
 	        'page_post_engagements',
 	        'page_views_total',
-	        'page_fan_adds_unique',
+	        'page_followers_count',
 	        'page_follows',
 	    ];
 
 	    $data = SocialAnalytics::where('account_id', $accountId)
-	        ->whereIn('metric', $metrics)
-	        ->whereBetween('date', [$since, $until])
-	        ->get()
-	        ->groupBy('metric')
-	        ->map(fn($group) => $group->sum('value'))
-	        ->all();
+				->whereIn('metric', $metrics)
+				->whereBetween('date', [$since, $until])
+				->select('metric', DB::raw('SUM(value) as total_value'), DB::raw('COUNT(*) as row_count'))
+				->groupBy('metric')
+				->get()
+				->keyBy('metric')
+				->map(function($item) {
+					return [
+						'sum' => $item->total_value,
+						'count' => $item->row_count,
+					];
+				})
+				->all();
 
 	    $days = Carbon::parse($since)->diffInDays(Carbon::parse($until)) + 1;
 	    $sinceCompare = Carbon::parse($since)->subDays($days)->toDateString();
@@ -166,27 +176,43 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	        if ($previous == 0) return 100;
 	        return round((($current - $previous) / $previous) * 100, 2);
 	    };
+		
+		$totals = SocialAnalyticsPostInfo::query()
+	        ->select('metric', DB::raw('SUM(value) as total'))
+	        ->where('account_id', $accountId)
+	        ->whereIn('metric', ['post_impressions_unique'])
+	        ->whereBetween('date', [$since, $until])
+	        ->groupBy('metric')
+	        ->get()
+	        ->pluck('total', 'metric');
+		$dataCompare1 = SocialAnalyticsPostInfo::where('account_id', $accountId)
+	        ->whereIn('metric', ['post_impressions_unique'])
+	        ->whereBetween('date', [$sinceCompare, $untilCompare])
+	        ->get()
+	        ->groupBy('metric')
+	        ->map(fn($group) => $group->sum('value'))
+	        ->all();
 
 	    return [
 	        'likes' => [
-	            'value' => (int) ($data['page_fan_adds_unique'] ?? 0),
-	            'change' => $calculateChange($data['page_fan_adds_unique'] ?? 0, $dataCompare['page_fan_adds_unique'] ?? 0),
+	            'value' => (int) ($data['page_follows']['count'] ?? 0),
+	            'change' => $calculateChange($data['page_follows']['count'] ?? 0, $dataCompare['page_follows'] ?? 0),
 	        ],
 	        'reach' => [
-	            'value' => (int) ($data['page_impressions_unique'] ?? 0),
-	            'change' => $calculateChange($data['page_impressions_unique'] ?? 0, $dataCompare['page_impressions_unique'] ?? 0),
+	            'value' => (int) ($data['page_impressions_unique']['sum'] ?? 0),
+	            'change' => $calculateChange($data['page_impressions_unique']['sum'] ?? 0, $dataCompare['page_impressions_unique'] ?? 0),
 	        ],
 	        'impressions' => [
-	            'value' => (int) ($data['page_impressions_unique'] ?? 0),
-	            'change' => $calculateChange($data['page_impressions_unique'] ?? 0, $dataCompare['page_impressions_unique'] ?? 0),
+	            'value' => (int) ($totals['post_impressions_unique'] ?? 0),
+	            'change' => $calculateChange($totals['post_impressions_unique'] ?? 0, $dataCompare1['post_impressions_unique'] ?? 0),
 	        ],
 	        'engagements' => [
-	            'value' => (int) ($data['page_post_engagements'] ?? 0),
-	            'change' => $calculateChange($data['page_post_engagements'] ?? 0, $dataCompare['page_post_engagements'] ?? 0),
+	            'value' => (int) ($data['page_post_engagements']['sum'] ?? 0),
+	            'change' => $calculateChange($data['page_post_engagements']['sum'] ?? 0, $dataCompare['page_post_engagements'] ?? 0),
 	        ],
 	        'page_views' => [
-	            'value' => (int) ($data['page_views_total'] ?? 0),
-	            'change' => $calculateChange($data['page_views_total'] ?? 0, $dataCompare['page_views_total'] ?? 0),
+	            'value' => (int) ($data['page_views_total']['sum'] ?? 0),
+	            'change' => $calculateChange($data['page_views_total']['sum'] ?? 0, $dataCompare['page_views_total'] ?? 0),
 	        ],
 	        'published_posts' => [
 	            'value' => $currentPosts,
@@ -271,29 +297,55 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 
 	public function getFanSummary(int $accountId, string $since, string $until): array
 	{
-	    $metricsMap = [
-	        'page_fan_adds_unique'    => 'new_fans',
-	        'page_fan_removes_unique' => 'lost_fans',
-	    ];
+		// Generate all dates in range
+		$dates = collect();
+		$start = \Carbon\Carbon::parse($since);
+		$end = \Carbon\Carbon::parse($until);
+		for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+			$dates->put($date->format('M d'), 0);
+		}
 
-	    $raw = SocialAnalytics::query()
-	        ->select('metric', DB::raw('SUM(value) as total'))
-	        ->where('account_id', $accountId)
-	        ->whereIn('metric', array_keys($metricsMap))
-	        ->whereBetween('date', [$since, $until])
-	        ->groupBy('metric')
-	        ->pluck('total', 'metric')
-	        ->toArray();
+		// Get gained fans (page_follows) - VALID METRIC
+		$gainedFansRaw = SocialAnalytics::select(
+				DB::raw('DATE_FORMAT(date, "%b %d") as day'),
+				DB::raw('SUM(value) as total')
+			)
+			->where('account_id', $accountId)
+			->where('metric', 'page_follows')
+			->whereBetween('date', [$since, $until])
+			->groupBy('day')
+			->orderByRaw('STR_TO_DATE(day, "%b %d")')
+			->get()
+			->keyBy('day');
 
-	    $result = [];
+		// Get total fan count data
+		$totalFansData = SocialAnalytics::select('date', 'value')
+			->where('account_id', $accountId)
+			->where('metric', 'page_fan_count')
+			->whereBetween('date', [$since, $until])
+			->orderBy('date', 'asc')
+			->get()
+			->keyBy(function ($item) {
+				return \Carbon\Carbon::parse($item->date)->format('M d');
+			});
 
-	    foreach ($metricsMap as $metric => $key) {
-	        $result[$key] = (int) ($raw[$metric] ?? 0);
-	    }
+		$gained = [];
+		$lost = [];
+		$previous = null;
 
-	    $result['net_fans'] = $result['new_fans'] - $result['lost_fans'];
-
-	    return $result;
+		foreach ($dates->keys() as $day) {
+			
+			$gained[] = ((isset($gainedFansRaw[$day]) && $previous==null) ? 0 : ((isset($gainedFansRaw[$day]) && (json_decode($gainedFansRaw[$day],TRUE)['total'] > $previous)) ? json_decode($gainedFansRaw[$day],TRUE)['total'] - $previous : 0));
+			
+			$lost[] = ((isset($gainedFansRaw[$day]) && $previous==null) ? 0 : ((isset($gainedFansRaw[$day]) && (json_decode($gainedFansRaw[$day],TRUE)['total'] < $previous)) ? $previous - json_decode($gainedFansRaw[$day],TRUE)['total'] : 0));
+			
+			$previous = isset($gainedFansRaw[$day]) ? json_decode($gainedFansRaw[$day],TRUE)['total'] : 0;
+		}
+		return [
+			'new_fans' => array_sum($gained),
+			'lost_fans' => array_sum($lost),
+			'net_fans' => isset($totalFansData->first()->value) ? $totalFansData->first()->value : 0,
+		];
 	}
 
 	public function getFanHistoryChartData(int $accountId, string $since, string $until): array
@@ -310,7 +362,7 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	            DB::raw('MAX(value) as total')
 	        )
 	        ->where('account_id', $accountId)
-	        ->where('metric', 'page_fans')
+	        ->where('metric', 'page_follows')
 	        ->whereBetween('date', [$since, $until])
 	        ->groupBy('day')
 	        ->orderByRaw('STR_TO_DATE(day, "%b %d")')
@@ -332,49 +384,78 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 
 	public function getFanChangesChartData(int $accountId, string $since, string $until): array
 	{
-	    $metrics = [
-	        'page_fan_adds_unique'    => __('Gained Fans'),
-	        'page_fan_removes_unique' => __('Lost Fans'),
-	    ];
+		// Generate all dates in range
+		$dates = collect();
+		$start = \Carbon\Carbon::parse($since);
+		$end = \Carbon\Carbon::parse($until);
+		for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
+			$dates->put($date->format('M d'), 0);
+		}
 
-	    $dates = collect();
-	    $start = \Carbon\Carbon::parse($since);
-	    $end = \Carbon\Carbon::parse($until);
-	    for ($date = $start->copy(); $date->lte($end); $date->addDay()) {
-	        $dates->put($date->format('M d'), 0);
-	    }
+		// Get gained fans (page_follows) - VALID METRIC
+		$gainedFansRaw = SocialAnalytics::select(
+				DB::raw('DATE_FORMAT(date, "%b %d") as day'),
+				DB::raw('SUM(value) as total')
+			)
+			->where('account_id', $accountId)
+			->where('metric', 'page_follows')
+			->whereBetween('date', [$since, $until])
+			->groupBy('day')
+			->orderByRaw('STR_TO_DATE(day, "%b %d")')
+			->get()
+			->keyBy('day');
 
-	    $raw = SocialAnalytics::select(
-	            DB::raw('DATE_FORMAT(date, "%b %d") as day'),
-	            'metric',
-	            DB::raw('SUM(value) as total')
-	        )
-	        ->where('account_id', $accountId)
-	        ->whereIn('metric', array_keys($metrics))
-	        ->whereBetween('date', [$since, $until])
-	        ->groupBy('day', 'metric')
-	        ->orderByRaw('STR_TO_DATE(day, "%b %d")')
-	        ->get()
-	        ->groupBy('metric');
+		// Get total fan count for each day (to calculate lost fans)
+		$totalFansRaw = SocialAnalytics::select(
+				DB::raw('DATE_FORMAT(date, "%b %d") as day'),
+				'date',
+				'value'
+			)
+			->where('account_id', $accountId)
+			->where('metric', 'page_fan_count')
+			->whereBetween('date', [$since, $until])
+			->orderBy('date')
+			->get()
+			->keyBy('day');
 
-	    $series = [];
-	    foreach ($metrics as $metricKey => $label) {
-	        $data = $dates->map(function ($v, $day) use ($raw, $metricKey) {
-	            return isset($raw[$metricKey])
-	                ? (int) ($raw[$metricKey]->firstWhere('day', $day)?->total ?? 0)
-	                : 0;
-	        })->toArray();
+		$gainedFansData = [];
+		$lostFansData = [];
+		$previousTotal = null;
+		$previous = null;
+		foreach ($dates->keys() as $day) {
+			
+			
+			// Gained fans
+			$gained = ((isset($gainedFansRaw[$day]) && $previous==null) ? $gainedFansRaw[$day] : ((isset($gainedFansRaw[$day]) && (json_decode($gainedFansRaw[$day],TRUE)['total'] > $previous)) ? json_decode($gainedFansRaw[$day],TRUE)['total'] - $previous : 0));
+			$gainedFansData[] = $gained;
 
-	        $series[] = [
-	            'name' => $label,
-	            'data' => array_values($data)
-	        ];
-	    }
+			// Calculate lost fans
+			$lost = ((isset($gainedFansRaw[$day]) && $previous==null) ? $gainedFansRaw[$day] : ((isset($gainedFansRaw[$day]) && (json_decode($gainedFansRaw[$day],TRUE)['total'] < $previous)) ? $previous - json_decode($gainedFansRaw[$day],TRUE)['total'] : 0));
+			$lostFansData[] = $lost;
+			
+			
+			$previous = isset($gainedFansRaw[$day]) ? json_decode($gainedFansRaw[$day],TRUE)['total'] : 0;
+			
 
-	    return [
-	        'categories' => $dates->keys()->toArray(),
-	        'series' => $series
-	    ];
+			$previousTotal = $currentTotal ?? $previousTotal;
+		}
+
+			
+		return [
+			'categories' => $dates->keys()->toArray(),
+			'series' => [
+				[
+					'name' => __('Gained Fans'),
+					'data' => $gainedFansData,
+					'color' => '#52c41a', // Green
+				],
+				[
+					'name' => __('Lost Fans'),
+					'data' => $lostFansData,
+					'color' => '#ff4d4f', // Red
+				]
+			]
+		];
 	}
 
 	public function getDailyPageViewsChartData(int $accountId, string $since, string $until): array
@@ -462,9 +543,9 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	public function getPostImpressionSummaryChartData(int $accountId, string $since, string $until): array
 	{
 	    $metrics = [
-	        'post_impressions'         => __('Total Impressions'),
-	        'post_impressions_organic' => __('Organic Impressions'),
-	        'post_impressions_paid'    => __('Paid Impressions'),
+	        'post_impressions_unique'         => __('Total Impressions'),
+	        'post_impressions_organic_unique' => __('Organic Impressions'),
+	        'post_impressions_paid_unique'    => __('Paid Impressions'),
 	    ];
 
 	    $raw = SocialAnalyticsPostInfo::query()
@@ -485,18 +566,18 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 
 	    return [
 	        'summary' => [
-	            'total'     => $totals['post_impressions'],
-	            'organic'   => $totals['post_impressions_organic'],
-	            'paid'      => $totals['post_impressions_paid'],
-	            'avg_daily' => $days > 0 ? round($totals['post_impressions'] / $days) : 0,
+	            'total'     => $totals['post_impressions_unique'],
+	            'organic'   => $totals['post_impressions_organic_unique'],
+	            'paid'      => $totals['post_impressions_paid_unique'],
+	            'avg_daily' => $days > 0 ? round($totals['post_impressions_unique'] / $days) : 0,
 	        ],
 	        'series' => [
 	            [
 	                'name' => __('Impressions'),
 	                'data' => [
-	                    $totals['post_impressions'],
-	                    $totals['post_impressions_organic'],
-	                    $totals['post_impressions_paid'],
+	                    $totals['post_impressions_unique'],
+	                    $totals['post_impressions_organic_unique'],
+	                    $totals['post_impressions_paid_unique'],
 	                ],
 	                'colorByPoint' => true
 	            ]
@@ -550,7 +631,7 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 
 	public function getPostEngagementRateSummaryData(int $accountId, string $since, string $until): array
 	{
-	    $metrics = ['reactions', 'comments', 'shares', 'post_impressions'];
+	    $metrics = ['reactions', 'comments', 'shares', 'post_impressions_unique'];
 
 	    $totals = SocialAnalyticsPostInfo::query()
 	        ->select('metric', DB::raw('SUM(value) as total'))
@@ -568,7 +649,7 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	    }
 
 	    $engagements = $values['reactions'] + $values['comments'] + $values['shares'];
-	    $impressions = $values['post_impressions'];
+	    $impressions = $values['post_impressions_unique'];
 	    $rate = $impressions > 0 ? round(($engagements / $impressions) * 100, 2) : 0;
 
 	    return [
@@ -717,7 +798,6 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	        ->where('account_id', $accountId)
 	        ->whereBetween('date', [$since, $until])
 	        ->whereIn('metric', [
-	            'post_impressions',
 	            'post_impressions_unique',
 	            'likes',
 	            'shares',
@@ -964,7 +1044,7 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 			
 			// Get total fans count from the page object (not insights)
 			$this->fetchPageFansCount($pageId, $token, $insights);
-			$this->fetchPageDemographics($pageId, $token, $insights);
+			//$this->fetchPageDemographics($pageId, $token, $insights);
 			
 			if (!empty($insights)) {
 				\Analytics::saveInsightsToDatabase($accountId, $social, $insights);
@@ -1013,22 +1093,35 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	protected function fetchPageDemographics(string $pageId, string $token, array &$insights): void
 	{
 		try {
-			// Get page audience data
-			$endpoint = "/{$pageId}?fields=audience,global_brand_page_name,country_page_likes";
+			// Demographic metrics - must use period=lifetime (not day)
+			$demographicMetrics = [
+				'page_follows_country',
+				'page_follows_city',
+			];
+
+			$endpoint = "/{$pageId}/insights?metric=" . implode(',', $demographicMetrics) . "&period=lifetime";
 			$response = $this->fb->get($endpoint, $token);
 			$result = $response->getDecodedBody();
-			
+
 			$date = Carbon::now()->toDateString();
-			
-			// Store any available demographic data
-			if (isset($result['audience'])) {
-				foreach ($result['audience'] as $key => $value) {
-					if (!empty($value)) {
-						$insights["page_audience.{$key}"][$date] = $value;
+
+			// Process each demographic metric
+			foreach ($result['data'] ?? [] as $item) {
+				$metric = $item['name'];
+				
+				// Get the latest value (index 0 for lifetime period)
+				$value = $item['values'][0]['value'] ?? null;
+				
+				if (is_array($value) && !empty($value)) {
+					// Store each country/city/locale/demographic as separate metric
+					foreach ($value as $key => $count) {
+						if ((float) $count > 0) {
+							$insights["{$metric}.{$key}"][$date] = (float) $count;
+						}
 					}
 				}
 			}
-			
+
 		} catch (\Exception $e) {
 			// Silently fail - demographics may not be available
 			logger()->debug("[FacebookAnalytics] Could not fetch demographics: " . $e->getMessage());

@@ -831,7 +831,19 @@ ul#myTab li button.active {
     fill: var(--white);
     padding: 6px 4px 6px 8px;
 }
-
+.compose-editor .add-icon svg {
+    padding: 6px 4px 6px 4px;
+}
+span.svg-icons svg {
+    fill: var(--d-primary);
+    width: 30px;
+    margin-right: 10px;
+}
+.post-schedule button.btn {
+    min-width: 180px !important;
+    margin-left: 15px;
+	font-size:14px;
+}
 .schedule-list {
 	margin-left: -25px;
     margin-right: -25px;

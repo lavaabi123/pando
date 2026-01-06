@@ -18,7 +18,7 @@
             </div>
         </div>
     </div>
-    <a class="btn btn-dark btn-sm actionItem b-r-50 text-nowrap" href="{{ module_url("composer") }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> {{ __("Compose") }}</a>
+    <a class="btn btn-dark btn-sm actionItem b-r-50 text-nowrap" href="{{ url_app("publishing/composer") }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> {{ __("Compose") }}</a>
 @endsection
 
 @section('content')

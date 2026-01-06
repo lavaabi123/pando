@@ -449,22 +449,23 @@ class PublishingReport extends Facade
 			->get();
 		
 		// Accounts with inbox not cleared for more than 24 hours
-		// Use subquery to get one record per account_id
+		$yesterday = now()->subHours(24);
+
+		// Get the oldest uncompleted message per account (more than 24 hours old)
 		$inboxNotClearedIds = DB::table('inbox')
-			->select('account_id', DB::raw('MAX(id) as max_id'))
+			->select('account_id', DB::raw('MIN(id) as min_id')) // Changed to MIN to get oldest
 			->where('brand_id', $brandId)
-			->where('created_time', '>', $yesterday)
+			->where('created_time', '<', $yesterday) // Changed to < (messages OLDER than 24 hours)
 			->where('is_completed', 0)
 			->groupBy('account_id')
-			->pluck('max_id');
-		
+			->pluck('min_id');
+
 		$inboxNotCleared = DB::table('inbox as i')
 			->leftJoin('accounts as a', 'a.id', '=', 'i.account_id')
 			->select('i.*', 'a.social_network', 'a.name', 'a.avatar')
 			->whereIn('i.id', $inboxNotClearedIds)
 			->orderByDesc('i.created_time')
 			->get();
-		
 		// Posts pending approval
 		$pendingApproval = DB::table('posts as p')
 			->leftJoin('accounts as a', 'a.id', '=', 'p.account_id')
@@ -509,7 +510,7 @@ class PublishingReport extends Facade
 			
 			$result['inbox_messages'] = DB::table('inbox')
 				->where('brand_id', $brandId)
-				->where('created_time', $today)
+				->whereDate('created_time', $today)
 				->where('is_completed', 0)
 				->count();
 			

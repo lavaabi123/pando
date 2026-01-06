@@ -27,7 +27,7 @@ class AppPublishingApprovalController extends Controller
             return $current_page;
         });
 
-        $query = Posts::where('team_id', $teamId)->where('status', 2);
+        $query = Posts::where('brand_id', session('brand_id'))->where('status', 2);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -57,4 +57,5 @@ class AppPublishingApprovalController extends Controller
             ])->render()
         ]);
     } 
+	
 }

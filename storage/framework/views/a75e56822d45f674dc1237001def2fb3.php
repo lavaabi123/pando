@@ -2,7 +2,7 @@
 $permission = $permission ?? 'appchannels';
 $teamId = request()->team_id;
 $query = DB::table('accounts')->where('status', 1)->where('brand_id',session('brand_id'));
-if ($teamId) $query->where('team_id', $teamId);
+//if ($teamId) $query->where('team_id', $teamId);
 
 if (!empty($accounts) && is_array($accounts)) {
     $query->whereIn("id", $accounts);
@@ -10,7 +10,7 @@ if (!empty($accounts) && is_array($accounts)) {
 
 $channels = $query->get();
 
-$groups = DB::table('groups')->where('team_id', $teamId)->get();
+$groups = DB::table('groups')->get();
 ?>
 
 <div class="account_manager w-100">
@@ -19,9 +19,9 @@ $groups = DB::table('groups')->where('team_id', $teamId)->get();
             <div class="overflow-y-auto flex-grow-1 max-h-90 me-3">
                 <button type="button" class="am-open-list-account"></button>
                 <div class="am-selected-empty">
-                    <div class="d-flex gap-8  align-items-center">
-                        <i class="fa-light fa-chart-network"></i>
-                        <span class="fw-5 text-gray-700 fs-14"><?php echo e(__("Please select a account")); ?></span>
+                    <div class="d-flex align-items-center">
+                        <span class="svg-icons"><?php echo file_get_contents(public_path('img/account2.svg')); ?></span>
+                        <span class="fw-5 fs-14"><?php echo e(__("Please select a account")); ?></span>
                     </div>
                 </div>
                 <div class="am-selected-list">

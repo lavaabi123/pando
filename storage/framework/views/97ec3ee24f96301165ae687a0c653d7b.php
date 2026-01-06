@@ -149,7 +149,7 @@ if ((int)$role === 2) {
 							<?php if($selectedBrand): ?>
 								<div class="selected-brand-display">
 									<?php if($selectedBrand->image): ?>
-										<img src="<?php echo e($selectedBrand->image); ?>" class="brand-avatar-small" alt="<?php echo e($selectedBrand->name); ?>">
+										<img src="<?php echo e(Media::url($selectedBrand->image)); ?>" class="brand-avatar-small" alt="<?php echo e($selectedBrand->name); ?>">
 									<?php else: ?>
 										<div class="brand-avatar-placeholder-small"><?php echo e(strtoupper(substr($selectedBrand->name, 0, 1))); ?></div>
 									<?php endif; ?>
@@ -259,7 +259,7 @@ if ((int)$role === 2) {
     width: 28px;
     height: 28px;
     border-radius: 50%;
-    object-fit: cover;
+    object-fit: contain;
 }
 
 .brand-avatar-placeholder-small {

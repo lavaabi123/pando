@@ -82,15 +82,15 @@
         <i class="fa-light fa-chart-network"></i>
     </span>
     <div class="fw-semibold fs-5 mb-2 text-gray-800">
-        <?php echo e(__('No Social Channels Connected')); ?>
+        <?php echo e(__('No Social Accounts Connected')); ?>
 
     </div>
     <div class="text-body-secondary mb-4 text-center">
-        <?php echo e(__('Connect your social channels to manage and track all your accounts in one place.')); ?>
+        <?php echo e(__('Connect your social accounts to manage and track all your accounts in one place.')); ?>
 
     </div>
     <a class="btn btn-dark" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addChannelModal">
-        <i class="fa-light fa-plus me-1"></i> <?php echo e(__('Add Channel')); ?>
+        <i class="fa-light fa-plus me-1"></i> <?php echo e(__('Add an Account')); ?>
 
     </a>
 </div>

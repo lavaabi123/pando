@@ -111,5 +111,7 @@
     "AppInboxold.zip": true,
     "AppApprovals": true,
     "AppHashtags": true,
-    "AppPublishing.zip": true
+    "AppPublishing.zip": true,
+    "AppChannels.zip": true,
+    "AppChannels_local.zip": true
 }

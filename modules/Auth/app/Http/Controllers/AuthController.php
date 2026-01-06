@@ -349,6 +349,7 @@ class AuthController extends Controller
 
 					session(['brand_id' => $brandId]);
 					session(['user_id' => $user->id]);
+					session(['role_id' => $user->role]);
                     if($user->language){
                         \Cookie::queue('locale', $user->language, 60 * 24 * 365 * 10);
                     }

@@ -270,7 +270,7 @@
                     {{ __('Total Posted:') }} <span class="fw-bold">{{ number_format($totalPosts) }}</span>
                 </div>
                 <div class="fs-14 text-muted">
-                    {{ __('Compared to last :days days', ['days' => $startDate->diffInDays($endDate)]) }}
+                    {{ __('Compared to last :days days', ['days' => number_format($startDate->diffInDays($endDate),0)]) }}
                 </div>
             </div>
         </div>
@@ -408,7 +408,7 @@
             <div class="card shadow-sm h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-3">
-                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-100" style="width: 48px; height: 48px;">
+                        <div class="d-flex align-items-center justify-content-center b-r-15 mr-10 bg-success-100" style="width: 48px; height: 48px;">
                             <i class="fa-light fa-circle-check text-success fs-20"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -427,7 +427,7 @@
             <div class="card h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-3">
-                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-danger-100" style="width: 48px; height: 48px;">
+                        <div class="d-flex align-items-center justify-content-center b-r-15 mr-10 bg-danger-100" style="width: 48px; height: 48px;">
                             <i class="fa-light fa-circle-xmark text-danger fs-20"></i>
                         </div>
                         <div class="flex-grow-1">
@@ -446,7 +446,7 @@
             <div class="card h-100">
                 <div class="card-body p-4">
                     <div class="d-flex align-items-start gap-3 mb-3">
-                        <div class="d-flex align-items-center justify-content-center rounded-circle bg-success-100" style="width: 48px; height: 48px;">
+                        <div class="d-flex align-items-center justify-content-center b-r-15 mr-10 bg-success-100" style="width: 48px; height: 48px;">
                             <i class="fa-light fa-calendar-check text-success fs-20"></i>
                         </div>
                         <div class="flex-grow-1">

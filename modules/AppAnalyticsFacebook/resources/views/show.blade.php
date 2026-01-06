@@ -123,7 +123,7 @@
                 <div class="col-lg-8">
                     <div class="card">
                         <div class="card-header">
-                            <h5 class="fs-5 fs-16">{{ __('Gained & Lost Fans') }}</h5>
+                            <h5 class="fs-5 fs-16">{{ __('Gained vs Lost Fans') }}</h5>
                         </div>
                         <div class="card-body">
                             <div id="gained-lost-fans-chart" class="export-chart" style="height: 300px;"></div>
@@ -292,7 +292,8 @@
                 </div>
             </div>
         </div>
-
+		
+		<!--
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
@@ -341,8 +342,9 @@
                 </div>
             </div>
         </div>
-
-        <div class="col-lg-4">
+        -->
+		
+		<div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
                     <h5 class="fs-5 fs-16">{{ __('Video View Completion') }}</h5>
@@ -403,7 +405,7 @@
                             <th style="width: 60px;">{{ __('Image') }}</th>
                             <th>{{ __('Message') }}</th>
                             <th>{{ __('Date') }}</th>
-                            <th>{{ __('Impressions') }}</th>
+                            <!--<th>{{ __('Impressions') }}</th>-->
                             <th>{{ __('Reach') }}</th>
                             <th>{{ __('Likes') }}</th>
                             <th>{{ __('Reactions') }}</th>
@@ -433,7 +435,7 @@
                                 <td class="text-nowrap text-gray-700 fs-14">{{ \Carbon\Carbon::parse($post['created_time'])->format('M d, Y') }}</td>
 
                                 {{-- Metrics --}}
-                                <td class="text-center text-primary">{{ number_format($post['metrics']['post_impressions'] ?? 0) }}</td>
+                                <!--<td class="text-center text-primary">{{ number_format($post['metrics']['post_impressions'] ?? 0) }}</td>-->
                                 <td class="text-center text-info">{{ number_format($post['metrics']['post_impressions_unique'] ?? 0) }}</td>
                                 <td class="text-center text-success">{{ number_format($post['metrics']['likes'] ?? 0) }}</td>
                                 <td class="text-center text-danger">{{ number_format($post['metrics']['reactions'] ?? 0) }}</td>
@@ -461,10 +463,17 @@
 @section('script')
 <script type="text/javascript">
 var overviewData = {!! json_encode($analytics['overview_chart']) !!};
-overviewData.series[0].color = '#675dff';
-overviewData.series[1].color = '#13c2c2';
-overviewData.series[2].color = '#ffa940';
-Main.Chart('areaspline', overviewData.series, 'overview-chart', {
+
+// Debug: Check what the data structure looks like
+console.log('Overview Data:', overviewData);
+
+// Check if series exists before setting colors
+if (overviewData && overviewData.series && Array.isArray(overviewData.series)) {
+    if (overviewData.series[0]) overviewData.series[0].color = '#675dff';
+    if (overviewData.series[1]) overviewData.series[1].color = '#13c2c2';
+    if (overviewData.series[2]) overviewData.series[2].color = '#ffa940';
+    
+    Main.Chart('areaspline', overviewData.series, 'overview-chart', {
     xAxis: {
         categories: overviewData.categories,
         title: { text: '' },
@@ -509,7 +518,7 @@ Main.Chart('areaspline', overviewData.series, 'overview-chart', {
                 enabled: false,
                 states: { hover: { enabled: false } }
             },
-            color: '#675dff',
+            color: '#ee1255',
             fillColor: {
                 linearGradient: [0, 0, 0, 200],
                 stops: [
@@ -520,6 +529,9 @@ Main.Chart('areaspline', overviewData.series, 'overview-chart', {
         }
     }
 });
+} else {
+    console.error('Invalid overview data structure:', overviewData);
+}
 
 var fanHistoryChart = {!! json_encode($analytics['fan_history_chart']) !!};
 Main.Chart('column', fanHistoryChart.series, 'fan-history-chart', {
@@ -571,12 +583,13 @@ Main.Chart('column', fanHistoryChart.series, 'fan-history-chart', {
                 }
             }
         }
-    }
+    },
+	colors: ['#ff7875']
 });
 
 var gainedLostFanChartData = {!! json_encode($analytics['gained_lost_fans_chart']) !!};
 gainedLostFanChartData.series[0].color = '#675dff';
-gainedLostFanChartData.series[1].color = '#f5222d';
+gainedLostFanChartData.series[1].color = '#ee1255';
 Main.Chart('column', gainedLostFanChartData.series, 'gained-lost-fans-chart', {
     xAxis: {
         categories: gainedLostFanChartData.categories,
@@ -602,7 +615,7 @@ Main.Chart('column', gainedLostFanChartData.series, 'gained-lost-fans-chart', {
             crop: false
         }
     },
-    title: { text: '{{ __("Gained & Lost Fans") }}' },
+    title: { text: '{{ __("Gained vs Lost Fans") }}' },
     yAxis: {
         title: { text: '' },
         gridLineColor: '#f3f4f6',
@@ -615,7 +628,8 @@ Main.Chart('column', gainedLostFanChartData.series, 'gained-lost-fans-chart', {
             pointPadding: 0.2,
             groupPadding: 0.1
         }
-    }
+    },
+	colors: ['#4096ff', '#ff7875', '#faad14']
 });
 
 var pageViewsData = {!! json_encode($analytics['page_views_chart']) !!};
@@ -659,7 +673,7 @@ Main.Chart('areaspline', pageViewsData.series, 'page-views-chart', {
             marker: { enabled: false }
         },
         series: {
-            color: '#675dff',
+            color: '#ee1255',
             fillColor: {
                 linearGradient: [0, 0, 0, 200],
                 stops: [
@@ -670,7 +684,6 @@ Main.Chart('areaspline', pageViewsData.series, 'page-views-chart', {
         }
     }
 });
-
 var postReachChart = {!! json_encode($analytics['postReachSummaryChart']) !!};
 Main.Chart('column', postReachChart.series, 'post-reach-chart', {
     title: { text: '{{ __("Post Reach Metrics") }}' },
@@ -698,6 +711,7 @@ Main.Chart('column', postReachChart.series, 'post-reach-chart', {
         column: {
             borderRadius: 6,
             colorByPoint: true,
+			maxPointWidth: 80,
             dataLabels: {
                 enabled: true,
                 formatter: function () {
@@ -705,7 +719,8 @@ Main.Chart('column', postReachChart.series, 'post-reach-chart', {
                 }
             }
         }
-    }
+    },
+    colors: ['#6366f1', '#ec4899', '#ff9800']
 });
 
 var impressionChart = {!! json_encode($analytics['postImpressionSummaryChart']) !!};
@@ -715,23 +730,10 @@ Main.Chart('column', impressionChart.series, 'post-impression-chart', {
         categories: impressionChart.categories,
         lineColor: '#ddd',
         labels: {
-            rotation: 0,
-            useHTML: true,
-            formatter: function () {
-                const pos = this.pos;
-                const total = this.axis.categories.length;
-                if (pos === 0)
-                    return `<div style="text-align:left;transform:translateX(60px);width:140px;">${this.value}</div>`;
-                else if (pos === total - 1)
-                    return `<div style="text-align:right;transform:translateX(-55px);width:140px;">${this.value}</div>`;
-                return '';
-            },
             style: {
                 fontSize: '13px',
-                whiteSpace: 'nowrap'
-            },
-            overflow: 'none',
-            crop: false
+                color: '#333'
+            }
         }
     },
     yAxis: {
@@ -748,6 +750,7 @@ Main.Chart('column', impressionChart.series, 'post-impression-chart', {
         column: {
             borderRadius: 6,
             colorByPoint: true,
+			maxPointWidth: 80,
             dataLabels: {
                 enabled: true,
                 formatter: function () {
@@ -755,7 +758,8 @@ Main.Chart('column', impressionChart.series, 'post-impression-chart', {
                 }
             }
         }
-    }
+    },
+	colors: ['#9254de', '#13c2c2', '#ff9800']
 });
 
 const postEngagementChartData = {!! json_encode($analytics['postEngagementSummaryChart']) !!};
@@ -765,23 +769,10 @@ Main.Chart('column', postEngagementChartData.series, 'post-engagement-chart', {
         categories: postEngagementChartData.categories,
         lineColor: '#ddd',
         labels: {
-            rotation: 0,
-            useHTML: true,
-            formatter: function () {
-                const pos = this.pos;
-                const total = this.axis.categories.length;
-                if (pos === 0)
-                    return `<div style="text-align:left;transform:translateX(60px);width:140px;">${this.value}</div>`;
-                else if (pos === total - 1)
-                    return `<div style="text-align:right;transform:translateX(-55px);width:140px;">${this.value}</div>`;
-                return '';
-            },
             style: {
                 fontSize: '13px',
-                whiteSpace: 'nowrap'
-            },
-            overflow: 'none',
-            crop: false
+                color: '#333'
+            }
         }
     },
     yAxis: {
@@ -805,25 +796,29 @@ Main.Chart('column', postEngagementChartData.series, 'post-engagement-chart', {
                 }
             }
         }
-    }
+    },
+	colors: ['#6366f1', '#ec4899', '#ff9800', '#14b8a6']
 });
 
 Main.Chart('pie', {!! json_encode($analytics['videoViewCompletionChart']) !!}, 'video-view-pie-chart', {
     title: { text: '{{ __("Video View Distribution") }}' },
     legend: { enabled: true },
-    plotOptions: { pie: { showInLegend: true } }
+    plotOptions: { pie: { showInLegend: true } },
+	colors: ['#52c41a', '#ff9800']
 });
 
 Main.Chart('pie', {!! json_encode($analytics['videoOrganicPaidChart']) !!}, 'video-views-pie-chart', {
     title: { text: '{{ __("Video Views: Organic vs Paid") }}' },
     legend: { enabled: true },
-    plotOptions: { pie: { showInLegend: true } }
+    plotOptions: { pie: { showInLegend: true } },
+	colors: ['#13c2c2', '#ff4d4f'] 
 });
 
 Main.Chart('pie', {!! json_encode($analytics['videoPlayMethodChart']) !!}, 'video-play-method-chart', {
     title: { text: '{{ __("Video Plays: Click vs Auto") }}' },
     legend: { enabled: true },
-    plotOptions: { pie: { showInLegend: true } }
+    plotOptions: { pie: { showInLegend: true } },
+	colors: ['#4096ff', '#ff7875', '#faad14']
 });
 
 const fansLocationMapChart = {!! json_encode($analytics['fansLocationMapChart']) !!};

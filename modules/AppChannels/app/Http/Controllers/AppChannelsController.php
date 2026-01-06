@@ -20,8 +20,7 @@ class AppChannelsController extends Controller
         $this->maxChannels = \Access::permission('max_channels');
         // Only count if brand is selected
         if (session('brand_id')) {
-            $this->totalAccounts = Accounts::where('team_id', $request->team_id)
-                ->where("brand_id", session('brand_id'))
+            $this->totalAccounts = Accounts::where("brand_id", session('brand_id'))
                 ->where('status', '!=', 0)
                 ->count();
         } else {
@@ -41,8 +40,7 @@ class AppChannelsController extends Controller
             ]);
         }
 
-        $total = Accounts::where("team_id", $request->team_id)
-            ->where("brand_id", session('brand_id'))
+        $total = Accounts::where("brand_id", session('brand_id'))
             ->count();
         
         return view('appchannels::index', [
@@ -70,7 +68,7 @@ class AppChannelsController extends Controller
 
         // FIXED: Was overwriting team_id with brand_id
         $wheres = [
-            "team_id" => $request->team_id,
+            //"team_id" => $request->team_id,
             "brand_id" => session('brand_id')
         ];
         
@@ -182,7 +180,7 @@ class AppChannelsController extends Controller
         // Only update accounts belonging to current brand and team
         DB::table('accounts')
             ->whereIn('id_secure', $id_arr)
-            ->where('team_id', $request->team_id)
+            //->where('team_id', $request->team_id)
             ->where('brand_id', session('brand_id'))
             ->update(['status' => $status]);
 
@@ -354,7 +352,7 @@ class AppChannelsController extends Controller
         foreach ($id_arr as $key => $id) {
             $channel_item = Accounts::where([
                 "id_secure" => $id, 
-                "team_id" => $request->team_id,
+                //"team_id" => $request->team_id,
                 "brand_id" => session('brand_id')
             ])->get()->first();
 
@@ -364,7 +362,7 @@ class AppChannelsController extends Controller
         }
 
         Accounts::whereIn('id_secure', $id_arr)
-            ->where('team_id', $request->team_id)
+            //->where('team_id', $request->team_id)
             ->where('brand_id', session('brand_id'))
             ->delete();
             

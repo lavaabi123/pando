@@ -32,7 +32,7 @@
             </div>
         </div>
     </div>
-    <a class="btn btn-dark btn-sm actionItem b-r-50 text-nowrap" href="<?php echo e(module_url("composer")); ?>" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> <?php echo e(__("Compose")); ?></a>
+    <a class="btn btn-dark btn-sm actionItem b-r-50 text-nowrap" href="<?php echo e(url_app("publishing/composer")); ?>" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> <?php echo e(__("Compose")); ?></a>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>

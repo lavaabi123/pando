@@ -28,17 +28,10 @@
         "icon": "fa-light fa-paper-plane",
         "sub_menu": [
             {
-                "uri": "app/publishing/composer",
-                "name": "Publishing & Scheduling",
-                "position": 50,
-                "icon": "fa-light fa-paper-plane",
-                "color": "#992527"
-            },
-			{
                 "uri": "app/publishing",
-                "name": "Calendar",
+                "name": "Publishing & Scheduling",
                 "position": 40,
-                "icon": "fa-light fa-calendar",
+                "icon": "fa-light fa-paper-plane",
                 "color": "#992527"
             },
             {

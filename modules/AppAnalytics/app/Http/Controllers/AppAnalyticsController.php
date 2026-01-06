@@ -54,32 +54,43 @@ class AppAnalyticsController extends Controller
     }
 
     public function exportPdf(Request $request, $social, $id_secure)
-    {
-        $account = Accounts::where('id_secure', $id_secure)
-            ->where('social_network', $social)
-            ->firstOrFail();
-
-        $module = "AppAnalytics" . ucfirst($social);
-        $class  = "Modules\\{$module}\\Services\\" . ucfirst($social) . "Analytics";
-
-        if (!class_exists($class)) {
-            abort(404, "Analytics service not found for {$social}");
-        }
-
-        $service = app($class);
-        [$since, $until] = \Core::parseDateRange($request);
-
-        $analytics = $service->getAnalyticsData($account->team_id, $account->id_secure, $since, $until);
-        $charts    = $request->input('charts', []);
-
-        $pdf = Pdf::loadView(strtolower("{$module}::export_pdf"), [
-            'account'   => $account,
-            'analytics' => $analytics,
-            'charts'    => $charts,
-            'startDate' => $since,
-            'endDate'   => $until,
-        ])->setPaper('a4', 'portrait');
-
-        return $pdf->download(ucfirst($social) . '_analytics_' . now()->format('Ymd_His') . '.pdf');
-    }
+	{
+		$account = Accounts::where('id_secure', $id_secure)
+			->where('social_network', $social)
+			->where('team_id', $request->team_id)
+			->firstOrFail();
+		
+		$module = "AppAnalytics" . ucfirst($social);
+		$class  = "Modules\\{$module}\\Services\\" . ucfirst($social) . "Analytics";
+		
+		if (!class_exists($class)) {
+			abort(404, "Analytics service not found for {$social}");
+		}
+		
+		$service = app($class);
+		[$since, $until] = \Core::parseDateRange($request);
+		
+		$analytics = $service->getAnalyticsData($account->team_id, $account->id_secure, $since, $until);
+		
+		// Get charts from request (sent from JavaScript)
+		$chartsJson = $request->input('charts', '[]');
+		$charts = is_string($chartsJson) ? json_decode($chartsJson, true) : $chartsJson;
+		
+		// Ensure charts is an array
+		if (!is_array($charts)) {
+			$charts = [];
+		}
+		
+		$pdf = Pdf::loadView(strtolower("{$module}::export_pdf"), [
+			'account'   => $account,
+			'analytics' => $analytics,
+			'charts'    => $charts,
+			'startDate' => $since,
+			'endDate'   => $until,
+		])->setPaper('a4', 'portrait');
+		
+		$filename = ucfirst($social) . '_analytics_' . now()->format('Ymd_His') . '.pdf';
+		
+		return $pdf->download($filename);
+	}
 }

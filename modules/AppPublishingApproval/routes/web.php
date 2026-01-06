@@ -19,6 +19,7 @@ Route::group(["prefix" => "app"], function () {
         Route::group(["prefix" => "approval"], function () {
             Route::resource('/', AppPublishingApprovalController::class)->names('app.publishing.approval');
             Route::post('list', [AppPublishingApprovalController::class, 'list'])->name('app.publishing.approval.list');
+            Route::get('list', [AppPublishingApprovalController::class, 'list'])->name('app.publishing.approval.list');
             Route::get('create', [AppPublishingApprovalController::class, 'create'])->name('app.publishing.approval.create');
             Route::get('edit/{any}', [AppPublishingApprovalController::class, 'edit'])->name('app.publishing.approval.edit');
             Route::post('save', [AppPublishingApprovalController::class, 'save'])->name('app.publishing.approval.save');

@@ -14,7 +14,7 @@
             </div>
         </div>
     </div>
-    <a class="btn btn-dark btn-sm actionItem b-r-50 text-nowrap" href="{{ module_url("composer") }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> {{ __("Compose") }}</a>
+    <a class="btn btn-dark btn-sm actionItem b-r-50 text-nowrap" href="{{ url_app("publishing/composer") }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> {{ __("Compose") }}</a>
 @endsection
 
 
@@ -39,6 +39,26 @@
                         </button>
                     </div>
 
+                </div>
+                <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
+                    <div>
+                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="prev">
+                            <i class="fa-light fa-angle-left"></i>
+                        </div>
+                    </div>
+                    <div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
+					<div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
+                    <div>
+                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="next">
+                            <i class="fa-light fa-angle-right"></i>
+                        </div>
+                    </div>
+                    <!--<div class="d-none d-md-block">
+                        <div class="btn btn-sm btn-light b-r-50 border-gray-300 calendar-event" data-calendar-type="today">{{ __("Today") }}</div>
+                    </div>-->
+				</div>
+                <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
+					
                     <div class="d-flex">
                         <div class="btn-group position-static">
                             <button type="button" class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
@@ -57,7 +77,6 @@
                                             <option value="3">{{ __("Processing") }}</option>
                                             <option value="4">{{ __("Published") }}</option>
                                             <option value="5">{{ __("Unpublished") }}</option>
-                                            <option value="1">{{ __("Active") }}</option>
                                             <option value="2">{{ __("Waiting Approve") }}</option>
                                             <option value="6">{{ __("Pause/Stop") }}</option>
                                         </select>
@@ -124,23 +143,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
-                    <div>
-                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="prev">
-                            <i class="fa-light fa-angle-left"></i>
-                        </div>
-                    </div>
-                    <div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
-                    <div>
-                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="next">
-                            <i class="fa-light fa-angle-right"></i>
-                        </div>
-                    </div>
-                    <div class="d-none d-md-block">
-                        <div class="btn btn-sm btn-light b-r-50 border-gray-300 calendar-event" data-calendar-type="today">{{ __("Today") }}</div>
-                    </div>
-                </div>
-                <div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
                 
             </div>
             <div class="calendar-scroll">
@@ -148,7 +150,7 @@
             </div>
 
             <div class="calendar-add-button d-none">
-                <a class="add-button wp-100 bg-dark text-white l-0 b-0 px-3 py-2 fs-14 fw-6 text-center actionItem" href="{{ module_url("composer") }}?date=[[date]]" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();">
+                <a class="add-button wp-100 bg-dark text-white l-0 b-0 px-3 py-2 fs-14 fw-6 text-center actionItem" href="{{ url_app("publishing/composer") }}?date=[[date]]" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();">
                     <i class="fa-light fa-plus"></i> {{ __("Add post") }}
                 </a>
             </div>

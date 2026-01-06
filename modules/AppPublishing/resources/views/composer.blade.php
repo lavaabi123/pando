@@ -166,7 +166,8 @@ if($post){
                     <div class="mb-3">
                         <div class="card shadow-none b-r-15 border-gray-400">
                             <div class="card-header px-3">
-                                <div class="fs-12 fw-6 text-gray-700">
+                                <div class="fw-5 fs-14">
+									<span class="add-icon">{!! file_get_contents(public_path('img/add.svg')) !!}</span>
                                     @if( Gate::allows('apppublishingcampaigns') && Gate::allows('apppublishinglabels'))
                                         {{ __("Tags & Campaigns") }}
                                     @elseif(Gate::allows('apppublishingcampaigns'))
@@ -216,11 +217,11 @@ if($post){
                             @if( empty($post) )
 
                                 <div class="card-header px-3">
-                                    <div class="fs-12 fw-6 text-gray-700">
-                                        {{ __("When to post") }}
+                                    <div class="fw-5 fs-14">
+                                        <span class="svg-icons">{!! file_get_contents(public_path('img/time.svg')) !!}</span> {{ __("When to post") }}
                                     </div>
                                     <div class="card-toolbar">
-                                        <select class="form-select mw-150 fs-12" name="post_by">
+                                        <select class="form-select mw-150 fs-12 b-r-20" name="post_by">
                                             <option value="1" {{ old('post_by', $post->post_by ?? '') == 1 ? 'selected' : '' }}>{{ __("Immediately") }}</option>
                                             <option value="2" {{ old('post_by', $post->post_by ?? '') == 2 || isset($date) ? 'selected' : '' }}>{{ __("Schedule & Repost") }}</option>
                                             <option value="3" {{ old('post_by', $post->post_by ?? '') == 3 ? 'selected' : '' }}>{{ __("Specific Days & Times") }}</option>
@@ -235,11 +236,11 @@ if($post){
                                 @if ($post->status==1 || $post->status==2)
 
                                     <div class="card-header px-3">
-                                        <div class="fs-12 fw-6 text-gray-700">
-                                            {{ __("When to post") }}
+                                        <div class="fw-5 fs-14">
+                                            <span class="svg-icons">{!! file_get_contents(public_path('img/time.svg')) !!}</span>{{ __("When to post") }}
                                         </div>
                                         <div class="card-toolbar">
-                                            <select class="form-select mw-150 fs-12" name="post_by">
+                                            <select class="form-select mw-150 fs-12 b-r-20" name="post_by">
                                                 <option value="1" {{ old('post_by', $post->post_by ?? '') == 1 ? 'selected' : '' }}>{{ __("Immediately") }}</option>
                                                 <option value="2" {{ old('post_by', $post->post_by ?? '') == 2 ? 'selected' : '' }}>{{ __("Schedule & Repost") }}</option>
                                                 <option value="3" {{ old('post_by', $post->post_by ?? '') == 3 ? 'selected' : '' }}>{{ __("Specific Days & Times") }}</option>
@@ -551,10 +552,21 @@ if($post){
 				</div>			
 				
 	</div></div>
-				 <div class="tab-pane fade" 
-					 id="contact" 
-					 role="tabpanel" 
-					 aria-labelledby="contact-tab">
+				 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+					<div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 hp-100">
+						<div class="max-w-450 wp-100 mx-auto">
+							<div id="draft-list-content">
+								{{-- Loading indicator --}}
+								<div class="text-center py-5">
+									<div class="spinner-border text-primary" role="status">
+										<span class="visually-hidden">Loading...</span>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				 <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
 					<div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 hp-100">
 						<div class="max-w-450 wp-100 mx-auto">
 							<div id="approval-list-content">
@@ -683,6 +695,9 @@ $(document).ready(function() {
     var approvalPage = 0;
     var isLoadingApproval = false;
     var hasMoreApproval = true;
+    var draftPage = 0;
+    var isLoadingdraft= false;
+    var hasMoredraft = true;
     
     // Load approval list when tab is clicked
     $('#contact-tab').on('shown.bs.tab', function (e) {
@@ -694,8 +709,17 @@ $(document).ready(function() {
             $(this).addClass('loaded');
         }
     });
-    
-    // Function to load approval list
+	$('#profile-tab').on('shown.bs.tab', function (e) {
+        if (!$(this).hasClass('loaded')) {
+            draftPage = 0;
+            hasMoredraft = true;
+            $('#draft-list-content').empty();
+            loadDraftList();
+            $(this).addClass('loaded');
+        }
+    });
+	
+	// Function to load approval list
     function loadApprovalList() {
         if (isLoadingApproval || !hasMoreApproval) {
             return;
@@ -724,7 +748,7 @@ $(document).ready(function() {
         }
         
         $.ajax({
-            url: '{{ url("app/publishing/approval") }}',
+            url: '{{ url("app/publishing/approval/list") }}',
             type: 'GET',
             data: {
                 page: approvalPage,
@@ -796,6 +820,131 @@ $(document).ready(function() {
         });
     }
     
+    // Function to load draft list
+    function loadDraftList() {
+        if (isLoadingdraft || !hasMoredraft) {
+            return;
+        }
+        
+        isLoadingdraft = true;
+        
+        // Show loading indicator
+        if (approvalPage === 0) {
+            $('#draft-list-content').html(`
+                <div class="text-center py-5" id="initial-loader">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading draft list...</p>
+                </div>
+            `);
+        } else {
+            $('#draft-list-content').append(`
+                <div class="text-center py-3" id="load-more-spinner">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `);
+        }
+        
+        $.ajax({
+            url: '{{ url("app/publishing/draft") }}',
+            type: 'GET',
+            data: {
+                page: approvalPage,
+                team_id: '{{ $teamId ?? "" }}',
+                keyword: $('#draft-search').val() || '',
+                status: 1 // Pending draft status
+            },
+            success: function(response) {
+                console.log('draft list response:', response);
+                
+                // Remove loading indicators
+                $('#initial-loader').remove();
+                $('#load-more-spinner').remove();
+                
+                if (response.status === 1) {
+                    if (approvalPage === 0) {
+                        $('#draft-list-content').html(response.data);
+                    } else {
+                        $('#draft-list-content').append(response.data);
+                    }
+                    
+                    approvalPage++;
+                    
+                    // Check if there's more data
+                    var $content = $(response.data);
+                    var itemsCount = $content.filter('.draft-item').length;
+                    if (itemsCount < 30) { // Per page is 30
+                        hasMoredraft = false;
+                    }
+                } else {
+                    hasMoredraft = false;
+                    
+                    if (approvalPage === 0) {
+                        $('#draft-list-content').html(`
+                            <div class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="fa-light fa-inbox fs-48 text-muted opacity-50"></i>
+                                </div>
+                                <h5 class="text-muted">{{ __('No draft post') }}</h5>
+                                <p class="text-muted">{{ __('All caught up! There are no posts in draft.') }}</p>
+                            </div>
+                        `);
+                    }
+                }
+                
+                isLoadingdraft = false;
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading approval list:', error);
+                
+                $('#initial-loader').remove();
+                $('#load-more-spinner').remove();
+                
+                $('#approval-list-content').html(`
+                    <div class="text-center py-5">
+                        <div class="text-danger mb-3">
+                            <i class="fa-light fa-exclamation-triangle fs-48"></i>
+                        </div>
+                        <h5 class="text-danger">{{ __('Error loading approval list') }}</h5>
+                        <p class="text-muted">{{ __('Please try again.') }}</p>
+                        <button class="btn btn-primary btn-sm" onclick="reloaddraftList()">
+                            <i class="fa-light fa-refresh"></i> {{ __('Retry') }}
+                        </button>
+                    </div>
+                `);
+                
+                isLoadingdraft = false;
+            }
+        });
+    }
+    
+    // Infinite scroll for draft list
+    $('#draft-list-content').on('scroll', function() {
+        var $container = $(this);
+        if ($container.scrollTop() + $container.height() >= $container[0].scrollHeight - 100) {
+            loadApprovalList();
+        }
+    });
+    
+    // Search functionality
+    $('#draft-search').on('input', debounce(function() {
+        draftPage = 0;
+        hasMoredraft = true;
+        $('#draft-list-content').empty();
+        loadDraftList();
+    }, 500));
+    
+    // Reload function (global so it can be called from error state)
+    window.reloaddraftList = function() {
+        draftPage = 0;
+        hasMoredraft = true;
+        $('#draft-list-content').empty();
+        $('#profile-tab').removeClass('loaded').trigger('click');
+    };
+	
     // Infinite scroll for approval list
     $('#approval-list-content').on('scroll', function() {
         var $container = $(this);

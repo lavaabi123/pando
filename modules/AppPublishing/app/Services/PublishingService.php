@@ -307,10 +307,17 @@ class PublishingService
                 ];
             }
         }
-        return [
-            "status" => 1,
-            "message" => __("Content successfully scheduled")
-        ];
+		if ($postBy != 1) {
+			return [
+				"status" => 1,
+				"message" => __("Content successfully updated")
+			];
+		} else {
+			return [
+				"status" => 1,
+				"message" => __("Content successfully scheduled")
+			];
+		}
     }
 
     /**

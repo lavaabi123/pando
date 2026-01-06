@@ -5,20 +5,26 @@ namespace Modules\AppPublishing\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\AppPublishing\Models\Posts;
+use Modules\AppPublishing\Models\PostComment;
 use Validator;
 use Channels;
 use Publishing;
 use DB;
 use Arr;
 use Media;
+use Auth;
 
 class AppPublishingController extends Controller
 {
     public function index(Request $request)
     {
 
-        $campaigns = DB::table("post_campaigns")->where("team_id", $request->team_id)->get();
-        $labels = DB::table("post_labels")->where("team_id", $request->team_id)->get();
+        $campaigns = DB::table("post_campaigns")->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})->get();
+        $labels = DB::table("post_labels")->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})->get();
 
         return view(module("key") . '::index', [
             "campaigns" => $campaigns,
@@ -41,9 +47,12 @@ class AppPublishingController extends Controller
 
         // Filter by team_id
         if ($teamId) {
-            $query->where('team_id', $teamId);
+            //$query->where('team_id', $teamId);
+			$query->when(session('role_id') != 2, function($q) use ($teamId) {
+				//return $q->where('team_id', $teamId);
+			});
         }
-
+		$query->where('brand_id', session('brand_id'));
         // Filter by date range (time_post)
         if ($request->has('start') && $request->has('end')) {
             $query->whereBetween('time_post', [
@@ -52,7 +61,7 @@ class AppPublishingController extends Controller
             ]);
         }
 
-        $query->where('status', '!=', 1);
+        //$query->where('status', '!=', 1);
 
         // Dynamic filter by status
         if ($request->filled('status') && $request->status !== '-1') {
@@ -146,12 +155,15 @@ class AppPublishingController extends Controller
 		$teamId = $request->team_id;
 		
 		// Subquery to get the ID of the most recent post per grouping_data
-		$subquery = Posts::select(DB::raw('MAX(id) as id'))
-			->where('status', '!=', 1);
+		$subquery = Posts::select(DB::raw('MAX(id) as id'));
 		
 		if ($teamId) {
-			$subquery->where('team_id', $teamId);
+			$subquery->when(session('role_id') != 2, function($sq) use ($teamId) {
+				//return $sq->where('team_id', $teamId);
+			});
+			//$subquery->where('team_id', $teamId);
 		}
+		$subquery->where('brand_id', session('brand_id'));
 		
 		if ($request->has('start') && $request->has('end')) {
 			$subquery->whereBetween('time_post', [
@@ -377,8 +389,9 @@ class AppPublishingController extends Controller
     public function preview(Request $request){
         $id = $request->id;
 
-        $post = Posts::with('account')->where("grouping_data", $id)->where("team_id", $request->team_id)->get();
-
+        $post = Posts::with('account')->where("grouping_data", $id)->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})->get();
         ms([
             "status" => 1,
             "data" => view(module("key") . '::preview', [
@@ -406,7 +419,9 @@ class AppPublishingController extends Controller
 		// Get all posts with those grouping_data values
 		$frame_posts = Posts::with('account')
 			->whereIn('grouping_data', $groupingDataArray)
-			->where('team_id', $teamId)
+			->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $teamId);
+			})
 			->orderBy('time_post', 'DESC')
 			->get()->unique('grouping_data');
 		
@@ -425,13 +440,75 @@ class AppPublishingController extends Controller
 		]);
 	}
 
+	public function comments(Request $request){
+        $id = $request->id;
+
+        $comments = PostComment::where("grouping_data", $id)->get();
+        ms([
+            "status" => 1,
+            "data" => view(module("key") . '::comments', [
+                "comments" => $comments,
+				"grouping_data" => $id
+            ])->render()
+        ]);
+    }
+    public function store(Request $request)
+    {
+        $request->validate([
+            'comment' => 'required|string|max:500'
+        ]);
+		if(!empty($request->id)){
+			$comment = PostComment::where("id", $request->id)->update([
+				'comment' => $request->comment,
+			]);
+
+			return response()->json([
+				'status' => 'success',
+				'message' => 'Comment updated successfully',
+				'comment' => [
+					'id' => $request->id,
+					'comment' => $request->comment,
+				]
+			]);
+		}else{
+			$comment = PostComment::create([
+				'grouping_data' => $request->grouping_data,
+				'user_id' => Auth::id(),
+				'post_id' => 0,
+				'comment' => $request->comment,
+			]);
+
+			return response()->json([
+				'status' => 'success',
+				'message' => 'Comment added successfully',
+				'comment' => [
+					'id' => $comment->id,
+					'comment' => $comment->comment,
+				]
+			]);
+		}
+    }
+	
+	public function comments_destroy(Request $request)
+    {
+        $comment = PostComment::findOrFail($request->id);        
+        $comment->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Comment deleted successfully'
+        ]);
+    }
+	
     public function changePostDate(Request $request)
     {
         $newDate = $request->new_date;
         $id = $request->id;
 
-        $post = Posts::where("id_secure", $id)->where("team_id", $request->team_id)->first();
-
+        $post = Posts::where("id_secure", $id)->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})->first();
+		
         if(!$post){
             ms([
                 "status" => 0,
@@ -456,12 +533,16 @@ class AppPublishingController extends Controller
         $post = Posts::where("id_secure", $id)->first();
 
         $labels = DB::table('post_labels')
-            ->where("team_id", $request->team_id)
+             ->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})
             ->where("status", 1)
             ->get();
 
         $campaigns = DB::table('post_campaigns')
-            ->where("team_id", $request->team_id)
+             ->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})
             ->where("status", 1)
             ->get();
 
@@ -475,37 +556,6 @@ class AppPublishingController extends Controller
             ])->render()
         ]);
     }
-	
-	public function composerPage(Request $request)
-    {
-        // Check if brand is selected
-        if (!session('brand_id')) {
-            return redirect()->route('app.publishing.index')
-                ->with('error', __('Please select a brand first.'));
-        }
-
-        $id = $request->input("id");
-        $date = $request->input("date");
-        $post = null;
-        
-        if ($id) {
-            $post = Posts::where("id_secure", $id)
-                ->where("team_id", $request->team_id)
-                ->where("brand_id", session('brand_id'))
-                ->first();
-        }
-
-        $campaigns = DB::table("post_campaigns")->where("team_id", $request->team_id)->get();
-        $labels = DB::table("post_labels")->where("team_id", $request->team_id)->get();
-
-        return view(module("key") . '::index', [
-            "campaigns" => $campaigns,
-            "labels" => $labels,
-            "post"      => $post,
-            "date"      => $date,
-        ]);
-    }
-
 
     public function getLinkInfo(Request $request){
         $url = $request->input('value');
@@ -550,7 +600,7 @@ class AppPublishingController extends Controller
         if (!$channels) {
             return ms([
                 "status"  => 0,
-                "message" => __("Please select at least a channel")
+                "message" => __("Please select at least one account")
             ]);
         }
 
@@ -624,13 +674,18 @@ class AppPublishingController extends Controller
         }
 
         $campaign = DB::table("post_campaigns")
-            ->where(["id_secure" => $campaignIdSecure, "team_id" => $request->team_id])
+            ->where(["id_secure" => $campaignIdSecure])
+			->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})
             ->first();
         $campaignId = $campaign ? $campaign->id : 0;
 
         $labels = DB::table("post_labels")
             ->whereIn("id_secure", $labelIds)
-            ->where(["team_id" => $request->team_id])
+            ->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})
             ->get();
         $labelIdsArray = $labels ? Arr::pluck($labels, 'id') : [];
 
@@ -755,8 +810,27 @@ class AppPublishingController extends Controller
 
     public function destroy(Request $request)
     {
-        $response = \DBHelper::destroy(Posts::class, $request->input('id'));
-        return response()->json($response);
+        
+		$groupingData = $request->input('id'); // Actually contains grouping_data value
+
+		$postsToDelete = Posts::where('grouping_data', $groupingData)->get();
+
+		if ($postsToDelete->isEmpty()) {
+			return response()->json([
+				'status' => 'error',
+				'message' => 'No posts found'
+			], 404);
+		}
+
+		// Delete all posts with this grouping_data
+		Posts::where('grouping_data', $groupingData)->delete();
+
+		return response()->json([
+			'status' => 'success',
+			'message' => 'Post deleted successfully'
+		]);
+		//$response = \DBHelper::destroy(Posts::class, $request->input('id'));
+        //return response()->json($response);
     }
 	
 	public function move_to_queue(Request $request)

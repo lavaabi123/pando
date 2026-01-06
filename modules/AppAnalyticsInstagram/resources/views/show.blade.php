@@ -460,11 +460,11 @@ Main.Chart('areaspline', dailyViewsChartData.series, 'dailyViewsChart', {
             marker: { enabled: false }
         },
         series: {
-            color: '#675dff',
+            color: '#e66513',
             fillColor: {
                 linearGradient: [0, 0, 0, 200],
                 stops: [
-                    [0, 'rgba(103, 93, 255, 0.4)'],
+                    [0, 'rgba(230, 101, 19, 0.4)'],
                     [1, 'rgba(255, 255, 255, 0)']
                 ]
             }
@@ -513,11 +513,11 @@ Main.Chart('areaspline', dailyFollowersCountChartData.series, 'dailyFollowersCou
             marker: { enabled: false }
         },
         series: {
-            color: '#675dff',
+            color: '#0ecabc',
             fillColor: {
                 linearGradient: [0, 0, 0, 200],
                 stops: [
-                    [0, 'rgba(103, 93, 255, 0.4)'],
+                    [0, 'rgba(14, 202, 188, 0.4)'],
                     [1, 'rgba(255, 255, 255, 0)']
                 ]
             }
@@ -526,7 +526,7 @@ Main.Chart('areaspline', dailyFollowersCountChartData.series, 'dailyFollowersCou
 });
 
 var dailyInteractionsChartData = {!! json_encode($analytics['dailyInteractionsChartData']) !!};
-dailyInteractionsChartData.series[0].color = '#675dff';
+dailyInteractionsChartData.series[0].color = '#b892ff';
 dailyInteractionsChartData.series[1].color = '#13c2c2';
 dailyInteractionsChartData.series[2].color = '#ffa940';
 dailyInteractionsChartData.series[3].color = '#f5222d';
@@ -577,7 +577,8 @@ Main.Chart("mix", dailyInteractionsChartData.series, 'dailyInteractionsChart', {
             lineWidth: 2,
             marker: { enabled: false }
         }
-    }
+    },
+	colors: ['#ff7b00', '#51bea1', '#ffa69e','#7bdff2']
 });
 
 var dailyAccountReachChartData = {!! json_encode($analytics['dailyAccountReachChartData']) !!};
@@ -627,7 +628,8 @@ Main.Chart('column', dailyAccountReachChartData.series, 'dailyAccountReachChart'
                 }
             }
         }
-    }
+    },
+	colors: ['#ef476f', '#ffd166', '#06d6a0','#118ab2']
 });
 
 var dailyReachChartData = {!! json_encode($analytics['dailyReachChartData']) !!};
@@ -677,7 +679,8 @@ Main.Chart('column', dailyReachChartData.series, 'dailyReachChart', {
                 }
             }
         }
-    }
+    },
+	colors: ['#53629E']
 });
 
 var followerAgeChartData = {!! json_encode($analytics['followerAgeChartData']) !!};
@@ -718,7 +721,8 @@ Main.Chart('column', followerAgeChartData.series, 'followerAgeChart', {
                 }
             }
         }
-    }
+    },
+	colors: ['#4096ff', '#ff7875', '#faad14']
 });
 
 var dailyEngagementRateChartData = {!! json_encode($analytics['dailyEngagementRateChartData']) !!};
@@ -763,36 +767,77 @@ Main.Chart('areaspline', dailyEngagementRateChartData.series, 'dailyEngagementRa
             marker: { enabled: false }
         },
         series: {
-            color: '#675dff',
+            color: '#10c018',
             fillColor: {
                 linearGradient: [0, 0, 0, 200],
                 stops: [
-                    [0, 'rgba(103, 93, 255, 0.4)'],
+                    [0, 'rgba(16, 192, 24, 0.4)'],
                     [1, 'rgba(255, 255, 255, 0)']
                 ]
             }
         }
     }
 });
-
-const topFollowerCountriesChartData = {!! json_encode($analytics['topFollowerCountriesChartData']['map_data']) !!};
-Main.Chart('map', topFollowerCountriesChartData, 'topFollowerCountriesChart', {
-    chart: { map: 'custom/world' },
-    title: { text: '{{ __('Fan Locations') }}' },
-    colorAxis: { min: 0,  minColor: '#ede9fe', maxColor: '#675dff' },
-    tooltip: {
-        formatter: function () {
-            const label = this.point.name || this.key || '{{ __('Unknown') }}';
-            const value = this.point.value?.toLocaleString?.() ?? '0';
-
-            return `<div class="d-flex gap-8 justify-content-between align-items-center" style="padding: 4px 12px;">
-                <span class="fs-12"><span style="color: ${this.point.color};">●</span> ${label}:</span>
-                <span class="fs-12 fw-6">${value}</span>
-            </div>`;
-        }
+(async function() {
+    const mapData = {!! json_encode($analytics['topFollowerCountriesChartData']['map_data']) !!};
+    
+    try {
+        // Fetch world map topology
+        const response = await fetch('https://code.highcharts.com/mapdata/custom/world.topo.json');
+        const topology = await response.json();
+        
+        console.log('Map topology loaded:', topology);
+        
+        Highcharts.mapChart('topFollowerCountriesChart', {
+            chart: {
+                map: topology
+            },
+            title: {
+                text: ''
+            },
+            mapNavigation: {
+                enabled: false
+            },
+            colorAxis: {
+                min: 0,
+                minColor: '#00B7B5',
+                maxColor: '#005461'
+            },
+            series: [{
+                data: mapData,
+                joinBy: ['iso-a2', 'code'],
+                name: '{{ __("Followers") }}',
+                borderColor: '#e5e7eb',
+                borderWidth: 0.5,
+                nullColor: '#f3f4f6',
+                states: {
+                    hover: {
+                        color: '#5d5fef'
+                    }
+                }
+            }],
+            legend: {
+                enabled: true
+            },
+            tooltip: {
+                useHTML: true,
+                formatter: function() {
+                    if (this.point.value) {
+                        return '<b>' + this.point.name + '</b><br/>' +
+                               'Followers: <b>' + this.point.value.toLocaleString() + '</b>';
+                    }
+                    return false;
+                }
+            },
+            credits: {
+                enabled: false
+            }
+        });
+        
+    } catch (error) {
+        console.error('Error loading map:', error);
     }
-});
-
+})();
 const followerCountriesChartData = {!! json_encode($analytics['topFollowerCountriesChartData']) !!};
 Main.Chart('bar', followerCountriesChartData.series, 'topCoutriesChart', {
     title: { text: '{{ __("Top Countries") }}' },
@@ -824,7 +869,8 @@ Main.Chart('bar', followerCountriesChartData.series, 'topCoutriesChart', {
                 }
             }
         }
-    }
+    },
+	colors: ['#EE6983'],
 });
 
 var topFollowerCitiesChartData = {!! json_encode($analytics['topFollowerCitiesChartData']) !!};
@@ -858,7 +904,8 @@ Main.Chart('bar', topFollowerCitiesChartData.series, 'topCitiesChart', {
                 }
             }
         }
-    }
+    },
+	colors: ['#9254de', '#13c2c2', '#ff9800'],
 });
 
 var reachByFollowTypeData = {!! json_encode($analytics['reachByFollowTypeData']) !!};
@@ -874,6 +921,7 @@ Main.Chart('pie', reachByFollowTypeData.series, 'reachByFollowTypeChart', {
             dataLabels: { enabled: true }
         }
     },
+	colors: ['#9254de', '#13c2c2', '#ff9800'],
     legend: { enabled: true }
 });
 
@@ -890,6 +938,7 @@ Main.Chart('pie', followerGenderChartData.series, 'followerGenderChart', {
             dataLabels: { enabled: true }
         }
     },
+	colors: ['#6366f1', '#ec4899', '#ff9800'],
     legend: { enabled: true }
 });
 </script>

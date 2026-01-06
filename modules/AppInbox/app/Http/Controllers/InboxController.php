@@ -1071,7 +1071,7 @@ public function getTagsList()
 	
 	public function cron()
     {
-		//$messages = Inbox::get_message_conversation(3);
-		$comments = InboxComment::getComments(3);
+		$messages = Inbox::get_message_conversation(2);
+		$comments = InboxComment::getComments(2);
 	}
 }

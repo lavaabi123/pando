@@ -48,7 +48,7 @@ class Channels extends Facade
             $Query->where($wheres);
         }
 
-        $Query->where("team_id", request()->team_id);
+        //$Query->where("team_id", request()->team_id);
 
         return $Query->get();
         
@@ -62,7 +62,7 @@ class Channels extends Facade
             $Query->where($wheres);
         }
 
-        $Query->where("team_id", request()->team_id);
+        //$Query->where("team_id", request()->team_id);
 
         return $Query->get();
         

@@ -25,36 +25,41 @@
 
                         {{-- Dropdown Menu --}}
                         @if(empty(request()->input('from')))
-                            <div class="">
-                                <div class="sp-menu-dropdown dropdown dropdown-hide-arrow" data-dropdown-spacing="0">
-                                    <a class="dropdown-toggle text-gray-800 d-flex w-30 h-30 icon-with-circle fs-18 justify-content-center" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <i class="fal fa-ellipsis-v fw-bold"></i>
-                                    </a>
-                                    <ul class="dropdown-menu" data-dropdown-spacing="0">
-                                        @foreach($frame_posts as $key => $value)
-                                            @php
-                                                $module = $value->module ?? '';
-                                                $resApi = json_decode($value->result, true) ?? [];
-                                                $displayName = $module == 'twitter' ? 'X' : ucfirst($module);
-                                            @endphp
-                                            
-                                            <li class="p-3">
-                                                @if(!empty($resApi['url']))
-                                                    <a class="dropdown-item p-0" target="_blank" href="{{ $resApi['url'] }}">
-                                                        {{ get_social_media_icon_large($value->social_network) }}
-                                                        Show in {{ $displayName }}
-                                                    </a>
-                                                @else
-                                                    <a class="dropdown-item p-0 disabled" href="javascript:void(0);">
-                                                        {{ get_social_media_icon_large($value->social_network) }}
-                                                        Show in {{ $displayName }}
-                                                    </a>
-                                                @endif
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
+                            @php
+								// Check if any post has a URL
+								$hasAnyUrl = $frame_posts->contains(function($post) {
+									$resApi = json_decode($post->result, true) ?? [];
+									return !empty($resApi['url']);
+								});
+							@endphp
+
+							@if($hasAnyUrl)
+								<div class="">
+									<div class="sp-menu-dropdown dropdown dropdown-hide-arrow" data-dropdown-spacing="0">
+										<a class="dropdown-toggle text-gray-800 d-flex w-30 h-30 icon-with-circle fs-18 justify-content-center" href="javascript:void(0);" data-bs-toggle="dropdown" aria-expanded="false">
+											<i class="fal fa-ellipsis-v fw-bold"></i>
+										</a>
+										<ul class="dropdown-menu" data-dropdown-spacing="0">
+											@foreach($frame_posts as $key => $value)
+												@php
+													$module = $value->social_network ?? '';
+													$resApi = json_decode($value->result, true) ?? [];
+													$displayName = $module == 'twitter' ? 'X' : ucfirst($module);
+												@endphp
+												
+												@if(!empty($resApi['url']))
+													<li class="p-3">
+														<a class="dropdown-item p-0" target="_blank" href="{{ $resApi['url'] }}">
+															{{ get_social_media_icon_large($value->social_network) }}
+															Show in {{ $displayName }}
+														</a>
+													</li>
+												@endif
+											@endforeach
+										</ul>
+									</div>
+								</div>
+							@endif
                         @endif
                     </div>
 

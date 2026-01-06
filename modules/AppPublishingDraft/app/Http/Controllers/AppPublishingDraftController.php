@@ -27,7 +27,7 @@ class AppPublishingDraftController extends Controller
             return $current_page;
         });
 
-        $query = Posts::where('team_id', $teamId)->where('status', 1);
+        $query = Posts::where('brand_id', session('brand_id'))->where('status', 1);
 
         if ($search) {
             $query->where(function ($q) use ($search) {
