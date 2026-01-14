@@ -192,7 +192,7 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 .top-menu a:hover svg, .top-menu a:focus svg, .top-menu a.active svg {
     fill: var(--white);
 }
-.sidebar .menu .menu-item:first-child {
+.sidebar .menu > .menu-top > .menu-item:first-child {
 	border-bottom: 1px solid #1e2626;
     padding-bottom: 10px;
     box-shadow: 0 1px 0px #4f5b5b;
@@ -844,10 +844,16 @@ span.svg-icons svg {
     margin-left: 15px;
 	font-size:14px;
 }
-.schedule-list {
-	margin-left: -25px;
-    margin-right: -25px;
-	margin-bottom: -25px;
+.schedule-list .card:last-child {
+	margin-bottom:0 !important;
+}
+.schedule-list span.badge {
+	width:100%;
+	height:100%;
+	clip-path: polygon(100% 0, 0 0, 100% 100%);
+}
+.schedule-list span.badge i {
+	margin: -20px -20px 0 0;
 }
 
 /** Publishing Popup **/
@@ -865,6 +871,10 @@ span.svg-icons svg {
     background: var(--sp-gray-300);
     border-bottom-right-radius: 0;
     border-bottom-left-radius: 0;
+}
+/** calendar **/
+#calendar-new {
+    min-width: auto;
 }
 
 /** Footer **/

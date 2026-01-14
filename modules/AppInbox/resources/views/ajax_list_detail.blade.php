@@ -24,18 +24,29 @@
 
         <div class="reply-section py-3 border-top">
             <form id="reply-form" onsubmit="sendReply(event, '{{ $id }}', '{{ $conversation_id }}', '{{$lists[0]['inbox_type']}}')">
-                <div class="input-group">
-                    <textarea class="form-control" name="comment" rows="1" placeholder="Type your reply..." required></textarea>
-                    <button class="btn btn-primary" type="submit">
-                        <i class="fa-light fa-paper-plane"></i>
-                    </button>
-                </div>
-                <div class="form-check mt-2">
-                    <input class="form-check-input" type="checkbox" name="complete_id" value="1" id="markComplete">
-                    <label class="form-check-label" for="markComplete">
-                        Mark as complete after sending
-                    </label>
-                </div>
+					<div class="bg-white border b-r-30 p-15">
+						<div class="d-flex align-items-center gap-2">
+							<div class="post-account">
+								<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['from_image']; ?>">
+							</div>	
+							<p class="fw-7 mb-0 fs-12"><?php echo $lists[0]['from_name']; ?></p>					
+						</div>
+						<textarea class="form-control fw-4 border-0 p-0 p-t-10" rows="3" cols="10" id="textarea" name="comment" placeholder="Type your reply.." required></textarea>
+					</div>
+					<div class="d-flex align-items-center flex-row-reverse justify-content-between my-3">
+						<ec-post-buttons >
+							<div  class="save-buttons">
+								<button  type="submit" class="btn btn-primary me-2"> Send</button>
+								<button class="btn btn-secondary" onclick="clear_detail_form()">Cancel</button>
+							</div>
+						</ec-post-buttons>
+					</div>
+					<div class="form-check mt-2">
+						<input class="form-check-input" type="checkbox" name="complete_id" value="1" id="markComplete">
+						<label class="form-check-label" for="markComplete">
+							Mark as complete after sending
+						</label>
+					</div>
             </form>
         </div>
     </div>
@@ -60,17 +71,16 @@ function sendReply(event, detailId, conversationId, inboxType) {
         },
         success: function(response) {
             if (response.status === 'success') {
-                alert('Reply sent successfully');
+                Main.showNotify('', 'Reply sent successfully', 'success');
                 form[0].reset();
                 // Reload the conversation
                 loadInboxList();
             } else {
-                alert('Error: ' + response.message);
+                Main.showNotify('', 'Error: ' + response.message, 'error');
             }
         },
         error: function(xhr) {
-            console.error('Error sending reply:', xhr);
-            alert('Error sending reply. Please try again.');
+            Main.showNotify('', 'Error sending reply. Please try again.', 'error');
         }
     });
 }

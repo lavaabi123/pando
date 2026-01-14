@@ -97,229 +97,451 @@ class PublishingService
     /**
      * Publish posts on social networks.
      */
-    public function post($posts, $socialCanPost = false)
-    {
-        $postBy = request()->post_by;
-        $teamId = request()->team_id;
-        $postId = 0;
-        $countError = 0;
-        $countSuccess = 0;
-        $countSchedule = 0;
-        $message = "";
+   public function post($posts, $socialCanPost = false)
+{
+    $postBy = request()->post_by;
+    $teamId = request()->team_id;
+    $postType = (!empty(request()->post_type) && request()->post_type == 'duplicate') ? request()->post_type : '';
+    $postId = 0;
+    $countError = 0;
+    $countSuccess = 0;
+    $countSchedule = 0;
+    $message = "";
+    $errMessages = [];
 
+    // Only validate if not approval (post_by != 5)
+    if ($postBy != 5) {
         if (empty($posts)) {
             return [
                 "status" => 0,
                 "message" => __('Accounts selected is inactive. Let re-login and try again')
             ];
         }
+    }
 
-        foreach ($posts as $post) {
-            // Check quota
-            $teamId = is_object($post) ? ($post->team_id ?? null) : ($post['team_id'] ?? null);
-            $quota = $this->checkQuota($teamId);
+    foreach ($posts as $post) {
+        try {
+            $fromRun = (!empty($post->from_run) && $post->from_run == 'cron') ? $post->from_run : '';
+            unset($post->from_run);
 
-            if (!$quota['can_post']) {
-                Posts::where("id", $postId)->update([
-                    'status' => 5,
-                    'result' => json_encode([
-                        'message' => __('Post failed: Quota exceeded'),
-                        'reason'  => $quota['message'],
-                    ], JSON_UNESCAPED_UNICODE)
-                ]);
-                $this->savePostStat($post, 5, __('Post failed: Quota exceeded'), null);
-                continue;
+            // Convert post to array
+            if (is_null($post)) {
+                $tmpPost = [];
+            } elseif ($post instanceof \Illuminate\Database\Eloquent\Model || $post instanceof \Illuminate\Support\Collection) {
+                $tmpPost = $post->toArray();
+            } elseif ($post instanceof \stdClass) {
+                $tmpPost = (array) $post;
+            } elseif (is_array($post)) {
+                $tmpPost = $post;
+            } else {
+                $tmpPost = json_decode(json_encode($post), true);
             }
 
-            $checkPosts = Posts::where("id_secure", $post->id_secure)
-                ->where("team_id", $post->team_id)
-                ->first();
-            if ($checkPosts) $postId = $checkPosts->id;
+            if (isset($post->team_id)) {
+                $teamId = $post->team_id;
+            }
 
-            try {
-                if (empty($post->module) || empty($post->social_network)) continue;
+            $socialNetwork = $post->social_network;
+            $canPostThis = (is_array($socialCanPost) && in_array($socialNetwork, $socialCanPost)) || !$socialCanPost;
+
+            if ($canPostThis) {
+                // Check if module exists
+                if (empty($post->module) || empty($post->social_network)) {
+                    continue;
+                }
 
                 $module = $post->module;
                 if (!class_exists($module)) {
                     $modulePath = "\\Modules\\{$module}\\Facades\\Post";
-                    if (class_exists($modulePath)) class_alias($modulePath, $module);
-                    else continue;
+                    if (class_exists($modulePath)) {
+                        class_alias($modulePath, $module);
+                    } else {
+                        continue;
+                    }
                 }
 
                 if (method_exists($module, 'post')) {
-                    if (is_null($post)) {
-                        $tmpPost = [];
-                    } elseif ($post instanceof \Illuminate\Database\Eloquent\Model || $post instanceof \Illuminate\Support\Collection) {
-                        $tmpPost = $post->toArray();
-                    } elseif ($post instanceof \stdClass) {
-                        $tmpPost = (array) $post;
-                    } elseif (is_array($post)) {
-                        $tmpPost = $post;
-                    } else {
-                        $tmpPost = json_decode(json_encode($post), true);
-                    }
-                    if (isset($post->team_id)) $teamId = $post->team_id;
+                    // Check if we should post immediately or schedule
+                    if (!request()->has('id_secure') || request()->input('draft')) {
+                        if (isset($post->id) && !request()->input('draft')) {
+                            $postId = $post->id;
+                        }
 
-                    $socialNetwork = $post->social_network;
-                    $canPostThis = (is_array($socialCanPost) && in_array($socialNetwork, $socialCanPost)) || !$socialCanPost;
+                        // Get account
+                        $account = Accounts::find($post->account_id);
+                        
+                        if (empty($account)) {
+                            $countError++;
+                            $message = __("This account does not exist");
 
-                    if ($canPostThis) {
-                        if (!$postId || $postBy == 1 || ($postId && !$postBy)) {
-                            $account = Accounts::find($post->account_id);
-                            if (!$account) {
-                                $countError++;
-                                $message = __("This account does not exist");
-
-                                if (request()->id_secure) {
-                                    $post->status = 5;
-                                    $post->result = json_encode(["message" => $message], JSON_UNESCAPED_UNICODE);
-                                    Posts::where("id", $postId)
+                            // Update post status if editing
+                            if (request()->has('id_secure')) {
+                                $post->status = 5;
+                                $post->result = json_encode(["message" => $message], JSON_UNESCAPED_UNICODE);
+                                
+                                $item = Posts::where('id_secure', $post->id_secure)->first();
+                                if ($item) {
+                                    Posts::where('grouping_data', $item->grouping_data)
                                         ->update([
                                             'status' => 5,
                                             'result' => json_encode(["message" => $message], JSON_UNESCAPED_UNICODE)
                                         ]);
                                 }
-                            } else {
-                                if ($postBy == 1 || isset($post->id)) {
-                                    $post->account = $account;
-                                    $this->handleMediaPreprocessing($post);
-                                    $response = $module::post($post) ?: [
-                                        "status"  => 0,
-                                        "message" => __("Unknown error")
-                                    ];
-
-                                    if ($response["status"] == 1 || $response["status"] == 5) {
-                                        $countSuccess++;
-                                        $message = $response["message"];
-                                        $post->status = $response["status"] == 1 ? 4 : 5;
-                                        $post->result = json_encode([
-                                            "id"      => $response["id"] ?? null,
-                                            "url"     => $response["url"] ?? null,
-                                            "message" => $response["message"],
-                                            "type"    => $response["status"] == 5 ? $response["type"] ?? null : null,
-                                        ], JSON_UNESCAPED_UNICODE);
-                                    } else {
-                                        $countError++;
-                                        $message = $response["message"];
-                                        $post->status = 5;
-                                        $post->result = json_encode(["message" => $response["message"]], JSON_UNESCAPED_UNICODE);
+                            }
+                        } else {
+                            // Post immediately or from cron
+                            if ($postBy == 1 || isset($post->id)) {
+                                // Check quota
+                                $quota = $this->checkQuota($teamId);
+                                if (!$quota['can_post']) {
+                                    $countError++;
+                                    $message = __('Post failed: Quota exceeded');
+                                    $errMessages[] = ucfirst($socialNetwork) . '--' . $quota['message'];
+                                    
+                                    $post->status = 5;
+                                    $post->result = json_encode([
+                                        'message' => ucfirst($socialNetwork) . '--' . $quota['message'],
+                                    ], JSON_UNESCAPED_UNICODE);
+                                    
+                                    if ($fromRun == 'cron') {
+                                        Posts::where('id', $post->id)
+                                            ->update([
+                                                'status' => 5,
+                                                'result' => $post->result
+                                            ]);
                                     }
+                                    
+                                    $this->savePostStat($post, 5, $quota['message'], null);
+                                    continue;
+                                }
 
-                                    // Handle repost
-                                    if (($tmpPost['repost_frequency'] ?? 0) != 0) {
-                                        $nextTime = $tmpPost['repost_frequency'] * 86400;
-                                        unset($tmpPost['account'], $tmpPost['id']);
+                                $post->account = $account;
+                                $this->handleMediaPreprocessing($post);
+                                
+                                $response = $module::post($post) ?: [
+                                    "status" => 0,
+                                    "message" => __("Unknown error")
+                                ];
 
-                                        if ($tmpPost['time_post'] < $tmpPost['repost_until']) {
-                                            $post->repost_frequency = 0;
-                                            $post->repost_until = null;
+                                if ($response["status"] == 1) {
+                                    $countSuccess++;
+                                    $message = $response["message"];
+                                    $post->status = 4; // Published
+                                    $post->result = json_encode([
+                                        "id" => $response["id"] ?? null,
+                                        "url" => $response["url"] ?? null,
+                                        "message" => $response["message"]
+                                    ], JSON_UNESCAPED_UNICODE);
+
+                                    // Update team stats
+                                    $this->updateTeamStats($teamId, $socialNetwork, 'success', $response["type"] ?? null);
+                                } else {
+                                    $countError++;
+                                    $message = $response["message"];
+                                    $errMessages[] = ucfirst($socialNetwork) . '--' . $response["message"];
+                                    
+                                    $post->status = 5; // Failed
+                                    $post->result = json_encode([
+                                        "message" => ucfirst($socialNetwork) . '--' . $response["message"]
+                                    ], JSON_UNESCAPED_UNICODE);
+
+                                    // Update team stats
+                                    $this->updateTeamStats($teamId, $socialNetwork, 'error');
+                                }
+
+                                // Update status if from cron
+                                if ($fromRun == 'cron') {
+                                    Posts::where('id', $post->id)
+                                        ->update([
+                                            'status' => $post->status,
+                                            'result' => $post->result
+                                        ]);
+                                }
+
+                                // Save post stats
+                                $postResponse = json_decode($post->result, true) ?? [];
+                                $this->savePostStat($post, $post->status, $postResponse['message'] ?? null, $postResponse['id'] ?? null);
+
+                                // Handle repost
+                                if (($tmpPost['repost_frequency'] ?? 0) != 0) {
+                                    $nextTime = $tmpPost['repost_frequency'] * 86400;
+                                    unset($tmpPost['account'], $tmpPost['id']);
+
+                                    if ($tmpPost['time_post'] < $tmpPost['repost_until']) {
+                                        $post->repost_frequency = 0;
+                                        $post->repost_until = null;
+                                        
+                                        if ($fromRun != 'cron') {
                                             $tmpPost['id_secure'] = rand_string();
                                             $tmpPost['result'] = null;
                                             $tmpPost['changed'] = time();
                                             $tmpPost['created'] = time();
                                             $tmpPost['time_post'] += $nextTime;
+                                            
                                             if ($tmpPost['time_post'] <= time()) {
                                                 $tmpPost['time_post'] = time() + $nextTime;
                                             }
+                                            
                                             Posts::create($tmpPost);
                                         }
                                     }
-                                } else {
-                                    $countSchedule++;
-                                }
-
-                                unset($post->account);
-
-                                $postArr = (is_object($post) && method_exists($post, 'toArray'))
-                                    ? $post->toArray()
-                                    : (array)$post;
-
-                                if ($postId) {
-                                    $postSaved = Posts::where("id_secure", $postArr['id_secure'])
-                                        ->update($postArr);
-                                } else {
-                                    $postSaved = Posts::create($postArr);
-                                }
-
-                                if($postSaved){
-                                    $postResponse = json_decode($postArr['result'], true) ?? [];
-                                    $this->savePostStat($post, $postArr['status'], $postResponse['message'] ?? null, $postResponse['id'] ?? 0);
-                                }
-                            }
-                        } else {
-                            $postArr = (is_object($post) && method_exists($post, 'toArray'))
-                                ? $post->toArray()
-                                : (array)$post;
-
-                            if ($checkPosts) {
-                                if ($postArr['status'] == 0) {
-                                    $postArr['id_secure'] = rand_string();
-                                    Posts::create($postArr);
-                                } else {
-                                    Posts::where("id_secure", $postArr['id_secure'])
-                                        ->update($postArr);
                                 }
                             } else {
-                                return [
-                                    "status"  => 0,
-                                    "message" => __("Can't update this post")
-                                ];
+                                $countSchedule++;
                             }
+
+                            unset($post->account);
+
+                            $postArr = (is_object($post) && method_exists($post, 'toArray'))
+                                ? $post->toArray()
+                                : (array) $post;
+
+                            // Save or update post
+                            if ($postId && !request()->input('draft') && $fromRun != 'cron') {
+                                $item = Posts::where('id_secure', $postArr['id_secure'])->first();
+                                
+                                if (!empty($item) && empty($postType)) {
+                                    Posts::where('grouping_data', $item->grouping_data)->delete();
+                                }
+                                
+                                if ($fromRun != 'cron') {
+                                    $postArr['id_secure'] = rand_string();
+                                    Posts::create($postArr);
+                                }
+                            } else {
+                                if ($fromRun != 'cron') {
+                                    if (request()->input('draft') && $postArr['status'] == 0) {
+                                        $item = Posts::where('id_secure', $postArr['id_secure'])->first();
+                                        
+                                        if (!empty($item) && empty($postType)) {
+                                            Posts::where('grouping_data', $item->grouping_data)->delete();
+                                        }
+                                        
+                                        $postArr['id_secure'] = rand_string();
+                                        Posts::create($postArr);
+                                    } else {
+                                        $item = Posts::where('id_secure', $postArr['id_secure'])->first();
+                                        
+                                        if (!empty($item) && empty($postType)) {
+                                            Posts::where('grouping_data', $item->grouping_data)->delete();
+                                        }
+                                        
+                                        $postArr['id_secure'] = rand_string();
+                                        Posts::create($postArr);
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // Updating existing post
+                        $item = Posts::where('id_secure', $post->id_secure)->first();
+                        
+                        if (!empty($item)) {
+                            if ($post->status == 0) {
+                                if ($fromRun != 'cron') {
+                                    $postArr = (is_object($post) && method_exists($post, 'toArray'))
+                                        ? $post->toArray()
+                                        : (array) $post;
+                                    
+                                    $postArr['id_secure'] = rand_string();
+                                    Posts::create($postArr);
+                                }
+                            } else {
+                                if ($fromRun != 'cron') {
+                                    if (empty($postType)) {
+                                        Posts::where('grouping_data', $item->grouping_data)->delete();
+                                    }
+                                    
+                                    $postArr = (is_object($post) && method_exists($post, 'toArray'))
+                                        ? $post->toArray()
+                                        : (array) $post;
+                                    
+                                    $postArr['id_secure'] = rand_string();
+                                    Posts::create($postArr);
+                                }
+                            }
+                        } elseif (empty($item)) {
+                            if ($fromRun != 'cron') {
+                                $postArr = (is_object($post) && method_exists($post, 'toArray'))
+                                    ? $post->toArray()
+                                    : (array) $post;
+                                
+                                $postArr['id_secure'] = rand_string();
+                                Posts::create($postArr);
+                            }
+                        } else {
+                            return [
+                                "status" => 0,
+                                "message" => __("Can't update this post")
+                            ];
+                        }
+                    }
+                } elseif ($postBy == 5) {
+                    // Save to approval
+                    if ($post->id_secure) {
+                        if ($fromRun != 'cron') {
+                            $item = Posts::where('id_secure', $post->id_secure)->first();
+                            
+                            if (!empty($item) && empty($postType)) {
+                                Posts::where('grouping_data', $item->grouping_data)->delete();
+                            }
+                            
+                            $postArr = (is_object($post) && method_exists($post, 'toArray'))
+                                ? $post->toArray()
+                                : (array) $post;
+                            
+                            $postArr['id_secure'] = rand_string();
+                            Posts::create($postArr);
+                        }
+                    } else {
+                        if ($fromRun != 'cron') {
+                            $postArr = (is_object($post) && method_exists($post, 'toArray'))
+                                ? $post->toArray()
+                                : (array) $post;
+                            
+                            $postArr['id_secure'] = rand_string();
+                            Posts::create($postArr);
+                        }
+                    }
+                } else {
+                    $countError++;
+                    $message = __("Can't post to this social network");
+
+                    if ($postId) {
+                        $item = Posts::where('id', $postId)->first();
+                        if ($item) {
+                            Posts::where('grouping_data', $item->grouping_data)
+                                ->update([
+                                    'status' => 5,
+                                    'result' => json_encode(["message" => $message], JSON_UNESCAPED_UNICODE)
+                                ]);
                         }
                     }
                 }
-            } catch (Exception $e) {
-                $this->savePostStat($post, 5, $e->getMessage(), null);
-
-                $postArr = (is_object($post) && method_exists($post, 'toArray'))
-                    ? $post->toArray()
-                    : (array)$post;
-
-                unset($postArr['account'], $postArr['id']);
-                $postArr['status'] = 5;
-                $postArr['result'] = json_encode(["message" => $e->getMessage()], JSON_UNESCAPED_UNICODE);
-                if ($postId) {
-                    Posts::where("id", $postId)->update($postArr);
-                } else {
-                    Posts::create($postArr);
-                }
             }
-        }
+        } catch (\Exception $e) {
+            $countError++;
+            $errMessages[] = ucfirst($socialNetwork ?? 'Unknown') . '--' . $e->getMessage();
+            
+            $this->savePostStat($post, 5, $e->getMessage(), null);
 
-        // cleanup uploaded files sau khi post
-        $this->cleanupFiles();
+            $postArr = (is_object($post) && method_exists($post, 'toArray'))
+                ? $post->toArray()
+                : (array) $post;
 
-        if ($postBy == 1 || isset($post->id)) {
-            if ($countError == 0) {
-                return [
-                    "status" => 1,
-                    "message" => __("Content is being published on :success profiles", ['success' => $countSuccess])
-                ];
-            } else if ($countError == 1 && $countSuccess == 0) {
-                return [
-                    "status" => 0,
-                    "message" => $message
-                ];
+            unset($postArr['account'], $postArr['id']);
+            $postArr['status'] = 5;
+            $postArr['result'] = json_encode(["message" => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+            
+            if ($postId) {
+                Posts::where('id', $postId)->update($postArr);
             } else {
-                return [
-                    "status" => 1,
-                    "message" => sprintf(__("Content is being published on %d profiles and %d profiles unpublished"), $countSuccess, $countError)
-                ];
+                Posts::create($postArr);
             }
         }
-		if ($postBy != 1) {
-			return [
-				"status" => 1,
-				"message" => __("Content successfully updated")
-			];
-		} else {
-			return [
-				"status" => 1,
-				"message" => __("Content successfully scheduled")
-			];
-		}
     }
 
+    // Cleanup uploaded files
+    $this->cleanupFiles();
+
+    // Return appropriate response based on post_by value
+    if ($postBy == 1 || isset($post->id)) {
+        if ($countError == 0) {
+            return [
+                "status" => 1,
+                "message" => sprintf(__("Content is being published on %d profiles"), $countSuccess)
+            ];
+        } elseif ($countError == 1 && $countSuccess == 0) {
+            return [
+                "status" => 0,
+                "message" => $message
+            ];
+        } else {
+            return [
+                "status" => 0,
+                "message" => sprintf(
+                    __("Content is being published on %d profiles and %d profiles unpublished(%s)"), 
+                    $countSuccess, 
+                    $countError, 
+                    implode(', ', $errMessages)
+                )
+            ];
+        }
+    } elseif ($postBy == 4) {
+        return [
+            "status" => 1,
+            "message" => __("Post saved to draft folder")
+        ];
+    } elseif ($postBy == 5) {
+        return [
+            "status" => 1,
+            "message" => __("Post saved to approval folder")
+        ];
+    } else {
+        return [
+            "status" => 1,
+            "message" => __("Content successfully scheduled")
+        ];
+    }
+}
+
+// Helper method to update team stats
+protected function updateTeamStats($teamId, $socialNetwork, $type, $postType = null)
+{
+    if ($type == 'success') {
+        // Increment success count
+        $currentSuccess = TeamData::where('team_id', $teamId)
+            ->where('key', $socialNetwork . '_post_success_count')
+            ->value('value') ?? 0;
+        
+        TeamData::updateOrCreate(
+            ['team_id' => $teamId, 'key' => $socialNetwork . '_post_success_count'],
+            ['value' => $currentSuccess + 1]
+        );
+        
+        // Increment total count
+        $currentTotal = TeamData::where('team_id', $teamId)
+            ->where('key', $socialNetwork . '_post_count')
+            ->value('value') ?? 0;
+        
+        TeamData::updateOrCreate(
+            ['team_id' => $teamId, 'key' => $socialNetwork . '_post_count'],
+            ['value' => $currentTotal + 1]
+        );
+        
+        // Increment post type count if provided
+        if ($postType) {
+            $currentTypeCount = TeamData::where('team_id', $teamId)
+                ->where('key', $socialNetwork . '_post_' . $postType . '_count')
+                ->value('value') ?? 0;
+            
+            TeamData::updateOrCreate(
+                ['team_id' => $teamId, 'key' => $socialNetwork . '_post_' . $postType . '_count'],
+                ['value' => $currentTypeCount + 1]
+            );
+        }
+    } elseif ($type == 'error') {
+        // Increment error count
+        $currentError = TeamData::where('team_id', $teamId)
+            ->where('key', $socialNetwork . '_post_error_count')
+            ->value('value') ?? 0;
+        
+        TeamData::updateOrCreate(
+            ['team_id' => $teamId, 'key' => $socialNetwork . '_post_error_count'],
+            ['value' => $currentError + 1]
+        );
+        
+        // Increment total count
+        $currentTotal = TeamData::where('team_id', $teamId)
+            ->where('key', $socialNetwork . '_post_count')
+            ->value('value') ?? 0;
+        
+        TeamData::updateOrCreate(
+            ['team_id' => $teamId, 'key' => $socialNetwork . '_post_count'],
+            ['value' => $currentTotal + 1]
+        );
+    }
+}
     /**
      * Xử lý media (convert b64_json → file url)
      */

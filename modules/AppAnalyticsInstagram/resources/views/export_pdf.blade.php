@@ -56,13 +56,6 @@
         .table tbody tr:nth-child(even) {
             background-color: #fafafa;
         }
-        img.chart {
-            display: block;
-            margin: 0 auto;
-            max-width: 95%;
-            margin-top: 12px;
-            margin-bottom: 30px;
-        }
         .highlight {
             font-weight: bold;
             color: #e1306c;
@@ -72,6 +65,31 @@
             font-size: 11px;
             margin-top: 3px;
         }
+		/* Chart styling - 2 per row */
+		/* Charts in 2 columns with proper spacing */
+		.chart-container {
+			display: inline-block;
+			width: 45%;
+			margin-bottom: 20px;
+			margin-right: 0;
+			padding: 10px;
+			vertical-align: top;
+			page-break-inside: avoid;
+			box-sizing: border-box;
+			border: 1px solid #e0e0e0;
+		}
+
+		.chart-container:nth-child(odd) {
+			margin-right: 2%;
+		}
+
+		img.chart {
+			display: block;
+			width: 100%;
+			height: auto;
+			border: none;
+			background: #fff;
+		}
     </style>
 </head>
 <body>
@@ -90,16 +108,6 @@
         @endif
     </div>
 
-    @if (!empty($charts) && is_array($charts))
-        <div class="section">
-            <h3>{{ __('Charts') }}</h3>
-            @foreach ($charts as $chart)
-                @if(isset($chart['base64']))
-                    <img class="chart" src="{{ $chart['base64'] }}" alt="Chart">
-                @endif
-            @endforeach
-        </div>
-    @endif
 
     <div class="section">
         <h3>{{ __('Profile Overview') }}</h3>
@@ -108,7 +116,7 @@
                 <tr>
                     <th>{{ __('Metric') }}</th>
                     <th>{{ __('Total') }}</th>
-                    <th>{{ __('Change (%)') }}</th>
+                    <!--<th>{{ __('Change (%)') }}</th>-->
                 </tr>
             </thead>
             <tbody>
@@ -116,37 +124,74 @@
                 <tr>
                     <td>{{ __('Reach') }}</td>
                     <td class="highlight">{{ number_format($overview['reach']['value'] ?? 0) }}</td>
-                    <td>{{ ($overview['reach']['change'] ?? 0) . '%' }}</td>
+                   <!-- <td>{{ ($overview['reach']['change'] ?? 0) . '%' }}</td>-->
                 </tr>
                 <tr>
                     <td>{{ __('Likes') }}</td>
                     <td class="highlight">{{ number_format($overview['likes']['value'] ?? 0) }}</td>
-                    <td>{{ ($overview['likes']['change'] ?? 0) . '%' }}</td>
+                    <!--<td>{{ ($overview['likes']['change'] ?? 0) . '%' }}</td>-->
                 </tr>
                 <tr>
                     <td>{{ __('Comments') }}</td>
                     <td class="highlight">{{ number_format($overview['comments']['value'] ?? 0) }}</td>
-                    <td>{{ ($overview['comments']['change'] ?? 0) . '%' }}</td>
+                    <!--<td>{{ ($overview['comments']['change'] ?? 0) . '%' }}</td>-->
                 </tr>
                 <tr>
                     <td>{{ __('Shares') }}</td>
                     <td class="highlight">{{ number_format($overview['shares']['value'] ?? 0) }}</td>
-                    <td>{{ ($overview['shares']['change'] ?? 0) . '%' }}</td>
+                    <!--<td>{{ ($overview['shares']['change'] ?? 0) . '%' }}</td>-->
                 </tr>
                 <tr>
                     <td>{{ __('Views') }}</td>
                     <td class="highlight">{{ number_format($overview['views']['value'] ?? 0) }}</td>
-                    <td>{{ ($overview['views']['change'] ?? 0) . '%' }}</td>
+                    <!--<td>{{ ($overview['views']['change'] ?? 0) . '%' }}</td>-->
                 </tr>
                 <tr>
                     <td>{{ __('Published Posts') }}</td>
                     <td class="highlight">{{ number_format($overview['published_videos']['value'] ?? 0) }}</td>
-                    <td>{{ ($overview['published_videos']['change'] ?? 0) . '%' }}</td>
+                    <!--<td>{{ ($overview['published_videos']['change'] ?? 0) . '%' }}</td>-->
                 </tr>
             </tbody>
         </table>
     </div>
+	
+	
+    @if (!empty($charts) && is_array($charts))
+        <div class="section">
+           <!-- <h3>{{ __('Charts') }}</h3>-->
+            @foreach ($charts as $chart)
+                @if(isset($chart['base64']))
+					<div class="chart-container">
+                        <img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}">
+                    </div>
+                @endif
+            @endforeach
+        </div>
+    @endif
 
+    <div class="section">
+        <h3>{{ __('Reach by Followers Type') }}</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>{{ __('Type') }}</th>
+                    <th>{{ __('Reach') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($analytics['reachByFollowTypeData']['series'] ?? [] as $row)
+                    <tr>
+                        <td>{{ $row['name'] }}</td>
+                        <td class="highlight">{{ number_format($row['y']) }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+        <div class="subtext">
+            {{ __('Total:') }} <strong>{{ number_format($analytics['reachByFollowTypeData']['summary']['total'] ?? 0) }}</strong>
+        </div>
+    </div>
+	
     <div class="section">
         <h3>{{ __('Top Countries') }}</h3>
         <table class="table">
@@ -333,29 +378,7 @@
         </div>
     </div>
 
-    <div class="section">
-        <h3>{{ __('Reach by Followers Type') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Type') }}</th>
-                    <th>{{ __('Reach') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($analytics['reachByFollowTypeData']['series'] ?? [] as $row)
-                    <tr>
-                        <td>{{ $row['name'] }}</td>
-                        <td class="highlight">{{ number_format($row['y']) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="subtext">
-            {{ __('Total:') }} <strong>{{ number_format($analytics['reachByFollowTypeData']['summary']['total'] ?? 0) }}</strong>
-        </div>
-    </div>
-
+<!--
     <div class="section">
         <h3>{{ __('Post History') }}</h3>
         <table class="table">
@@ -390,6 +413,17 @@
                 @endforeach
             </tbody>
         </table>
+    </div>-->
+    <!-- Summary -->
+    <div class="section">
+        <h3>{{ __('Summary') }}</h3>
+        <p>
+            {{ __('This report shows the Instagram performance for the selected period.') }}
+            {{ __('The metrics include reach, likes, comments, shares, views and follower growth.') }}
+        </p>
+        <p style="margin-top: 20px; font-size: 10px; color: #666;">
+            {{ __('Generated on') }}: {{ now()->format('Y-m-d H:i:s') }}
+        </p>
     </div>
 
 </body>

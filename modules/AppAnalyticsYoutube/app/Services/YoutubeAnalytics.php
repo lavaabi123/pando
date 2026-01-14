@@ -49,7 +49,7 @@ class YoutubeAnalytics implements SocialAnalyticsInterface
 
     public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "youtube")->where("category", "channel")->orderBy('id')->get();
+		$accounts = Accounts::where("brand_id", session('brand_id'))->where("social_network", "youtube")->where("category", "channel")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {

@@ -2791,60 +2791,164 @@ var Main = new (function ()
         window.ChartInstances[container] = chart;
         return chart;
     },
-
-    Main.exportCharts = function() {
-        $(document).off("click", ".exportPDF").on("click", ".exportPDF", function(e) {
-            e.preventDefault();
-
-            const action = $(this).attr("href");
-            const chartIds = $(".export-chart").map(function() {
-                const id = $(this).attr("id");
-                return id ? id : null;
-            }).get();
-
-            if (chartIds.length === 0) {
-                Main.showNotify('', "No valid charts to export.", 0);
-                return;
-            }
-
-            const convertChartPromises = chartIds.map(id => {
-                return new Promise((resolve) => {
-                    const chart = window.ChartInstances?.[id];
-                    if (!chart || typeof chart.getSVG !== "function") {
-                        console.warn(`Chart with ID '${id}' is either invalid or not initialized.`);
-                        resolve(null);
-                        return;
-                    }
-
+Main.exportCharts = function() {
+    $(document).off("click", ".exportPDF").on("click", ".exportPDF", function(e) {
+        e.preventDefault();
+        const action = $(this).attr("href");
+        
+        const chartIds = $(".export-chart").map(function() {
+            const id = $(this).attr("id");
+            return id ? id : null;
+        }).get().filter(Boolean);
+        
+        if (chartIds.length === 0) {
+            Main.showNotify('', "No valid charts to export.", 0);
+            return;
+        }
+        
+        Main.showNotify('info', "Preparing charts for export...", 1);
+        
+        const convertChartPromises = chartIds.map(id => {
+            return new Promise((resolve) => {
+                const chart = window.ChartInstances?.[id];
+                
+                if (!chart || typeof chart.getSVG !== "function") {
+                    console.warn(`Chart with ID '${id}' is either invalid or not initialized.`);
+                    resolve(null);
+                    return;
+                }
+                
+                try {
                     const svg = chart.getSVG();
-                    const cleanedSVG = svg.replace(/<text[^>]*>Chart title<\/text>/gi, '');
+                    
+                    // More specific title removal - only remove titles in the top area
+                    let cleanedSVG = svg;
+                    
+                    // Remove ApexCharts title class specifically
+                    cleanedSVG = cleanedSVG.replace(/<text[^>]*class="[^"]*apexcharts-title-text[^"]*"[^>]*>.*?<\/text>/gi, '');
+                    
+                    // Remove "Chart title" placeholder only
+                    cleanedSVG = cleanedSVG.replace(/<text[^>]*>Chart title<\/text>/gi, '');
+                    
+                    // Alternative: Remove specific known title texts but preserve everything else
+                    const specificTitles = [
+                        'Overview Trends', 
+                        'Fan History', 
+                        'Gained vs Lost Fans', 
+                        'Post Reach Metrics', 
+                        'Post Impression Metrics', 
+                        'Page Views', 
+                        'Video View Distribution', 
+                        'Post Engagement Metrics', 
+                        'Video Views: Organic vs Paid', 
+                        'Video Plays: Click vs Auto',
+                        'Engagement Rate',
+                        'Reach',
+                        'Interactions',
+                        'Account Reach', 
+                        'Followers by Age Group', 
+                        'Followers by Gender',
+                        // Add LinkedIn demographics titles
+						'Page Views by Device',
+                        'Followers by Industry',
+                        'Followers by Seniority',
+                        'Followers by Job Function',
+                        'Followers by Company Size',
+                        'Fan Locations',
+						'Post Count by Day',
+						'Post Reach', 
+						'Post Impressions, Engagement and Rate',
+						'Post Click Count by Day',
+                    ];
+                    specificTitles.forEach(title => {
+                        const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                        cleanedSVG = cleanedSVG.replace(
+                            new RegExp(`<text[^>]*(?!.*apexcharts-legend)>${escapedTitle}<\/text>`, 'gi'), 
+                            ''
+                        );
+                    });
+                    
+                    // Get chart title from element
+                    const chartElement = $(`#${id}`);
+                    const chartTitle = chartElement.closest('.card').find('.card-header h5, .card-title').text().trim() || 
+                                      chartElement.attr('data-title') || 
+                                      id.replace(/-/g, ' ').replace(/_/g, ' ');
+                    
                     const canvas = document.createElement('canvas');
                     const ctx = canvas.getContext('2d');
                     const img = new Image();
-
+                    
                     img.onload = function() {
-                        canvas.width = img.width;
-                        canvas.height = img.height;
-                        ctx.drawImage(img, 0, 0);
-                        resolve({ id: id, base64: canvas.toDataURL("image/png") });
+                        const titleHeight = 35;
+                        const titleMarginBottom = 15;
+                        const titleMarginTop = 10;
+                        const bottomSpace = 100;
+                        const sideSpace = 40;
+                        
+                        const totalTitleSpace = titleHeight + titleMarginBottom + titleMarginTop;
+                        
+                        canvas.width = img.width + (sideSpace * 2);
+                        canvas.height = img.height + totalTitleSpace + bottomSpace;
+                        
+                        // White background
+                        ctx.fillStyle = '#ffffff';
+                        ctx.fillRect(0, 0, canvas.width, canvas.height);
+                        
+                        // Draw title
+                        ctx.fillStyle = '#333333';
+                        ctx.font = 'bold 20px Arial, sans-serif';
+                        ctx.textAlign = 'left';
+                        ctx.textBaseline = 'top';
+                        ctx.fillText(chartTitle, sideSpace, titleMarginTop);
+                        
+                        // Draw underline
+                        ctx.strokeStyle = '#e0e0e0';
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(sideSpace, titleMarginTop + 25);
+                        ctx.lineTo(canvas.width - sideSpace, titleMarginTop + 25);
+                        ctx.stroke();
+                        
+                        // Draw chart
+                        ctx.drawImage(img, sideSpace, totalTitleSpace);
+                        
+                        resolve({ 
+                            id: id, 
+                            title: chartTitle,
+                            base64: canvas.toDataURL("image/png", 1.0)
+                        });
                     };
-
+                    
+                    img.onerror = function() {
+                        console.error(`Failed to load image for chart: ${id}`);
+                        resolve(null);
+                    };
+                    
                     const svgBlob = new Blob([cleanedSVG], { type: 'image/svg+xml;charset=utf-8' });
                     img.src = URL.createObjectURL(svgBlob);
-                });
-            });
-
-            Promise.all(convertChartPromises).then(results => {
-                const validCharts = results.filter(item => item !== null);
-                if (validCharts.length === 0) {
-                    Main.showNotify('', "No valid charts to export.", 0);
-                    return;
+                    
+                } catch (error) {
+                    console.error(`Error processing chart ${id}:`, error);
+                    resolve(null);
                 }
-                Main.sendChart(action, validCharts);
             });
         });
-    },
-
+        
+        Promise.all(convertChartPromises).then(results => {
+            const validCharts = results.filter(item => item !== null);
+            
+            if (validCharts.length === 0) {
+                Main.showNotify('error', "No valid charts to export.", 0);
+                return;
+            }
+            
+            Main.sendChart(action, validCharts);
+        }).catch(error => {
+            console.error('Error converting charts:', error);
+            Main.showNotify('error', "Failed to prepare charts for export.", 0);
+        });
+    });
+},
     Main.sendChart = function(url, images){
         Main.overplay();
         fetch(url, {

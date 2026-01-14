@@ -525,13 +525,43 @@ class AppPublishingController extends Controller
 
         ms([ "status" => 1 ]);
     }
+	
+	public function composerget(Request $request)
+    {
+        $id = $request->input("id");
+        $date = $request->input("date");
+        $post = Posts::where("id_secure", $id)->first();
+		$accountIds = !empty($post) ? Posts::where('grouping_data', $post->grouping_data)->pluck('account_id')->toArray() : [];
+        $labels = DB::table('post_labels')
+             ->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})
+            ->where("status", 1)
+            ->get();
 
+        $campaigns = DB::table('post_campaigns')
+             ->when(session('role_id') != 2, function($query) use ($request) {
+				return $query->where('team_id', $request->team_id);
+			})
+            ->where("status", 1)
+            ->get();
+
+        return view(module("key") . '::composer', [
+        "labels"    => $labels,
+        "campaigns" => $campaigns,
+        "post"      => $post,
+        "date"      => $date,
+		"method" => "get",
+		"accountIds" => $accountIds
+    ]);
+    }
+	
     public function composer(Request $request)
     {
         $id = $request->input("id");
         $date = $request->input("date");
         $post = Posts::where("id_secure", $id)->first();
-
+        $accountIds = Posts::where('grouping_data', $post->grouping_data)->pluck('account_id')->toArray();
         $labels = DB::table('post_labels')
              ->when(session('role_id') != 2, function($query) use ($request) {
 				return $query->where('team_id', $request->team_id);
@@ -553,6 +583,8 @@ class AppPublishingController extends Controller
                 "campaigns" => $campaigns,
                 "post"      => $post,
                 "date"      => $date,
+				"method" => "post",
+				"accountIds" => $accountIds
             ])->render()
         ]);
     }
@@ -570,6 +602,7 @@ class AppPublishingController extends Controller
 
     public function save(Request $request)
     {
+		
         $skipValidate    = (bool) $request->confirm;
         $type            = (string) $request->type;
         $postBy          = (int) $request->post_by;

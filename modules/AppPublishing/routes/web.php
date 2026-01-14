@@ -19,10 +19,12 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::group(["prefix" => "app"], function () {
         Route::group(["prefix" => "publishing"], function () {
             Route::resource('/', AppPublishingController::class)->only(['index'])->names('app.publishing');
+            Route::resource('/calendar', AppPublishingController::class)->only(['index'])->names('app.publishing.calendar');
             Route::get('events', [AppPublishingController::class, 'events'])->name('app.publishing.events');
 			Route::post('alllist/{type}/{category}/{date}', [AppPublishingController::class, 'alllist']);
             Route::get('events_count', [AppPublishingController::class, 'events_count'])->name('app.publishing.events_count');
             Route::post('composer', [AppPublishingController::class, 'composer'])->name('app.publishing.composer');
+            Route::get('composer', [AppPublishingController::class, 'composerget'])->name('app.publishing.composer');
             Route::post('preview', [AppPublishingController::class, 'preview'])->name('app.publishing.preview');
             Route::post('comments', [AppPublishingController::class, 'comments'])->name('app.publishing.comments');
             Route::post('comments/store', [AppPublishingController::class, 'store'])->name('app.publishing.comments.store');

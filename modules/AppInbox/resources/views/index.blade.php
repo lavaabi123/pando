@@ -225,7 +225,7 @@
         <!-- Main Content Area -->
         <div class="col-9">
 			<h3 class="fw-7 mb-4 fs-22"><span class="d-inline-block w-22">{!! file_get_contents(public_path('img/inbox.svg')) !!}</span> Inbox</h3>
-			<div class="border b-r-30 p-3 fs-14 maxHeight-wos overflow-hidden">
+			<div class="border b-r-30 p-3 fs-14 overflow-hidden">
 
 				<div class="row h-100">
 					<!-- Inbox List -->

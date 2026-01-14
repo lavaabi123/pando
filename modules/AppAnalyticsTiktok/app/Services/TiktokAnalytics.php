@@ -22,7 +22,7 @@ class TiktokAnalytics implements SocialAnalyticsInterface
 
     public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "tiktok")->where("category", "profile")->orderBy('id')->get();
+		$accounts = Accounts::where("brand_id", session('brand_id'))->where("social_network", "tiktok")->where("category", "profile")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {
@@ -740,7 +740,7 @@ class TiktokAnalytics implements SocialAnalyticsInterface
 	            'Authorization' => 'Bearer ' . $accessToken,
 	            'Content-Type'  => 'application/json',
 	        ])->post('https://open.tiktokapis.com/v2/video/list/?fields='.implode(',', $fields), $payload);
-
+			print_r($response->json());exit;
 	        if (!$response->successful()) {
 	            logger()->error('[TiktokAnalytics] getVideoList failed', [
 	                'status' => $response->status(),

@@ -56,7 +56,7 @@
         </div>
     </div>
 </div>
-
+@push('scripts')
 <script>
 $(document).on('change', 'input[name="type"]', function () {
     var isLink = $(this).val() === 'link';
@@ -149,3 +149,4 @@ if (container) {
     updateInstagramPreviews(); // also trigger on load
 }
 </script>
+@endpush

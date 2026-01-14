@@ -56,7 +56,7 @@
         </div>
     </div>
 </div>
-
+<?php $__env->startPush('scripts'); ?>
 <script>
 $(document).on('change', 'input[name="type"]', function () {
     var isLink = $(this).val() === 'link';
@@ -149,4 +149,4 @@ if (container) {
     updateInstagramPreviews(); // also trigger on load
 }
 </script>
-<?php /**PATH C:\xampp82\htdocs\pando-laravel\modules/AppChannelInstagramProfiles\resources/views/preview.blade.php ENDPATH**/ ?>
+<?php $__env->stopPush(); ?><?php /**PATH C:\xampp82\htdocs\pando-laravel\modules/AppChannelInstagramProfiles\resources/views/preview.blade.php ENDPATH**/ ?>

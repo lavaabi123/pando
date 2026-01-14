@@ -45,6 +45,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
+            margin-bottom: 46px;
         }
 
         .table th, .table td {
@@ -56,15 +57,35 @@
             background-color: #f9f9f9;
         }
 
-        img.chart {
-            max-width: 100%;
-            margin-top: 10px;
-            margin-bottom: 25px;
-        }
 
         .text-muted {
             color: #777;
         }
+		/* Chart styling - 2 per row */
+		/* Charts in 2 columns with proper spacing */
+		.chart-container {
+			display: inline-block;
+			width: 45%;
+			margin-bottom: 20px;
+			margin-right: 0;
+			padding: 10px;
+			vertical-align: top;
+			page-break-inside: avoid;
+			box-sizing: border-box;
+			border: 1px solid #e0e0e0;
+		}
+
+		.chart-container:nth-child(odd) {
+			margin-right: 2%;
+		}
+
+		img.chart {
+			display: block;
+			width: 100%;
+			height: auto;
+			border: none;
+			background: #fff;
+		}
     </style>
 </head>
 <body>
@@ -77,22 +98,10 @@
         <strong>{{ __('Profile URL') }}:</strong> {{ $analytics['account']['url'] ?? '-' }}<br>
         @if (!empty($startDate) && !empty($endDate))
             <br>
-            <strong>{{ __('From') }}:</strong> {{ $startDate }}<br>
-            <strong>{{ __('To') }}:</strong> {{ $endDate }}
+             <strong>{{ __('Period') }}:</strong> {{ $startDate }} -  {{ $endDate }}
         @endif
     </div>
-
-    @if (!empty($charts) && is_array($charts))
-        <div class="section">
-            <h3>{{ __('Charts') }}</h3>
-            @foreach ($charts as $chart)
-                @if(isset($chart['base64']))
-                    <img class="chart" src="{{ $chart['base64'] }}" alt="Chart">
-                @endif
-            @endforeach
-        </div>
-    @endif
-
+	
     <div class="section">
         <h3>{{ __('Overview') }}</h3>
         <table class="table">
@@ -100,7 +109,7 @@
                 <tr>
                     <th>{{ __('Metric') }}</th>
                     <th>{{ __('Total') }}</th>
-                    <th>{{ __('Change') }}</th>
+                    <!--<th>{{ __('Change') }}</th>-->
                 </tr>
             </thead>
             <tbody>
@@ -108,14 +117,24 @@
                     <tr>
                         <td>{{ __(ucfirst(str_replace('_', ' ', $key))) }}</td>
                         <td>{{ number_format($item['value']) }}</td>
-                        <td>{{ $item['change'] }}%</td>
+                        <!--<td>{{ $item['change'] }}%</td>-->
                     </tr>
                 @endforeach
             </tbody>
         </table>
-    </div>
+		@if (!empty($charts) && is_array($charts))
+				@foreach ($charts as $chart)
+					@if(isset($chart['base64']))
+						<div class="chart-container">
+							<img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}">
+						</div>
+					@endif
+				@endforeach
+		@endif
+        </div>
 
-    <div class="section">
+
+    <!--<div class="section">
         <h3>{{ __('Top Countries') }}</h3>
         <table class="table">
             <thead>
@@ -133,6 +152,16 @@
                 @endforeach
             </tbody>
         </table>
+    </div>-->
+	<div class="section">
+        <h3>{{ __('Summary') }}</h3>
+        <p>
+            {{ __('This report shows the Linkedin performance for the selected period.') }}
+            {{ __('The metrics include reach, likes, comments, shares, views and follower growth.') }}
+        </p>
+        <p style="margin-top: 20px; font-size: 10px; color: #666;">
+            {{ __('Generated on') }}: {{ now()->format('Y-m-d H:i:s') }}
+        </p>
     </div>
 
 </body>

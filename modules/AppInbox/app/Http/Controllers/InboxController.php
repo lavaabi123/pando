@@ -853,9 +853,10 @@ public function getTagsList()
     protected function getCommentDetailView($item, $wheres, $whereIn)
     {
         // Get inbox detail to fetch account_id and user IDs
-        $inboxDetail = DB::table('inbox_comments')
-            ->select('account_id', 'from_user_id', 'to_user_id')
-            ->where('id', $item['id'])
+        $inboxDetail = DB::table('inbox_comments as c')
+            ->select('c.account_id', 'c.from_user_id', 'c.to_user_id','a.token')
+			->leftJoin('accounts as a', 'a.id', '=', 'c.account_id')
+            ->where('c.id', $item['id'])
             ->first();
 
         if (!$inboxDetail) {
@@ -896,20 +897,22 @@ public function getTagsList()
             if (!in_array($item['inbox_type'], ['Comment', 'AdComment'])) {
                 $postDetail = [];
             } else {
-                $postDetail = $this->getPostDetail($item['post_id']);
+                $postDetail = $this->getPostDetail($item['post_id'],$inboxDetail->token);
             }
         } elseif ($item['media_type'] == 'linkedin') {
             $postDetail = [];
         } else {
             // Instagram or other
-            $postDetail = $this->getPostDetailInsta($item['post_id']);
+            $postDetail = $this->getPostDetailInsta($item['post_id'],$inboxDetail->token);
         }
-
+		
         return view('appinbox::ajax_list_comment_detail', [
             'post_detail' => $postDetail,
             'lists' => $inboxArray,
             'id' => $item['id'],
-            'conversation_id' => ''
+            'conversation_id' => '',
+			'mediaType' => $item['media_type'],
+			'inboxType' => $item['inbox_type']
         ])->render();
     }
 
@@ -998,17 +1001,23 @@ public function getTagsList()
         return '';
     }
 
-    protected function getPostDetail($postId)
+    protected function getPostDetail($postId, $token)
     {
         // Implementation for getting Facebook post details
-        return [];
+        return InboxComment::getPostDetail($postId, $token);
     }
 
-    protected function getPostDetailInsta($postId)
+    protected function getPostDetailInsta($postId, $token)
     {
         // Implementation for getting Instagram post details
-        return [];
+        return InboxComment::getPostDetailInsta($postId, $token);
     }
+	
+	protected function getPostDetailLinkedin($postId, $token)
+    {
+        // Implementation for getting linkedin post details
+        return Inbox::getPostDetailLinkedin($postId, $token);
+    }	
 
     protected function postComment($id, $comment, $conversationId, $completeId)
     {
@@ -1017,7 +1026,7 @@ public function getTagsList()
 		$account = Accounts::where("id", $inbox[0]['account_id'])->get();
 		
 		if($account[0]['social_network'] == 'linkedin'){
-			$inbox_list = $this->Linkedinmodel->post_comment($_POST["account_id"],$id,$comment,$conversation_id,$complete_id);
+			$inbox_list = Inbox::postLinkedInComment($account[0]->token,$inbox[0]['post_id'],$inbox[0]['from_user_id'],$comment,$completeId,$id);
 		}else{
 			if($account[0]['social_network'] == 'facebook'){
 				$endpoint = "/".$inbox[0]['message_id']."/comments";
@@ -1026,7 +1035,7 @@ public function getTagsList()
 				$endpoint = "/".$inbox[0]['message_id']."/replies";
 				$token = $account[0]->token;
 			}
-			return InboxComment::postComment($token, $comment, $conversationId, $completeId, $endpoint); 
+			return InboxComment::postComment($token, $comment, $conversationId, $completeId, $endpoint,$id); 
 		}
     }
 
@@ -1071,7 +1080,11 @@ public function getTagsList()
 	
 	public function cron()
     {
-		$messages = Inbox::get_message_conversation(2);
-		$comments = InboxComment::getComments(2);
+		//$messages = Inbox::get_message_conversation(2);
+		//$comments = InboxComment::getComments(2);		
+		//$mentions = Inbox::get_mentions(2);
+		//$reviews = Inbox::get_reviews(2);
+		//$ad_comments = Inbox::get_ad_comments(2);
+		$linkedin_comment = Inbox::get_linkedin_comments(2);
 	}
 }

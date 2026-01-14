@@ -13,7 +13,7 @@
             </div>
         </div>
     </div>
-    <a class="btn btn-dark btn-sm actionItem b-r-50 text-nowrap" href="<?php echo e(url_app("publishing/composer")); ?>" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> <?php echo e(__("Compose")); ?></a>
+    <a class="btn btn-dark btn-sm b-r-50 text-nowrap" href="<?php echo e(url_app("publishing/composer")); ?>" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();"><i class="fa-light fa-calendar-lines-pen"></i> <?php echo e(__("Compose")); ?></a>
 <?php $__env->stopSection(); ?>
 
 
@@ -151,7 +151,7 @@
             </div>
 
             <div class="calendar-add-button d-none">
-                <a class="add-button wp-100 bg-dark text-white l-0 b-0 px-3 py-2 fs-14 fw-6 text-center actionItem" href="<?php echo e(url_app("publishing/composer")); ?>?date=[[date]]" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();">
+                <a class="add-button wp-100 bg-dark text-white l-0 b-0 px-3 py-2 fs-14 fw-6 text-center" href="<?php echo e(url_app("publishing/composer")); ?>?date=[[date]]" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();">
                     <i class="fa-light fa-plus"></i> <?php echo e(__("Add post")); ?>
 
                 </a>
@@ -185,7 +185,7 @@
                             [[status]]
                             <div class="d-flex gap-8">
                                 <a href="<?php echo e(url_app("publishing/preview")); ?>" class="text-gray-900 actionItem" data-popup="pubishingPreviewModal" data-id="[[grouping_data]]" data-call-success="AppPubishing.closePopoverCalendar();"><i class="fa-light fa-eye"></i></a>
-                                <a href="<?php echo e(url_app("publishing/composer")); ?>" class="text-gray-900 actionItem" data-append-content="composer-scheduling" data-id="[[id]]" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();"><i class="fa-light fa-pen-to-square"></i></a>
+                                <a href="<?php echo e(url_app("publishing/composer?id=[[id]]")); ?>" class="text-gray-900" data-append-content="composer-scheduling" data-id="[[id]]" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();"><i class="fa-light fa-pen-to-square"></i></a>
                                 <div class="btn-group position-static">
                                     <div class="dropdown-toggle dropdown-arrow-hide text-gray-900 fs-11" data-bs-toggle="dropdown" aria-expanded="true">
                                         <i class="fa-light fa-grid-2"></i>

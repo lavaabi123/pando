@@ -310,6 +310,137 @@ class InboxComment extends Model
         ]);
     }
 
+	public static function getPostDetail($postId, $token)
+	{
+		$FB = new Facebook([
+            'app_id'              => get_option("facebook_app_id", ""),
+            'app_secret'          => get_option("facebook_app_secret", ""),
+            'default_graph_version' => get_option("facebook_graph_version", "v21.0"),
+        ]);
+		if (!empty($token)) {
+			try {
+				$fields = 'from,message,created_time,full_picture';
+				$response = $FB->get("{$postId}?fields={$fields}", $token);
+				return $postData = $response->getDecodedBody();
+			} catch (\Exception $e) {
+				return [];
+			}
+		}
+		return [];
+	}
+	
+	public static function getPostDetailInsta($postId, $token)
+	{
+		try {
+			$FB = new Facebook([
+				'app_id' => get_option("facebook_client_id", ""),
+				'app_secret' => get_option("facebook_client_secret", ""),
+				'default_graph_version' => get_option("facebook_app_version", "v21.0"),
+			]);
+
+			if (empty($token)) {
+				logger()->warning("[Instagram] No token provided for post {$postId}");
+				return [];
+			}
+
+			try {
+				// ✅ FIXED: Add media_product_type to detect Reels
+				$fields = 'id,caption,timestamp,username,media_url,media_type,media_product_type,permalink,like_count,comments_count,thumbnail_url';
+				
+				$response = $FB->get("/{$postId}?fields={$fields}", $token);
+				$postData = $response->getDecodedBody();
+				
+				// Check if it's a Reel
+				$isReel = isset($postData['media_product_type']) && 
+						  $postData['media_product_type'] === 'REELS';
+				
+				if ($isReel) {
+					logger()->info("[Instagram] Post {$postId} is a REEL");
+					$postData['is_reel'] = true;
+				}
+				
+				logger()->info("[Instagram] Successfully retrieved post {$postId} from API");
+				
+				return $postData;
+				
+			} catch (\Facebook\Exceptions\FacebookResponseException $e) {
+				$errorCode = $e->getCode();
+				$errorMessage = $e->getMessage();
+				
+				logger()->warning("[Instagram] API error for post {$postId}");
+				logger()->warning("[Instagram] Error code: {$errorCode}");
+				logger()->warning("[Instagram] Error message: {$errorMessage}");
+				
+				// If it's a Reel, try alternative method
+				if (strpos($errorMessage, 'Unsupported get request') !== false) {
+					logger()->info("[Instagram] Trying Reel-specific endpoint for {$postId}");
+					return self::getReelDetails($postId, $token);
+				}
+				
+				// For error 100, try database fallback
+				if ($errorCode == 100) {
+					logger()->info("[Instagram] Post {$postId} not accessible via API, trying database fallback");
+					return [];
+				}
+				
+				return [];
+			}
+			
+		} catch (\Exception $e) {
+			logger()->error("[Instagram] Unexpected error for post {$postId}: " . $e->getMessage());
+			return [];
+		}
+	}
+	
+	protected static function getReelDetails($reelId, $token)
+	{
+		try {
+			$FB = new Facebook([
+				'app_id' => get_option("facebook_client_id", ""),
+				'app_secret' => get_option("facebook_client_secret", ""),
+				'default_graph_version' => get_option("facebook_app_version", "v21.0"),
+			]);
+
+			// Try different field combinations for Reels
+			$fieldSets = [
+				// Option 1: Comprehensive fields
+				'id,caption,timestamp,username,media_url,media_type,permalink,like_count,comments_count,thumbnail_url',
+				
+				// Option 2: Minimal fields
+				'id,caption,username,timestamp,permalink',
+				
+				// Option 3: Just basics
+				'id,caption,username'
+			];
+
+			foreach ($fieldSets as $fields) {
+				try {
+					$response = $FB->get("/{$reelId}?fields={$fields}", $token);
+					$reelData = $response->getDecodedBody();
+					
+					$reelData['is_reel'] = true;
+					$reelData['media_type'] = 'REELS';
+					
+					Log::info("[Instagram] Successfully retrieved Reel {$reelId} with fields: {$fields}");
+					
+					return $reelData;
+					
+				} catch (\Exception $e) {
+					// Try next field set
+					continue;
+				}
+			}
+			
+			// If all attempts fail, use database
+			Log::warning("[Instagram] All Reel API attempts failed for {$reelId}, using database");
+			return self::getPostDetailFromDatabase($reelId);
+			
+		} catch (\Exception $e) {
+			Log::error("[Instagram] Error getting Reel details: " . $e->getMessage());
+			return self::getPostDetailFromDatabase($reelId);
+		}
+	}
+
 	public static function getComments($brandId = '')
 	{
 		$FB = new Facebook([
@@ -600,7 +731,7 @@ class InboxComment extends Model
 		}
 	}
 	
-	public static function postComment($token, $comment, $conversationId, $completeId, $endpoint)
+	public static function postComment($token, $comment, $conversationId, $completeId, $endpoint,$id)
     {
 		$FB = new Facebook([
             'app_id'              => get_option("facebook_app_id", ""),
@@ -616,7 +747,7 @@ class InboxComment extends Model
 			 // Check if message was sent successfully
 			if (!empty($response['id'])) {	
 				if($completeId == '1' || $completeId == 1){
-					DB::table('inbox_comments')->where('conversation_id', $conversationId)->update(['is_completed' => 1]);
+					DB::table('inbox_comments')->where('id', $id)->update(['is_completed' => 1]);
 				}			
 				return ['status' => 'success', 'message' => 'Comment posted'];
 			} else {

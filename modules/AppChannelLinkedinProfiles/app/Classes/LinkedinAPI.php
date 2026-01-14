@@ -524,4 +524,92 @@ class LinkedinAPI
             return $e->getMessage();
         }
     }
+		
+	public function linkedInCommentGet($accessToken, $personId)
+	{
+		$url = 'https://api.linkedin.com/rest/organizationalEntityNotifications?'
+			 . 'q=criteria'
+			 . '&actions[0]=COMMENT'
+			 . '&actions[1]=SHARE_MENTION'
+			 . '&organizationalEntity=urn%3Ali%3Aorganization%3A' . $personId
+			 . '&count=100';
+		
+		$options = [
+			'headers' => [
+				'Authorization' => 'Bearer ' . trim($accessToken),
+				'LinkedIn-Version' => '202501'
+			]
+		];
+		
+		return $this->sendRequest('GET', $url, $options);
+	}
+
+
+public function linkedInCommentDetailGet($accessToken, $activityId)
+{
+    $projection = '(elements(*,actor~(localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams))))';
+    
+    $url = 'https://api.linkedin.com/v2/socialActions/' 
+         . urlencode($activityId) 
+         . '/comments?projection=' . urlencode($projection);
+    
+    $options = [
+        'headers' => [
+            'Authorization' => 'Bearer ' . trim($accessToken),
+            'Content-Type' => 'application/json'
+        ]
+    ];
+    
+    return $this->sendRequest('GET', $url, $options);
+}
+
+
+public function linkedInCommentPost($accessToken, $personId, $message, $activityUrn)
+{
+	
+    $activityUrn = trim($activityUrn);
+	
+	if (strpos($activityUrn, 'urn:li:activity:') === 0) {
+        $activityId = str_replace('urn:li:activity:', '', $activityUrn);
+        $activityUrn = 'urn:li:share:' . $activityId;
+    }
+
+    $url = 'https://api.linkedin.com/rest/socialActions/'
+         . rawurlencode($activityUrn)
+         . '/comments';
+
+    $request = [
+        "actor"   => "urn:li:organization:" . $personId,
+        "message" => [ "text" => $message ],
+    ];
+
+    $options = [
+        'headers' => [
+            'Authorization' => 'Bearer ' . trim($accessToken),
+            'Linkedin-Version' => '202501',
+            'X-Restli-Protocol-Version' => '2.0.0',
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
+        ],
+        'body' => json_encode($request),
+    ];
+
+    return $this->sendRequest('POST', $url, $options);
+}
+
+public function linkedInPostDetailGet($accessToken, $postUrn)
+{
+    $url = 'https://api.linkedin.com/rest/posts/' . urlencode($postUrn);
+    
+    $options = [
+        'headers' => [
+            'Authorization' => 'Bearer ' . trim($accessToken),
+            'LinkedIn-Version' => '202501'
+        ]
+    ];
+    
+    return $this->sendRequest('GET', $url, $options);
+}
+
+
 }

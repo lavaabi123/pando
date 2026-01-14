@@ -22,7 +22,7 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 
     public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "linkedin")->where('login_type', 1)->where("category", "page")->orderBy('id')->get();
+		$accounts = Accounts::where("brand_id", session('brand_id'))->where("social_network", "linkedin")->where('login_type', 1)->where("category", "page")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {
@@ -61,13 +61,28 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
         $clickCountChartData = $this->getClickCountChartData($account->id, $since, $until);
         $postImpressionAndEngagementChartData = $this->getPostImpressionAndEngagementChartData($account->id, $since, $until);
         $reachChartData = $this->getReachChartData($account->id, $since, $until);
+		$hasCountryData = SocialAnalytics::where('account_id', $account->id)
+        ->where('social_network', 'linkedin')
+        ->where('metric', 'LIKE', 'page_fans_country.%')
+        ->exists();
+		// Get alternative demographics
+		$followersByIndustry = $this->getFollowersByIndustry($account->id, $since, $until);
+		$followersBySeniority = $this->getFollowersBySeniority($account->id, $since, $until);
+		$followersByFunction = $this->getFollowersByFunction($account->id, $since, $until);
+		$followersByCompanySize = $this->getFollowersByCompanySize($account->id, $since, $until);
+		
 
         return [
             'status' => 'success',
             'account' => $account,
             'overview' => $overview,
-            'fansLocationMapChart' => $fansLocationMapChart,
-            'topFansCountries' => $topFansCountries,
+			'hasCountryData' => $hasCountryData,
+			'fansLocationMapChart' => $hasCountryData ? $this->getFansLocationMapChartData($account->id, $since, $until) : null,
+			'topFansCountries' => $hasCountryData ? $this->getTopFansCountries($account->id, $since, $until) : null,
+			'followersByIndustry' => $followersByIndustry,
+			'followersBySeniority' => $followersBySeniority,
+			'followersByFunction' => $followersByFunction,
+			'followersByCompanySize' => $followersByCompanySize,
             'dailyAllPageViewsChart' => $dailyAllPageViewsChart,
             'sectionPageViewsChartData' => $sectionPageViewsChartData,
             'devicePageViewsChartData' => $devicePageViewsChartData,
@@ -331,6 +346,137 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 	        ];
 	    })->toArray();
 	}
+	
+	public function getFollowersByIndustry(int $accountId, string $since, string $until): array
+	{
+		$data = DB::table('social_analytics')
+			->where('account_id', $accountId)
+			->where('social_network', 'linkedin')
+			->where('metric', 'LIKE', 'followers_by_industry.%')
+			->whereBetween('date', [$since, $until])
+			->orderByDesc('value')
+			->limit(10)
+			->get();
+		
+		return $data->map(function($item) {
+			$industryId = str_replace('followers_by_industry.', '', $item->metric);
+			return [
+				'industry' => $this->getIndustryName($industryId), // You'll need to map industry IDs
+				'count' => $item->value,
+			];
+		})->toArray();
+	}
+
+	public function getFollowersBySeniority(int $accountId, string $since, string $until): array
+	{
+		$seniorityLabels = [
+			'1' => 'Unpaid',
+			'2' => 'Training',
+			'3' => 'Entry',
+			'4' => 'Senior',
+			'5' => 'Manager',
+			'6' => 'Director',
+			'7' => 'VP',
+			'8' => 'CXO',
+			'9' => 'Owner',
+			'10' => 'Partner',
+		];
+		
+		$data = DB::table('social_analytics')
+			->where('account_id', $accountId)
+			->where('social_network', 'linkedin')
+			->where('metric', 'LIKE', 'followers_by_seniority.%')
+			->whereBetween('date', [$since, $until])
+			->orderByDesc('value')
+			->get();
+		
+		return $data->map(function($item) use ($seniorityLabels) {
+			$seniorityId = str_replace('followers_by_seniority.', '', $item->metric);
+			return [
+				'seniority' => $seniorityLabels[$seniorityId] ?? "Level {$seniorityId}",
+				'count' => $item->value,
+			];
+		})->toArray();
+	}
+
+	public function getFollowersByFunction(int $accountId, string $since, string $until): array
+	{
+		$functionLabels = [
+			'1' => 'Accounting',
+			'2' => 'Administrative',
+			'3' => 'Arts and Design',
+			'4' => 'Business Development',
+			'5' => 'Community & Social Services',
+			'6' => 'Consulting',
+			'7' => 'Education',
+			'8' => 'Engineering',
+			'9' => 'Entrepreneurship',
+			'10' => 'Finance',
+			'11' => 'Healthcare Services',
+			'12' => 'Human Resources',
+			'13' => 'Information Technology',
+			'14' => 'Legal',
+			'15' => 'Marketing',
+			'16' => 'Media & Communication',
+			'17' => 'Military & Protective Services',
+			'18' => 'Operations', // This is what you have (function:18)
+			'19' => 'Product Management',
+			'20' => 'Program & Project Management',
+			'21' => 'Purchasing',
+			'22' => 'Quality Assurance',
+			'23' => 'Real Estate',
+			'24' => 'Research',
+			'25' => 'Sales',
+			'26' => 'Support',
+		];
+		
+		$data = DB::table('social_analytics')
+			->where('account_id', $accountId)
+			->where('social_network', 'linkedin')
+			->where('metric', 'LIKE', 'followers_by_function.%')
+			->whereBetween('date', [$since, $until])
+			->orderByDesc('value')
+			->get();
+		
+		return $data->map(function($item) use ($functionLabels) {
+			$functionId = str_replace('followers_by_function.', '', $item->metric);
+			return [
+				'function' => $functionLabels[$functionId] ?? "Function {$functionId}",
+				'count' => $item->value,
+			];
+		})->toArray();
+	}
+
+	public function getFollowersByCompanySize(int $accountId, string $since, string $until): array
+	{
+		$sizeLabels = [
+			'size_self_employed' => 'Self-employed',
+			'size_1_to_10' => '1-10 employees',
+			'size_11_to_50' => '11-50 employees',
+			'size_51_to_200' => '51-200 employees',
+			'size_201_to_500' => '201-500 employees',
+			'size_501_to_1000' => '501-1,000 employees',
+			'size_1001_to_5000' => '1,001-5,000 employees',
+			'size_5001_to_10000' => '5,001-10,000 employees',
+			'size_10001_or_more' => '10,001+ employees',
+		];
+		
+		$data = DB::table('social_analytics')
+			->where('account_id', $accountId)
+			->where('social_network', 'linkedin')
+			->where('metric', 'LIKE', 'followers_by_company_size.%')
+			->whereBetween('date', [$since, $until])
+			->orderByDesc('value')
+			->get();
+		
+		return $data->map(function($item) use ($sizeLabels) {
+			$sizeKey = str_replace('followers_by_company_size.', '', $item->metric);
+			return [
+				'size' => $sizeLabels[$sizeKey] ?? $sizeKey,
+				'count' => $item->value,
+			];
+		})->toArray();
+	}
 
 	public function getPostCountByDayChartData(int $accountId, string $since, string $until): array
 	{
@@ -538,34 +684,37 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 
     protected function syncFollowerStatistics(int $accountId, string $organizationId, string $accessToken): void
 	{
-	    $url = 'https://api.linkedin.com/rest/organizationalEntityFollowerStatistics';
+	    // Clean the org ID
+		$orgId = str_replace('urn:li:organization:', '', $organizationId);
+		
+		// Use v2 API like CodeIgniter (not REST API)
+		$url = 'https://api.linkedin.com/v2/organizationalEntityFollowerStatistics';
+		
+		$response = Http::withHeaders([
+			'Content-Type' => 'application/json',
+			'X-Restli-Protocol-Version' => '2.0.0', // Keep this header
+		])->get($url, [
+			'q' => 'organizationalEntity',
+			'organizationalEntity' => "urn:li:organization:{$orgId}",
+			'oauth2_access_token' => $accessToken, // Token in query parameter, not header!
+		]);
 
-	    $response = Http::withHeaders([
-	        'Authorization'     => 'Bearer ' . $accessToken,
-	        'LinkedIn-Version'  => '202505',
-	        'Content-Type'      => 'application/json',
-	        'X-Restli-Protocol-Version' => '2.0.0',
-	    ])->get($url, [
-	        'q' => 'organizationalEntity',
-	        'organizationalEntity' => "urn:li:organization:$organizationId"
-	    ]);
+		if ($response->failed()) {
+			logger()->error('[LinkedInAnalytics] Failed to fetch follower statistics', [
+				'account_id' => $accountId,
+				'status' => $response->status(),
+				'body' => $response->body(),
+			]);
+			return;
+		}
 
-	    if ($response->failed()) {
-	        logger()->error('[LinkedInAnalytics] Failed to fetch follower statistics', [
-	            'account_id' => $accountId,
-	            'status'     => $response->status(),
-	            'body'       => $response->body(),
-	        ]);
-	        return;
-	    }
+		$data = $response->json();
+		$item = $data['elements'][0] ?? null;
 
-	    $data = $response->json();
-	    $item = $data['elements'][0] ?? null;
-
-	    if (!$item || empty($item['followerCountsByGeoCountry'])) {
-	        logger()->warning('[LinkedInAnalytics] No follower data found.');
-	        return;
-	    }
+		if (!$item || empty($item['followerCountsByGeoCountry'])) {
+			logger()->warning('[LinkedInAnalytics] No follower data found.');
+			return;
+		}
 
 	    // ===== TOTAL FOLLOWER COUNT =====
 	    $totalFollowers = collect($item['followerCountsByGeoCountry'])
@@ -591,11 +740,11 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 
 	    // Request country names for geoIds
 	    $geoResponse = Http::withHeaders([
-	        'Authorization' => 'Bearer ' . $accessToken,
-	        'LinkedIn-Version' => '202505',
-	    ])->get('https://api.linkedin.com/v2/geo', [
-	        'ids' => $geoIds->toArray()
-	    ]);
+			'Content-Type' => 'application/json',
+		])->get('https://api.linkedin.com/v2/geo', [
+			'ids' => 'List(' . implode(',', $geoIds->toArray()) . ')',
+			'oauth2_access_token' => $accessToken,
+		]);
 
 	    $geoNames = collect($geoResponse->json()['results'] ?? [])->mapWithKeys(function ($item, $id) {
 	        return [(string) $id => country_name_to_iso($item['defaultLocalizedName']['value']) ?? __('Unknown')];
@@ -628,16 +777,17 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 	    $startMs = Carbon::parse($since)->startOfDay()->timestamp * 1000;
 	    $endMs = Carbon::parse($until)->endOfDay()->timestamp * 1000;
 
-	    $response = Http::withHeaders([
-	        'Authorization' => 'Bearer ' . $accessToken,
-	        'LinkedIn-Version' => '202505',
-	    ])->get('https://api.linkedin.com/rest/organizationPageStatistics', [
-	        'q' => 'organization',
-	        'organization' => "urn:li:organization:$organizationId",
-	        'timeIntervals.timeRange.start' => $startMs,
-	        'timeIntervals.timeRange.end' => $endMs,
-	        'timeIntervals.timeGranularityType' => 'DAY',
-	    ]);
+	    // Use v2 API
+		$response = Http::withHeaders([
+			'Content-Type' => 'application/json',
+		])->get('https://api.linkedin.com/v2/organizationPageStatistics', [
+			'q' => 'organization',
+			'organization' => "urn:li:organization:$organizationId",
+			'timeIntervals.timeRange.start' => $startMs,
+			'timeIntervals.timeRange.end' => $endMs,
+			'timeIntervals.timeGranularityType' => 'DAY',
+			'oauth2_access_token' => $accessToken, // Token as query param
+		]);
 
 	    if ($response->failed()) {
 	        logger()->error('[LinkedIn] Failed to fetch organizationPageStatistics', [
@@ -681,16 +831,15 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 	    $endMs   = Carbon::parse($until)->endOfDay()->timestamp * 1000;
 
 	    $response = Http::withHeaders([
-	        'Authorization' => 'Bearer ' . $accessToken,
-	        'LinkedIn-Version' => '202505',
-	        'Content-Type' => 'application/json',
-	    ])->get('https://api.linkedin.com/rest/organizationalEntityShareStatistics', [
-	        'q' => 'organizationalEntity',
-	        'organizationalEntity' => "urn:li:organization:$organizationId",
-	        'timeIntervals.timeGranularityType' => 'DAY',
-	        'timeIntervals.timeRange.start' => $startMs,
-	        'timeIntervals.timeRange.end' => $endMs,
-	    ]);
+			'Content-Type' => 'application/json',
+		])->get('https://api.linkedin.com/v2/organizationalEntityShareStatistics', [
+			'q' => 'organizationalEntity',
+			'organizationalEntity' => "urn:li:organization:$organizationId",
+			'timeIntervals.timeGranularityType' => 'DAY',
+			'timeIntervals.timeRange.start' => $startMs,
+			'timeIntervals.timeRange.end' => $endMs,
+			'oauth2_access_token' => $accessToken, // Token as query param
+		]);
 
 	    if ($response->failed()) {
 	        logger()->error('[LinkedIn] Failed to fetch share statistics', [
@@ -737,16 +886,15 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 	    $organizationUrn = 'urn:li:organization:' . $organizationId;
 
 	    $response = Http::withHeaders([
-	        'Authorization' => 'Bearer ' . $accessToken,
-	        'LinkedIn-Version' => '202505',
-	        'Content-Type' => 'application/json',
-	        'X-Restli-Protocol-Version' => '2.0.0',
-	    ])->get('https://api.linkedin.com/rest/posts', [
-	        'q' => 'author',
-	        'author' => $organizationUrn,
-	        'sortBy' => 'LAST_MODIFIED',
-	        'count' => 50,
-	    ]);
+			'Content-Type' => 'application/json',
+			'X-Restli-Protocol-Version' => '2.0.0',
+		])->get('https://api.linkedin.com/v2/ugcPosts', [
+			'q' => 'authors',
+			'authors' => "List({$organizationUrn})",
+			'sortBy' => 'CREATED',
+			'count' => 50,
+			'oauth2_access_token' => $accessToken, // Token as query param
+		]);
 
 	    if ($response->failed()) {
 	        logger()->error('[LinkedIn] Failed to fetch posts', [
@@ -787,6 +935,240 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 			    'created'        => time(),
 			]);
 		}
+	}
+	
+	protected function getIndustryName(string $industryId): string
+	{
+		$industries = [
+			'1' => 'Defense & Space',
+			'2' => 'Computer Hardware',
+			'3' => 'Computer Software',
+			'4' => 'Computer Networking',
+			'5' => 'Internet',
+			'6' => 'Semiconductors',
+			'7' => 'Telecommunications',
+			'8' => 'Law Practice',
+			'9' => 'Legal Services',
+			'10' => 'Management Consulting',
+			'11' => 'Biotechnology',
+			'12' => 'Medical Practice',
+			'13' => 'Hospital & Health Care',
+			'14' => 'Pharmaceuticals',
+			'15' => 'Veterinary',
+			'16' => 'Medical Devices',
+			'17' => 'Cosmetics',
+			'18' => 'Apparel & Fashion',
+			'19' => 'Sporting Goods',
+			'20' => 'Tobacco',
+			'21' => 'Supermarkets',
+			'22' => 'Food Production',
+			'23' => 'Consumer Electronics',
+			'24' => 'Consumer Goods',
+			'25' => 'Furniture',
+			'26' => 'Retail',
+			'27' => 'Entertainment',
+			'28' => 'Gambling & Casinos',
+			'29' => 'Leisure, Travel & Tourism',
+			'30' => 'Hospitality',
+			'31' => 'Restaurants',
+			'32' => 'Sports',
+			'33' => 'Food & Beverages',
+			'34' => 'Motion Pictures and Film',
+			'35' => 'Broadcast Media',
+			'36' => 'Museums and Institutions',
+			'37' => 'Fine Art',
+			'38' => 'Performing Arts',
+			'39' => 'Recreational Facilities and Services',
+			'40' => 'Banking',
+			'41' => 'Insurance',
+			'42' => 'Financial Services',
+			'43' => 'Real Estate',
+			'44' => 'Investment Banking',
+			'45' => 'Investment Management',
+			'46' => 'Accounting',
+			'47' => 'Construction',
+			'48' => 'Building Materials',
+			'49' => 'Architecture & Planning',
+			'50' => 'Civil Engineering',
+			'51' => 'Aviation & Aerospace',
+			'52' => 'Automotive',
+			'53' => 'Chemicals',
+			'54' => 'Machinery',
+			'55' => 'Mining & Metals',
+			'56' => 'Oil & Energy',
+			'57' => 'Shipbuilding',
+			'58' => 'Utilities',
+			'59' => 'Textiles',
+			'60' => 'Paper & Forest Products',
+			'61' => 'Railroad Manufacture',
+			'62' => 'Farming',
+			'63' => 'Ranching',
+			'64' => 'Dairy',
+			'65' => 'Fishery',
+			'66' => 'Primary/Secondary Education',
+			'67' => 'Higher Education',
+			'68' => 'Education Management',
+			'69' => 'Research',
+			'70' => 'Military',
+			'71' => 'Legislative Office',
+			'72' => 'Judiciary',
+			'73' => 'International Affairs',
+			'74' => 'Government Administration',
+			'75' => 'Executive Office',
+			'76' => 'Law Enforcement',
+			'77' => 'Public Safety',
+			'78' => 'Public Policy',
+			'79' => 'Marketing and Advertising',
+			'80' => 'Newspapers',
+			'81' => 'Publishing',
+			'82' => 'Printing',
+			'83' => 'Information Services',
+			'84' => 'Libraries',
+			'85' => 'Environmental Services',
+			'86' => 'Package/Freight Delivery',
+			'87' => 'Individual & Family Services',
+			'88' => 'Religious Institutions',
+			'89' => 'Civic & Social Organization',
+			'90' => 'Consumer Services',
+			'91' => 'Transportation/Trucking/Railroad',
+			'92' => 'Warehousing',
+			'93' => 'Airlines/Aviation',
+			'94' => 'Maritime',
+			'95' => 'Information Technology and Services',
+			'96' => 'Market Research',
+			'97' => 'Public Relations and Communications',
+			'98' => 'Design',
+			'99' => 'Nonprofit Organization Management',
+			'100' => 'Fundraising',
+			'101' => 'Program Development',
+			'102' => 'Writing and Editing',
+			'103' => 'Staffing and Recruiting',
+			'104' => 'Professional Training & Coaching',
+			'105' => 'Venture Capital & Private Equity',
+			'106' => 'Political Organization',
+			'107' => 'Translation and Localization',
+			'108' => 'Computer Games',
+			'109' => 'Events Services',
+			'110' => 'Arts and Crafts',
+			'111' => 'Electrical/Electronic Manufacturing',
+			'112' => 'Online Media',
+			'113' => 'Nanotechnology',
+			'114' => 'Music',
+			'115' => 'Logistics and Supply Chain',
+			'116' => 'Plastics',
+			'117' => 'Computer & Network Security',
+			'118' => 'Wireless',
+			'119' => 'Alternative Dispute Resolution',
+			'120' => 'Security and Investigations',
+			'121' => 'Facilities Services',
+			'122' => 'Outsourcing/Offshoring',
+			'123' => 'Health, Wellness and Fitness',
+			'124' => 'Alternative Medicine',
+			'125' => 'Media Production',
+			'126' => 'Animation',
+			'127' => 'Commercial Real Estate',
+			'128' => 'Capital Markets',
+			'129' => 'Think Tanks',
+			'130' => 'Philanthropy',
+			'131' => 'E-Learning',
+			'132' => 'Wholesale',
+			'133' => 'Import and Export',
+			'134' => 'Mechanical or Industrial Engineering',
+			'135' => 'Photography',
+			'136' => 'Human Resources',
+			'137' => 'Business Supplies and Equipment',
+			'138' => 'Mental Health Care',
+			'139' => 'Graphic Design',
+			'140' => 'International Trade and Development',
+			'141' => 'Wine and Spirits',
+			'142' => 'Luxury Goods & Jewelry',
+			'143' => 'Renewables & Environment',
+			'144' => 'Glass, Ceramics & Concrete',
+			'145' => 'Packaging and Containers',
+			'146' => 'Industrial Automation',
+			'147' => 'Government Relations',
+		];
+
+		return $industries[$industryId] ?? "Industry {$industryId}";
+	}
+
+	/**
+	 * Get function name from LinkedIn function ID
+	 */
+	protected function getFunctionName(string $functionId): string
+	{
+		$functions = [
+			'1' => 'Accounting',
+			'2' => 'Administrative',
+			'3' => 'Arts and Design',
+			'4' => 'Business Development',
+			'5' => 'Community & Social Services',
+			'6' => 'Consulting',
+			'7' => 'Education',
+			'8' => 'Engineering',
+			'9' => 'Entrepreneurship',
+			'10' => 'Finance',
+			'11' => 'Healthcare Services',
+			'12' => 'Human Resources',
+			'13' => 'Information Technology',
+			'14' => 'Legal',
+			'15' => 'Marketing',
+			'16' => 'Media & Communication',
+			'17' => 'Military & Protective Services',
+			'18' => 'Operations',
+			'19' => 'Product Management',
+			'20' => 'Program & Project Management',
+			'21' => 'Purchasing',
+			'22' => 'Quality Assurance',
+			'23' => 'Real Estate',
+			'24' => 'Research',
+			'25' => 'Sales',
+			'26' => 'Support',
+		];
+
+		return $functions[$functionId] ?? "Function {$functionId}";
+	}
+
+	/**
+	 * Get seniority name from LinkedIn seniority ID
+	 */
+	protected function getSeniorityName(string $seniorityId): string
+	{
+		$seniorities = [
+			'1' => 'Unpaid',
+			'2' => 'Training',
+			'3' => 'Entry Level',
+			'4' => 'Senior',
+			'5' => 'Manager',
+			'6' => 'Director',
+			'7' => 'VP',
+			'8' => 'CXO',
+			'9' => 'Owner',
+			'10' => 'Partner',
+		];
+
+		return $seniorities[$seniorityId] ?? "Level {$seniorityId}";
+	}
+
+	/**
+	 * Get company size label from staff count range code
+	 */
+	protected function getCompanySizeLabel(string $staffCountRange): string
+	{
+		$sizes = [
+			'SIZE_SELF_EMPLOYED' => 'Self-employed',
+			'SIZE_1' => '1 employee',
+			'SIZE_2_TO_10' => '2-10 employees',
+			'SIZE_11_TO_50' => '11-50 employees',
+			'SIZE_51_TO_200' => '51-200 employees',
+			'SIZE_201_TO_500' => '201-500 employees',
+			'SIZE_501_TO_1000' => '501-1,000 employees',
+			'SIZE_1001_TO_5000' => '1,001-5,000 employees',
+			'SIZE_5001_TO_10000' => '5,001-10,000 employees',
+			'SIZE_10001_OR_MORE' => '10,001+ employees',
+		];
+
+		return $sizes[$staffCountRange] ?? str_replace('_', ' ', ucwords(strtolower($staffCountRange)));
 	}
 
 }

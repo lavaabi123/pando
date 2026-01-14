@@ -165,19 +165,74 @@
                 </div>
             </div>
         </div>
+		 {{-- Followers by Industry --}}
+        @if(!empty($analytics['followersByIndustry']))
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="fs-5 fs-16">{{ __('Followers by Industry') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="followers-by-industry-chart" class="export-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        @endif
+		
+		{{-- Followers by Seniority --}}
+        @if(!empty($analytics['followersBySeniority']))
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="fs-5 fs-16">{{ __('Followers by Seniority') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="followers-by-seniority-chart" class="export-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        @endif
+		
+		{{-- Followers by Function --}}
+        @if(!empty($analytics['followersByFunction']))
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="fs-5 fs-16">{{ __('Followers by Job Function') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="followers-by-function-chart" class="export-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        @endif
+		
+		{{-- Followers by Company Size --}}
+        @if(!empty($analytics['followersByCompanySize']))
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="fs-5 fs-16">{{ __('Followers by Company Size') }}</h5>
+                </div>
+                <div class="card-body">
+                    <div id="followers-by-company-size-chart" class="export-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+        </div>
+        @endif
 
-        <div class="col-lg-8">
+        <div class="col-lg-8 d-none">
             <div class="card">
                 <div class="card-header">
                     <h5 class="fs-5 fs-16">{{ __('Fans Location') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div id="fans-map-chart" class="export-chart" style="height: 510px;"></div>
+                    <div id="fans-map-chart" class="" style="height: 510px;"></div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-4">
+        <div class="col-lg-4 d-none">
             <div class="card">
                 <div class="card-header">
                     <h5 class="fs-5 fs-16">{{ __('Top Countries') }}</h5>
@@ -258,7 +313,7 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="fs-5 fs-16">{{ __('Post Impressions, Engagement & Rate') }}</h5>
+                    <h5 class="fs-5 fs-16">{{ __('Post Impressions, Engagement and Rate') }}</h5>
                 </div>
                 <div class="card-body border-bottom">
                     <div id="postImpressionAndEngagementChart" class="export-chart" style="height: 300px;"></div>
@@ -391,7 +446,7 @@ postImpressionAndEngagementChartData.series[0].color = '#675dff';
 postImpressionAndEngagementChartData.series[1].color = '#ffa940';
 Main.Chart("mix", postImpressionAndEngagementChartData.series, 'postImpressionAndEngagementChart', {
     chart: { zoomType: 'xy' },
-    title: { text: '{{ __("Post Impressions, Engagement & Rate") }}' },
+    title: { text: '{{ __("Post Impressions, Engagement and Rate") }}' },
     xAxis: {
         categories: postImpressionAndEngagementChartData.categories,
         labels: {
@@ -731,6 +786,245 @@ Main.Chart('column', clickCountChartData.series, 'clickCountChart', {
         }
     }
 });
+
+{{-- Demographics Charts with Export Support --}}
+
+{{-- Initialize ChartInstances if it doesn't exist --}}
+if (typeof window.ChartInstances === 'undefined') {
+    window.ChartInstances = {};
+}
+
+{{-- Industry Chart - Donut with external labels --}}
+@if(!empty($analytics['followersByIndustry']))
+var followersByIndustry = {!! json_encode([
+    'data' => array_map(function($item) {
+        return [
+            'name' => $item['industry'],
+            'y' => $item['count']
+        ];
+    }, $analytics['followersByIndustry'])
+]) !!};
+
+window.ChartInstances['followers-by-industry-chart'] = Highcharts.chart('followers-by-industry-chart', {
+    chart: {
+        type: 'pie',
+        height: 300
+    },
+    title: {
+        text: ''
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.1f}%)'
+    },
+    accessibility: {
+        point: {
+            valueSuffix: ' followers'
+        }
+    },
+    plotOptions: {
+        pie: {
+            innerSize: '50%',
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                distance: 20,
+                format: '{point.name}: {point.y}',
+                style: {
+                    fontSize: '11px',
+                    textOutline: 'none'
+                },
+                connectorShape: 'crookedLine',
+                crookDistance: '70%'
+            },
+            showInLegend: false,
+            colors: [
+                '#FFD700', '#FFA500', '#FF8C00', '#FF6347', '#FF4500',
+                '#DC143C', '#C71585', '#8B008B', '#4B0082', '#000080'
+            ]
+        }
+    },
+    series: [{
+        name: '{{ __("Followers") }}',
+        colorByPoint: true,
+        data: followersByIndustry.data
+    }]
+});
+@endif
+
+{{-- Seniority Chart - Donut with external labels --}}
+@if(!empty($analytics['followersBySeniority']))
+var followersBySeniority = {!! json_encode([
+    'data' => array_map(function($item) {
+        return [
+            'name' => $item['seniority'],
+            'y' => $item['count']
+        ];
+    }, $analytics['followersBySeniority'])
+]) !!};
+
+window.ChartInstances['followers-by-seniority-chart'] = Highcharts.chart('followers-by-seniority-chart', {
+    chart: {
+        type: 'pie',
+        height: 300
+    },
+    title: {
+        text: ''
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.1f}%)'
+    },
+    accessibility: {
+        point: {
+            valueSuffix: ' followers'
+        }
+    },
+    plotOptions: {
+        pie: {
+            innerSize: '50%',
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                distance: 20,
+                format: '{point.name}: {point.y}',
+                style: {
+                    fontSize: '11px',
+                    textOutline: 'none'
+                },
+                connectorShape: 'crookedLine',
+                crookDistance: '70%'
+            },
+            showInLegend: false,
+            colors: [
+                '#FF69B4', '#FF1493', '#C71585', '#8B008B', '#4B0082',
+                '#0000FF', '#4169E1', '#1E90FF', '#00BFFF', '#87CEEB'
+            ]
+        }
+    },
+    series: [{
+        name: '{{ __("Followers") }}',
+        colorByPoint: true,
+        data: followersBySeniority.data
+    }]
+});
+@endif
+
+{{-- Function Chart - Donut with external labels --}}
+@if(!empty($analytics['followersByFunction']))
+var followersByFunction = {!! json_encode([
+    'data' => array_map(function($item) {
+        return [
+            'name' => $item['function'],
+            'y' => $item['count']
+        ];
+    }, $analytics['followersByFunction'])
+]) !!};
+
+window.ChartInstances['followers-by-function-chart'] = Highcharts.chart('followers-by-function-chart', {
+    chart: {
+        type: 'pie',
+        height: 300
+    },
+    title: {
+        text: ''
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.1f}%)'
+    },
+    accessibility: {
+        point: {
+            valueSuffix: ' followers'
+        }
+    },
+    plotOptions: {
+        pie: {
+            innerSize: '50%',
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                distance: 20,
+                format: '{point.name}: {point.y}',
+                style: {
+                    fontSize: '11px',
+                    textOutline: 'none'
+                },
+                connectorShape: 'crookedLine',
+                crookDistance: '70%'
+            },
+            showInLegend: false,
+            colors: [
+                '#90EE90', '#32CD32', '#228B22', '#006400', '#008000',
+                '#00FF00', '#7FFF00', '#ADFF2F', '#9ACD32', '#556B2F'
+            ]
+        }
+    },
+    series: [{
+        name: '{{ __("Followers") }}',
+        colorByPoint: true,
+        data: followersByFunction.data
+    }]
+});
+@endif
+
+{{-- Company Size Chart - Donut with external labels --}}
+@if(!empty($analytics['followersByCompanySize']))
+var followersByCompanySize = {!! json_encode([
+    'data' => array_map(function($item) {
+        return [
+            'name' => $item['size'],
+            'y' => $item['count']
+        ];
+    }, $analytics['followersByCompanySize'])
+]) !!};
+
+window.ChartInstances['followers-by-company-size-chart'] = Highcharts.chart('followers-by-company-size-chart', {
+    chart: {
+        type: 'pie',
+        height: 300
+    },
+    title: {
+        text: ''
+    },
+    tooltip: {
+        pointFormat: '{series.name}: <b>{point.y}</b> ({point.percentage:.1f}%)'
+    },
+    accessibility: {
+        point: {
+            valueSuffix: ' followers'
+        }
+    },
+    plotOptions: {
+        pie: {
+            innerSize: '50%',
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+                enabled: true,
+                distance: 20,
+                format: '{point.name}: {point.y}',
+                style: {
+                    fontSize: '11px',
+                    textOutline: 'none'
+                },
+                connectorShape: 'crookedLine',
+                crookDistance: '70%'
+            },
+            showInLegend: false,
+            colors: [
+                '#B0E0E6', '#87CEEB', '#4682B4', '#5F9EA0', '#20B2AA',
+                '#00CED1', '#48D1CC', '#40E0D0', '#7FFFD4', '#AFEEEE'
+            ]
+        }
+    },
+    series: [{
+        name: '{{ __("Followers") }}',
+        colorByPoint: true,
+        data: followersByCompanySize.data
+    }]
+});
+@endif
 </script>
 
 @endsection

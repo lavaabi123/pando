@@ -43,6 +43,8 @@ var AppPubishing = new (function ()
 	
 	AppPubishing.initn = function( reload ) 
     {
+		
+	console.log('dfs');
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': VARIABLES.csrf
@@ -229,7 +231,6 @@ var AppPubishing = new (function ()
                 });
             }
         });
-
         if (!profileFound) {
             var $profile = $('.preview-profile');
             if ($profile.length) {
@@ -366,6 +367,7 @@ var AppPubishing = new (function ()
     },
 
     AppPubishing.openCompose = function(){
+	console.log('dx');
         $(".composer-scheduling")
         .removeClass("d-none")
         .fadeIn(300);
@@ -849,11 +851,7 @@ var AppPubishing = new (function ()
 				var eventEl = $(info.el);
 				var eventItemEl = $('.calendar-event-item-new').html();
 				var data = info.event.extendedProps;
-				
-				// Debug - check what data you're getting
-				console.log('Event extendedProps:', data);
-				console.log('Grouping data:', data.grouping_data);
-				
+								
 				// Ensure grouping_data exists and convert to string
 				var groupingData = data.grouping_data ? String(data.grouping_data) : '';
 				
@@ -863,16 +861,12 @@ var AppPubishing = new (function ()
 					'[[date]]': String(data.date || ''),
 					'[[grouping_data]]': groupingData,
 				};
-				
-				console.log('Replacements:', replacements);
 
 				// Replace the placeholders
 				for (const [key, value] of Object.entries(replacements)) {
 					eventItemEl = eventItemEl.replaceAll(key, value);
 				}
 				
-				console.log('Final HTML:', eventItemEl);
-
 				if(info.view.type == "listWeek"){
 					eventEl.html('<td>' + eventItemEl + '</td>');
 				} else {
@@ -1118,3 +1112,301 @@ var AppPubishing = new (function ()
 });
 
 AppPubishing.init();
+
+$(document).ready(function() {
+	
+	if ( $(".compose").length > 0 )
+	{
+		AppPubishing.openCompose();
+	}
+	
+	
+    var approvalPage = 0;
+    var isLoadingApproval = false;
+    var hasMoreApproval = true;
+    var draftPage = 0;
+    var isLoadingdraft= false;
+    var hasMoredraft = true;
+    
+    // Load approval list when tab is clicked
+    $('#contact-tab').on('shown.bs.tab', function (e) {
+        if (!$(this).hasClass('loaded')) {
+            approvalPage = 0;
+            hasMoreApproval = true;
+            $('#approval-list-content').empty();
+            loadApprovalList();
+            $(this).addClass('loaded');
+        }
+    });
+	$('#profile-tab').on('shown.bs.tab', function (e) {
+        if (!$(this).hasClass('loaded')) {
+            draftPage = 0;
+            hasMoredraft = true;
+            $('#draft-list-content').empty();
+            loadDraftList();
+            $(this).addClass('loaded');
+        }
+    });
+	
+	// Function to load approval list
+    function loadApprovalList() {
+        if (isLoadingApproval || !hasMoreApproval) {
+            return;
+        }
+        
+        isLoadingApproval = true;
+        
+        // Show loading indicator
+        if (approvalPage === 0) {
+            $('#approval-list-content').html(`
+                <div class="text-center py-5" id="initial-loader">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading approval list...</p>
+                </div>
+            `);
+        } else {
+            $('#approval-list-content').append(`
+                <div class="text-center py-3" id="load-more-spinner">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `);
+        }
+        
+        $.ajax({
+            url: VARIABLES.url+'app/publishing/approval/list',
+            type: 'GET',
+            data: {
+                page: approvalPage,
+                team_id: '{{ $teamId ?? "" }}',
+                keyword: $('#approval-search').val() || '',
+                status: 2 // Pending approval status
+            },
+            success: function(response) {
+                console.log('Approval list response:', response);
+                
+                // Remove loading indicators
+                $('#initial-loader').remove();
+                $('#load-more-spinner').remove();
+                
+                if (response.status === 1) {
+                    if (approvalPage === 0) {
+                        $('#approval-list-content').html(response.data);
+                    } else {
+                        $('#approval-list-content').append(response.data);
+                    }
+                    
+                    approvalPage++;
+                    
+                    // Check if there's more data
+                    var $content = $(response.data);
+                    var itemsCount = $content.filter('.approval-item').length;
+                    if (itemsCount < 30) { // Per page is 30
+                        hasMoreApproval = false;
+                    }
+                } else {
+                    hasMoreApproval = false;
+                    
+                    if (approvalPage === 0) {
+                        $('#approval-list-content').html(`
+                            <div class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="fa-light fa-inbox fs-48 text-muted opacity-50"></i>
+                                </div>
+                                <h5 class="text-muted">{{ __('No posts pending approval') }}</h5>
+                                <p class="text-muted">{{ __('All caught up! There are no posts waiting for approval.') }}</p>
+                            </div>
+                        `);
+                    }
+                }
+                
+                isLoadingApproval = false;
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading approval list:', error);
+                
+                $('#initial-loader').remove();
+                $('#load-more-spinner').remove();
+                
+                $('#approval-list-content').html(`
+                    <div class="text-center py-5">
+                        <div class="text-danger mb-3">
+                            <i class="fa-light fa-exclamation-triangle fs-48"></i>
+                        </div>
+                        <h5 class="text-danger">{{ __('Error loading approval list') }}</h5>
+                        <p class="text-muted">{{ __('Please try again.') }}</p>
+                        <button class="btn btn-primary btn-sm" onclick="reloadApprovalList()">
+                            <i class="fa-light fa-refresh"></i> {{ __('Retry') }}
+                        </button>
+                    </div>
+                `);
+                
+                isLoadingApproval = false;
+            }
+        });
+    }
+    
+    // Function to load draft list
+    function loadDraftList() {
+        if (isLoadingdraft || !hasMoredraft) {
+            return;
+        }
+        
+        isLoadingdraft = true;
+        
+        // Show loading indicator
+        if (approvalPage === 0) {
+            $('#draft-list-content').html(`
+                <div class="text-center py-5" id="initial-loader">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-2 text-muted">Loading draft list...</p>
+                </div>
+            `);
+        } else {
+            $('#draft-list-content').append(`
+                <div class="text-center py-3" id="load-more-spinner">
+                    <div class="spinner-border spinner-border-sm text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            `);
+        }
+        
+        $.ajax({
+            url: VARIABLES.url+'app/publishing/draft',
+            type: 'GET',
+            data: {
+                page: approvalPage,
+                team_id: '{{ $teamId ?? "" }}',
+                keyword: $('#draft-search').val() || '',
+                status: 1 // Pending draft status
+            },
+            success: function(response) {
+                console.log('draft list response:', response);
+                
+                // Remove loading indicators
+                $('#initial-loader').remove();
+                $('#load-more-spinner').remove();
+                
+                if (response.status === 1) {
+                    if (approvalPage === 0) {
+                        $('#draft-list-content').html(response.data);
+                    } else {
+                        $('#draft-list-content').append(response.data);
+                    }
+                    
+                    approvalPage++;
+                    
+                    // Check if there's more data
+                    var $content = $(response.data);
+                    var itemsCount = $content.filter('.draft-item').length;
+                    if (itemsCount < 30) { // Per page is 30
+                        hasMoredraft = false;
+                    }
+                } else {
+                    hasMoredraft = false;
+                    
+                    if (approvalPage === 0) {
+                        $('#draft-list-content').html(`
+                            <div class="text-center py-5">
+                                <div class="mb-3">
+                                    <i class="fa-light fa-inbox fs-48 text-muted opacity-50"></i>
+                                </div>
+                                <h5 class="text-muted">{{ __('No draft post') }}</h5>
+                                <p class="text-muted">{{ __('All caught up! There are no posts in draft.') }}</p>
+                            </div>
+                        `);
+                    }
+                }
+                
+                isLoadingdraft = false;
+            },
+            error: function(xhr, status, error) {
+                console.error('Error loading approval list:', error);
+                
+                $('#initial-loader').remove();
+                $('#load-more-spinner').remove();
+                
+                $('#approval-list-content').html(`
+                    <div class="text-center py-5">
+                        <div class="text-danger mb-3">
+                            <i class="fa-light fa-exclamation-triangle fs-48"></i>
+                        </div>
+                        <h5 class="text-danger">{{ __('Error loading approval list') }}</h5>
+                        <p class="text-muted">{{ __('Please try again.') }}</p>
+                        <button class="btn btn-primary btn-sm" onclick="reloaddraftList()">
+                            <i class="fa-light fa-refresh"></i> {{ __('Retry') }}
+                        </button>
+                    </div>
+                `);
+                
+                isLoadingdraft = false;
+            }
+        });
+    }
+    
+    // Infinite scroll for draft list
+    $('#draft-list-content').on('scroll', function() {
+        var $container = $(this);
+        if ($container.scrollTop() + $container.height() >= $container[0].scrollHeight - 100) {
+            loadApprovalList();
+        }
+    });
+    
+    // Search functionality
+    $('#draft-search').on('input', debounce(function() {
+        draftPage = 0;
+        hasMoredraft = true;
+        $('#draft-list-content').empty();
+        loadDraftList();
+    }, 500));
+    
+    // Reload function (global so it can be called from error state)
+    window.reloaddraftList = function() {
+        draftPage = 0;
+        hasMoredraft = true;
+        $('#draft-list-content').empty();
+        $('#profile-tab').removeClass('loaded').trigger('click');
+    };
+	
+    // Infinite scroll for approval list
+    $('#approval-list-content').on('scroll', function() {
+        var $container = $(this);
+        if ($container.scrollTop() + $container.height() >= $container[0].scrollHeight - 100) {
+            loadApprovalList();
+        }
+    });
+    
+    // Search functionality
+    $('#approval-search').on('input', debounce(function() {
+        approvalPage = 0;
+        hasMoreApproval = true;
+        $('#approval-list-content').empty();
+        loadApprovalList();
+    }, 500));
+    
+    // Reload function (global so it can be called from error state)
+    window.reloadApprovalList = function() {
+        approvalPage = 0;
+        hasMoreApproval = true;
+        $('#approval-list-content').empty();
+        $('#contact-tab').removeClass('loaded').trigger('click');
+    };
+    
+    // Debounce helper
+    function debounce(func, wait) {
+        var timeout;
+        return function() {
+            var context = this, args = arguments;
+            clearTimeout(timeout);
+            timeout = setTimeout(function() {
+                func.apply(context, args);
+            }, wait);
+        };
+    }
+});

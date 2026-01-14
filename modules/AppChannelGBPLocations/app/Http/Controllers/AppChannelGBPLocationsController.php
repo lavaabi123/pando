@@ -59,28 +59,35 @@ class AppChannelGBPLocationsController extends Controller
     }
 
     public function index(Request $request)
-    {
-        $result = [];
+	{
+		$result = [];
 
-        try 
-        {
-            if( !session("GBP_AccessToken") )
-            {
-                if(!$request->code)
-                {
-                    return redirect( module_url("oauth") );
-                }
+		try 
+		{
+			if( !session("GBP_AccessToken") )
+			{
+				if(!$request->code)
+				{
+					return redirect( module_url("oauth") );
+				}
 
-                $accessToken = $this->client->fetchAccessTokenWithAuthCode($request->code);
-                session(["GBP_AccessToken" => $accessToken]);
-                return redirect( $this->callback_url );
-            }
-            else
-            {
-                $accessToken = session("GBP_AccessToken"); 
-            }
+				$accessToken = $this->client->fetchAccessTokenWithAuthCode($request->code);
+				session(["GBP_AccessToken" => $accessToken]);
+				return redirect( $this->callback_url );
+			}
+			else
+			{
+				$accessToken = session("GBP_AccessToken");
+				
+				// Check if token has required scopes
+				if (!$this->hasRequiredScopes($accessToken)) {
+					// Clear old token and force re-auth
+					$request->session()->forget('GBP_AccessToken');
+					return redirect( module_url("oauth") )->with('message', 'Please re-authorize to grant additional permissions.');
+				}
+			}
 
-            $this->client->setAccessToken($accessToken);
+			$this->client->setAccessToken($accessToken);
 
             $accountsList = $this->gbp_management->accounts->listAccounts()->getAccounts();
             if(!empty($accountsList))
@@ -164,4 +171,22 @@ class AppChannelGBPLocationsController extends Controller
     public function settings(){
         return view('appchannelgbplocations::settings');
     }
+	
+	private function hasRequiredScopes($accessToken)
+	{
+		try {
+			$this->client->setAccessToken($accessToken);
+			
+			// Verify token with Google's tokeninfo endpoint
+			$oauth2 = new \Google_Service_Oauth2($this->client);
+			$tokenInfo = $oauth2->tokeninfo();
+			
+			$grantedScopes = explode(' ', $tokenInfo->getScope());
+			$requiredScope = 'https://www.googleapis.com/auth/business.manage';
+			
+			return in_array($requiredScope, $grantedScopes);
+		} catch (\Exception $e) {
+			return false;
+		}
+	}
 }

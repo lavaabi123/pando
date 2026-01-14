@@ -47,7 +47,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 
     public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::where("team_id", $teamId)->where("brand_id", session('brand_id'))->where("social_network", "instagram")->where("category", "profile")->where("login_type", 1)->orderBy('id')->get();
+		$accounts = Accounts::where("brand_id", session('brand_id'))->where("social_network", "instagram")->where("category", "profile")->where("login_type", 1)->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {
@@ -81,7 +81,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
         // SYNC
         $this->syncProfileInsights($accountId, $instagramId, $accessToken, $since, $until);
         $this->syncPostInsights($accountId, $instagramId, $accessToken, $since, $until);
-		//echo "<pre>";print_r($this->getReachByFollowTypeData($accountId, $since, $until));exit;
+		
         return [
             'status' => 'success',
             'account' => $accountInfo,
@@ -397,7 +397,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 
 	    $latestDate = SocialAnalytics::where('account_id', $accountId)
 	        ->where('metric', 'like', 'follower_age.%')
-	        ->whereBetween('date', [$since, $until])
+	        //->whereBetween('date', [$since, $until])
 	        ->max('date');
 
 	    $raw = SocialAnalytics::selectRaw("
@@ -406,7 +406,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	        ")
 	        ->where('account_id', $accountId)
 	        ->where('metric', 'like', 'follower_age.%')
-	        ->where('date', $latestDate)
+	        //->where('date', $latestDate)
 	        ->get()
 	        ->keyBy('age_group');
 
@@ -452,12 +452,12 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 
 	    $latestDate = SocialAnalytics::where('account_id', $accountId)
 	        ->whereIn('metric', array_keys($metrics))
-	        ->whereBetween('date', [$since, $until])
+	        //->whereBetween('date', [$since, $until])
 	        ->max('date');
 
 	    $raw = SocialAnalytics::where('account_id', $accountId)
 	        ->whereIn('metric', array_keys($metrics))
-	        ->where('date', $latestDate)
+	        //->where('date', $latestDate)
 	        ->pluck('value', 'metric')
 	        ->toArray();
 
@@ -487,7 +487,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	{
 	    $latestDate = SocialAnalytics::where('account_id', $accountId)
 	        ->where('metric', 'like', 'follower_country.%')
-	        ->whereBetween('date', [$since, $until])
+	        //->whereBetween('date', [$since, $until])
 	        ->max('date');
 
 	    $raw = SocialAnalytics::selectRaw("
@@ -496,7 +496,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	        ")
 	        ->where('account_id', $accountId)
 	        ->where('metric', 'like', 'follower_country.%')
-	        ->where('date', $latestDate)
+	        //->where('date', $latestDate)
 	        ->orderByDesc('followers')
 	        ->limit($limit)
 	        ->get();
@@ -551,7 +551,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	{
 	    $latestDate = SocialAnalytics::where('account_id', $accountId)
 	        ->where('metric', 'like', 'follower_city.%')
-	        ->whereBetween('date', [$since, $until])
+	        //->whereBetween('date', [$since, $until])
 	        ->max('date');
 
 	    $raw = SocialAnalytics::selectRaw("
@@ -560,7 +560,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	        ")
 	        ->where('account_id', $accountId)
 	        ->where('metric', 'like', 'follower_city.%')
-	        ->where('date', $latestDate)
+	        //->where('date', $latestDate)
 	        ->orderByDesc('followers')
 	        ->limit($limit)
 	        ->get();
@@ -647,13 +647,13 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 	    $latestDate = SocialAnalytics::where('account_id', $accountId)
 	        ->where('social_network', 'instagram')
 	        ->whereIn('metric', array_keys($metrics))
-	        ->whereBetween('date', [$since, $until])
+	        //->whereBetween('date', [$since, $until])
 	        ->max('date');
 
 	    $raw = SocialAnalytics::where('account_id', $accountId)
 	        ->where('social_network', 'instagram')
 	        ->whereIn('metric', array_keys($metrics))
-	        ->where('date', $latestDate)
+	        //->where('date', $latestDate)
 	        ->pluck('value', 'metric')
 	        ->toArray();
 
@@ -1110,11 +1110,9 @@ class InstagramAnalytics implements SocialAnalyticsInterface
             $url = "/{$instagramId}/media?fields=id,caption,media_type,media_url,permalink,timestamp,insights.metric(reach,likes,comments,shares,views,total_interactions,saved)&since={$since}&until={$until}&limit=100";
             $response = $this->fb->get($url, $token);
             $media = $response->getDecodedBody();
-
             $now = time();
             $metaInsert = [];
             $metricsInsert = [];
-
             foreach ($media['data'] ?? [] as $post) {
                 $postId = $post['id'];
                 $created = Carbon::parse($post['timestamp']);
@@ -1140,7 +1138,6 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 
 				$now = time();
 				$socialNetwork = 'instagram';
-				$metricsInsert = [];
 
 				$start = Carbon::now()->subDays(29); 
 
@@ -1160,6 +1157,7 @@ class InstagramAnalytics implements SocialAnalyticsInterface
                     }
                 }
             }
+
 
             if (!empty($metaInsert)) {
                 SocialAnalyticsPost::upsert($metaInsert, ['account_id', 'social_network', 'post_id', 'date'], ['message', 'created_time', 'full_picture', 'permalink_url', 'type', 'created']);

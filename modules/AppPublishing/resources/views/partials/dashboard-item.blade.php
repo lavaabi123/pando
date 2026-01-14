@@ -54,7 +54,7 @@
 
 
 <div class="gradient-bg main-services text-center my-4 p-4 b-r-20 justify-content-xl-evenly">
-	<div class="p-4 d-flex gap-25 justify-content-xl-evenly">
+	<div class="p-4 d-flex gap-20 justify-content-xl-evenly">
 		<a class="icons" href="{{ url_app('publishing') }}">
 			<div class="mb-3" style="fill:var(--d-primary);">
 				{!! file_get_contents(public_path('img/post.svg')) !!}
@@ -231,7 +231,7 @@
     </div>
 </div>
 
-<div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
+<div class="row row-cols-1 row-cols-md-4 g-4">
 
     {{-- Quota --}}
     <div class="col-md-6">
@@ -280,7 +280,7 @@
     <div class="col-md-6">
         <div class="card shadow-sm">
             <div class="card-header">
-                <div class="fw-5">{{ __("Add Channels") }}</div>
+                <div class="fs-20 mb-0">{{ __("Add Channels") }}</div>
             </div>
             <div class="card-body">
                 <div class="row max-h-300 overflow-y-scroll row-gap-4">
@@ -338,12 +338,12 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-success-100 border border-success-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-success-500">
+                    <span class="d-inline-flex align-items-center justify-content-center b-r-15 size-44 bg-success-500">
                         <i class="fa-light fa-circle-check text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $statusMap[4]['label'] ?? __('Success') }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($successTotal) }}</div>
+                <div class="fw-bold fs-2 mb-0 lh-sm text-dark">{{ number_format($successTotal) }}</div>
                 <div class="fs-14 text-muted">
                     {{ ($statusGrowth[4] ?? 0) == 0 ? '0%' : (($statusGrowth[4] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[4] ?? 0) . '%' }}
                 </div>
@@ -355,12 +355,12 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-danger-100 border border-danger-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-danger-500">
+                    <span class="d-inline-flex align-items-center justify-content-center b-r-15 size-44 bg-danger-500">
                         <i class="fa-light fa-circle-xmark text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $statusMap[5]['label'] ?? __('Failed') }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($failedTotal) }}</div>
+                <div class="fw-bold fs-2 mb-0 lh-sm text-dark">{{ number_format($failedTotal) }}</div>
                 <div class="fs-14 text-muted">
                     {{ ($statusGrowth[5] ?? 0) == 0 ? '0%' : (($statusGrowth[5] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[5] ?? 0) . '%' }}
                 </div>
@@ -372,12 +372,12 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-primary-100 border border-primary-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-primary-500">
+                    <span class="d-inline-flex align-items-center justify-content-center b-r-15 size-44 bg-primary-500">
                         <i class="fa-light fa-badge-check text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ __('Success Rate') }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-primary">{{ $successRate }}%</div>
+                <div class="fw-bold fs-2 mb-0 lh-sm text-primary">{{ $successRate }}%</div>
                 <div class="fs-14 text-muted">{{ __('of processed posts') }}</div>
             </div>
         </div>
@@ -388,12 +388,12 @@
 	    <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-teal-100 border border-teal-200">
 	        <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
 	            <div class="d-flex align-items-center mb-2 gap-12">
-	                <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-teal-500">
+	                <span class="d-inline-flex align-items-center justify-content-center b-r-15 size-44 bg-teal-500">
 	                    <i class="fa-light fa-arrows-rotate text-white fs-22"></i>
 	                </span>
 	                <span class="fw-6 fs-14 text-muted">{{ $processingLabel }}</span>
 	            </div>
-	            <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($processingTotal) }}</div>
+	            <div class="fw-bold fs-2 mb-0 lh-sm text-dark">{{ number_format($processingTotal) }}</div>
 	            <div class="fs-14 text-muted">
 	                {{ $processingGrowth == 0 ? '0%' : ($processingGrowth > 0 ? '+' : '-') . abs($processingGrowth) . '%' }}
 	            </div>
@@ -401,19 +401,21 @@
 	    </div>
 	</div>
 {{-- Three Mini Charts Section --}}
-<div class="col-md-12 mb-4">
+<div class="col-md-12">
     <div class="row g-3">
         {{-- Success Chart --}}
         <div class="col-md-4">
             <div class="card shadow-sm h-100">
                 <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="d-flex align-items-center justify-content-center b-r-15 mr-10 bg-success-100" style="width: 48px; height: 48px;">
                             <i class="fa-light fa-circle-check text-success fs-20"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <h2 class="fw-bold text-success mb-0">{{ number_format($successTotal) }}</h2>
-                            <div class="text-muted fs-14">Succeed</div>
+							<div class="">
+								<span class="fs-28 fw-9 text-success me-1">{{ number_format($successTotal) }}</span> 
+								<span class="fw-6 text-gray-700">Succeed</span>
+							</div>
                             <div class="text-muted fs-12">{{ $startDate->format('m/d/Y') }} - {{ $endDate->format('m/d/Y') }}</div>
                         </div>
                     </div>
@@ -426,13 +428,15 @@
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="d-flex align-items-center justify-content-center b-r-15 mr-10 bg-danger-100" style="width: 48px; height: 48px;">
                             <i class="fa-light fa-circle-xmark text-danger fs-20"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <h2 class="fw-bold text-danger mb-0">{{ number_format($failedTotal) }}</h2>
-                            <div class="text-muted fs-14">Failed</div>
+							<div class="">
+								<span class="fs-28 fw-9 text-success me-1">{{ number_format($failedTotal) }}</span> 
+								<span class="fw-6 text-gray-700">Failed</span>
+							</div>
                             <div class="text-muted fs-12">{{ $startDate->format('m/d/Y') }} - {{ $endDate->format('m/d/Y') }}</div>
                         </div>
                     </div>
@@ -445,13 +449,15 @@
         <div class="col-md-4">
             <div class="card h-100">
                 <div class="card-body p-4">
-                    <div class="d-flex align-items-start gap-3 mb-3">
+                    <div class="d-flex align-items-center gap-3 mb-3">
                         <div class="d-flex align-items-center justify-content-center b-r-15 mr-10 bg-success-100" style="width: 48px; height: 48px;">
                             <i class="fa-light fa-calendar-check text-success fs-20"></i>
                         </div>
                         <div class="flex-grow-1">
-                            <h2 class="fw-bold text-success mb-0">{{ number_format($totalPosts) }}</h2>
-                            <div class="text-muted fs-14">Total</div>
+							<div class="">
+								<span class="fs-28 fw-9 text-success me-1">{{ number_format($totalPosts) }}</span> 
+								<span class="fw-6 text-gray-700">Total</span>
+							</div>
                             <div class="text-muted fs-12">{{ $startDate->format('m/d/Y') }} - {{ $endDate->format('m/d/Y') }}</div>
                         </div>
                     </div>
@@ -466,22 +472,22 @@
 <div class="col-md-12">
     <div class="card">
         <div class="card-header">
-            <h5 class="fs-5 fs-16 mb-0">{{ __('Report post by status') }}</h5>
+            <h5 class="fs-20 mb-0">{{ __('Report post by status') }}</h5>
         </div>
         <div class="card-body">
             <div id="posts-error-success-chart" style="height: 400px;"></div>
         </div>
         <div class="d-flex card-body p-0 border-top">
             <div class="flex-fill px-4 py-3 border-end">
-                <div class="text-gray-500 fs-14 mb-2">{{ __('Success') }}</div>
+                <div class="text-gray-500 fs-14 mb-0">{{ __('Success') }}</div>
                 <div class="text-gray-800 fs-25 fw-bold">{{ number_format($errorSuccessSummary['success_total']) }}</div>
             </div>
             <div class="flex-fill px-4 py-3 border-end">
-                <div class="text-gray-500 fs-14 mb-2">{{ __('Error') }}</div>
+                <div class="text-gray-500 fs-14 mb-0">{{ __('Error') }}</div>
                 <div class="text-gray-800 fs-25 fw-bold">{{ number_format($errorSuccessSummary['fail_total']) }}</div>
             </div>
             <div class="flex-fill px-4 py-3">
-                <div class="text-gray-500 fs-14 mb-2">{{ __('Success Rate') }}</div>
+                <div class="text-gray-500 fs-14 mb-0">{{ __('Success Rate') }}</div>
                 <div class="text-gray-800 fs-25 fw-bold">
                     {{ $errorSuccessSummary['success_rate'] }}%
                 </div>
@@ -491,19 +497,19 @@
 </div>
 
 {{-- Two Column Section: Pie Chart + Recent Publications --}}
-<div class="col-md-12 mb-4">
+<div class="col-md-12">
     <div class="row g-4">
         {{-- Left Column: Pie Chart (Report post by type) --}}
         <div class="col-md-6">
-            <div class="card h-100">
+            <div class="card h-100 overflow-hidden">
                 <div class="card-header">
-                    <h5 class="fs-5 fs-16 mb-0">{{ __('Report post by social media') }}</h5>
+                    <h5 class="fs-20 mb-0">{{ __('Report post by social media') }}</h5>
                 </div>
-                <div class="card-body d-flex align-items-center justify-content-center">
+                <div class="card-body d-flex align-items-start justify-content-center">
                     <div id="social-media-pie-chart" style="height: 400px; width: 100%;"></div>
                 </div>
-                <div class="card-footer border-top">
-                    <div class="table-responsive">
+                <div class="card-footer border-top p-0">
+                    <div class="table-responsive w-100">
                         <table class="table table-sm table-borderless mb-0">
                             <thead>
                                 <tr>
@@ -530,13 +536,13 @@
 
         {{-- Right Column: Recent Publications --}}
 <div class="col-md-6">
-    <div class="card h-100">
+    <div class="card h-100 overflow-hidden">
         <div class="card-header">
-            <h5 class="fs-5 fs-16 mb-0">{{ __('Recent publications') }}</h5>
+            <h5 class="fs-20 mb-0">{{ __('Recent publications') }}</h5>
         </div>
         <div class="card-body p-0">
-            <div class="schedules-main overflow-auto row mt-4 mh-600 h-100">
-                <div class="schedule-list p-3">
+            <div class="schedules-main overflow-auto my-3 max-h-600 h-100">
+                <div class="schedule-list px-3">
                     @forelse($recentPosts as $post)
                         @php
                             $data = json_decode($post->data);
@@ -546,15 +552,15 @@
                         <div class="card border mb-3 position-relative overflow-hidden">
                             {{-- Status Ribbon --}}
                             @if($post->status == 4)
-                                <div class="position-absolute top-0 end-0 m-2" style="z-index: 10;">
-                                    <span class="badge bg-success">
-                                        <i class="fa-solid fa-check-double"></i>
+                                <div class="position-absolute top-0 end-0 w-56 h-56" style="z-index: 10;">
+                                    <span class="badge bg-success b-r-0">
+                                        <i class="fs-20 fad fa-check-double text-white"></i>
                                     </span>
                                 </div>
                             @elseif($post->status == 5)
-                                <div class="position-absolute top-0 end-0 m-2" style="z-index: 10;">
-                                    <span class="badge bg-danger">
-                                        <i class="fa-solid fa-exclamation-circle"></i>
+                                <div class="position-absolute top-0 end-0 w-56 h-56" style="z-index: 10;">
+                                    <span class="badge bg-danger b-r-0">
+                                        <i class="fs-20 fad fa-exclamation-circle text-white"></i>
                                     </span>
                                 </div>
                             @endif
@@ -570,7 +576,7 @@
                                                 <div class="position-relative">
                                                     <img src="{{ Media::url($account['avatar']) }}" 
                                                          class="rounded-circle border border-2 border-white bg-white" 
-                                                         style="width: 32px; height: 32px; object-fit: cover;" 
+                                                         style="width: 45px; height: 45px; object-fit: cover;" 
                                                          alt="{{ $account['name'] }}"
                                                          title="{{ $account['name'] }}">
                                                     {{-- Social Media Icon Badge --}}
@@ -584,7 +590,7 @@
                                             {{-- Show +N indicator if more than 4 accounts --}}
                                             @if(!empty($post->accounts) && count($post->accounts) > 4)
                                                 <div class="rounded-circle border border-2 border-white bg-light d-flex align-items-center justify-content-center" 
-                                                     style="width: 32px; height: 32px; margin-left: -12px; z-index: 1;">
+                                                     style="width: 45px; height: 45px; margin-left: -12px; z-index: 1;">
                                                     <span class="fs-10 fw-bold text-muted">+{{ count($post->accounts) - 4 }}</span>
                                                 </div>
                                             @endif
@@ -615,7 +621,7 @@
                             <div class="card-body p-3 pt-0">
                                 <div class="d-flex gap-3">
                                     {{-- Media Thumbnail --}}
-                                    <div class="flex-shrink-0">
+                                    <div class="flex-shrink-0 me-3">
                                         @if($post->type == 'media' && !empty($post->medias))
                                             @php 
                                                 $firstMedia = is_array($post->medias) ? ($post->medias[0] ?? null) : $post->medias;
@@ -623,12 +629,12 @@
                                             @if($firstMedia)
                                                 <div class="position-relative">
                                                     @if(str_contains($firstMedia, '.mp4') || str_contains($firstMedia, '.mov'))
-                                                        <video class="rounded border" style="width: 80px; height: 80px; object-fit: cover;" muted>
+                                                        <video class="b-r-15 border" style="width: 80px; height: 80px; object-fit: cover;" muted>
                                                             <source src="{{ Media::url($firstMedia) }}" type="video/mp4">
                                                         </video>
                                                     @else
                                                         <img src="{{ Media::url($firstMedia) }}" 
-                                                             class="rounded border" 
+                                                             class="b-r-15 border" 
                                                              style="width: 80px; height: 80px; object-fit: cover;" 
                                                              alt="">
                                                     @endif
@@ -663,10 +669,10 @@
                             {{-- Card Footer: Status --}}
                             @if($post->status == 4)
                                 <div class="card-footer bg-success bg-opacity-10 text-white border-0 py-2 px-3">
-                                    <div class="d-flex justify-content-between align-items-center">
+                                    <div class="d-flex justify-content-between align-items-center w-100">
                                         <span class="fs-13">{{ __('Post Published') }}</span>
                                         @if(!empty($result->url))
-                                            <a href="{{ $result->url }}" target="_blank" class="btn btn-sm btn-success">
+                                            <a href="{{ $result->url }}" target="_blank" class="fs-13">
                                                 <i class="fa-light fa-eye"></i> {{ __('View post') }}
                                             </a>
                                         @endif
@@ -700,7 +706,7 @@
 	</div>
 </div>
 </div>
-<div class="footer pt-50 mt-20">
+<div class="footer pt-50 mt-50">
 	<div class="container">
 		<div class="row">
 			<div class="col-md-2 mb-4">
@@ -738,7 +744,6 @@
 /* Stacked avatars hover effect */
 .schedule-list .position-relative:hover {
     z-index: 20 !important;
-    transform: translateY(-2px);
     transition: all 0.2s ease;
 }
 

@@ -1,3 +1,5 @@
+
+
 <?php
 $postType = Access::permission("appfiles") ? "media" : "link";
 $caption = "";
@@ -28,24 +30,24 @@ if($post){
 }
 
 ?>
-
-<div class="compose position-absolute l-0 t-0 wp-100 hp-100 bg-white zIndex-9 overflow-hidden d-none">
+<?php $__env->startSection('content'); ?>
+<div class="composer-scheduling compose position-absolute l-0 t-0 wp-100 hp-100 bg-white zIndex-9 overflow-hidden">
 
     <div class="d-flex hp-100">
         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check("appfiles")): ?>
-        <div class="compose-media d-flex flex-column flex-fill max-w-400 min-w-300 bg-white d-none">
+        <div class="compose-media d-flex flex-column flex-fill max-w-400 min-w-300 bg-white">
             <?php echo $__env->make('appfiles::block_files', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         </div>
         <?php endif; ?>
 
-        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-600" action="<?php echo e(url_app("publishing/save")); ?>" id="compose-editor" data-call-after="AppPubishing.confirmPostModal(result);" data-call-success="AppPubishing.closeCompose(); AppPubishing.reloadCalendar(); Main.ajaxScroll(true);">
+        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-600" action="<?php echo e(url_app("publishing/save")); ?>" id="compose-editor" data-redirect="<?php echo e(module_url("calendar")); ?>">
 
             <div class="d-flex flex-column flex-column-fluid overflow-y-auto py-2">
                 <div class="max-w-750 wp-100 mx-auto p-3">
                     <div class="mb-3">
                         <?php echo $__env->make('appchannels::block_channels', [
                             'permission' => 'apppublishing',
-                            'accounts' => isset($post->account_id)?[$post->account_id]:[]
+                            'accounts' => isset($accountIds)?$accountIds:[]
                         ], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
                     </div>
 
@@ -227,8 +229,8 @@ if($post){
                                     <div class="card-toolbar">
                                         <select class="form-select mw-150 fs-12 b-r-20" name="post_by">
                                             <option value="1" <?php echo e(old('post_by', $post->post_by ?? '') == 1 ? 'selected' : ''); ?>><?php echo e(__("Immediately")); ?></option>
-                                            <option value="2" <?php echo e(old('post_by', $post->post_by ?? '') == 2 || isset($date) ? 'selected' : ''); ?>><?php echo e(__("Schedule & Repost")); ?></option>
-                                            <option value="3" <?php echo e(old('post_by', $post->post_by ?? '') == 3 ? 'selected' : ''); ?>><?php echo e(__("Specific Days & Times")); ?></option>
+                                            <!--<option value="2" <?php echo e(old('post_by', $post->post_by ?? '') == 2 || isset($date) ? 'selected' : ''); ?>><?php echo e(__("Schedule & Repost")); ?></option>-->
+                                            <option value="3" <?php echo e(old('post_by', $post->post_by ?? '') == 3  || isset($date) ? 'selected' : ''); ?>><?php echo e(__("Schedule")); ?></option>
                                             <option value="4" <?php echo e(old('post_by', $post->post_by ?? '') == 4 ? 'selected' : ''); ?>><?php echo e(__("Draft")); ?></option>
                                             <option value="5" <?php echo e(old('post_by', $post->post_by ?? '') == 5 ? 'selected' : ''); ?>><?php echo e(__("Approval")); ?></option>
                                         </select>
@@ -237,7 +239,7 @@ if($post){
 
                             <?php else: ?>
 
-                                <?php if($post->status==1 || $post->status==2): ?>
+                                <?php if($post->status==1 || $post->status==2 || $post->status==3): ?>
 
                                     <div class="card-header px-3">
                                         <div class="fw-5 fs-14">
@@ -246,9 +248,9 @@ if($post){
                                         </div>
                                         <div class="card-toolbar">
                                             <select class="form-select mw-150 fs-12 b-r-20" name="post_by">
-                                                <option value="1" <?php echo e(old('post_by', $post->post_by ?? '') == 1 ? 'selected' : ''); ?>><?php echo e(__("Immediately")); ?></option>
-                                                <option value="2" <?php echo e(old('post_by', $post->post_by ?? '') == 2 ? 'selected' : ''); ?>><?php echo e(__("Schedule & Repost")); ?></option>
-                                                <option value="3" <?php echo e(old('post_by', $post->post_by ?? '') == 3 ? 'selected' : ''); ?>><?php echo e(__("Specific Days & Times")); ?></option>
+                                                <option value="1" <?php echo e(old('status', $post->status ?? '') == 1 ? 'selected' : ''); ?>><?php echo e(__("Immediately")); ?></option>
+                                                <!--<option value="2" <?php echo e(old('post_by', $post->post_by ?? '') == 2 ? 'selected' : ''); ?>><?php echo e(__("Schedule & Repost")); ?></option>-->
+                                                <option value="3" <?php echo e(old('status', $post->status ?? '') == 3 ? 'selected' : ''); ?>><?php echo e(__("Schedule")); ?></option>
                                                 <option value="4" <?php echo e(old('status', $post->status ?? '') == 1 ? 'selected' : ''); ?>><?php echo e(__("Draft")); ?></option>
                                                 <option value="5" <?php echo e(old('status', $post->status ?? '') == 2 ? 'selected' : ''); ?>><?php echo e(__("Approval")); ?></option>
                                             </select>
@@ -270,7 +272,7 @@ if($post){
 
                             <?php endif; ?>
 
-                            <div class="post-by <?php echo e((old('status', $post->status ?? '') == 1 || old('status', $post->status ?? '') == 2) || (empty($post) && empty($date))? 'd-none' : ''); ?>" data-by="2">
+                            <div class="post-by d-none" data-by="2">
                                 <div class="card-body px-3">
                                     <div class="post-by" data-by="2">
                                         <div class="row mb-3">
@@ -300,7 +302,7 @@ if($post){
                                     </div>
                                 </div>
                             </div>
-							<div class="post-by <?php echo e(old('status', $post->status ?? '') == 2 || (!empty($post) && !empty($date))? '' : 'd-none'); ?>" data-by="5">
+							<div class="post-by d-none" data-by="5">
                                 <div class="card-body px-3">
                                     <div class="post-by" data-by="5">
                                         <div class="row mb-3">
@@ -312,12 +314,12 @@ if($post){
                                     </div>
                                 </div>
                             </div>
-                            <div class="post-by d-none" data-by="3">
+                            <div class="post-by <?php echo e((!empty($date) || (!empty($post->status) && $post->status == 3))? '' : 'd-none'); ?>" data-by="3">
                                 <div class="card-body border-top p-20 listPostByDays">
                                     <div class="item my-1">
                                         <div class="input-group mb-3">
                                             <div class="form-control">
-                                                <input type="text" class="datetime" name="time_posts[]" value="">
+                                                <input type="text" class="datetime" name="time_posts[]" value="<?php echo e(isset($post->time_post) ? datetime_show($post->time_post) : $date); ?>">
                                                 <i class="fa-light fa-calendar-days"></i>
                                             </div>
                                             <button type="button" class="btn btn-input remove disabled">
@@ -326,7 +328,7 @@ if($post){
                                         </div>
                                     </div>
                                 </div>
-                                <div class="card-footer py-1 p-r-20 p-l-20">
+                                <div class="card-footer py-1 p-r-20 p-l-20 d-none">
                                     <a href="javascript:void(0);" class="me-5 mb-0 py-2 fs-12 addSpecificDays">
                                         <i class="fal fa-plus"></i> <?php echo e(__("Add more scheduled times")); ?>
 
@@ -680,12 +682,7 @@ if($post){
     </div>
 </div>
 
-<script type="text/javascript">
-    Main.init(false);
-    AppPubishing.init(false);
-    Files.init(false);
-</script>
-
+<?php $__env->stopSection(); ?>
 <style>
 .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{
 	min-height:0em;
@@ -698,297 +695,4 @@ if($post){
     border: 2px solid #2196f3 !important;
 }
 </style>
-<script>
-$(document).ready(function() {
-    var approvalPage = 0;
-    var isLoadingApproval = false;
-    var hasMoreApproval = true;
-    var draftPage = 0;
-    var isLoadingdraft= false;
-    var hasMoredraft = true;
-    
-    // Load approval list when tab is clicked
-    $('#contact-tab').on('shown.bs.tab', function (e) {
-        if (!$(this).hasClass('loaded')) {
-            approvalPage = 0;
-            hasMoreApproval = true;
-            $('#approval-list-content').empty();
-            loadApprovalList();
-            $(this).addClass('loaded');
-        }
-    });
-	$('#profile-tab').on('shown.bs.tab', function (e) {
-        if (!$(this).hasClass('loaded')) {
-            draftPage = 0;
-            hasMoredraft = true;
-            $('#draft-list-content').empty();
-            loadDraftList();
-            $(this).addClass('loaded');
-        }
-    });
-	
-	// Function to load approval list
-    function loadApprovalList() {
-        if (isLoadingApproval || !hasMoreApproval) {
-            return;
-        }
-        
-        isLoadingApproval = true;
-        
-        // Show loading indicator
-        if (approvalPage === 0) {
-            $('#approval-list-content').html(`
-                <div class="text-center py-5" id="initial-loader">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Loading approval list...</p>
-                </div>
-            `);
-        } else {
-            $('#approval-list-content').append(`
-                <div class="text-center py-3" id="load-more-spinner">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            `);
-        }
-        
-        $.ajax({
-            url: '<?php echo e(url("app/publishing/approval/list")); ?>',
-            type: 'GET',
-            data: {
-                page: approvalPage,
-                team_id: '<?php echo e($teamId ?? ""); ?>',
-                keyword: $('#approval-search').val() || '',
-                status: 2 // Pending approval status
-            },
-            success: function(response) {
-                console.log('Approval list response:', response);
-                
-                // Remove loading indicators
-                $('#initial-loader').remove();
-                $('#load-more-spinner').remove();
-                
-                if (response.status === 1) {
-                    if (approvalPage === 0) {
-                        $('#approval-list-content').html(response.data);
-                    } else {
-                        $('#approval-list-content').append(response.data);
-                    }
-                    
-                    approvalPage++;
-                    
-                    // Check if there's more data
-                    var $content = $(response.data);
-                    var itemsCount = $content.filter('.approval-item').length;
-                    if (itemsCount < 30) { // Per page is 30
-                        hasMoreApproval = false;
-                    }
-                } else {
-                    hasMoreApproval = false;
-                    
-                    if (approvalPage === 0) {
-                        $('#approval-list-content').html(`
-                            <div class="text-center py-5">
-                                <div class="mb-3">
-                                    <i class="fa-light fa-inbox fs-48 text-muted opacity-50"></i>
-                                </div>
-                                <h5 class="text-muted"><?php echo e(__('No posts pending approval')); ?></h5>
-                                <p class="text-muted"><?php echo e(__('All caught up! There are no posts waiting for approval.')); ?></p>
-                            </div>
-                        `);
-                    }
-                }
-                
-                isLoadingApproval = false;
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading approval list:', error);
-                
-                $('#initial-loader').remove();
-                $('#load-more-spinner').remove();
-                
-                $('#approval-list-content').html(`
-                    <div class="text-center py-5">
-                        <div class="text-danger mb-3">
-                            <i class="fa-light fa-exclamation-triangle fs-48"></i>
-                        </div>
-                        <h5 class="text-danger"><?php echo e(__('Error loading approval list')); ?></h5>
-                        <p class="text-muted"><?php echo e(__('Please try again.')); ?></p>
-                        <button class="btn btn-primary btn-sm" onclick="reloadApprovalList()">
-                            <i class="fa-light fa-refresh"></i> <?php echo e(__('Retry')); ?>
-
-                        </button>
-                    </div>
-                `);
-                
-                isLoadingApproval = false;
-            }
-        });
-    }
-    
-    // Function to load draft list
-    function loadDraftList() {
-        if (isLoadingdraft || !hasMoredraft) {
-            return;
-        }
-        
-        isLoadingdraft = true;
-        
-        // Show loading indicator
-        if (approvalPage === 0) {
-            $('#draft-list-content').html(`
-                <div class="text-center py-5" id="initial-loader">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="mt-2 text-muted">Loading draft list...</p>
-                </div>
-            `);
-        } else {
-            $('#draft-list-content').append(`
-                <div class="text-center py-3" id="load-more-spinner">
-                    <div class="spinner-border spinner-border-sm text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                </div>
-            `);
-        }
-        
-        $.ajax({
-            url: '<?php echo e(url("app/publishing/draft")); ?>',
-            type: 'GET',
-            data: {
-                page: approvalPage,
-                team_id: '<?php echo e($teamId ?? ""); ?>',
-                keyword: $('#draft-search').val() || '',
-                status: 1 // Pending draft status
-            },
-            success: function(response) {
-                console.log('draft list response:', response);
-                
-                // Remove loading indicators
-                $('#initial-loader').remove();
-                $('#load-more-spinner').remove();
-                
-                if (response.status === 1) {
-                    if (approvalPage === 0) {
-                        $('#draft-list-content').html(response.data);
-                    } else {
-                        $('#draft-list-content').append(response.data);
-                    }
-                    
-                    approvalPage++;
-                    
-                    // Check if there's more data
-                    var $content = $(response.data);
-                    var itemsCount = $content.filter('.draft-item').length;
-                    if (itemsCount < 30) { // Per page is 30
-                        hasMoredraft = false;
-                    }
-                } else {
-                    hasMoredraft = false;
-                    
-                    if (approvalPage === 0) {
-                        $('#draft-list-content').html(`
-                            <div class="text-center py-5">
-                                <div class="mb-3">
-                                    <i class="fa-light fa-inbox fs-48 text-muted opacity-50"></i>
-                                </div>
-                                <h5 class="text-muted"><?php echo e(__('No draft post')); ?></h5>
-                                <p class="text-muted"><?php echo e(__('All caught up! There are no posts in draft.')); ?></p>
-                            </div>
-                        `);
-                    }
-                }
-                
-                isLoadingdraft = false;
-            },
-            error: function(xhr, status, error) {
-                console.error('Error loading approval list:', error);
-                
-                $('#initial-loader').remove();
-                $('#load-more-spinner').remove();
-                
-                $('#approval-list-content').html(`
-                    <div class="text-center py-5">
-                        <div class="text-danger mb-3">
-                            <i class="fa-light fa-exclamation-triangle fs-48"></i>
-                        </div>
-                        <h5 class="text-danger"><?php echo e(__('Error loading approval list')); ?></h5>
-                        <p class="text-muted"><?php echo e(__('Please try again.')); ?></p>
-                        <button class="btn btn-primary btn-sm" onclick="reloaddraftList()">
-                            <i class="fa-light fa-refresh"></i> <?php echo e(__('Retry')); ?>
-
-                        </button>
-                    </div>
-                `);
-                
-                isLoadingdraft = false;
-            }
-        });
-    }
-    
-    // Infinite scroll for draft list
-    $('#draft-list-content').on('scroll', function() {
-        var $container = $(this);
-        if ($container.scrollTop() + $container.height() >= $container[0].scrollHeight - 100) {
-            loadApprovalList();
-        }
-    });
-    
-    // Search functionality
-    $('#draft-search').on('input', debounce(function() {
-        draftPage = 0;
-        hasMoredraft = true;
-        $('#draft-list-content').empty();
-        loadDraftList();
-    }, 500));
-    
-    // Reload function (global so it can be called from error state)
-    window.reloaddraftList = function() {
-        draftPage = 0;
-        hasMoredraft = true;
-        $('#draft-list-content').empty();
-        $('#profile-tab').removeClass('loaded').trigger('click');
-    };
-	
-    // Infinite scroll for approval list
-    $('#approval-list-content').on('scroll', function() {
-        var $container = $(this);
-        if ($container.scrollTop() + $container.height() >= $container[0].scrollHeight - 100) {
-            loadApprovalList();
-        }
-    });
-    
-    // Search functionality
-    $('#approval-search').on('input', debounce(function() {
-        approvalPage = 0;
-        hasMoreApproval = true;
-        $('#approval-list-content').empty();
-        loadApprovalList();
-    }, 500));
-    
-    // Reload function (global so it can be called from error state)
-    window.reloadApprovalList = function() {
-        approvalPage = 0;
-        hasMoreApproval = true;
-        $('#approval-list-content').empty();
-        $('#contact-tab').removeClass('loaded').trigger('click');
-    };
-    
-    // Debounce helper
-    function debounce(func, wait) {
-        var timeout;
-        return function() {
-            var context = this, args = arguments;
-            clearTimeout(timeout);
-            timeout = setTimeout(function() {
-                func.apply(context, args);
-            }, wait);
-        };
-    }
-});
-</script><?php /**PATH C:\xampp82\htdocs\pando-laravel\modules/AppPublishing\resources/views/composer.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp82\htdocs\pando-laravel\modules/AppPublishing\resources/views/composer.blade.php ENDPATH**/ ?>

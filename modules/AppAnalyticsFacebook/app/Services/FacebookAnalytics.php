@@ -42,10 +42,7 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 
 	public function getAccounts(int $teamId)
 	{
-		$accounts = Accounts::when(session('role_id') != 2, function ($query) use ($teamId) {
-        $query->where("team_id", $teamId)
-              ->where("brand_id", session('brand_id'));
-    })->where("social_network", "facebook")->where("category", "page")->orderBy('id')->get();
+		$accounts = Accounts::where("brand_id", session('brand_id'))->where("social_network", "facebook")->where("category", "page")->orderBy('id')->get();
 
 		if ($accounts) {
 			foreach ($accounts as $key => $value) {
