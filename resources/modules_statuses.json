@@ -113,7 +113,6 @@
     "AppHashtags": true,
     "AppPublishing.zip": true,
     "AppChannels.zip": true,
-    "AppChannels_local.zip": true,
     "Auth.zip": true,
-    "AppAnalytics.zip": true
+    "AppWatermark.zip": true
 }

@@ -234,7 +234,7 @@ class PublishingService
                                     ], JSON_UNESCAPED_UNICODE);
 
                                     // Update team stats
-                                    $this->updateTeamStats($teamId, $socialNetwork, 'success', $response["type"] ?? null);
+                                    //$this->updateTeamStats($teamId, $socialNetwork, 'success', $response["type"] ?? null);
                                 } else {
                                     $countError++;
                                     $message = $response["message"];
@@ -246,7 +246,7 @@ class PublishingService
                                     ], JSON_UNESCAPED_UNICODE);
 
                                     // Update team stats
-                                    $this->updateTeamStats($teamId, $socialNetwork, 'error');
+                                    //$this->updateTeamStats($teamId, $socialNetwork, 'error');
                                 }
 
                                 // Update status if from cron

@@ -56,13 +56,6 @@
         .table tbody tr:nth-child(even) {
             background-color: #fafafa;
         }
-        img.chart {
-            display: block;
-            margin: 0 auto;
-            max-width: 95%;
-            margin-top: 12px;
-            margin-bottom: 30px;
-        }
         .highlight {
             font-weight: bold;
             color: #e1306c;
@@ -72,11 +65,34 @@
             font-size: 11px;
             margin-top: 3px;
         }
+		.chart-container {
+			display: inline-block;
+			width: 45%;
+			margin-bottom: 20px;
+			margin-right: 0;
+			padding: 10px;
+			vertical-align: top;
+			page-break-inside: avoid;
+			box-sizing: border-box;
+			border: 1px solid #e0e0e0;
+		}
+
+		.chart-container:nth-child(odd) {
+			margin-right: 2%;
+		}
+
+		img.chart {
+			display: block;
+			width: 100%;
+			height: auto;
+			border: none;
+			background: #fff;
+		}
     </style>
 </head>
 <body>
 
-    <h1>{{ __('Instagram Analytics Report') }}</h1>
+    <h1>{{ __('TikTok Analytics Report') }}</h1>
 
     <div class="section">
         <strong>{{ __('Account Name') }}:</strong> <span class="highlight">{{ $analytics['account']['name'] ?? '-' }}</span><br>
@@ -95,7 +111,9 @@
             <h3>{{ __('Charts') }}</h3>
             @foreach ($charts as $chart)
                 @if(isset($chart['base64']))
-                    <img class="chart" src="{{ $chart['base64'] }}" alt="Chart">
+					<div class="chart-container">
+						<img class="chart" src="{{ $chart['base64'] }}" alt="Chart">
+					</div>
                 @endif
             @endforeach
         </div>
@@ -113,11 +131,6 @@
             </thead>
             <tbody>
                 @php $overview = $analytics['overview'] ?? [] @endphp
-                <tr>
-                    <td>{{ __('Reach') }}</td>
-                    <td class="highlight">{{ number_format($overview['reach']['value'] ?? 0) }}</td>
-                    <td>{{ ($overview['reach']['change'] ?? 0) . '%' }}</td>
-                </tr>
                 <tr>
                     <td>{{ __('Likes') }}</td>
                     <td class="highlight">{{ number_format($overview['likes']['value'] ?? 0) }}</td>
@@ -147,249 +160,16 @@
         </table>
     </div>
 
-    <div class="section">
-        <h3>{{ __('Top Countries') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Country') }}</th>
-                    <th>{{ __('Followers') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($analytics['topFollowerCountriesChartData']['top_countries'] ?? [] as $row)
-                    <tr>
-                        <td>{{ $row['country'] }}</td>
-                        <td class="highlight">{{ number_format($row['followers']) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Top Cities') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('City') }}</th>
-                    <th>{{ __('Followers') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($analytics['topFollowerCitiesChartData']['top_cities'] ?? [] as $row)
-                    <tr>
-                        <td>{{ $row['city'] }}</td>
-                        <td class="highlight">{{ number_format($row['followers']) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Followers by Age Group') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Age Group') }}</th>
-                    <th>{{ __('Followers') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (($analytics['followerAgeChartData']['summary'] ?? []) as $age => $count)
-                    @if($age !== 'total' && $age !== 'latest_date')
-                        <tr>
-                            <td>{{ $age }}</td>
-                            <td class="highlight">{{ number_format($count) }}</td>
-                        </tr>
-                    @endif
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Followers by Gender') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Gender') }}</th>
-                    <th>{{ __('Followers') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (($analytics['followerGenderChartData']['summary'] ?? []) as $gender => $count)
-                    @if($gender !== 'total' && $gender !== 'latest_date')
-                        <tr>
-                            <td>{{ ucfirst($gender) }}</td>
-                            <td class="highlight">{{ number_format($count) }}</td>
-                        </tr>
-                    @endif
-                @endforeach
-            </tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Reach Overview') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Date') }}</th>
-                    <th>{{ __('Reach') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (($analytics['dailyReachChartData']['categories'] ?? []) as $i => $day)
-                    <tr>
-                        <td>{{ $day }}</td>
-                        <td class="highlight">{{ number_format($analytics['dailyReachChartData']['series'][0]['data'][$i] ?? 0) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="subtext">
-            {{ __('Total Reach:') }} <strong>{{ number_format($analytics['dailyReachChartData']['summary']['total'] ?? 0) }}</strong>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Engagement Rate by Day') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Date') }}</th>
-                    <th>{{ __('Engagement Rate (%)') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (($analytics['dailyEngagementRateChartData']['categories'] ?? []) as $i => $day)
-                    <tr>
-                        <td>{{ $day }}</td>
-                        <td class="highlight">{{ number_format($analytics['dailyEngagementRateChartData']['series'][0]['data'][$i] ?? 0, 2) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="subtext">
-            {{ __('Average Engagement Rate:') }} <strong>{{ number_format($analytics['dailyEngagementRateChartData']['summary']['avg_rate'] ?? 0, 2) }}%</strong>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Interactions by Day') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Date') }}</th>
-                    <th>{{ __('Total Interactions') }}</th>
-                    <th>{{ __('Likes') }}</th>
-                    <th>{{ __('Comments') }}</th>
-                    <th>{{ __('Shares') }}</th>
-                    <th>{{ __('Saved') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (($analytics['dailyInteractionsChartData']['categories'] ?? []) as $i => $day)
-                    <tr>
-                        <td>{{ $day }}</td>
-                        <td class="highlight">{{ number_format($analytics['dailyInteractionsChartData']['series'][0]['data'][$i] ?? 0) }}</td>
-                        <td>{{ number_format($analytics['dailyInteractionsChartData']['series'][1]['data'][$i] ?? 0) }}</td>
-                        <td>{{ number_format($analytics['dailyInteractionsChartData']['series'][2]['data'][$i] ?? 0) }}</td>
-                        <td>{{ number_format($analytics['dailyInteractionsChartData']['series'][3]['data'][$i] ?? 0) }}</td>
-                        <td>{{ number_format($analytics['dailyInteractionsChartData']['series'][4]['data'][$i] ?? 0) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="subtext">
-            {{ __('Total Interactions:') }} <strong>{{ number_format($analytics['dailyInteractionsChartData']['summary']['total_interactions'] ?? 0) }}</strong>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Followers by Day') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Date') }}</th>
-                    <th>{{ __('Followers') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (($analytics['dailyFollowersCountChartData']['categories'] ?? []) as $i => $day)
-                    <tr>
-                        <td>{{ $day }}</td>
-                        <td class="highlight">{{ number_format($analytics['dailyFollowersCountChartData']['series'][0]['data'][$i] ?? 0) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="subtext">
-            {{ __('Followers Growth:') }} <strong>{{ number_format($analytics['dailyFollowersCountChartData']['summary']['change'] ?? 0) }}</strong>,
-            {{ __('Start:') }} <strong>{{ number_format($analytics['dailyFollowersCountChartData']['summary']['start'] ?? 0) }}</strong>,
-            {{ __('End:') }} <strong>{{ number_format($analytics['dailyFollowersCountChartData']['summary']['end'] ?? 0) }}</strong>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Reach by Followers Type') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Type') }}</th>
-                    <th>{{ __('Reach') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($analytics['reachByFollowTypeData']['series'] ?? [] as $row)
-                    <tr>
-                        <td>{{ $row['name'] }}</td>
-                        <td class="highlight">{{ number_format($row['y']) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-        <div class="subtext">
-            {{ __('Total:') }} <strong>{{ number_format($analytics['reachByFollowTypeData']['summary']['total'] ?? 0) }}</strong>
-        </div>
-    </div>
-
-    <div class="section">
-        <h3>{{ __('Post History') }}</h3>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>{{ __('Post ID') }}</th>
-                    <th>{{ __('Created') }}</th>
-                    <th>{{ __('Caption') }}</th>
-                    <th>{{ __('Reach') }}</th>
-                    <th>{{ __('Likes') }}</th>
-                    <th>{{ __('Comments') }}</th>
-                    <th>{{ __('Shares') }}</th>
-                    <th>{{ __('Saved') }}</th>
-                    <th>{{ __('Views') }}</th>
-                    <th>{{ __('Interactions') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($analytics['postHistoryList'] ?? [] as $post)
-                    <tr>
-                        <td>{{ $post['post_id'] ?? '-' }}</td>
-                        <td>{{ $post['created_time'] ?? '-' }}</td>
-                        <td>{{ Str::limit($post['caption'] ?? '', 50) }}</td>
-                        <td>{{ number_format($post['metrics']['reach'] ?? 0) }}</td>
-                        <td>{{ number_format($post['metrics']['likes'] ?? 0) }}</td>
-                        <td>{{ number_format($post['metrics']['comments'] ?? 0) }}</td>
-                        <td>{{ number_format($post['metrics']['shares'] ?? 0) }}</td>
-                        <td>{{ number_format($post['metrics']['saved'] ?? 0) }}</td>
-                        <td>{{ number_format($post['metrics']['views'] ?? 0) }}</td>
-                        <td>{{ number_format($post['metrics']['total_interactions'] ?? 0) }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+   
+	<div class="section">
+        <h3>{{ __('Summary') }}</h3>
+        <p>
+            {{ __('This report shows the TikTok performance for the selected period.') }}
+            {{ __('The metrics include likes, comments, shares, views and follower growth.') }}
+        </p>
+        <p style="margin-top: 20px; font-size: 10px; color: #666;">
+            {{ __('Generated on') }}: {{ now()->format('Y-m-d H:i:s') }}
+        </p>
     </div>
 
 </body>

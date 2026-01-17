@@ -35,7 +35,7 @@ if($post){
 
     <div class="d-flex hp-100">
         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check("appfiles")): ?>
-        <div class="compose-media d-flex flex-column flex-fill max-w-400 min-w-300 bg-white">
+        <div class="compose-media d-flex flex-column flex-fill max-w-400 min-w-300 bg-white d-none">
             <?php echo $__env->make('appfiles::block_files', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
         </div>
         <?php endif; ?>

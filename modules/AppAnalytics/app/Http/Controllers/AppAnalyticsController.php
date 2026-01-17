@@ -23,7 +23,7 @@ class AppAnalyticsController extends Controller
     {
         $account = Accounts::where('id_secure', $id_secure)
             ->where('social_network', $social)
-            ->where('team_id', $request->team_id)
+            //->where('team_id', $request->team_id)
             ->firstOrFail();
 
         $module = "AppAnalytics" . ucfirst($social);
@@ -57,7 +57,7 @@ class AppAnalyticsController extends Controller
 	{
 		$account = Accounts::where('id_secure', $id_secure)
 			->where('social_network', $social)
-			->where('team_id', $request->team_id)
+			//->where('team_id', $request->team_id)
 			->firstOrFail();
 		
 		$module = "AppAnalytics" . ucfirst($social);

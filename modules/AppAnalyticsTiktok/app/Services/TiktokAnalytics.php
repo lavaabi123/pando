@@ -740,7 +740,7 @@ class TiktokAnalytics implements SocialAnalyticsInterface
 	            'Authorization' => 'Bearer ' . $accessToken,
 	            'Content-Type'  => 'application/json',
 	        ])->post('https://open.tiktokapis.com/v2/video/list/?fields='.implode(',', $fields), $payload);
-			print_r($response->json());exit;
+			//print_r($response->json());exit;
 	        if (!$response->successful()) {
 	            logger()->error('[TiktokAnalytics] getVideoList failed', [
 	                'status' => $response->status(),
