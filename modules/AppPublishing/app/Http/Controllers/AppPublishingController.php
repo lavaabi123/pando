@@ -13,6 +13,8 @@ use DB;
 use Arr;
 use Media;
 use Auth;
+use Modules\AppPublishing\Models\CalendarNote;
+
 
 class AppPublishingController extends Controller
 {
@@ -914,6 +916,119 @@ class AppPublishingController extends Controller
 			'status' => 'success',
 			'message' => __('Post Scheduled Successfully.')
 		]);
+	}
+	
+	public function addNote(Request $request)
+    {
+        $validated = $request->validate([
+            'note_text' => 'required|string|max:1024',
+            'note_date' => 'required|date',
+        ]);
+
+        CalendarNote::create([
+            'notes' => $validated['note_text'],
+            'date' => $validated['note_date'],
+            'user_id' => Auth::id(),
+            'brand_id' => session('brand_id'),
+        ]);
+
+        return response()->json(['message' => 'success']);
+    }
+
+    public function editNote(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'note_text' => 'required|string|max:1024',
+            'note_date' => 'required|date',
+        ]);
+
+        $note = CalendarNote::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        $note->update([
+            'notes' => $validated['note_text'],
+			'date' => $validated['note_date'],
+        ]);
+
+        return response()->json(['message' => 'success']);
+    }
+
+    public function getNote($date)
+    {
+        $notes = CalendarNote::with('user')
+            ->where('date', $date)
+            ->where('user_id', Auth::id())
+            ->where('brand_id', session('brand_id'))
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $notesHtml = '';
+        
+        if ($notes->isNotEmpty()) {
+            foreach ($notes as $note) {
+                $notesHtml .= view(module("key") . '::partials.calendar-note-item', [
+                    'note' => $note
+                ])->render();
+            }
+        }
+
+        return response($notesHtml);
+    }
+
+    public function deleteNote($id)
+    {
+        CalendarNote::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->delete();
+
+        return response('success');
+    }
+	
+	public function getNotesForCalendar(Request $request)
+	{
+		$start = $request->input('start');
+		$end = $request->input('end');
+		
+		if (!$start || !$end) {
+			return response()->json(['data' => []]);
+		}
+		
+		// Fetch notes within date range
+		$notes = CalendarNote::with('user')
+			->where('user_id', Auth::id())
+			->where('brand_id', session('brand_id'))
+			->whereBetween('date', [$start, $end])
+			->orderBy('date', 'asc')
+			->orderBy('created_at', 'desc')
+			->get();
+		
+		// Group notes by date
+		$groupedNotes = [];
+		
+		foreach ($notes as $note) {
+			$dateKey = $note->date instanceof \Carbon\Carbon 
+				? $note->date->format('Y-m-d') 
+				: date('Y-m-d', strtotime($note->date));
+			
+			if (!isset($groupedNotes[$dateKey])) {
+				$groupedNotes[$dateKey] = [
+					'date' => $dateKey,
+					'count' => 0,
+					'notes' => []
+				];
+			}
+			
+			$groupedNotes[$dateKey]['count']++;
+			$groupedNotes[$dateKey]['notes'][] = [
+				'id' => $note->id,
+				'text' => $note->notes,
+				'user' => $note->user->name ?? 'Unknown',
+				'created_at' => date('M d, Y H:i A', strtotime($note->created_at))
+			];
+		}
+		
+		return response()->json(['data' => $groupedNotes]);
 	}
 	
 	

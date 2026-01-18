@@ -5,47 +5,92 @@
     <title>{{ __('Facebook Analytics Report') }}</title>
     <style>
         @font-face {
-            font-family: 'NotoSans';
-            src: url("{{ base_path('resources/fonts/NotoSans-Regular.ttf') }}") format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
+        font-family: 'DejaVuSans';
+        src: url("{{ storage_path('fonts/DejaVuSans.ttf') }}") format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
 
-        @font-face {
-            font-family: 'NotoSans';
-            src: url("{{ base_path('resources/fonts/NotoSans-Bold.ttf') }}") format('truetype');
-            font-weight: bold;
-            font-style: normal;
-        }
+    @font-face {
+        font-family: 'DejaVuSans';
+        src: url("{{ storage_path('fonts/DejaVuSans-Bold.ttf') }}") format('truetype');
+        font-weight: bold;
+        font-style: normal;
+    }
 
-        body {
-            font-family: 'NotoSans', sans-serif;
+    body {
+        font-family: 'DejaVuSans', sans-serif;   
             font-size: 12px;
-            line-height: 1.6;
+            line-height: 1.4;
             margin: 0;
-            padding: 20px;
-            color: #222;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
         }
 
         h1 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #3b5998;
-            color: #3b5998;
-        }
-
-        h3 {
-            font-size: 15px;
-            margin-bottom: 8px;
-            margin-top: 28px;
-            color: #333;
+            font-size: 16px;
+            margin-bottom: 10px;
+			color: #666;
+			text-align:center;
         }
 
         .section {
-            margin-bottom: 32px;
+            margin-bottom: 30px;
         }
 
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            margin-bottom: 46px;
+        }
+
+        .table th, .table td {
+            border: 1px solid #ddd;
+            padding: 6px 8px;
+        }
+
+        .table th {
+            background-color: #f9f9f9;
+        }
+
+
+        .text-muted {
+            color: #777;
+        }
+		/* Chart styling - 2 per row */
+		/* Charts in 2 columns with proper spacing */
+		.chart-container {
+			display: inline-block;
+			width: 45%;
+			margin-bottom: 20px;
+			margin-right: 0;
+			padding: 10px;
+			vertical-align: top;
+			page-break-inside: avoid;
+			box-sizing: border-box;
+			border: 1px solid #e0e0e0;
+		}
+
+		.chart-container:nth-child(odd) {
+			margin-right: 2%;
+		}
+
+		img.chart {
+			display: block;
+			width: 100%;
+			height: auto;
+			border: none;
+			background: #fff;
+		}
+		.header {
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 10px;
+            color: #666;
+        }
+		
         .metrics-grid {
             display: table;
             width: 100%;
@@ -76,77 +121,33 @@
             color: #000;
         }
 
-        .table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 11px;
-        }
-
-        .table th, .table td {
-            border: 1px solid #ddd;
-            padding: 6px 8px;
-            text-align: left;
-        }
-
-        .table th {
-            background-color: #f0f0f0;
-            font-weight: bold;
-        }
-
-        .table tbody tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-
-
-        .highlight {
-            font-weight: bold;
-            color: #000;
-        }
-
-        .info-box {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-
-        .page-break {
-            page-break-after: always;
-        }
-		/* Chart styling - 2 per row */
-		/* Charts in 2 columns with proper spacing */
-		.chart-container {
-			display: inline-block;
-			width: 45%;
-			margin-bottom: 20px;
-			margin-right: 0;
-			padding: 10px;
-			vertical-align: top;
-			page-break-inside: avoid;
-			box-sizing: border-box;
-			border: 1px solid #e0e0e0;
-		}
-
-		.chart-container:nth-child(odd) {
-			margin-right: 2%;
-		}
-
-		img.chart {
-			display: block;
-			width: 100%;
-			height: auto;
-			border: none;
-			background: #fff;
-		}
-
     </style>
 </head>
 <body>
+	{{-- Header --}}
+    <div class="header">
+		<div style="text-align:center">
+			@php
+				$path = public_path('img/logo-brand-dark.png');    
+				if (file_exists($path)) {
+					$type = pathinfo($path, PATHINFO_EXTENSION);
+					$data = file_get_contents($path);
+					$base64im = 'data:image/' . $type . ';base64,' . base64_encode($data);
+				} else {
+					$base64im = null;
+				}
+			@endphp
+			@if($base64im)
+				<img alt="Logo" src="{{ $base64im }}" style="width: 90px; height: 39px; margin-top: 15px;">
+			@endif
+			<h3 style="margin:0px">Brand: {{ $brand_name }}</h3>
+			<h6 style="margin:5px 0px">Created on: {{ now()->format('F Y') }}</h6>
+		</div>	
+	</div>
 
     <h1>{{ __('Facebook Analytics Report') }}</h1>
 
-    <div class="info-box">
+    <div class="section" style="text-align:center;">
         <strong>{{ __('Page Name') }}:</strong> <span class="highlight">{{ $analytics['account']['name'] ?? '-' }}</span><br>
         <strong>{{ __('Followers') }}:</strong> <span class="highlight">{{ number_format($analytics['account']['followers_count'] ?? 0) }}</span><br>
         <strong>{{ __('Category') }}:</strong> <span class="highlight">{{ $analytics['account']['category'] ?? '-' }}</span><br>
@@ -161,26 +162,7 @@
         <h3>{{ __('Key Performance Metrics') }}</h3>
         <div class="metrics-grid">
 			@php
-				$overview = $analytics['overview'];
-				$icons = [
-					'likes' => 'fa-light fa-thumbs-up', 
-					'follows' => 'fa-light fa-users', 
-					'reach' => 'fa-light fa-eye',
-					'impressions' => 'fa-light fa-repeat', 
-					'engagements' => 'fa-light fa-comment',
-					'page_views' => 'fa-light fa-binoculars', 
-					'published_posts' => 'fa-light fa-paper-plane',
-				];
-				$colors = [
-					'likes' => 'primary', 
-					'follows' => 'info', 
-					'reach' => 'success',
-					'impressions' => 'warning', 
-					'engagements' => 'danger',
-					'page_views' => 'dark', 
-					'published_posts' => 'pink',
-				];
-				
+				$overview = $analytics['overview'];				
 				// Chunk into groups of 3
 				$metricsChunks = array_chunk($overview, 3, true);
 			@endphp
@@ -209,7 +191,7 @@
             @foreach ($charts as $chart)
                 @if(isset($chart['base64']) && isset($chart['id']))
                     <div class="chart-container">
-                        <img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}">
+                        <img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}" data-social="facebook">
                     </div>
                 @endif
             @endforeach

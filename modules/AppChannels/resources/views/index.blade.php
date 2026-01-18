@@ -329,13 +329,13 @@
                     brandDropdown.classList.remove('animate-pulse-brand');
                 }, 3000);
             } else {
-                console.warn('Brand dropdown not found. Please inspect your HTML and update the selector.');
-                console.log('Looking for elements containing "brand" in class or id:');
+                //console.warn('Brand dropdown not found. Please inspect your HTML and update the selector.');
+                //console.log('Looking for elements containing "brand" in class or id:');
                 
                 // Debug: Log all possible brand-related elements
                 const debugElements = document.querySelectorAll('[class*="brand"], [id*="brand"]');
                 debugElements.forEach(function(el) {
-                    console.log('Found element:', el.tagName, el.className, el.id);
+                    //console.log('Found element:', el.tagName, el.className, el.id);
                 });
             }
         };

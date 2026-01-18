@@ -5,65 +5,59 @@
     <title>{{ __('Instagram Analytics Report') }}</title>
     <style>
         @font-face {
-            font-family: 'NotoSans';
-            src: url("{{ base_path('resources/fonts/NotoSans-Regular.ttf') }}") format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
-        @font-face {
-            font-family: 'NotoSans';
-            src: url("{{ base_path('resources/fonts/NotoSans-Bold.ttf') }}") format('truetype');
-            font-weight: bold;
-            font-style: normal;
-        }
-        body {
-            font-family: 'NotoSans', sans-serif;
+        font-family: 'DejaVuSans';
+        src: url("{{ storage_path('fonts/DejaVuSans.ttf') }}") format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
+
+    @font-face {
+        font-family: 'DejaVuSans';
+        src: url("{{ storage_path('fonts/DejaVuSans-Bold.ttf') }}") format('truetype');
+        font-weight: bold;
+        font-style: normal;
+    }
+
+    body {
+        font-family: 'DejaVuSans', sans-serif;   
             font-size: 12px;
-            line-height: 1.6;
+            line-height: 1.4;
             margin: 0;
-            padding: 20px;
-            color: #222;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
         }
+
         h1 {
-            font-size: 20px;
-            margin-bottom: 16px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e1306c;
+            font-size: 16px;
+            margin-bottom: 10px;
+			color: #666;
+			text-align:center;
         }
-        h3 {
-            font-size: 15px;
-            margin-bottom: 8px;
-            margin-top: 28px;
-            color: #333;
-        }
+
         .section {
-            margin-bottom: 32px;
+            margin-bottom: 30px;
         }
+
         .table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            font-size: 12px;
+            margin-bottom: 46px;
         }
+
         .table th, .table td {
             border: 1px solid #ddd;
-            padding: 6px 10px;
-            text-align: left;
+            padding: 6px 8px;
         }
+
         .table th {
-            background-color: #f0f0f0;
+            background-color: #f9f9f9;
         }
-        .table tbody tr:nth-child(even) {
-            background-color: #fafafa;
-        }
-        .highlight {
-            font-weight: bold;
-            color: #e1306c;
-        }
-        .subtext {
-            color: #888;
-            font-size: 11px;
-            margin-top: 3px;
+
+
+        .text-muted {
+            color: #777;
         }
 		/* Chart styling - 2 per row */
 		/* Charts in 2 columns with proper spacing */
@@ -90,13 +84,70 @@
 			border: none;
 			background: #fff;
 		}
+		.header {
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 10px;
+            color: #666;
+        }
+		
+        .metrics-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .metric-row {
+            display: table-row;
+        }
+
+        .metric-cell {
+            display: table-cell;
+            padding: 12px;
+            border: 1px solid #ddd;
+            width: 33%;
+            vertical-align: top;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+
     </style>
 </head>
 <body>
+	{{-- Header --}}
+    <div class="header">
+		<div style="text-align:center">
+			@php
+				$path = public_path('img/logo-brand-dark.png');    
+				if (file_exists($path)) {
+					$type = pathinfo($path, PATHINFO_EXTENSION);
+					$data = file_get_contents($path);
+					$base64im = 'data:image/' . $type . ';base64,' . base64_encode($data);
+				} else {
+					$base64im = null;
+				}
+			@endphp
+			@if($base64im)
+				<img alt="Logo" src="{{ $base64im }}" style="width: 90px; height: 39px; margin-top: 15px;">
+			@endif
+			<h3 style="margin:0px">Brand: {{ $brand_name }}</h3>
+			<h6 style="margin:5px 0px">Created on: {{ now()->format('F Y') }}</h6>
+		</div>	
+	</div>
 
     <h1>{{ __('Instagram Analytics Report') }}</h1>
 
-    <div class="section">
+    <div class="section" style="text-align:center;">
         <strong>{{ __('Account Name') }}:</strong> <span class="highlight">{{ $analytics['account']['name'] ?? '-' }}</span><br>
         <strong>{{ __('Username') }}:</strong> <span class="highlight">{{ $analytics['account']['username'] ?? '-' }}</span><br>
         <strong>{{ __('Followers') }}:</strong> <span class="highlight">{{ number_format($analytics['account']['followers_count'] ?? 0) }}</span><br>
@@ -162,7 +213,7 @@
             @foreach ($charts as $chart)
                 @if(isset($chart['base64']))
 					<div class="chart-container">
-                        <img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}">
+                        <img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}" data-social="instagram">
                     </div>
                 @endif
             @endforeach

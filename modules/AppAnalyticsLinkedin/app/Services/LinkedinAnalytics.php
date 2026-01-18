@@ -54,6 +54,7 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
         $fansLocationMapChart = $this->getFansLocationMapChartData($account->id, $since, $until);
         $topFansCountries = $this->getTopFansCountries($account->id, $since, $until);
         $dailyAllPageViewsChart = $this->getDailyAllPageViewsChartData($account->id, $since, $until);
+		$getDailyFollowerChartData = $this->getDailyFollowerChartData($account->id, $since, $until);
         $sectionPageViewsChartData = $this->getSectionPageViewsChartData($account->id, $since, $until);
         $devicePageViewsChartData = $this->getDevicePageViewsChartData($account->id, $since, $until);
         $postCountByDayChartData = $this->getPostCountByDayChartData($account->id, $since, $until);
@@ -84,6 +85,7 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 			'followersByFunction' => $followersByFunction,
 			'followersByCompanySize' => $followersByCompanySize,
             'dailyAllPageViewsChart' => $dailyAllPageViewsChart,
+			'getDailyFollowerChartData' => $getDailyFollowerChartData,
             'sectionPageViewsChartData' => $sectionPageViewsChartData,
             'devicePageViewsChartData' => $devicePageViewsChartData,
             'postCountChart' => $postCountByDayChartData,
@@ -216,6 +218,40 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 	        'categories' => $allDays->toArray(),
 	        'series' => [
 	            ['name' => __('Page Views'), 'data' => $values]
+	        ],
+	        'summary' => [
+	            'total' => array_sum($values)
+	        ]
+	    ];
+	}
+	
+	public function getDailyFollowerChartData(int $accountId, string $since, string $until): array
+	{
+	    $allDays = collect();
+	    $date = Carbon::parse($since);
+	    $end = Carbon::parse($until);
+	    while ($date->lte($end)) {
+	        $allDays->push($date->format('M d'));
+	        $date->addDay();
+	    }
+
+	    $raw = DB::table('social_analytics')
+	        ->selectRaw('DATE_FORMAT(date, "%b %d") as day, SUM(value) as total')
+	        ->where('account_id', $accountId)
+	        ->where('social_network', 'linkedin')
+	        ->where('metric', 'follower_count')
+	        ->whereBetween('date', [$since, $until])
+	        ->groupBy('day')
+	        ->orderByRaw('STR_TO_DATE(day, "%b %d")')
+	        ->get()
+	        ->keyBy('day');
+
+	    $values = $allDays->map(fn($day) => (int) ($raw[$day]->total ?? 0))->toArray();
+
+	    return [
+	        'categories' => $allDays->toArray(),
+	        'series' => [
+	            ['name' => __('Followers'), 'data' => $values]
 	        ],
 	        'summary' => [
 	            'total' => array_sum($values)

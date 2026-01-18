@@ -5,7 +5,7 @@ var AppPubishing = new (function ()
     var AppPubishing = this;
     var CalendarMain = null;      // Main calendar instance
     var CalendarCompose = null;   // Compose calendar instance
-    
+    var calendarNotesData = {};
     /*
     * FULL CALENDAR
      */
@@ -37,6 +37,10 @@ var AppPubishing = new (function ()
         {
             AppPubishing.previewAction();
             AppPubishing.preview();
+			setTimeout(function() {
+				AppPubishing.updateCharacterCountIndicators();
+				AppPubishing.updateCharacterCounts();
+			}, 500);
         }
 
     },
@@ -44,7 +48,6 @@ var AppPubishing = new (function ()
 	AppPubishing.initn = function( reload ) 
     {
 		
-	console.log('dfs');
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': VARIABLES.csrf
@@ -64,6 +67,10 @@ var AppPubishing = new (function ()
         {
             AppPubishing.previewAction();
             AppPubishing.preview();
+			setTimeout(function() {
+				AppPubishing.updateCharacterCountIndicators();
+				AppPubishing.updateCharacterCounts();
+			}, 500);
         }
 
     },
@@ -156,6 +163,7 @@ var AppPubishing = new (function ()
                 $('.cpv-empty').removeClass('d-none');
             }
             AppPubishing.preview();
+			AppPubishing.updateCharacterCountIndicators();
         }
 
         // Setup MutationObserver
@@ -177,6 +185,7 @@ var AppPubishing = new (function ()
                 var text = $(".post-caption")[0].emojioneArea.getText();
                 var content = editor.html();
                 editor.parents(".wrap-input-emoji").find('.count-word span').html( text.length );
+				AppPubishing.updateCharacterCounts();
                 if(text != ""){
                     $(".cpv-text").html(content);
                 }else{
@@ -188,6 +197,7 @@ var AppPubishing = new (function ()
                 var text = $(".post-caption")[0].emojioneArea.getText();
                 var content = editor.html();
                 editor.parents(".wrap-input-emoji").find('.count-word span').html( text.length );
+				AppPubishing.updateCharacterCounts();
                 if(text != ""){
                     $(".cpv-text").html(content);
                 }else{
@@ -199,6 +209,7 @@ var AppPubishing = new (function ()
                 var text = $(".post-caption")[0].emojioneArea.getText();
                 var content = $(".post-caption")[0].parents(".wrap-input-emoji").find(".emojionearea-editor").html();
                 button.parents(".wrap-input-emoji").find('.count-word span').html( text.length );
+				AppPubishing.updateCharacterCounts();
                 if(text != ""){
                     $(".cpv-text").html(content);
                 }else{
@@ -355,7 +366,101 @@ var AppPubishing = new (function ()
         }
     },
 
-    AppPubishing.closeCompose = function(){
+    /**
+	 * Update character count indicators based on selected social networks
+	 */
+	AppPubishing.updateCharacterCountIndicators = function() {
+		var networks = {
+			x: false,
+			instagram: false,
+			facebook: false,
+			linkedin: false,
+			pinterest: false
+		};
+		
+		// Check which networks are selected
+		$(".am-selected-list .am-selected-item").each(function(){
+			var network = $(this).attr('data-network');
+			if (network) {
+				networks[network.toLowerCase()] = true;
+			}
+		});
+		
+		// Show/hide character count indicators
+		if (networks.x) {
+			$(".count-word-x").css('display', 'flex');
+		} else {
+			$(".count-word-x").hide();
+		}
+		
+		if (networks.instagram) {
+			$(".count-word-instagram").css('display', 'flex');
+			$(".count-word-hashtag").css('display', 'flex');
+		} else {
+			$(".count-word-instagram").hide();
+			$(".count-word-hashtag").hide();
+		}
+		
+		if (networks.facebook) {
+			$(".count-word-facebook").css('display', 'flex');
+		} else {
+			$(".count-word-facebook").hide();
+		}
+		
+		if (networks.linkedin) {
+			$(".count-word-linkedin").css('display', 'flex');
+		} else {
+			$(".count-word-linkedin").hide();
+		}
+		
+		if (networks.pinterest) {
+			$(".count-word-pinterest").css('display', 'flex');
+		} else {
+			$(".count-word-pinterest").hide();
+		}
+	};
+
+	/**
+	 * Update character counts for all social networks
+	 */
+	AppPubishing.updateCharacterCounts = function() {
+		if ($(".post-caption").length > 0 && $(".post-caption")[0].emojioneArea) {
+			var text = $(".post-caption")[0].emojioneArea.getText();
+			var textLength = text.length;
+			
+			// Update main counter
+			$(".count-word span").html(textLength);
+			
+			// Update each network-specific counter
+			$(".word-reduce").each(function() {
+				var limit = $(this).data("word-count");
+				var remaining = limit - textLength;
+				
+				if (remaining < 0) {
+					$(this).removeClass("text-gray-500").removeClass("text-warning").addClass("text-danger");
+					$(this).find("span").html(remaining);
+				} else if (remaining < limit * 0.1) {
+					$(this).removeClass("text-gray-500").removeClass("text-danger").addClass("text-warning");
+					$(this).find("span").html(remaining);
+				} else {
+					$(this).removeClass("text-danger").removeClass("text-warning").addClass("text-gray-500");
+					$(this).find("span").html(remaining);
+				}
+			});
+			
+			// Count hashtags
+			var hashtags = (text.match(/#[\w]+/g) || []).length;
+			$(".count-word-hashtag .hashtag-current").html(hashtags);
+			
+			if (hashtags > 30) {
+				$(".count-word-hashtag").removeClass("text-gray-500").addClass("text-danger");
+			} else {
+				$(".count-word-hashtag").removeClass("text-danger").addClass("text-gray-500");
+			}
+		}
+	};
+
+	AppPubishing.closeCompose = function(){
         $(".compose,.compose_header").addClass("d-none");
         $(".composer-scheduling").addClass("d-none").html("");
         
@@ -367,7 +472,6 @@ var AppPubishing = new (function ()
     },
 
     AppPubishing.openCompose = function(){
-	console.log('dx');
         $(".composer-scheduling")
         .removeClass("d-none")
         .fadeIn(300);
@@ -1013,19 +1117,38 @@ var AppPubishing = new (function ()
     },
 	
 	AppPubishing.CalendarTitleCompose = function(){
-        if($(".compose-calendar-new").length == 0) return false;
-        var target = document.querySelector('#calendar-new .fc-toolbar-title');
-        if(!target) return false;
-        $(".compose-calendar-new").find(CALENDAR_SELECTORS.TITLE).html(target.innerText);
-        var observer = new MutationObserver(function(mutations) {
-            $(".compose-calendar-new").find(CALENDAR_SELECTORS.TITLE).html(target.innerText);  
-        });
-        observer.observe(target, {
-            childList: true,
-            subtree: true,
-            characterDataOldValue: true
-        });
-    },
+		if($(".compose-calendar-new").length == 0) return false;
+		var target = document.querySelector('#calendar-new .fc-toolbar-title');
+		if(!target) return false;
+		
+		$(".compose-calendar-new").find(CALENDAR_SELECTORS.TITLE).html(target.innerText);
+		
+		var observer = new MutationObserver(function(mutations) {
+			$(".compose-calendar-new").find(CALENDAR_SELECTORS.TITLE).html(target.innerText);
+			
+			// ⭐ ADD THIS: Load notes when calendar title changes (view changes)
+			if(CalendarCompose) {
+				const view = CalendarCompose.view;
+				const start = view.activeStart.toISOString().split('T')[0];
+				const end = view.activeEnd.toISOString().split('T')[0];
+				AppPubishing.loadCalendarNotes(start, end);
+			}
+		});
+		
+		observer.observe(target, {
+			childList: true,
+			subtree: true,
+			characterDataOldValue: true
+		});
+		
+		// ⭐ ADD THIS: Load notes on initial calendar load
+		if(CalendarCompose) {
+			const view = CalendarCompose.view;
+			const start = view.activeStart.toISOString().split('T')[0];
+			const end = view.activeEnd.toISOString().split('T')[0];
+			AppPubishing.loadCalendarNotes(start, end);
+		}
+	},
 
     AppPubishing.CalendarEvents = function(){
         $(document).on("click", ".compose-calendar .calendar-event", function(){
@@ -1109,6 +1232,169 @@ var AppPubishing = new (function ()
         });
     }
 
+	AppPubishing.buildSimpleLeftAlignedTooltip = function(noteData) {
+		const maxNotesInTooltip = 5;
+		const maxNoteLength = 70;
+		
+		let tooltip = '<div style="padding: 10px; max-width: 300px; text-align: left;">';
+		
+		// Header
+		tooltip += '<div style="font-weight: bold; font-size: 12px; margin-bottom: 8px; text-align: left;">';
+		tooltip += 'Notes (' + noteData.count + ')';
+		tooltip += '</div>';
+		
+		// Notes
+		const notesToShow = noteData.notes.slice(0, maxNotesInTooltip);
+		
+		notesToShow.forEach(function(note, index) {
+			let text = note.text;
+			if (text.length > maxNoteLength) {
+				text = text.substring(0, maxNoteLength) + '...';
+			}
+			text = text.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+			
+			tooltip += '<div style="margin: 5px 0; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.1); text-align: left;">';
+			tooltip += '<span style="color: #28a745; font-weight: bold; margin-right: 6px;">' + (index + 1) + '.</span>';
+			tooltip += '<span style="color: #fff; font-size: 11px; line-height: 1.4;">' + text + '</span>';
+			tooltip += '</div>';
+		});
+		
+		// More notes
+		if (noteData.count > maxNotesInTooltip) {
+			tooltip += '<div style="margin-top: 6px; font-size: 10px; color: rgba(255,255,255,0.6); font-style: italic; text-align: left;">';
+			tooltip += '...and ' + (noteData.count - maxNotesInTooltip) + ' more';
+			tooltip += '</div>';
+		}
+		
+		// Footer
+		tooltip += '<div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.2); font-size: 10px; color: rgba(255,255,255,0.7); text-align: left;">';
+		tooltip += '<i class="fas fa-arrow-circle-down"></i> Click green dot to view/edit';
+		tooltip += '</div>';
+		
+		tooltip += '</div>';
+		
+		return tooltip;
+	},
+	AppPubishing.reloadCalendarNotes = function() {
+		if (!CalendarCompose) return;
+		
+		const view = CalendarCompose.view;
+		const start = view.activeStart.toISOString().split('T')[0];
+		const end = view.activeEnd.toISOString().split('T')[0];
+		
+		AppPubishing.loadCalendarNotes(start, end);
+	};
+// DEBUGGING STEPS - Run these in browser console
+
+
+	AppPubishing.renderNoteDots = function() {
+    console.log('🎯 renderNoteDots called');
+    
+    // Remove existing dots
+    $('.note-dots-container').remove();
+    
+    if(!calendarNotesData || Object.keys(calendarNotesData).length === 0) {
+        console.log('⚠️ No notes data available');
+        return;
+    }
+    
+    let totalDots = 0;
+    
+    // Add dots to dates with notes
+    Object.keys(calendarNotesData).forEach(function(date) {
+        const noteData = calendarNotesData[date];
+        const $dayCell = $('.fc-daygrid-day[data-date="' + date + '"]');
+        
+        if ($dayCell.length && noteData.count > 0) {
+            // Find the date number link
+            const $dayNumber = $dayCell.find('.fc-daygrid-day-number');
+            
+            if($dayNumber.length) {
+                // Create dots HTML - use SPAN instead of DIV
+                let dotsHtml = '<span class="note-dots-container pointer" data-date="' + date + '" style="cursor: pointer;">';
+                
+                
+                dotsHtml += '<span class="note-dot"></span>';
+				if (noteData.count > 1) {
+					dotsHtml += '<span class="note-count">(' + noteData.count + ')</span>';
+				}
+
+                
+                dotsHtml += '</span>';
+                
+                // Append dots inside the date number link
+                $dayNumber.append(dotsHtml);
+                
+                // Build tooltip
+                const tooltipContent = AppPubishing.buildSimpleLeftAlignedTooltip(noteData);
+                const $container = $dayCell.find('.note-dots-container');
+                
+                $container.attr({
+                    'data-bs-toggle': 'tooltip',
+                    'data-bs-html': 'true',
+                    'data-bs-placement': 'top',
+                    'title': tooltipContent
+                });
+                
+                // Initialize Bootstrap tooltip
+                if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                    try {
+                        new bootstrap.Tooltip($container[0]);
+                    } catch(e) {
+                        // Silently fail if tooltip fails
+                    }
+                }
+            }
+        }
+    });
+    
+    console.log('🎉 Rendered', totalDots, 'dots on', Object.keys(calendarNotesData).length, 'dates');
+	// Add click handler for dots
+    $('.note-dots-container').off('click').on('click', function(e) {
+        e.stopPropagation(); // Prevent day click
+        e.preventDefault();
+        
+        const date = $(this).attr('data-date');
+        if (date) {
+            openNotesModal(date);
+        }
+    });
+},
+	
+	AppPubishing.loadCalendarNotes = function(start, end) {
+    console.log('🔄 Loading notes from', start, 'to', end);
+    
+    $.ajax({
+        url: VARIABLES.url + 'app/publishing/notes_for_calendar',
+        type: 'GET',
+        data: {
+            start: start,
+            end: end
+        },
+        dataType: 'json',
+        success: function(response) {
+            console.log('✅ Notes loaded:', response);
+            calendarNotesData = response.data || {};
+            console.log('📊 Stored notes data:', calendarNotesData);
+            
+            // Wait a bit for calendar to finish rendering
+            setTimeout(function() {
+                AppPubishing.renderNoteDots();
+            }, 300);
+        },
+        error: function(xhr, status, error) {
+            console.error('❌ Failed to load calendar notes');
+            console.error('Status:', status);
+            console.error('Error:', error);
+            console.error('Response:', xhr.responseText);
+        }
+    });
+};
+
+
+	// 6. Manually try to render dots
+	AppPubishing.renderNoteDots();
+
 });
 
 AppPubishing.init();
@@ -1186,7 +1472,6 @@ $(document).ready(function() {
                 status: 2 // Pending approval status
             },
             success: function(response) {
-                console.log('Approval list response:', response);
                 
                 // Remove loading indicators
                 $('#initial-loader').remove();
@@ -1287,7 +1572,6 @@ $(document).ready(function() {
                 status: 1 // Pending draft status
             },
             success: function(response) {
-                console.log('draft list response:', response);
                 
                 // Remove loading indicators
                 $('#initial-loader').remove();
@@ -1409,4 +1693,235 @@ $(document).ready(function() {
             }, wait);
         };
     }
+	
+	const PATH = '{{ url("/") }}/';
+
 });
+
+
+
+	function open_notes_modal() {
+		$(".calendar-notes-added").html('');
+		$('#notes_modal').modal('show');
+		$('.date').datepicker('setDate', 'today');
+		
+	}
+
+	$(document).ready(function () {
+		//load_calendar();
+		
+		// On date change, trigger the AJAX call
+		$('.date').off('changeDate').on('changeDate', function(e) {
+			// Skip if this is a programmatic change (not user click)
+			if ($(this).data('skip-change-event')) {
+				$(this).data('skip-change-event', false);
+				return;
+			}
+			
+			// User manually changed the date
+			var date = moment(e.date).format('YYYY-MM-DD');
+			
+			// Warn if in edit mode
+			var isEditMode = $('.edit_note_btn').is(':visible');
+			if (isEditMode) {
+				if (!confirm('Changing date will discard your current edits. Continue?')) {
+					// Revert to previous date
+					var originalDate = $(this).data('current-date');
+					$(this).data('skip-change-event', true);
+					$(this).datepicker('setDate', originalDate);
+					return;
+				}
+			}
+			
+			// Clear and load new date
+			$('#note_text').val('');
+			$('.edit_note_btn').attr('data-id', '');
+			$('.add_note_btn').show();
+			$('.edit_note_btn').hide();
+			$('.cancel-edit-btn').hide();
+			$(this).data('current-date', e.date);
+			
+			get_note(date);
+		});
+		
+		$('.date').on('focus click', function () {
+			$(this).datepicker('show');
+		});
+		
+		$('#notes_modal').on('shown.bs.modal', function() {  
+			$('.edit_note_btn').attr('data-id', '');
+			$('.add_note_btn').show();
+			$('.edit_note_btn').hide();
+		});
+	});
+
+	function add_note() {
+		var note_date = moment($("#note_date").datepicker("getDate")).format('YYYY-MM-DD');
+		var note_text = $("#note_text").val();
+		
+		if (note_date != '' && note_text != '') {
+			$(".loading").show();
+			$.ajax({
+				url: VARIABLES.url + 'app/publishing/add_note',
+				type: 'POST',
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				},
+				data: { note_date: note_date, note_text: note_text },
+				dataType: 'json',
+				error: function() {
+					$(".loading").hide();
+				},
+				success: function(res) {
+					AppPubishing.reloadCalendarCompose();
+					AppPubishing.reloadCalendarNotes();
+					$(".loading").hide();
+					$('#notes_modal').modal('hide');
+					iziToast.success({
+						icon: 'fad fa-bells',
+						title: '',
+						position: 'bottomCenter',
+						message: 'Note has been added successfully',
+					});
+				}
+			});
+		} else {
+			iziToast.error({
+				icon: 'fad fa-bells',
+				title: '',
+				position: 'bottomCenter',
+				message: 'Please enter note',
+			});
+		}
+	}
+
+	function click_edit(_this, id) {
+		$("#note_text").val($(_this).closest('.note-items').find('.notetext').text());
+		$('.edit_note_btn').attr('data-id', id);
+		$('.add_note_btn').hide();
+		$('.edit_note_btn').show();
+		$('.cancel-edit-btn').show();
+	}
+
+	function edit_note() {
+		var note_text = $("#note_text").val();
+		var id = $('.edit_note_btn').attr('data-id');
+		var note_date = moment($("#note_date").datepicker("getDate")).format('YYYY-MM-DD');
+		if (note_text != '') {
+			$(".loading").show();
+			$.ajax({
+				url: VARIABLES.url + 'app/publishing/edit_note/' + id,
+				type: 'POST',
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				},
+				data: { note_date: note_date, note_text: note_text },
+				dataType: 'json',
+				error: function() {
+					$(".loading").hide();
+				},
+				success: function(res) {
+					AppPubishing.reloadCalendarCompose();
+					AppPubishing.reloadCalendarNotes();
+					$(".loading").hide();
+					$('#notes_modal').modal('hide');
+					iziToast.success({
+						icon: 'fad fa-bells',
+						title: '',
+						position: 'bottomCenter',
+						message: 'Note has been updated successfully',
+					});
+				}
+			});
+		} else {
+			iziToast.error({
+				icon: 'fad fa-bells',
+				title: '',
+				position: 'bottomCenter',
+				message: 'Please enter note',
+			});
+		}
+	}
+
+	function get_note(date) {
+		$(".loading").show();
+		$(".calendar-notes-added").html('');
+		
+		$.ajax({
+			url: VARIABLES.url + 'app/publishing/get_note/' + date,
+			type: 'GET',
+			dataType: 'html',
+			error: function() {
+				$(".loading").hide();
+				iziToast.error({
+					title: 'Error',
+					message: 'Failed to load notes',
+					position: 'bottomCenter'
+				});
+			},
+			success: function(res) {
+				$(".calendar-notes-added").html(res);
+				$(".loading").hide();
+			}
+		});
+	}
+
+	function delete_note(id, date) {
+		Main.ConfirmDialog("Are you sure you want to delete this note?", function(s){
+			if(!s){
+				return false;
+			}
+			$.ajax({
+				url: VARIABLES.url + 'app/publishing/delete_note/' + id,
+				type: 'DELETE',
+				headers: {
+					'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+				},
+				success: function(res) {
+					AppPubishing.reloadCalendarCompose();
+					AppPubishing.reloadCalendarNotes();
+					get_note(date);
+					iziToast.success({
+						icon: 'fad fa-bells',
+						title: '',
+						position: 'bottomCenter',
+						message: 'Note has been deleted successfully',
+					});
+				}
+			});
+		});
+	}
+
+	function openNotesModal(date) {
+		$('#notes_modal').modal('show');
+		
+		const [year, month, day] = date.split('-');
+		const dateObj = new Date(year, month - 1, day);
+		
+		// Set flag to skip changeDate event
+		$('.date').data('skip-change-event', true);
+		$('.date').data('current-date', dateObj);
+		
+		$('.date').datepicker('setDate', dateObj);
+		
+		// Reset modal
+		$('.edit_note_btn').attr('data-id', '');
+		$('.add_note_btn').show();
+		$('.edit_note_btn').hide();
+		$('.cancel-edit-btn').hide();
+		$('#note_text').val('');
+		
+		get_note(date);
+	}
+	
+	$('#notes_modal').on('show.bs.modal', function() {
+		$('.cancel-edit-btn').hide();
+	});
+	
+	function reset_to_add_mode() {
+		$('#note_text').val('');
+		$('.edit_note_btn').attr('data-id', '');
+		$('.add_note_btn').show();
+		$('.edit_note_btn').hide();
+		$('.cancel-edit-btn').hide();
+	}

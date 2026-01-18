@@ -272,7 +272,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 const brandName = brandItem.querySelector('.brand-name-text').textContent;
                 const avatar = brandItem.querySelector('.brand-avatar, .brand-avatar-placeholder').cloneNode(true);
                 
-                console.log('Brand selected:', brandId, brandName);
+                //console.log('Brand selected:', brandId, brandName);
                 
                 // Update the toggle button
                 const selectedDisplay = dropdownToggle.querySelector('.selected-brand-display') || document.createElement('div');
@@ -311,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const btn = e.target.closest('.favorite-btn');
             const brandId = btn.dataset.brandId;
             
-            console.log('Favorite button clicked for brand:', brandId);
+            //console.log('Favorite button clicked for brand:', brandId);
             
             // Toggle UI immediately
             btn.classList.toggle('active');
@@ -340,7 +340,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const btn = e.target.closest('.edit-btn');
             const brandId = btn.dataset.brandId;
             
-            console.log('Edit button clicked for brand:', brandId);
+            //console.log('Edit button clicked for brand:', brandId);
             window.location.href = `${window.appRoutes.brandEdit}/${brandId}/edit`;
         }
     });
@@ -352,7 +352,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const btn = e.target.closest('.delete-btn');
             const brandId = btn.dataset.brandId;
             
-            console.log('Delete button clicked for brand:', brandId);
+            //console.log('Delete button clicked for brand:', brandId);
             
             if (confirm('Are you sure you want to delete this brand?')) {
                 await deleteBrand(brandId);
@@ -417,9 +417,9 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             
             const data = await response.json();
-            console.log('Toggle favorite response:', data);
+            //console.log('Toggle favorite response:', data);
         } catch (error) {
-            console.error('Error toggling favorite:', error);
+            //console.error('Error toggling favorite:', error);
             // Revert UI on error
             button.classList.toggle('active');
             const icon = button.querySelector('i');

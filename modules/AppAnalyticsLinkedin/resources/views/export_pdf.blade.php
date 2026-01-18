@@ -5,36 +5,34 @@
     <title>{{ __('LinkedIn Analytics Report') }}</title>
     <style>
         @font-face {
-            font-family: 'NotoSans';
-            src: url("{{ base_path('resources/fonts/NotoSans-Regular.ttf') }}") format('truetype');
-            font-weight: normal;
-            font-style: normal;
-        }
+        font-family: 'DejaVuSans';
+        src: url("{{ storage_path('fonts/DejaVuSans.ttf') }}") format('truetype');
+        font-weight: normal;
+        font-style: normal;
+    }
 
-        @font-face {
-            font-family: 'NotoSans';
-            src: url("{{ base_path('resources/fonts/NotoSans-Bold.ttf') }}") format('truetype');
-            font-weight: bold;
-            font-style: normal;
-        }
+    @font-face {
+        font-family: 'DejaVuSans';
+        src: url("{{ storage_path('fonts/DejaVuSans-Bold.ttf') }}") format('truetype');
+        font-weight: bold;
+        font-style: normal;
+    }
 
-        body {
-            font-family: 'NotoSans', sans-serif;
+    body {
+        font-family: 'DejaVuSans', sans-serif;   
             font-size: 12px;
-            line-height: 1.5;
+            line-height: 1.4;
             margin: 0;
-            padding: 20px;
+            padding-left: 20px;
+            padding-right: 20px;
+            padding-bottom: 20px;
         }
 
         h1 {
-            font-size: 18px;
+            font-size: 16px;
             margin-bottom: 10px;
-        }
-
-        h3 {
-            font-size: 14px;
-            margin-bottom: 6px;
-            margin-top: 24px;
+			color: #666;
+			text-align:center;
         }
 
         .section {
@@ -86,18 +84,75 @@
 			border: none;
 			background: #fff;
 		}
+		.header {
+            text-align: right;
+            margin-bottom: 20px;
+            font-size: 10px;
+            color: #666;
+        }
+		
+        .metrics-grid {
+            display: table;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .metric-row {
+            display: table-row;
+        }
+
+        .metric-cell {
+            display: table-cell;
+            padding: 12px;
+            border: 1px solid #ddd;
+            width: 33%;
+            vertical-align: top;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #000;
+        }
+
     </style>
 </head>
 <body>
+{{-- Header --}}
+    <div class="header">
+		<div style="text-align:center">
+			@php
+				$path = public_path('img/logo-brand-dark.png');    
+				if (file_exists($path)) {
+					$type = pathinfo($path, PATHINFO_EXTENSION);
+					$data = file_get_contents($path);
+					$base64im = 'data:image/' . $type . ';base64,' . base64_encode($data);
+				} else {
+					$base64im = null;
+				}
+			@endphp
+			@if($base64im)
+				<img alt="Logo" src="{{ $base64im }}" style="width: 90px; height: 39px; margin-top: 15px;">
+			@endif
+			<h3 style="margin:0px">Brand: {{ $brand_name }}</h3>
+			<h6 style="margin:5px 0px">Created on: {{ now()->format('F Y') }}</h6>
+		</div>	
+	</div>
 
     <h1>{{ __('LinkedIn Analytics Report') }}</h1>
 
-    <div class="section">
+    <div class="section" style="text-align:center;">
         <strong>{{ __('Page Name') }}:</strong> {{ $analytics['account']['name'] ?? '-' }}<br>
         <strong>{{ __('Username') }}:</strong> {{ $analytics['account']['username'] ?? '-' }}<br>
         <strong>{{ __('Profile URL') }}:</strong> {{ $analytics['account']['url'] ?? '-' }}<br>
         @if (!empty($startDate) && !empty($endDate))
-            <br>
+			<br>
              <strong>{{ __('Period') }}:</strong> {{ $startDate }} -  {{ $endDate }}
         @endif
     </div>
@@ -126,7 +181,7 @@
 				@foreach ($charts as $chart)
 					@if(isset($chart['base64']))
 						<div class="chart-container">
-							<img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}">
+							<img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}" data-social="linkedin">
 						</div>
 					@endif
 				@endforeach

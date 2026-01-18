@@ -288,6 +288,6 @@ function sendCommentReply(event, detailId, conversationId, inboxType) {
 
 function showReplyForm(commentId) {
     // Implementation for showing reply form for specific comment
-    console.log('Reply to comment:', commentId);
+    //console.log('Reply to comment:', commentId);
 }
 </script>

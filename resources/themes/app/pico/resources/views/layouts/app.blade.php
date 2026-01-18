@@ -127,6 +127,7 @@
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
     <script src="https://code.highcharts.com/maps/modules/map.js"></script>
     <script src="https://code.highcharts.com/mapdata/custom/world.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/jquery/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/jquery-ui/jquery-ui.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/codemirror5/lib/codemirror.js') }}"></script>
@@ -150,8 +151,9 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/lazysizes/lazysizes.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
-    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=9.0.36"></script>	
+    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=10.7"></script>	
     <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.20') }}"></script>
+	@stack('scripts')
     @yield('script')
     {!! Script::renderJs() !!}
     {!! Script::renderRaw() !!}

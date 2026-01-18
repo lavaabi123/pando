@@ -37,22 +37,29 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::post('save', [AppPublishingController::class, 'save'])->name('app.publishing.save');
             Route::post('changePostDate', [AppPublishingController::class, 'changePostDate'])->name('app.publishing.changePostDate');
 			Route::get('/dashboard/today-counts', function() {
-    $dayType = request()->day_type ?? 'daily';
-    $teamId = request()->team_id;
+			$dayType = request()->day_type ?? 'daily';
+			$teamId = request()->team_id;
+			
+			$counts = \PublishingReport::getTodayCounts($dayType, $teamId);
     
-    $counts = \PublishingReport::getTodayCounts($dayType, $teamId);
-    
-    return response()->json([
-        'total_scheduled_post' => $counts['total_scheduled_post'],
-        'inbox_messages' => $counts['inbox_messages'],
-        'total_reviews' => $counts['total_reviews'],
-        'new_people' => $counts['new_people'],
-        'total_failed_post' => $counts['total_failed_post'],
-        'total_holidays' => $counts['total_holidays'],
-        'date_text_html' => $counts['date_range_text'],
-        'day_type_text' => $counts['day_type_text'],
-    ]);
-})->name('dashboard.today-counts');
+			return response()->json([
+					'total_scheduled_post' => $counts['total_scheduled_post'],
+					'inbox_messages' => $counts['inbox_messages'],
+					'total_reviews' => $counts['total_reviews'],
+					'new_people' => $counts['new_people'],
+					'total_failed_post' => $counts['total_failed_post'],
+					'total_holidays' => $counts['total_holidays'],
+					'date_text_html' => $counts['date_range_text'],
+					'day_type_text' => $counts['day_type_text'],
+				]);
+			})->name('dashboard.today-counts');
+
+			Route::post('add_note', [AppPublishingController::class, 'addNote'])->name('calendar.notes.add');
+			Route::post('edit_note/{id}', [AppPublishingController::class, 'editNote'])->name('calendar.notes.edit');
+			Route::get('get_note/{date}', [AppPublishingController::class, 'getNote'])->name('calendar.notes.get');
+			Route::delete('delete_note/{id}', [AppPublishingController::class, 'deleteNote'])->name('calendar.notes.delete');
+			
+			Route::get('notes_for_calendar', [AppPublishingController::class, 'getNotesForCalendar'])->name('calendar.notes.for-dots');
 
         });
     });

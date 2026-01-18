@@ -33,7 +33,7 @@
 
     <form class="auto-submit" action="{{ url()->current(); }}" method="GET">
         <div class="d-flex justify-content-end gap-8">
-            <a  href="{{ route('analytics.export.pdf', [ 'social' => request()->segment(3), 'id_secure' => request()->segment(4) ]) }}" class="btn btn-dark exportPDF">{{ __("Export PDF") }}</a>
+            <a  href="{{ route('analytics.export.pdf', [ 'social' => request()->segment(3), 'id_secure' => request()->segment(4), 'daterange' => request()->input('daterange') ]) }}" class="btn btn-dark exportPDF"  data-brand-name="{{$brand_name}}" data-account="{{request()->segment(3)}}">{{ __("Export PDF") }}</a>
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div></div>
                 <div class="d-flex align-items-center justify-content-between gap-8">
@@ -463,9 +463,6 @@
 @section('script')
 <script type="text/javascript">
 var overviewData = {!! json_encode($analytics['overview_chart']) !!};
-
-// Debug: Check what the data structure looks like
-console.log('Overview Data:', overviewData);
 
 // Check if series exists before setting colors
 if (overviewData && overviewData.series && Array.isArray(overviewData.series)) {

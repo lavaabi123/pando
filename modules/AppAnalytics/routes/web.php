@@ -21,8 +21,12 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::resource('/', AppAnalyticsController::class)->names('app.analytics');
             Route::get('{social}/{id_secure}', [AppAnalyticsController::class, 'show'])->name('app.analytics.show');
             Route::post('{social}/{id_secure}/export-pdf', [AppAnalyticsController::class, 'exportPdf'])->name('analytics.export.pdf');
-			Route::get('/export-all-pdf', [AllAccountsAnalyticsController::class, 'exportAllAccountsPdf'])
-			->name('export.all.pdf');
+			// Consolidated view
+            Route::get('consolidated', [AppAnalyticsController::class, 'consolidated'])->name('app.analytics.consolidated');
+            
+            // Export all - POST only for chart data
+            Route::post('export-all-pdf', [AppAnalyticsController::class, 'exportAllPdf'])->name('app.analytics.export-all-pdf');
+            Route::get('export-all-pdf', [AppAnalyticsController::class, 'exportAllPdf'])->name('app.analytics.export-all-pdf');
         });
     });
 });

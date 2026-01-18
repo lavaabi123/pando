@@ -33,7 +33,7 @@
 
     <form class="auto-submit" action="{{ url()->current(); }}" method="GET">
         <div class="d-flex justify-content-end gap-8">
-            <a  href="{{ route('analytics.export.pdf', [ 'social' => request()->segment(3), 'id_secure' => request()->segment(4) ]) }}" class="btn btn-dark exportPDF">{{ __("Export PDF") }}</a>
+            <a  href="{{ route('analytics.export.pdf', [ 'social' => request()->segment(3), 'id_secure' => request()->segment(4), 'daterange' => request()->input('daterange') ]) }}" class="btn btn-dark exportPDF"  data-brand-name="{{$brand_name}}" data-account="{{request()->segment(3)}}">{{ __("Export PDF") }}</a>
             <div class="d-flex align-items-center justify-content-between mb-4">
                 <div></div>
                 <div class="d-flex align-items-center justify-content-between gap-8">
@@ -786,7 +786,7 @@ Main.Chart('areaspline', dailyEngagementRateChartData.series, 'dailyEngagementRa
         const response = await fetch('https://code.highcharts.com/mapdata/custom/world.topo.json');
         const topology = await response.json();
         
-        console.log('Map topology loaded:', topology);
+        //console.log('Map topology loaded:', topology);
         
         Highcharts.mapChart('topFollowerCountriesChart', {
             chart: {

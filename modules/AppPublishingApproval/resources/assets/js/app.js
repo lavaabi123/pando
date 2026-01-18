@@ -237,7 +237,6 @@ function edit_note_approval(){
 						$('input[name="approval_post_ids[]"]:checked').each(function() {
 							$(this).closest('.finalmaindiv').hide();
 						});
-						console.log($('input[name="approval_post_ids[]"]:visible').length);
 						if($('input[name="approval_post_ids[]"]:visible').length == 0){
 							$('.load-empty-message').html('<div class="text-center"><h3 class="mb-4 mt-4">There are no approvals</h3></div>');
 						}

@@ -424,7 +424,7 @@ var Main = new (function ()
 	},
 	
     Main.addToField = function () {
-		console.count("addToField click");
+		//console.count("addToField click");
 	  $(document)
 		.off("click.addToField", ".addToField")   // remove old handler(s)
 		.on("click.addToField", ".addToField", function (e) {
@@ -713,7 +713,6 @@ var Main = new (function ()
                     width: 'resolve',
                     tokenizer: function(m) { 
                         var dropdownClass = $this.data("select2-dropdown-class");
-                        console.log($this);
                         setTimeout(function(){
                             $(".select2-dropdown-class").width($this.width()).show();
                             $(".select2-dropdown").addClass(dropdownClass);
@@ -1030,8 +1029,7 @@ var Main = new (function ()
     },
 
     Main.dateRange = function() {
-		console.log($(".daterange").length);
-		console.log($("[name='daterange']").length);
+		//console.log($("[name='daterange']").length);
         if ($(".daterange").length > 0 && $("[name='daterange']").length === 0) {
             $(".daterange").removeClass("d-none");
             var $class = $(".daterange").attr("class");
@@ -1105,6 +1103,7 @@ var Main = new (function ()
 				
 				// Update URL with new daterange parameter
 				var url = new URL(window.location.href);
+				//console.log(url);
 				url.searchParams.set('daterange', newDateRange);
 				window.history.pushState({}, '', url);
 				
@@ -2784,7 +2783,7 @@ var Main = new (function ()
             }
             
             default:
-                console.warn(`Unsupported chart type: ${type}`);
+                //console.warn(`Unsupported chart type: ${type}`);
                 break;
         }
 
@@ -2795,6 +2794,8 @@ Main.exportCharts = function() {
     $(document).off("click", ".exportPDF").on("click", ".exportPDF", function(e) {
         e.preventDefault();
         const action = $(this).attr("href");
+        const brandName = $(this).data("brand-name");
+        const accountName = $(this).data("account");
         
         const chartIds = $(".export-chart").map(function() {
             const id = $(this).attr("id");
@@ -2802,18 +2803,18 @@ Main.exportCharts = function() {
         }).get().filter(Boolean);
         
         if (chartIds.length === 0) {
-            Main.showNotify('', "No valid charts to export.", 0);
+            Main.showNotify('', "No valid charts to export.", 'error');
             return;
         }
         
-        Main.showNotify('info', "Preparing charts for export...", 1);
+        Main.showNotify('', "Preparing charts for export...", 'info');
         
         const convertChartPromises = chartIds.map(id => {
             return new Promise((resolve) => {
                 const chart = window.ChartInstances?.[id];
                 
                 if (!chart || typeof chart.getSVG !== "function") {
-                    console.warn(`Chart with ID '${id}' is either invalid or not initialized.`);
+                    //console.warn(`Chart with ID '${id}' is either invalid or not initialized.`);
                     resolve(null);
                     return;
                 }
@@ -2920,7 +2921,7 @@ Main.exportCharts = function() {
                     };
                     
                     img.onerror = function() {
-                        console.error(`Failed to load image for chart: ${id}`);
+                       // console.error(`Failed to load image for chart: ${id}`);
                         resolve(null);
                     };
                     
@@ -2928,7 +2929,7 @@ Main.exportCharts = function() {
                     img.src = URL.createObjectURL(svgBlob);
                     
                 } catch (error) {
-                    console.error(`Error processing chart ${id}:`, error);
+                    //console.error(`Error processing chart ${id}:`, error);
                     resolve(null);
                 }
             });
@@ -2938,18 +2939,171 @@ Main.exportCharts = function() {
             const validCharts = results.filter(item => item !== null);
             
             if (validCharts.length === 0) {
-                Main.showNotify('error', "No valid charts to export.", 0);
+                Main.showNotify('', "No valid charts to export.", 'error');
                 return;
             }
             
-            Main.sendChart(action, validCharts);
+            Main.sendChart(action, validCharts, brandName, accountName);
         }).catch(error => {
-            console.error('Error converting charts:', error);
-            Main.showNotify('error', "Failed to prepare charts for export.", 0);
+            //console.error('Error converting charts:', error);
+            Main.showNotify('', "Failed to prepare charts for export.", 'error');
         });
     });
 },
-    Main.sendChart = function(url, images){
+Main.exportAllCharts = function() {
+    $(document).off("click", ".exportAllPDF").on("click", ".exportAllPDF", function(e) {
+        e.preventDefault();
+        const actionUrl = $(this).attr("href");
+        const brandName = $(this).data("brand-name");
+        
+        // Get all chart instances, but exclude mini charts
+        if (!window.ChartInstances || Object.keys(window.ChartInstances).length === 0) {
+            Main.showNotify('', "No charts available to export.", 'error');
+            return;
+        }
+        
+        // Filter to only include main charts
+        const mainChartIds = Object.keys(window.ChartInstances).filter(chartId => {
+            const parts = chartId.split('-');
+            return parts.length === 2; // Main charts: chart-{id}
+        });
+        
+        
+        if (mainChartIds.length === 0) {
+            Main.showNotify('', "No main charts available to export.", 'error');
+            return;
+        }
+        
+        Main.showNotify('', "Preparing charts for export...", 'info');
+        
+        const convertChartPromises = mainChartIds.map(chartId => {
+            return new Promise((resolve) => {
+                const chart = window.ChartInstances[chartId];
+                
+                if (!chart) {
+                    //console.warn(`Chart instance not found: ${chartId}`);
+                    resolve(null);
+                    return;
+                }
+                
+                // Use dataURI method for better compatibility
+                if (typeof chart.dataURI === "function") {
+                    chart.dataURI().then(({ imgURI }) => {
+                        const chartElement = $(`#${chartId}`);
+                        
+                        if (chartElement.length === 0) {
+                            resolve(null);
+                            return;
+                        }
+                        
+                        const social = chartElement.data("social") || "general";
+                        const accountId = chartElement.data("account-id") || chartId;
+                        const accountName = chartElement.data("account-name") || chartId;
+                        
+                        const cardElement = chartElement.closest('.social-analytics-card, .card');
+                        let chartTitle = '';
+                        
+                        if (cardElement.length > 0) {
+                            const platformTitle = cardElement.find('.platform-title').clone();
+                            platformTitle.find('small, .text-muted').remove();
+                            chartTitle = platformTitle.text().trim();
+                        }
+                        
+                        if (!chartTitle) {
+                            chartTitle = `${social.charAt(0).toUpperCase() + social.slice(1)} Analytics`;
+                        }
+                        
+                        chartTitle = chartTitle.replace(/[\n\r]+/g, ' ').replace(/\s+/g, ' ').trim();
+                        
+                        // Return base64 directly without adding title
+                        resolve({ 
+                            id: chartId, 
+                            title: chartTitle,
+                            social: social,
+                            accountId: accountId,
+							accountName: accountName,
+                            base64: imgURI  // Use the original chart image
+                        });
+                        
+                    }).catch(error => {
+                        //console.error(`dataURI error for chart ${chartId}:`, error);
+                        resolve(null);
+                    });
+                } else {
+                    //console.warn(`Chart ${chartId} doesn't have dataURI method`);
+                    resolve(null);
+                }
+            });
+        });
+        
+        Promise.all(convertChartPromises).then(results => {
+            const validCharts = results.filter(item => item !== null);
+            
+            
+            if (validCharts.length === 0) {
+                Main.showNotify('', "Failed to export charts.", 'error');
+                return;
+            }
+            
+            // Group by account ID
+            const groupedCharts = {};
+            validCharts.forEach(chart => {
+                const key = chart.accountId || chart.social || 'general';
+                if (!groupedCharts[key]) {
+                    groupedCharts[key] = [];
+                }
+                groupedCharts[key].push(chart);
+            });
+            
+            
+            // Send to server
+            Main.overplay();
+            
+            fetch(actionUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ 
+                    charts: groupedCharts,
+                    team_id: new URLSearchParams(window.location.search).get('team_id')
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Server responded with ' + response.status);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                Main.overplay(true);
+                
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = brandName+'_Report_' + Date.now() + '.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+                
+                Main.showNotify('', 'PDF downloaded successfully!', 'success');
+            })
+            .catch(error => {
+                Main.overplay(true);
+                //console.error('Download error:', error);
+                Main.showNotify('', 'Failed to download PDF: ' + error.message, 'error');
+            });
+            
+        }).catch(error => {
+            //console.error('Error converting charts:', error);
+            Main.showNotify('', "Failed to prepare charts.", 'error');
+        });
+    });
+},	
+	
+	Main.sendChart = function(url, images, brandName, accountName){
         Main.overplay();
         fetch(url, {
             method: 'POST',
@@ -2964,7 +3118,7 @@ Main.exportCharts = function() {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = name;
+                a.download = brandName+'_'+accountName+'_Report_' + Date.now() + '.pdf';
                 document.body.appendChild(a);
                 a.click();
                 a.remove();

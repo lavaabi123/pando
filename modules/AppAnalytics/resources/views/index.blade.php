@@ -1,21 +1,23 @@
 @extends('layouts.app')
 
 @section('sub_header')
-    <x-sub-header 
-        title="{{ __('Social Analytics') }}" 
-        description="{{ __('Track and compare performance across social media platforms.') }}" 
-    >
-    </x-sub-header>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="flex: 1;">
+            <x-sub-header 
+                title="{{ __('Social Analytics') }}" 
+                description="{{ __('Track and compare performance across social media platforms.') }}"
+            />
+        </div>
+        <div>
+            <a href="{{ route('app.analytics.consolidated', ['brand_id' => session('brand_id')]) }}" class="btn btn-primary">
+                <i class="fa fa-file-pdf"></i> {{ __('View Consolidated Analytics Overview') }}
+            </a>
+        </div>
+    </div>
 @endsection
 
 @section('content')
     <div class="container pb-5 row">
-	<div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-		<a href="{{ route('export.all.pdf') }}?date_range=last_30_days" 
-		   class="btn btn-primary">
-			Export All Analytics PDF
-		</a>
-	</div>
         @forelse ($analytics as $network => $data)
             <div class="mb-5 col-md-3">
                 <h4 class="fw-6 fs-18 mb-4">{{ $network }}</h4>
@@ -102,3 +104,11 @@
         @endforelse
     </div>
 @endsection
+@push('scripts')
+<script>
+    $(document).ready(function() {
+        // Initialize the consolidated export
+        Main.exportAllCharts();
+    });
+</script>
+@endpush

@@ -114,7 +114,6 @@ function edit_note_approval(){
 	}
 }	
 function add_note_approval(){
-	console.log('adads');
 	var grouping_data = $('#grouping_data').val();
 	var comment = $("#approval_note_text").val();
 	if(grouping_data != '' && comment != ''){

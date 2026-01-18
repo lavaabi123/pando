@@ -1,5 +1,7 @@
 <?php $__env->startSection('sub_header'); ?>
-    <?php if (isset($component)) { $__componentOriginal6bfd7fd5c294530066e0efb20ff4cd9a = $component; } ?>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <div style="flex: 1;">
+            <?php if (isset($component)) { $__componentOriginal6bfd7fd5c294530066e0efb20ff4cd9a = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal6bfd7fd5c294530066e0efb20ff4cd9a = $attributes; } ?>
 <?php $component = App\View\Components\SubHeader::resolve(['title' => ''.e(__('Social Analytics')).'','description' => ''.e(__('Track and compare performance across social media platforms.')).''] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('sub-header'); ?>
@@ -9,7 +11,7 @@
 <?php $attributes = $attributes->except(\App\View\Components\SubHeader::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes([]); ?>
-     <?php echo $__env->renderComponent(); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal6bfd7fd5c294530066e0efb20ff4cd9a)): ?>
 <?php $attributes = $__attributesOriginal6bfd7fd5c294530066e0efb20ff4cd9a; ?>
@@ -19,16 +21,18 @@
 <?php $component = $__componentOriginal6bfd7fd5c294530066e0efb20ff4cd9a; ?>
 <?php unset($__componentOriginal6bfd7fd5c294530066e0efb20ff4cd9a); ?>
 <?php endif; ?>
+        </div>
+        <div>
+            <a href="<?php echo e(route('app.analytics.consolidated', ['brand_id' => session('brand_id')])); ?>" class="btn btn-primary">
+                <i class="fa fa-file-pdf"></i> <?php echo e(__('View Consolidated Analytics Overview')); ?>
+
+            </a>
+        </div>
+    </div>
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
     <div class="container pb-5 row">
-	<div style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
-		<a href="<?php echo e(route('export.all.pdf')); ?>?date_range=last_30_days" 
-		   class="btn btn-primary">
-			Export All Analytics PDF
-		</a>
-	</div>
         <?php $__empty_1 = true; $__currentLoopData = $analytics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $network => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
             <div class="mb-5 col-md-3">
                 <h4 class="fw-6 fs-18 mb-4"><?php echo e($network); ?></h4>
@@ -123,4 +127,12 @@
         <?php endif; ?>
     </div>
 <?php $__env->stopSection(); ?>
+<?php $__env->startPush('scripts'); ?>
+<script>
+    $(document).ready(function() {
+        // Initialize the consolidated export
+        Main.exportAllCharts();
+    });
+</script>
+<?php $__env->stopPush(); ?>
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp82\htdocs\pando-laravel\modules/AppAnalytics\resources/views/index.blade.php ENDPATH**/ ?>

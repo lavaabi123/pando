@@ -852,30 +852,23 @@ class InstagramAnalytics implements SocialAnalyticsInterface
 			
 			try {
 	            $metrics = [  
-			    	'follower_count' 
+			    	'followers_count' 
 			    ];
 	            if (!empty($metrics)) {					
 					
 					$sin = date("Y-m-d",strtotime("today - 29 days"));
 					$uns = date("Y-m-d",strtotime("today"));
 			
-	                $endpoint = "/{$instagramId}/insights?metric=" . implode(',', $metrics) . "&period=day&since={$sin}&until={$uns}";
+	                $endpoint = "/{$instagramId}?fields=" . implode(',', $metrics) . "";
+										
 	                $response = $this->fb->get($endpoint, $token);
 	                $result = $response->getDecodedBody();
+					if(!empty($result) && !empty($result['followers_count'])){
+						$insights['follower_count'][date("Y-m-d",strtotime("today"))] = $result['followers_count'];
+					}
 
-	                foreach ($result['data'] ?? [] as $item) {
-
-					    $metric = $item['name'] ?? null;
-					    if (!$metric) continue;
-
-					    foreach ($item['values'] as $entry) {
-					        if (empty($entry['end_time'])) continue;
-					        $date = Carbon::parse($entry['end_time'])->toDateString();
-					        $value = $entry['value'] ?? 0;
-					        if (is_numeric($value) && $value > 0) {
-					            $insights[$metric][$date] = (float) $value;
-					        }
-					    }
+	                foreach ($result ?? [] as $h => $item) {
+						$insights[$metric][$date] = (float) $value;
 					}
 	            }
 
