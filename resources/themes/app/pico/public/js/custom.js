@@ -364,7 +364,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (addBrandBtn) {
         addBrandBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            console.log('Add brand clicked');
+            //console.log('Add brand clicked');
             window.location.href = window.appRoutes.brandCreate;
         });
     }

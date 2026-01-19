@@ -1304,13 +1304,11 @@ var AppPubishing = new (function ()
 
 
 	AppPubishing.renderNoteDots = function() {
-    console.log('🎯 renderNoteDots called');
     
     // Remove existing dots
     $('.note-dots-container').remove();
     
     if(!calendarNotesData || Object.keys(calendarNotesData).length === 0) {
-        console.log('⚠️ No notes data available');
         return;
     }
     
@@ -1364,7 +1362,6 @@ var AppPubishing = new (function ()
         }
     });
     
-    console.log('🎉 Rendered', totalDots, 'dots on', Object.keys(calendarNotesData).length, 'dates');
 	// Add click handler for dots
     $('.note-dots-container').off('click').on('click', function(e) {
         e.stopPropagation(); // Prevent day click
@@ -1378,7 +1375,6 @@ var AppPubishing = new (function ()
 },
 	
 	AppPubishing.loadCalendarNotes = function(start, end) {
-    console.log('🔄 Loading notes from', start, 'to', end);
     
     $.ajax({
         url: VARIABLES.url + 'app/publishing/notes_for_calendar',
@@ -1389,9 +1385,7 @@ var AppPubishing = new (function ()
         },
         dataType: 'json',
         success: function(response) {
-            console.log('✅ Notes loaded:', response);
             calendarNotesData = response.data || {};
-            console.log('📊 Stored notes data:', calendarNotesData);
             
             // Wait a bit for calendar to finish rendering
             setTimeout(function() {

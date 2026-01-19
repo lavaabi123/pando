@@ -480,8 +480,7 @@ function delete_selected_items(){
 	event.preventDefault();
     var searchIDs = $(".inbox_checkbox_input:checkbox:checked").map(function(){
       return $(this).val();
-    }).get(); // <----
-    console.log(searchIDs);
+    }).get();
 	
 	$('.loading').show();
 	$.ajax({
@@ -511,8 +510,7 @@ function complete_selected_items(_this){
 	event.preventDefault();
     var searchIDs = $(".inbox_checkbox_input:checkbox:checked").map(function(){
       return $(this).val();
-    }).get(); // <----
-    console.log(searchIDs);
+    }).get();
 	
 	$(".loading").show();
 	$.ajax({
@@ -563,8 +561,7 @@ function incomplete_selected_items(_this){
 	event.preventDefault();
     var searchIDs = $(".inbox_checkbox_input:checkbox:checked").map(function(){
       return $(this).val();
-    }).get(); // <----
-    console.log(searchIDs);
+    }).get();
 	
 	$(".loading").show();
 	$.ajax({
