@@ -821,6 +821,38 @@ if (!function_exists('get_file_url')) {
     }
 }
 
+
+function getMediaType($url) {
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HEADER => true,
+        CURLOPT_NOBODY => false, // we want body + headers
+        CURLOPT_RANGE => '0-2048', // download only first 2KB
+        CURLOPT_TIMEOUT => 10,
+        CURLOPT_SSL_VERIFYPEER => false, // if needed for local dev
+        CURLOPT_USERAGENT => 'Mozilla/5.0',
+    ]);
+
+    $response = curl_exec($ch);
+    $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+    $headers = substr($response, 0, $header_size);
+    curl_close($ch);
+
+    if (preg_match('/Content-Type:\s*([a-zA-Z0-9\/\-\+\.]+)/i', $headers, $matches)) {
+        $mime = strtolower(trim($matches[1]));
+
+        if (str_starts_with($mime, 'image/')) {
+            return 'image';
+        } elseif (str_starts_with($mime, 'video/')) {
+            return 'video';
+        }
+    }
+
+    return 'unknown';
+}
+
 include_once "Language_Helper.php";
 include_once "AI_Helper.php";
 include_once "Date_Helper.php";

@@ -1,21 +1,72 @@
 @if(!empty($lists))
     <div class="conversation-detail h-100">
-        <div class="conversation-header py-3 border-bottom">
-            <h5 class="mb-0">Conversation Details</h5>
+        <div class="conversation-header pb-3 border-bottom">
+            <h6 class="mb-0">Conversation Details</h6>
         </div>
 
         <div class="conversation-messages pt-3" style="max-height: 500px; overflow-y: auto;">
             @foreach($lists as $message)
                 <div class="message-item mb-3 {{ $message['to_type'] == 'me' ? 'received' : 'sent' }}">
-                    <div class="d-flex {{ $message['to_type'] == 'me' ? '' : 'flex-row-reverse' }}">
-                        <img src="{{ $message['from_image'] }}" class="rounded-circle {{ $message['to_type'] == 'me' ? 'me-2' : 'ms-2' }}" width="35" height="35" alt="">
-                        <div class="message-content">
+                    <div class="d-flex flex-wrap flex-column {{ $message['to_type'] == 'me' ? 'align-items-start align-content-start' : 'align-items-end align-content-end' }}">
+                       
+						
+						<div class="d-flex align-items-start {{ $message['to_type'] == 'me' ? '' : 'flex-row-reverse' }}">
+							<div class="">								
+								<div class="post-account">								
+									<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+										<img data-src="{{ Media::url($message['from_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+										<span class="position-absolute b-0 r-0">
+											<div class="w-100">{!! get_social_media_icon($message['media_type']) !!}</div>
+										</span>
+									</div>									
+								</div>															
+							</div>
+							<span class="ms-2 mb-0"><p class="fw-7 mb-0 fs-12">{{$message['from_name']}}</p><p class="fs-12 text-gray-600 mb-0">{{ date('M d, Y H:i', strtotime($message['created_time'])) }}</p>
+							</span>
+							<div class="dropdown ml-auto">
+								
+							</div>				
+						</div>
+					
+                        <div class="message-content ms-2">
                             <div class="message-bubble p-2 b-r-10 {{ $message['to_type'] == 'me' ? 'bg-light' : 'bg-primary text-white' }}">
                                 <p class="mb-0">{{ $message['message'] }}</p>
+								<?php if(!empty($message['attachments'])){  
+									$type = getMediaType($message['attachments']);
+									if ($type === 'image') {
+										echo "<img src='".$message['attachments']."' style='max-width:100%;width:50%; border-radius:10px;' />";
+									} elseif ($type === 'video') {
+										echo "<video controls style='max-width:100%;width:50%; border-radius:10px;'>
+												<source src='".$message['attachments']."' type='video/mp4'>
+												Your browser does not support the video tag.
+											  </video>";
+									} 
+								?>
+								<?php } ?>
+								<?php if(!empty($message['shares'])){  
+								$type = getMediaType($message['shares']);
+								if ($type === 'image') {
+									echo "<img src='".$message['shares']."' style='max-width:100%;width:50%; border-radius:10px;' />";
+								} elseif ($type === 'video') {
+									echo "<video controls style='max-width:100%;width:50%; border-radius:10px;'>
+											<source src='".$message['shares']."' type='video/mp4'>
+											Your browser does not support the video tag.
+										  </video>";
+								}
+								?>
+								<?php } ?>
+								<?php if(!empty($message['story'])){ 
+								$type = getMediaType($message['story']);
+								if ($type === 'image') {
+									echo "<img src='".$message['story']."' style='max-width:100%;width:50%; border-radius:10px;' />";
+								} elseif ($type === 'video') {
+									echo "<video controls style='max-width:100%;width:50%; border-radius:10px;'>
+											<source src='".$message['story']."' type='video/mp4'>
+											Your browser does not support the video tag.
+										  </video>";
+								}  ?>
+								<?php } ?>
                             </div>
-                            <small class="text-muted d-block mt-1">
-                                {{ date('M d, Y H:i', strtotime($message['created_time'])) }}
-                            </small>
                         </div>
                     </div>
                 </div>
@@ -24,12 +75,14 @@
 
         <div class="reply-section py-3 border-top">
             <form id="reply-form" onsubmit="sendReply(event, '{{ $id }}', '{{ $conversation_id }}', '{{$lists[0]['inbox_type']}}')">
-					<div class="bg-white border b-r-30 p-15">
+					<div class="bg-white border b-r-30 p-3">
 						<div class="d-flex align-items-center gap-2">
 							<div class="post-account">
-								<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['from_image']; ?>">
+								<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+									<img data-src="{{ Media::url($lists[0]['from_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+								</div>
 							</div>	
-							<p class="fw-7 mb-0 fs-12"><?php echo $lists[0]['from_name']; ?></p>					
+							<p class="fw-7 mb-0 fs-11"><?php echo $lists[0]['from_name']; ?></p>					
 						</div>
 						<textarea class="form-control fw-4 border-0 p-0 p-t-10" rows="3" cols="10" id="textarea" name="comment" placeholder="Type your reply.." required></textarea>
 					</div>

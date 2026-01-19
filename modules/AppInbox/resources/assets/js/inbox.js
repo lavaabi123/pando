@@ -472,3 +472,140 @@ function filter_result(e){
 	$('.loading').show();
 	loadInboxList();
 }
+
+
+function delete_selected_items(){
+	
+	
+	event.preventDefault();
+    var searchIDs = $(".inbox_checkbox_input:checkbox:checked").map(function(){
+      return $(this).val();
+    }).get(); // <----
+    console.log(searchIDs);
+	
+	$('.loading').show();
+	$.ajax({
+		type: 'POST',
+		url: 'inbox/delete-message-bulk',
+		data: {ids:searchIDs},
+		dataType: 'JSON',
+		success: function (res) {
+			$('.loading').hide();
+			iziToast.show({
+                theme: 'dark',
+                icon: 'fad fa-bells',
+                title: '',
+                position: 'bottomCenter',
+                message: 'Selected items Deleted successfully',
+                backgroundColor: "#04c8c8",
+                progressBarColor: 'rgb(255, 255, 255, 0.5)',
+            });
+			loadInboxList();
+		}
+	});
+}
+
+
+function complete_selected_items(_this){
+	
+	event.preventDefault();
+    var searchIDs = $(".inbox_checkbox_input:checkbox:checked").map(function(){
+      return $(this).val();
+    }).get(); // <----
+    console.log(searchIDs);
+	
+	$(".loading").show();
+	$.ajax({
+		type: 'POST',
+		url: 'inbox/make-post-complete-selected',
+		data: {
+			ids: searchIDs
+		},
+		success: function () {
+			loadInboxList();
+			$('.loading').hide();
+			iziToast.success({
+				icon: 'fad fa-bells',
+				title: '',
+				position: 'bottomCenter',
+				message: 'Selected items moved to Complete',
+			});
+		}
+	});			
+	
+}
+
+function complete_all_items(_this){
+	
+	event.preventDefault();
+	$(".loading").show();
+	$.ajax({
+		type: 'POST',
+		url: 'inbox/make-post-complete-all',
+		data: {},
+		success: function () {
+			loadInboxList();
+			$('.loading').hide();
+			iziToast.success({
+				icon: 'fad fa-bells',
+				title: '',
+				position: 'bottomCenter',
+				message: 'All items moved to Complete',
+			});
+		}
+	});			
+	
+}
+
+
+function incomplete_selected_items(_this){
+	
+	event.preventDefault();
+    var searchIDs = $(".inbox_checkbox_input:checkbox:checked").map(function(){
+      return $(this).val();
+    }).get(); // <----
+    console.log(searchIDs);
+	
+	$(".loading").show();
+	$.ajax({
+		type: 'POST',
+		url: 'inbox/make-post-incomplete-selected',
+		data: {
+			ids: searchIDs
+		},
+		success: function () {
+			loadInboxList();
+			$('.loading').hide();
+			iziToast.success({
+				icon: 'fad fa-bells',
+				title: '',
+				position: 'bottomCenter',
+				message: 'Selected items moved to Inbox',
+			});
+		}
+	});			
+	
+}
+
+function incomplete_all_items(_this){
+	
+	event.preventDefault();
+	$(".loading").show();
+	$.ajax({
+		type: 'POST',
+		url: 'inbox/make-post-incomplete-all',
+		data: {},
+		success: function () {
+			loadInboxList();
+			$('.loading').hide();
+			iziToast.success({
+				icon: 'fad fa-bells',
+				title: '',
+				position: 'bottomCenter',
+				message: 'All items moved to Inbox',
+			});
+		}
+	});			
+	
+}
+

@@ -1,48 +1,24 @@
 @if(!empty($lists))
     <div class="comment-detail">
 			<div class="border-0">
-				<div class="d-flex align-items-start justify-content-between">
+				<div class="d-flex align-items-start">
 					<div class="d-flex">
-					<?php if($lists[0]['media_type'] == 'facebook'){ ?>
-						<div class="post-account">
-						
-						<?php if($lists[0]['inbox_type'] == 'Comment' || $lists[0]['inbox_type'] == 'AdComment'){ ?>
-						<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
-						<?php }else{ ?>
-						<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
-						<?php } ?>
-							<i class="fa-facebook-f fab post-media2" style="background-color: #0074fa;color: #fff;right: 10px;"></i>
-						</div>	
-					<?php }else if($lists[0]['media_type'] == 'linkedin'){ ?>
-						<div class="post-account">
-						
-						<?php if($lists[0]['inbox_type'] == 'Comment' || $lists[0]['inbox_type'] == 'AdComment'){ ?>
-						<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
-						<?php }else{ ?>
-						<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
-						<?php } ?>
-							<i class="fa-linkedin fab post-media2" style="background-color: #0077b5;color: #fff;right: 10px;"></i>
-						</div>	
-					<?php }else{ ?>	
-						<div class="post-account">
-						<?php if($lists[0]['inbox_type'] == 'Comment' || $lists[0]['inbox_type'] == 'AdComment'){ ?>
-						<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
-						<?php }else{ ?>
-						<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
-						<?php } ?>
-							<i class="fa-instagram fab post-media2" style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);color: #fff;right: 10px;"></i>
-						</div>
-						<?php } ?>								
+						<div class="post-account">						
+							<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+								<img data-src="{{ Media::url($lists[0]['to_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+								<span class="position-absolute b-0 r-0">
+									<div class="w-100">{!! get_social_media_icon($lists[0]['media_type']) !!}</div>
+								</span>
+							</div>	
+						</div>							
 					</div>
 					
 				<?php if(!empty($post_detail) && ($lists[0]['inbox_type'] == 'Comment' || $lists[0]['inbox_type'] == 'AdComment')){ 	?>
-					<span class="ml-2 mb-0"><p class="fw-7 mb-0 fs-12"><?php echo !empty($post_detail['from']['name']) ? $post_detail['from']['name'] : $post_detail['username']; ?></p><p class="mb-0 fs-12 text-gray-600"><?php echo !empty($post_detail['from']['name']) ? date("M d, Y, h:i a", strtotime($post_detail['created_time'])) : date("M d, Y, h:i a", strtotime($post_detail['timestamp'])) ; ?></p>
-						<!--<div class="text-muted small pt-1"> 5055 Patrick Ln., Suite 105, Las Vegas, NV 89119</div>-->
+					<span class="ms-2 fw-7 mb-0 fs-11"><?php echo !empty($post_detail['from']['name']) ? $post_detail['from']['name'] : $post_detail['username']; ?><span class="chip chip-blue d-block fs-10 fw-5"><?php echo !empty($post_detail['from']['name']) ? date("M d, Y, h:i a", strtotime($post_detail['created_time'])) : date("M d, Y, h:i a", strtotime($post_detail['timestamp'])) ; ?></span>
 					</span>
 				<?php }else{ ?>
-					<span class="ml-2 mb-0"><p class="fw-7 mb-0 fs-12"><?php echo !empty($lists[0]['to_name']) ? $lists[0]['to_name'] : ''; ?>(Page)<span class="chip chip-blue ml-2">
-					<span><?php echo $lists[0]['inbox_type']; ?></span></span></p>
-						<!--<div class="text-muted small pt-1"> 5055 Patrick Ln., Suite 105, Las Vegas, NV 89119</div>-->
+					<span class="ms-2 fw-7 mb-0 fs-11"><?php echo !empty($lists[0]['to_name']) ? $lists[0]['to_name'] : ''; ?> (Page)
+					<span class="chip chip-blue d-block fs-10 fw-5"><?php echo $lists[0]['inbox_type']; ?></span>
 					</span>
 					
 				<?php } ?>
@@ -81,16 +57,20 @@
             @foreach($lists as $comment)
                 <div class="comment-item mb-3">
                     <div class="d-flex">
-                        <img src="{{ $comment['from_image'] }}" class="rounded-circle me-3" width="35" height="35" alt="">
-                        <div class="flex-grow-1">
-                            <div class="comment-header d-flex justify-content-between">
-                                <strong>{{ $comment['from_name'] }}</strong>
-                                <small class="text-muted">
-                                    {{ date('M d, Y H:i', strtotime($comment['created_time'])) }}
-                                </small>
-                            </div>
-                            <p class="mb-1">{{ $comment['message'] }}</p>
-                            
+						<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+							<img data-src="{{ Media::url($comment['from_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+							<span class="position-absolute b-0 r-0">
+								<div class="w-100">{!! get_social_media_icon($comment['media_type']) !!}</div>
+							</span>
+						</div>	
+						
+												<div class="flex-grow-1 ms-2">
+													<div class="">
+														<h6 class="fw-7 mb-0 fs-11">{{ $comment['from_name'] }}</h6>
+														<small class="text-muted fs-10">{{ date('M d, Y H:i', strtotime($comment['created_time'])) }}</small>
+													</div>
+													<p class="mb-1">{{ $comment['message'] }}</p>
+												
                             @if(!empty($comment['tag_names']))
                                 <div class="mt-1">
                                     @foreach(explode(',', $comment['tag_names']) as $tag)
@@ -108,14 +88,19 @@
 							<?php if($lists[0]['inbox_type'] != 'Tags'){ ?>
 								
 								<form onsubmit="sendCommentReply(event, '{{ $id }}', '', 'comment')">
-								<div class="bg-white border b-r-30 p-15">
+								<div class="bg-white border b-r-30 p-3">
 									<div class="d-flex align-items-center gap-2">
 										<div class="post-account">
-											<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
+											<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+												<img data-src="{{ Media::url($lists[0]['to_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+												<span class="position-absolute b-0 r-0">
+													<div class="w-100">{!! get_social_media_icon($lists[0]['media_type']) !!}</div>
+												</span>
+											</div>	
 										</div>	
 										<p class="fw-7 mb-0 fs-12"><?php echo $lists[0]['to_name']; ?></p>					
 									</div>
-									<textarea class="form-control fw-4 mt-2 b-r-30 p-15 border-0" rows="4" cols="10"  name="comment" placeholder="" required></textarea>
+									<textarea class="form-control fw-4 mt-2 b-r-30 p-3 border-0" rows="4" cols="10"  name="comment" placeholder="" required></textarea>
 									<div class="btm-option d-flex justify-content-between">
 									<ul class="d-flex align-items-center">
 										
@@ -144,14 +129,19 @@
                                     @foreach($comment['child'] as $child)
                                         <div class="child-comment-item mb-2 p-2 bg-light rounded">
                                             <div class="d-flex">
-                                                <img src="{{ $child['from_image'] }}" class="rounded-circle me-2" width="25" height="25" alt="">
-                                                <div class="flex-grow-1">
-                                                    <strong class="small">{{ $child['from_name'] }}</strong>
-                                                    <p class="mb-0 small">{{ $child['message'] }}</p>
-                                                    <small class="text-muted">
-                                                        {{ date('M d, Y H:i', strtotime($child['created_time'])) }}
-                                                    </small>
-                                                </div>
+												<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+													<img data-src="{{ Media::url($child['from_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+													<span class="position-absolute b-0 r-0">
+														<div class="w-100">{!! get_social_media_icon($child['media_type']) !!}</div>
+													</span>
+												</div>
+												<div class="flex-grow-1 ms-2">
+													<div class="">
+														<h6 class="fw-7 mb-0 fs-11">{{ $child['from_name'] }}</h6>
+														<small class="text-muted fs-10">{{ date('M d, Y H:i', strtotime($child['created_time'])) }}</small>
+													</div>
+													<p class="mb-1">{{ $child['message'] }}</p>
+												</div>							
                                             </div>
                                         </div>
 										<?php if($id == $child['id'] && $lists[0]['media_type'] != 'linkedin'){ ?>
@@ -161,14 +151,19 @@
 					
 				
 					<form onsubmit="sendCommentReply(event, '{{ $id }}', '', 'comment')">
-					<div class="bg-white border b-r-30 p-15 ml-3rem">
+					<div class="bg-white border b-r-30 p-3 ml-3rem">
 						<div class="d-flex align-items-center gap-2">
 							<div class="post-account">
-								<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
+								<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+									<img data-src="{{ Media::url($lists[0]['to_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+									<span class="position-absolute b-0 r-0">
+										<div class="w-100">{!! get_social_media_icon($lists[0]['media_type']) !!}</div>
+									</span>
+								</div>	
 							</div>	
-							<p class="fw-7 mb-0 fs-12"><?php echo $lists[0]['to_name']; ?></p>				
+							<p class="ms-2 fw-7 mb-0 fs-11"><?php echo $lists[0]['to_name']; ?></p>				
 						</div>
-						<textarea class="form-control fw-4 mt-2 border b-r-30 p-15" rows="4" cols="10"  name="comment" placeholder="" required></textarea>
+						<textarea class="form-control fw-4 mt-2 border b-r-30 p-3" rows="4" cols="10"  name="comment" placeholder="" required></textarea>
 						<div class="btm-option d-flex justify-content-between">
 						<ul class="d-flex align-items-center">
 						</ul>
@@ -204,14 +199,19 @@
 			
 			<?php if($lists[0]['media_type'] == 'linkedin'){ ?>
 					<form onsubmit="sendCommentReply(event, '{{ $id }}', '', 'comment')">
-					<div class="bg-white border b-r-30 p-15">
+					<div class="bg-white border b-r-30 p-3">
 						<div class="d-flex align-items-center gap-2">
 							<div class="post-account">
-								<img alt="user" width="30" height="30" class="rounded-circle" src="<?php echo $lists[0]['to_image']; ?>">
+								<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+									<img data-src="{{ Media::url($lists[0]['to_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+									<span class="position-absolute b-0 r-0">
+										<div class="w-100">{!! get_social_media_icon($lists[0]['media_type']) !!}</div>
+									</span>
+								</div>	
 							</div>	
-						<p class="fw-7 mb-0 fs-12"><?php echo $lists[0]['to_name']; ?></p>							
+						<p class="ms-2 fw-7 mb-0 fs-11"><?php echo $lists[0]['to_name']; ?></p>							
 						</div>
-						<textarea class="form-control fw-4 mt-2 border b-r-30 p-15" rows="6" cols="10"  name="comment" placeholder="" required></textarea>
+						<textarea class="form-control fw-4 mt-2 border b-r-30 p-3" rows="6" cols="10"  name="comment" placeholder="" required></textarea>
 						<div class="btm-option d-flex justify-content-between">
 						<ul class="d-flex align-items-center">
 						</ul>

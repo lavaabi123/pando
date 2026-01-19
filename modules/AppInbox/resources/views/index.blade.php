@@ -82,12 +82,16 @@
 					  @if(!empty($accounts))
 					  <ul class="list-unstyled symbol py-1">
 						@foreach($accounts as $value)
-						  <li class="py-0 d-flex align-items-center">
+						  <li class="py-0 d-flex align-items-center mb-2">
 						  <input type="checkbox" name="accounts[]" value="{{$value->id}}" class="me-2">
-						  <div class="symbol symbol-35px px-3 py-2" style="padding-left: 0 !important;">
-									<img src="{{ Media::url($value->avatar) }}" style="width:25px; height:25px" class="rounded-circle align-self-center" alt="">
-									{!! get_social_media_icon($value->social_network) !!}							
-								</div><span data-toggle="tooltip" data-placement="top" title="{{$value->name}}" class="text-truncate">{{$value->name}}</span><!----><!---->
+						  
+							<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+								<img data-src="{{ Media::url($value->avatar) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
+								<span class="position-absolute b-0 r-0">
+									<div class="w-100">{!! get_social_media_icon($value->social_network) !!}</div>
+								</span>
+							</div>
+							<span data-toggle="tooltip" data-placement="top" title="{{$value->name}}" class="text-truncate ms-2">{{$value->name}}</span><!----><!---->
 						  
 						  </li>							  
 						@endforeach
@@ -322,7 +326,7 @@
 					</div>
 					<!-- Detail View -->
 					<div class="col-md-6 h-100">
-						<div class="bg-grey border b-r-30 px-3 pb-3 h-100">
+						<div class="bg-grey border b-r-30 p-3 h-100">
 							<div id="inbox-detail-container" class="h-100">
 								<!-- Detail view will be loaded here via AJAX -->
 								<div class="text-center py-5 text-muted">
@@ -434,3 +438,9 @@ function clear_form(){
 }
 </script>
 @endsection
+
+<style>
+.dropdown-toggle::after{
+	display:none !important;
+}
+</style>

@@ -39,8 +39,12 @@ var AppPubishing = new (function ()
             AppPubishing.preview();
 			setTimeout(function() {
 				AppPubishing.updateCharacterCountIndicators();
-				AppPubishing.updateCharacterCounts();
-			}, 500);
+				
+				// Only update counts if emojioneArea is ready
+				if ($(".post-caption").length > 0 && $(".post-caption")[0].emojioneArea) {
+					AppPubishing.updateCharacterCounts();
+				}
+			}, 1000);
         }
 
     },
@@ -69,8 +73,12 @@ var AppPubishing = new (function ()
             AppPubishing.preview();
 			setTimeout(function() {
 				AppPubishing.updateCharacterCountIndicators();
-				AppPubishing.updateCharacterCounts();
-			}, 500);
+				
+				// Only update counts if emojioneArea is ready
+				if ($(".post-caption").length > 0 && $(".post-caption")[0].emojioneArea) {
+					AppPubishing.updateCharacterCounts();
+				}
+			}, 1000);
         }
 
     },
@@ -424,12 +432,18 @@ var AppPubishing = new (function ()
 	 * Update character counts for all social networks
 	 */
 	AppPubishing.updateCharacterCounts = function() {
-		if ($(".post-caption").length > 0 && $(".post-caption")[0].emojioneArea) {
+		// Early returns for safety
+		if (!$(".post-caption").length) return;
+		if (!$(".post-caption")[0].emojioneArea) return;
+		
+		try {
 			var text = $(".post-caption")[0].emojioneArea.getText();
 			var textLength = text.length;
 			
 			// Update main counter
-			$(".count-word span").html(textLength);
+			if ($(".count-word span").length) {
+				$(".count-word span").html(textLength);
+			}
 			
 			// Update each network-specific counter
 			$(".word-reduce").each(function() {
@@ -437,29 +451,31 @@ var AppPubishing = new (function ()
 				var remaining = limit - textLength;
 				
 				if (remaining < 0) {
-					$(this).removeClass("text-gray-500").removeClass("text-warning").addClass("text-danger");
-					$(this).find("span").html(remaining);
+					$(this).removeClass("text-gray-500 text-warning").addClass("text-danger");
 				} else if (remaining < limit * 0.1) {
-					$(this).removeClass("text-gray-500").removeClass("text-danger").addClass("text-warning");
-					$(this).find("span").html(remaining);
+					$(this).removeClass("text-gray-500 text-danger").addClass("text-warning");
 				} else {
-					$(this).removeClass("text-danger").removeClass("text-warning").addClass("text-gray-500");
-					$(this).find("span").html(remaining);
+					$(this).removeClass("text-danger text-warning").addClass("text-gray-500");
 				}
+				
+				$(this).find("span").html(remaining);
 			});
 			
 			// Count hashtags
-			var hashtags = (text.match(/#[\w]+/g) || []).length;
-			$(".count-word-hashtag .hashtag-current").html(hashtags);
-			
-			if (hashtags > 30) {
-				$(".count-word-hashtag").removeClass("text-gray-500").addClass("text-danger");
-			} else {
-				$(".count-word-hashtag").removeClass("text-danger").addClass("text-gray-500");
+			if ($(".count-word-hashtag .hashtag-current").length) {
+				var hashtags = (text.match(/#[\w]+/g) || []).length;
+				$(".count-word-hashtag .hashtag-current").html(hashtags);
+				
+				if (hashtags > 30) {
+					$(".count-word-hashtag").removeClass("text-gray-500").addClass("text-danger");
+				} else {
+					$(".count-word-hashtag").removeClass("text-danger").addClass("text-gray-500");
+				}
 			}
+		} catch (e) {
+			// Silently handle any errors
 		}
 	};
-
 	AppPubishing.closeCompose = function(){
         $(".compose,.compose_header").addClass("d-none");
         $(".composer-scheduling").addClass("d-none").html("");

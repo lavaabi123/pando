@@ -119,9 +119,7 @@
 					
 					@if(!empty($item['post_url']))
 						<div class="d-inline-block dropdown">
-							<a href="javascript:void(0)" 
-							   class="dropdown-toggle link text-muted d-flex w-30 h-30 icon-with-circle fs-18 justify-content-center" 
-							   aria-expanded="false">
+							<a href="javascript:void(0)" data-bs-toggle="dropdown" class="dropdown-toggle link text-muted d-flex w-30 h-30 icon-with-circle fs-18 justify-content-center ms-2" aria-expanded="false">
 								<i class="fa fa-ellipsis-v"></i>
 							</a>
 						

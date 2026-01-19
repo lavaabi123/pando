@@ -324,7 +324,7 @@ class Inbox extends Model
 							//if($fbresult->social_network == 'instagram' || $row['unread_count'] >= 1){
 								if(!empty($row['messages']['data'])){
 									foreach($row['messages']['data'] as $message){
-										if(!empty($message['message'])){
+										//if(!empty($message['message'])){
 										$totype = ($message['to']['data'][0]['id'] == $fbresult->pid) ? 'me' :'';
 										if($fbresult->social_network == 'facebook'){
 											$from_name = (!empty($message['from']) && $message['from']['name'])?$message['from']['name']:'';
@@ -396,7 +396,7 @@ class Inbox extends Model
 										$message_ids[] = $message['id'];
 										//db_insert(TB_INBOX, $data);
 										
-									}	
+									//}	
 									}
 								}
 						}

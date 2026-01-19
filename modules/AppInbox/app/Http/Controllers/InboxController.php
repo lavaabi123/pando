@@ -131,7 +131,8 @@ class InboxController extends Controller
             foreach ($request->accounts as $account) {
                 $profile = $this->getProfileName($account);
                 $icon = get_social_media_icon($profile->social_network);
-                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $profile->name . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Profile:</span><span class="text-truncate me-3">' . $icon . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'accounts[]\',' . $account . ')">x</span></div></li>';
+                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $profile->name . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Profile:</span><span class="text-truncate me-3"><div class="symbol symbol-35px px-1 py-2" style="padding-left: 0 !important;">
+					<img src="'.asset('storage/app/public/' . $profile->avatar).'" style="width:20px; height:20px" class="rounded-circle align-self-center" alt="">' . $icon . '</div><span class="text-truncate">' . $profile->name . '</span></span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'accounts[]\',' . $account . ')">x</span></div></li>';
             }
         }
 
@@ -144,8 +145,8 @@ class InboxController extends Controller
                 $events[] = $parts[1] ?? '';
                 $networkType[] = $parts[0] ?? '';
                 
-                $icon = $this->generateNetworkIcon($parts[0] ?? '');
-                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . ($parts[1] ?? '') . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Type:</span><span class="text-truncate me-3">' . $icon . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'eventType[]\',\'' . $et . '\')">x</span></div></li>';
+                $icon = get_social_media_icon($parts[0] ?? '');
+                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . ($parts[1] ?? '') . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Type:</span><span class="text-truncate me-3"><div class="symbol symbol-35px px-1 py-2" style="padding-left: 0 !important;">' . $icon . '</div><span class="text-truncate">' . ($parts[1] ?? '') . '</span></span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'eventType[]\',\'' . $et . '\')">x</span></div></li>';
             }
             $whereIn['media_type'] = $networkType;
             $whereIn['inbox_type'] = $events;
@@ -1080,11 +1081,11 @@ public function getTagsList()
 	
 	public function cron()
     {
-		//$messages = Inbox::get_message_conversation(2);
-		//$comments = InboxComment::getComments(2);		
-		//$mentions = Inbox::get_mentions(2);
-		//$reviews = Inbox::get_reviews(2);
-		//$ad_comments = Inbox::get_ad_comments(2);
+		$messages = Inbox::get_message_conversation(2);
+		$comments = InboxComment::getComments(2);		
+		$mentions = Inbox::get_mentions(2);
+		$reviews = Inbox::get_reviews(2);
+		$ad_comments = Inbox::get_ad_comments(2);
 		$linkedin_comment = Inbox::get_linkedin_comments(2);
 	}
 }
