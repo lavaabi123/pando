@@ -863,6 +863,7 @@ function changeTodayCounts(dayType, button) {
             }
         },
         accessibility: {
+			enabled: false,
             point: {
                 valueSuffix: ' posts'
             }
@@ -1230,7 +1231,7 @@ function changeTodayCounts(dayType, button) {
             Main.dateRange();
             
             // Setup date change handler
-            setupDateChangeHandler();
+            //setupDateChangeHandler();
         } else {
             console.error('Main.dateRange() not available');
         }

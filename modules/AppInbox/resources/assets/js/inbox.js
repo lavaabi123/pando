@@ -428,7 +428,7 @@ $(document).ready(function() {
 function datarangeinbox(){
 	if( $(".datarangeinbox").length > 0 && $("[name='daterange']").length == 0){
 		$(".datarangeinbox").html('<button type="button" id="daterange" class="bg-white px-3 py-2 border b-r-15 d-flex align-items-center gap-2"><div class="icon-primary" id="mySvgContainer"></div><span>Select date Range</span> <i class="fa fa-caret-down"></i> <input type="hidden" name="daterange" value=""></button><button type="submit" id="btn_daterange" class="d-none"></button>');
-		$('#mySvgContainer').load('assets/img/calender.svg');
+		$('#mySvgContainer').load(VARIABLES.url+'public/img/calender.svg');
 
 		var start = moment();
 		var end = moment();

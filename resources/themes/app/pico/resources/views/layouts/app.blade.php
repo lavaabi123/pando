@@ -157,5 +157,13 @@
     @yield('script')
     {!! Script::renderJs() !!}
     {!! Script::renderRaw() !!}
+	
+<script>	
+window.routes = {
+inboxAjax: @json(route('inbox.ajax_list')),
+addTag: @json(route('inbox.add_tag')),
+inboxDetail: @json(route('inbox.ajax_list_detail')),
+};
+</script>
 </body>
 </html>

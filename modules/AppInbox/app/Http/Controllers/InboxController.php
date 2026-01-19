@@ -1081,11 +1081,11 @@ public function getTagsList()
 	
 	public function cron()
     {
-		$messages = Inbox::get_message_conversation(2);
-		$comments = InboxComment::getComments(2);		
-		$mentions = Inbox::get_mentions(2);
-		$reviews = Inbox::get_reviews(2);
-		$ad_comments = Inbox::get_ad_comments(2);
-		$linkedin_comment = Inbox::get_linkedin_comments(2);
+		$messages = Inbox::get_message_conversation();
+		$comments = InboxComment::getComments();		
+		$mentions = Inbox::get_mentions();
+		$reviews = Inbox::get_reviews();
+		$ad_comments = Inbox::get_ad_comments();
+		$linkedin_comment = Inbox::get_linkedin_comments();
 	}
 }

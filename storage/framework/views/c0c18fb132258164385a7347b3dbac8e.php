@@ -305,7 +305,7 @@
                 try {
                     brandDropdown = document.querySelector(selector);
                     if (brandDropdown) {
-                        console.log('Found brand dropdown with selector:', selector);
+                        //console.log('Found brand dropdown with selector:', selector);
                         break;
                     }
                 } catch(e) {

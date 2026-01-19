@@ -537,7 +537,7 @@ class LinkedinAPI
 		$options = [
 			'headers' => [
 				'Authorization' => 'Bearer ' . trim($accessToken),
-				'LinkedIn-Version' => '202501'
+				'LinkedIn-Version' => '202601'
 			]
 		];
 		
@@ -586,7 +586,7 @@ public function linkedInCommentPost($accessToken, $personId, $message, $activity
     $options = [
         'headers' => [
             'Authorization' => 'Bearer ' . trim($accessToken),
-            'Linkedin-Version' => '202501',
+            'Linkedin-Version' => '202601',
             'X-Restli-Protocol-Version' => '2.0.0',
             'Content-Type' => 'application/json',
             'Accept' => 'application/json',
@@ -604,7 +604,7 @@ public function linkedInPostDetailGet($accessToken, $postUrn)
     $options = [
         'headers' => [
             'Authorization' => 'Bearer ' . trim($accessToken),
-            'LinkedIn-Version' => '202501'
+            'LinkedIn-Version' => '202601'
         ]
     ];
     

@@ -786,11 +786,11 @@ protected static function handleFacebookError($exception, $account, $syncType)
 
         // Set images
         if ($fromUserId == $account->pid) {
-            $fromImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
             $toImage = theme_public_asset('img/default.png');
         } else {
             $fromImage = theme_public_asset('img/default.png');
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
         }
 
         $data = [
@@ -842,11 +842,11 @@ protected static function handleFacebookError($exception, $account, $syncType)
 
         // Set images
         if ($fromUserId == $account->pid) {
-            $fromImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
             $toImage = theme_public_asset('img/default.png');
         } else {
             $fromImage = theme_public_asset('img/default.png');
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
         }
 
         $data = [
@@ -899,11 +899,11 @@ protected static function handleFacebookError($exception, $account, $syncType)
 
         // Set images
         if ($fromUserId == $account->pid) {
-            $fromImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
             $toImage = theme_public_asset('img/default.png');
         } else {
             $fromImage = theme_public_asset('img/default.png');
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
         }
 
         $data = [
@@ -959,11 +959,11 @@ protected static function handleFacebookError($exception, $account, $syncType)
 
         // Set images
         if ($fromUserId == $account->pid) {
-            $fromImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
             $toImage = theme_public_asset('img/default.png');
         } else {
             $fromImage = theme_public_asset('img/default.png');
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
         }
 
         $data = [
@@ -1020,11 +1020,11 @@ protected static function handleFacebookError($exception, $account, $syncType)
 
         // Set images
         if ($fromUserId == $account->pid) {
-            $fromImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
             $toImage = theme_public_asset('img/default.png');
         } else {
             $fromImage = theme_public_asset('img/default.png');
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
         }
 
         $data = [
@@ -1077,11 +1077,11 @@ protected static function handleFacebookError($exception, $account, $syncType)
 
         // Set images
         if ($fromUserId == $account->pid) {
-            $fromImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
             $toImage = theme_public_asset('img/default.png');
         } else {
             $fromImage = theme_public_asset('img/default.png');
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
         }
 
         $data = [
@@ -1138,11 +1138,11 @@ protected static function handleFacebookError($exception, $account, $syncType)
 
         // Set images
         if ($fromUserId == $account->pid) {
-            $fromImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
             $toImage = theme_public_asset('img/default.png');
         } else {
             $fromImage = theme_public_asset('img/default.png');
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
         }
 
         $data = [
@@ -1196,7 +1196,7 @@ protected static function handleFacebookError($exception, $account, $syncType)
         if (!empty($brandId)) {
             $query->where('brand_id', $brandId);
         }
-$query->where('id', 4);
+
         $accounts = $query->orderBy('created', 'DESC')->get();
 
         if ($accounts->isEmpty()) {
@@ -1341,11 +1341,11 @@ protected static function processLinkedInComment($account, $sourcePost, $comment
         // Get profile images
         if ($actor == $accountOrgUrn || $actor == $accountPersonUrn) {
             // Comment from account itself
-            $fromImage = get_file_url($account->avatar);
-            $toImage = get_file_url($account->avatar);
+            $fromImage = $account->avatar;
+            $toImage = $account->avatar;
         } else {
             // Comment from someone else
-            $toImage = get_file_url($account->avatar);
+            $toImage = $account->avatar;
             
             // Try to get commenter's profile picture
             $profilePicture = $comment['actor~']['profilePicture']['displayImage~']['elements'][0]['identifiers'][0]['identifier'] ?? '';

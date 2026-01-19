@@ -428,11 +428,6 @@
 </div>
 
 <script>
-window.routes = {
-inboxAjax: @json(route('inbox.ajax_list')),
-addTag: @json(route('inbox.add_tag')),
-inboxDetail: @json(route('inbox.ajax_list_detail')),
-};
 function clear_form(){
 	$('#filter_form')[0].reset();
 }

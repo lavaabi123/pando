@@ -865,63 +865,6 @@ if($post){
 }
 </style>
 @push('scripts')
-<script>
-// Character count functionality
-$(document).ready(function() {
-    
-    // Function to update character counts
-    function updateCharacterCounts() {
-        if ($(".post-caption").length > 0 && $(".post-caption")[0].emojioneArea) {
-            var text = $(".post-caption")[0].emojioneArea.getText();
-            var textLength = text.length;
-            
-            // Update main counter
-            $(".count-word span").html(textLength);
-            
-            // Update each network-specific counter
-            $(".word-reduce").each(function() {
-                var limit = $(this).data("word-count");
-                var remaining = limit - textLength;
-                
-                if (remaining < 0) {
-                    $(this).removeClass("text-gray-500").addClass("text-danger");
-                    $(this).find("span").html(remaining);
-                } else if (remaining < limit * 0.1) {
-                    $(this).removeClass("text-gray-500").removeClass("text-danger").addClass("text-warning");
-                    $(this).find("span").html(remaining);
-                } else {
-                    $(this).removeClass("text-danger").removeClass("text-warning").addClass("text-gray-500");
-                    $(this).find("span").html(remaining);
-                }
-            });
-            
-            // Count hashtags
-            var hashtags = (text.match(/#[\w]+/g) || []).length;
-            $(".count-word-hashtag .hashtag-current").html(hashtags);
-            
-            if (hashtags > 30) {
-                $(".count-word-hashtag").removeClass("text-gray-500").addClass("text-danger");
-            } else {
-                $(".count-word-hashtag").removeClass("text-danger").addClass("text-gray-500");
-            }
-        }
-    }
-    
-    // Attach event listeners to emojioneArea
-    if ($(".post-caption").length > 0) {
-        setTimeout(function() {
-            if ($(".post-caption")[0].emojioneArea) {
-                $(".post-caption")[0].emojioneArea.on("keyup change emojibtn.click", function() {
-                    updateCharacterCounts();
-                });
-            }
-        }, 500);
-    }
-    
-    // Initial count
-    updateCharacterCounts();
-});
-</script>
 @endpush
 <style>
 /* Character Count Indicators */
