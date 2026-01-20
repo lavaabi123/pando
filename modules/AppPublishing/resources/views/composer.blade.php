@@ -40,7 +40,7 @@ if($post){
         </div>
         @endcan
 
-        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-500" action="{{ url_app("publishing/save") }}" id="compose-editor" data-redirect="{{ module_url("calendar") }}">
+        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-500 mb-0" action="{{ url_app("publishing/save") }}" id="compose-editor" data-redirect="{{ module_url("calendar") }}">
 
             <div class="d-flex flex-column flex-column-fluid overflow-y-auto py-2">
                 <div class="max-w-750 wp-100 mx-auto p-3">
@@ -80,60 +80,60 @@ if($post){
                                 </div>
                                 @endcan
                             </div>
-                            <div class="d-flex flex-column justify-content-between align-items-center flex-wrap border-gray-400 border border-top-0 bbr-r-15 bbl-r-15">
-                                <div class="d-flex compose-type justify-content-between w-100">
+                            <div class="d-flex justify-content-between align-items-center border-gray-400 border border-top-0 bbr-r-15 bbl-r-15 compose-icons">
+                                <div class="d-flex compose-type">
                                     @can("appfiles")
-                                    <div class="border border-gray-400">
-                                        <label for="compose_type_media" class="px-3 py-2 d-block text-gray-700 activeItem {{ $postType=="media"?"bg-primary-100 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
+                                    <div class="border-gray-400">
+                                        <label for="compose_type_media" class="d-block text-gray-700 activeItem {{ $postType=="media"?"bg-primary-10 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-camera"></i>
                                         </label>
                                         <input type="radio" name="type" class="d-none" id="compose_type_media" value="media" {{ $postType=="media"?"checked":"" }}>
                                     </div>
                                     @endcan
-                                    <div class="border border-gray-400">
-                                        <label for="compose_type_link" class="px-3 py-2 d-block text-gray-700 activeItem {{ $postType=="link"?"bg-primary-100 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
+                                    <div class="border-gray-400">
+                                        <label for="compose_type_link" class="d-block text-gray-700 activeItem {{ $postType=="link"?"bg-primary-10 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-link"></i>
                                         </label>
                                         <input type="radio" name="type" class="d-none" id="compose_type_link" value="link" {{ $postType=="link"?"checked":"" }}>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <label for="compose_type_text" class="px-3 py-2 d-block text-gray-700 activeItem {{ $postType=="text"?"bg-primary-100 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
+                                    <div class="border-gray-400">
+                                        <label for="compose_type_text" class="d-block text-gray-700 activeItem {{ $postType=="text"?"bg-primary-10 text-primary":"" }}" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-align-center"></i>
                                             <input type="radio" name="type" class="d-none" id="compose_type_text" value="text" {{ $postType=="text"?"checked":"" }}>
                                         </label>
                                     </div>
                                 </div>
-                                <div class="d-flex compose-type flex-wrap">   
+                                <div class="d-flex compose-type">   
 									@if(get_option("ai_status", 1) && Gate::allows('appaicontents'))
-									<div class="border">
-										<a href="{{ route("app.ai-contents.popupAIContent") }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-popup="aiContentModal" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="{{ __('AI Template') }}" data-bs-html="true" data-bs-content="{!! __('Start by choosing a prompt from the Prompt Templates panel.') !!}"><i class="fa-light fa-sparkles"></i></a>
+									<div class="">
+										<a href="{{ route("app.ai-contents.popupAIContent") }}" class="d-block text-gray-700 actionItem" data-popup="aiContentModal" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="{{ __('AI Template') }}" data-bs-html="true" data-bs-content="{!! __('Start by choosing a prompt from the Prompt Templates panel.') !!}"><i class="fa-light fa-sparkles"></i></a>
 									</div>
 									@endif
 									
                                     @if(get_option("ai_status", 1) && Gate::allows('appaicontents'))
-                                    <div class="border">
-                                        <a href="javascript:void(0);" class="px-3 py-2 d-block text-gray-700 generalAIContent" data-url="{{ route('app.ai-contents.create_content') }}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="{{ __('AI Content') }}" data-bs-html="true" data-bs-content="{!! __('Enter a prompt in the caption box and click this button. Our AI will generate the perfect content for you with just one click.<br/><br/><b>Example:</b> Create a motivational quote for Monday morning.') !!}"><i class="fa-light fa-wand-magic-sparkles p-0"></i></a>
+                                    <div class="">
+                                        <a href="javascript:void(0);" class="d-block text-gray-700 generalAIContent" data-url="{{ route('app.ai-contents.create_content') }}" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="{{ __('AI Content') }}" data-bs-html="true" data-bs-content="{!! __('Enter a prompt in the caption box and click this button. Our AI will generate the perfect content for you with just one click.<br/><br/><b>Example:</b> Create a motivational quote for Monday morning.') !!}"><i class="fa-light fa-wand-magic-sparkles p-0"></i></a>
                                     </div>
                                     @endif
 
                                     @if(get_option("url_shorteners_platform", 0) && Gate::allows('appmediasearch'))
-                                    <div class="border border-gray-400">
-                                        <a href="{{ url_app("url-shorteners/shorten") }}" class="px-3 py-2 d-block text-gray-700 text-nowrap actionMultiItem" data-call-success="AppPubishing.shorten(result);" data-bs-title="{{ __("Shorten Links") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fa-light fa-link-simple"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="{{ url_app("url-shorteners/shorten") }}" class="d-block text-gray-700 text-nowrap actionMultiItem" data-call-success="AppPubishing.shorten(result);" data-bs-title="{{ __("Shorten Links") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fa-light fa-link-simple"></i></a>
                                     </div>
                                     @endif
 
                                     @if(Gate::allows('appcaptions'))
-                                    <div class="border border-gray-400">
-                                        <a href="{{ route('app.hashtags.get_hashtag') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getHashtagOffCanvas" data-bs-title="{{ __("Get Hashtag") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-hashtag p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="{{ route('app.hashtags.get_hashtag') }}" class="d-block text-gray-700 actionItem" data-offcanvas="getHashtagOffCanvas" data-bs-title="{{ __("Get Hashtag") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-hashtag p-0"></i></a>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <a href="{{ route('app.captions.get_caption') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getCaptionOffCanvas" data-bs-title="{{ __("Get Caption") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-closed-captioning p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="{{ route('app.captions.get_caption') }}" class="d-block text-gray-700 actionItem" data-offcanvas="getCaptionOffCanvas" data-bs-title="{{ __("Get Caption") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-closed-captioning p-0"></i></a>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <a href="{{ route('app.handles.get_handle') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getHandleOffCanvas" data-bs-title="{{ __("Get Handle") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-grip p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="{{ route('app.handles.get_handle') }}" class="d-block text-gray-700 actionItem" data-offcanvas="getHandleOffCanvas" data-bs-title="{{ __("Get Handle") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-grip p-0"></i></a>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <a href="{{ route('app.replies.get_reply') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getReplyOffCanvas" data-bs-title="{{ __("Get Replies") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-comment-alt-lines p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="{{ route('app.replies.get_reply') }}" class="d-block text-gray-700 actionItem" data-offcanvas="getReplyOffCanvas" data-bs-title="{{ __("Get Replies") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-comment-alt-lines p-0"></i></a>
                                     </div>
                                     <!--<div class="border">
                                         <a href="{{ route('app.captions.save_caption') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-popup="saveCaptionModal" data-bs-title="{{ __("Save caption") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-save p-0"></i></a>
@@ -141,49 +141,49 @@ if($post){
                                     @endif
 									{{-- Character count indicators for each social network --}}
 									<div style="display:none;" data-word-count="280" 
-										 class="word-reduce count-word-x px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-x lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="X character limit">
 										<i class="fa-brands fa-x-twitter"></i>
 										<span class="ps-2 fs-12 fw-6">280</span>
 									</div>
 
 									<div style="display:none;" data-word-count="5000" 
-										 class="word-reduce count-word-facebook px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-facebook lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Facebook character limit">
 										<i class="fab fa-facebook-f"></i>
 										<span class="ps-2 fs-12 fw-6">5000</span>
 									</div>
 
 									<div style="display:none;" data-word-count="3000" 
-										 class="word-reduce count-word-linkedin px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-linkedin lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="LinkedIn character limit">
 										<i class="fa-brands fa-linkedin-in"></i>
 										<span class="ps-2 fs-12 fw-6">3000</span>
 									</div>
 
 									<div style="display:none;" data-word-count="2200" 
-										 class="word-reduce count-word-instagram px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-instagram lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Instagram character limit">
 										<i class="fab fa-instagram"></i>
 										<span class="ps-2 fs-12 fw-6">2200</span>
 									</div>
 
 									<div style="display:none;" data-word-count="500" 
-										 class="word-reduce count-word-pinterest px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-pinterest lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Pinterest character limit">
 										<i class="fa-brands fa-pinterest"></i>
 										<span class="ps-2 fs-12 fw-6">500</span>
 									</div>
 
 									<div style="display:none;" data-word-count="30" 
-										 class="count-word-hashtag px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="count-word-hashtag px-2 py-2  align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Hashtag limit">
 										<i class="fa fa-hashtag"></i>
 										<div class="d-flex flex-column align-items-center">
 											<span class="fs-10 fw-6"><span class="hashtag-current">0</span>/30</span>
 										</div>
 									</div>
-                                    <div class="count-word px-3 text-gray-700 border-gray-400 py-2 border">
+                                    <div class="count-word text-gray-700 border-gray-400 lh-1">
                                         <span>0</span>
                                     </div>
 									
@@ -426,16 +426,16 @@ if($post){
                                 }
                             }
                         @endphp
-                        <button class="btn btn-dark btnPostNow {{ $button == 1 ? '' : 'd-none' }}">{{ __("Post now") }}</button>
-                        <button class="btn btn-dark btnSchedulePost {{ $button == 2 ? '' : 'd-none' }}">{{ __("Schedule") }}</button>
-                        <button class="btn btn-dark btnSaveDraft {{ $button == 3 ? '' : 'd-none' }}">{{ __(" Save as Draft") }}</button>
-                        <button class="btn btn-dark btnSaveApproval {{ $button == 4 ? '' : 'd-none' }}">{{ __(" Save as Approval") }}</button>
+                        <button class="btn btn-dark btnPostNow btn-sm {{ $button == 1 ? '' : 'd-none' }}">{{ __("Post now") }}</button>
+                        <button class="btn btn-dark btnSchedulePost btn-sm {{ $button == 2 ? '' : 'd-none' }}">{{ __("Schedule") }}</button>
+                        <button class="btn btn-dark btnSaveDraft btn-sm {{ $button == 3 ? '' : 'd-none' }}">{{ __(" Save as Draft") }}</button>
+                        <button class="btn btn-dark btnSaveApproval btn-sm {{ $button == 4 ? '' : 'd-none' }}">{{ __(" Save as Approval") }}</button>
                     </div>
                 </div>
             </div>
             
         </form>
-		<div class="w-100 position-relative p-4 overflow-auto">
+		<div class="w-100 position-relative p-3 overflow-auto">
 		<ul class="nav nav-tabs position-relative" id="myTab" role="tablist">
 			  <li class="nav-item" role="presentation">
 				<button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><span class="text">Scheduled Post</span></button>
@@ -453,7 +453,7 @@ if($post){
 			<div class="tab-content" id="myTabContent">	
 				<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
 					<div class="compose-calendar-new compose-preview d-flex flex-column flex-fill bg-white min-w-300">
-					<div class="wp-100 mx-auto p-4">
+					<div class="wp-100 mx-auto p-2">
 					<div class="calendar-header">
 						
 						<div class="border p-2 b-r-20 d-flex flex-wrap gap-8 justify-content-between align-items-center w-sm-100">
@@ -470,7 +470,7 @@ if($post){
 							</div>
 							<div class="d-flex">
 								<div class="btn-group">	
-									<button data-toggle="tooltip" data-placement="bottom" title="" data-bs-original-title="Add a note to a calendar date" class="bg-transparent d-flex align-items-center dropdown-toggle dropdown-arrow-hide" onclick="open_notes_modal()">
+									<button data-toggle="tooltip" data-placement="bottom" title="" data-bs-original-title="Add a note to a calendar date" class="bg-transparent fs-13 fw-medium d-flex align-items-center dropdown-toggle dropdown-arrow-hide" onclick="open_notes_modal()">
 										<span class="add-icon">{!! file_get_contents(public_path('img/note.svg')) !!}</span> {{ __('Take Notes') }}
 									</button>
 								</div>
@@ -483,7 +483,7 @@ if($post){
 									<i class="fa-light fa-angle-left"></i>
 								</div>
 								<div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
-								<div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
+								<div class="fs-18 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
 								<div class="fs-20 calendar-event-new" data-calendar-type="next">
 									<i class="fa-light fa-angle-right"></i>
 								</div>
@@ -865,6 +865,63 @@ if($post){
 }
 </style>
 @push('scripts')
+<script>
+// Character count functionality
+$(document).ready(function() {
+    
+    // Function to update character counts
+    function updateCharacterCounts() {
+        if ($(".post-caption").length > 0 && $(".post-caption")[0].emojioneArea) {
+            var text = $(".post-caption")[0].emojioneArea.getText();
+            var textLength = text.length;
+            
+            // Update main counter
+            $(".count-word span").html(textLength);
+            
+            // Update each network-specific counter
+            $(".word-reduce").each(function() {
+                var limit = $(this).data("word-count");
+                var remaining = limit - textLength;
+                
+                if (remaining < 0) {
+                    $(this).removeClass("text-gray-500").addClass("text-danger");
+                    $(this).find("span").html(remaining);
+                } else if (remaining < limit * 0.1) {
+                    $(this).removeClass("text-gray-500").removeClass("text-danger").addClass("text-warning");
+                    $(this).find("span").html(remaining);
+                } else {
+                    $(this).removeClass("text-danger").removeClass("text-warning").addClass("text-gray-500");
+                    $(this).find("span").html(remaining);
+                }
+            });
+            
+            // Count hashtags
+            var hashtags = (text.match(/#[\w]+/g) || []).length;
+            $(".count-word-hashtag .hashtag-current").html(hashtags);
+            
+            if (hashtags > 30) {
+                $(".count-word-hashtag").removeClass("text-gray-500").addClass("text-danger");
+            } else {
+                $(".count-word-hashtag").removeClass("text-danger").addClass("text-gray-500");
+            }
+        }
+    }
+    
+    // Attach event listeners to emojioneArea
+    if ($(".post-caption").length > 0) {
+        setTimeout(function() {
+            if ($(".post-caption")[0].emojioneArea) {
+                $(".post-caption")[0].emojioneArea.on("keyup change emojibtn.click", function() {
+                    updateCharacterCounts();
+                });
+            }
+        }, 500);
+    }
+    
+    // Initial count
+    updateCharacterCounts();
+});
+</script>
 @endpush
 <style>
 /* Character Count Indicators */
