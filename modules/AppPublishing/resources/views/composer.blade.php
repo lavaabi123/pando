@@ -588,7 +588,7 @@ if($post){
 						<div class="card-body px-2 py-0">
 							<div class="d-flex flex-grow-1 align-items-center justify-content-center gap-8 w-100">
 								<div class="text-center">
-									<div class="fw-bold fs-10">[[post_count]]</div>
+									<div class="fw-normal fs-9">[[post_count]]</div>
 									
 								</div>
 							</div>	
@@ -768,7 +768,7 @@ if($post){
 @endsection
 <style>
 .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{
-	min-height:0em;
+    min-height:0em;
 }
 .fc {
     min-width: auto;
@@ -781,13 +781,12 @@ if($post){
 .ui-datepicker {
     z-index: 10060 !important; /* Bootstrap modal z-index is 1050 */
 }
-
 /* If using jQuery UI datepicker */
 .ui-datepicker-div {
     z-index: 10060 !important;
 }
 .ui-datepicker-wrap{
-	z-index: 10060 !important;
+    z-index: 10060 !important;
 }
 .modal {
     z-index: 10005 !important;
@@ -796,27 +795,23 @@ if($post){
     display: flex !important;
     align-items: center;
 }
-
 .fc-daygrid-day-number {
     display: inline-block;
 }
-
 .note-dots-container {
     position: absolute !important;
-    left: 28px !important; 
+    left: 20px !important; 
 }
 .fc-daygrid-day-number {
     display: inline-flex !important;
     align-items: center !important;
 }
-
 .fc-daygrid-day-top {
     display: flex !important;
     justify-content: flex-start !important;
     align-items: center !important;
     padding: 2px 4px !important;
 }
-
 /* Make date number have fixed positioning */
 .fc-daygrid-day-number {
     display: inline-flex !important;
@@ -824,7 +819,6 @@ if($post){
     min-width: auto !important;
     position: relative !important;
 }
-
 /* Note dots container - absolute positioned to not affect layout */
 .note-dots-container {
     display: inline-flex !important;
@@ -832,36 +826,87 @@ if($post){
     margin-left: 4px !important;
     align-items: center !important;
 }
-
 /* Individual dot */
 .note-dot {
-    width: 8px !important;
-    height: 8px !important;
+    width: 6px !important;
+    height: 6px !important;
     background-color: #28a745 !important;
     border-radius: 50% !important;
     display: inline-block !important;
     flex-shrink: 0 !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
 }
-
 .note-dot:hover {
     transform: scale(1.2);
     transition: transform 0.15s ease;
 }
 .fc table tr > td.fc-day a.fc-daygrid-day-number{
-	border:none !important;
+    border:none !important;
 }
 .fc .fc-daygrid-day-top{
-	flex-direction: row;
+    flex-direction: row;
 }
 .note-count {
-    font-size: 9px !important;
+    font-size: 6px !important;
     color: #28a745 !important;
     font-weight: bold !important;
     white-space: nowrap !important;
 }
 .pointer {
-	cursor: pointer !important;
+    cursor: pointer !important;
+}
+
+/* ========================================
+   NEW: Calendar Row Height Consistency Fix
+   ======================================== */
+
+/* Force all calendar rows to same height */
+.fc .fc-daygrid-body tr {
+    height: 40px !important;
+}
+
+/* Set consistent day cell height */
+.fc .fc-daygrid-day {
+    height: 40px !important;
+}
+
+/* Prevent day frame from expanding */
+.fc .fc-daygrid-day-frame {
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 100px !important;
+}
+
+/* Control event container to not expand rows */
+.fc .fc-daygrid-day-events {
+    max-height: 40px !important;
+    overflow: hidden;
+}
+
+/* Ensure event harness doesn't affect row height */
+.fc .fc-daygrid-event-harness {
+    position: relative;
+}
+
+/* Remove any bottom margin that causes expansion */
+.fc .fc-daygrid-day-bottom {
+    margin-top: 0 !important;
+}
+.fc-scrollgrid-sync-table{
+	height:360px !important;
+}
+#calendar-new{
+	height:410px !important;
+}
+/* Remove today's date highlight */
+.fc .fc-day-today {
+    background-color: transparent !important;
+    background: none !important;
+}
+
+/* Also remove any additional today styling */
+.fc .fc-day-today .fc-daygrid-day-frame {
+    background-color: transparent !important;
 }
 </style>
 @push('scripts')

@@ -458,3 +458,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
+(function () {
+  function enableHorizontalScroll(selector) {
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('wheel', function (e) {
+        if (e.deltaY === 0) return;
+ 
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }, { passive: false });
+    });
+  }
+ 
+  // expose globally
+  window.enableHorizontalScroll = enableHorizontalScroll;
+})();

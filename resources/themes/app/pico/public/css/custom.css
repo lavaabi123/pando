@@ -721,7 +721,7 @@ i.post-media {
 .account_manager .am-choice-box .am-selected-box {
     border-radius: 15px !important;
 }
-.bg-primary-100, .fc table tr > td.fc-day.fc-day-today {
+.bg-primary-100 {
     background-color: color-mix(in srgb, var(--d-primary) 10%, transparent) !important;
 }
 .emojionearea, .emojionearea.form-control { 
@@ -736,7 +736,8 @@ i.post-media {
     border-color: var(--d-primary);
 }
 .fc table tr > td.fc-day.fc-day-today .fc-daygrid-day-top a {
-    background-color: var(--d-primary);
+    background-color: transparent;
+    color: #99a1b7;
 }
 .fc table tr > th.fc-day a {
     color: var(--black);

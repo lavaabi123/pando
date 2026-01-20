@@ -81,15 +81,18 @@ $groups = DB::table('groups')->get();
                     @foreach ($channels as $value)
                         @can($permission . "." . strtolower($value->module))
                             <div class="search-accounts">
-                                <label class="am-choice-item d-flex gap-12 border-top px-3 py-3"
+                                <label class="am-choice-item d-flex gap-12 border-top px-3 py-2"
                                     for="am_{{ $value->id }}"
                                     data-pid="{{ $value->pid }}"
                                     data-social-network="{{ $value->social_network }}"
                                     data-avatar="{{ Media::url($value->avatar) }}"
                                     data-username="{{ $value->username }}"
                                     data-name="{{ $value->name }}">
-                                    <div class="size-40">
+                                    <div class="min-w-20 text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
                                         <img src="{{ Media::url($value->avatar) }}" class="wp-100 hp-100 b-r-6 border">
+										<span class="position-absolute b-0 r-0">
+											<div class="w-100">{!! get_social_media_icon($value->social_network) !!}</div>
+										</span>
                                     </div>
                                     <div class="d-flex align-items-center flex-grow-1 text-truncate">
                                         <div class="flex-grow-1 me-2 text-truncate">
@@ -111,9 +114,12 @@ $groups = DB::table('groups')->get();
                                         <div class="am-selected-item border rounded p-2 me-2 min-w-100 max-w-150 float-start mb-1"
                                             data-id="{{ $value->id_secure }}" data-network="{{ $value->social_network }}">
                                             <div class="d-flex align-items-center gap-8">
-                                                <div class="size-20 min-w-20">
+                                                <div class="min-w-20 text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
                                                     <img src="{{ Media::url($value->avatar) }}"
                                                          class="d-flex wp-100 hp-100 b-r-6 border {{ $value->login_type!=1 ? 'border-danger-300' : '' }}">
+												    <span class="position-absolute b-0 r-0">
+														<div class="w-100">{!! get_social_media_icon($value->social_network) !!}</div>
+													</span>
                                                 </div>
                                                 <div class="d-flex align-items-center text-truncate">
                                                     <div class="text-gray-800 fs-12 fw-bold text-truncate">{{ $value->name }}</div>

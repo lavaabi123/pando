@@ -1426,22 +1426,22 @@ $(document).ready(function() {
     
     // Load approval list when tab is clicked
     $('#contact-tab').on('shown.bs.tab', function (e) {
-        if (!$(this).hasClass('loaded')) {
+        //if (!$(this).hasClass('loaded')) {
             approvalPage = 0;
             hasMoreApproval = true;
             $('#approval-list-content').empty();
             loadApprovalList();
-            $(this).addClass('loaded');
-        }
+            //$(this).addClass('loaded');
+        //}
     });
 	$('#profile-tab').on('shown.bs.tab', function (e) {
-        if (!$(this).hasClass('loaded')) {
+        //if (!$(this).hasClass('loaded')) {
             draftPage = 0;
             hasMoredraft = true;
             $('#draft-list-content').empty();
             loadDraftList();
-            $(this).addClass('loaded');
-        }
+            //$(this).addClass('loaded');
+        //}
     });
 	
 	// Function to load approval list
@@ -1477,9 +1477,10 @@ $(document).ready(function() {
             type: 'GET',
             data: {
                 page: approvalPage,
-                team_id: '{{ $teamId ?? "" }}',
+                team_id: '',
                 keyword: $('#approval-search').val() || '',
-                status: 2 // Pending approval status
+                status: 2, // Pending approval status
+				from:'compose'
             },
             success: function(response) {
                 
@@ -1553,7 +1554,7 @@ $(document).ready(function() {
         isLoadingdraft = true;
         
         // Show loading indicator
-        if (approvalPage === 0) {
+        if (draftPage === 0) {
             $('#draft-list-content').html(`
                 <div class="text-center py-5" id="initial-loader">
                     <div class="spinner-border text-primary" role="status">
@@ -1573,13 +1574,14 @@ $(document).ready(function() {
         }
         
         $.ajax({
-            url: VARIABLES.url+'app/publishing/draft',
+            url: VARIABLES.url+'app/publishing/draft/list',
             type: 'GET',
             data: {
-                page: approvalPage,
-                team_id: '{{ $teamId ?? "" }}',
+                page: draftPage,
+                team_id: '',
                 keyword: $('#draft-search').val() || '',
-                status: 1 // Pending draft status
+                status: 1, // Pending draft status
+				from:'compose'
             },
             success: function(response) {
                 
@@ -1588,13 +1590,13 @@ $(document).ready(function() {
                 $('#load-more-spinner').remove();
                 
                 if (response.status === 1) {
-                    if (approvalPage === 0) {
+                    if (draftPage === 0) {
                         $('#draft-list-content').html(response.data);
                     } else {
                         $('#draft-list-content').append(response.data);
                     }
                     
-                    approvalPage++;
+                    draftPage++;
                     
                     // Check if there's more data
                     var $content = $(response.data);
@@ -1605,14 +1607,14 @@ $(document).ready(function() {
                 } else {
                     hasMoredraft = false;
                     
-                    if (approvalPage === 0) {
+                    if (draftPage === 0) {
                         $('#draft-list-content').html(`
                             <div class="text-center py-5">
                                 <div class="mb-3">
                                     <i class="fa-light fa-inbox fs-48 text-muted opacity-50"></i>
                                 </div>
-                                <h5 class="text-muted">{{ __('No draft post') }}</h5>
-                                <p class="text-muted">{{ __('All caught up! There are no posts in draft.') }}</p>
+                                <h5 class="text-muted">No draft post</h5>
+                                <p class="text-muted">Start by creating a new draft to save your ideas and prepare content before publishing.</p>
                             </div>
                         `);
                     }
@@ -1621,20 +1623,20 @@ $(document).ready(function() {
                 isLoadingdraft = false;
             },
             error: function(xhr, status, error) {
-                console.error('Error loading approval list:', error);
+                console.error('Error loading draft list:', error);
                 
                 $('#initial-loader').remove();
                 $('#load-more-spinner').remove();
                 
-                $('#approval-list-content').html(`
+                $('#draft-list-content').html(`
                     <div class="text-center py-5">
                         <div class="text-danger mb-3">
                             <i class="fa-light fa-exclamation-triangle fs-48"></i>
                         </div>
-                        <h5 class="text-danger">{{ __('Error loading approval list') }}</h5>
-                        <p class="text-muted">{{ __('Please try again.') }}</p>
+                        <h5 class="text-danger">Error loading draft list</h5>
+                        <p class="text-muted">Please try again.</p>
                         <button class="btn btn-primary btn-sm" onclick="reloaddraftList()">
-                            <i class="fa-light fa-refresh"></i> {{ __('Retry') }}
+                            <i class="fa-light fa-refresh"></i>Retry
                         </button>
                     </div>
                 `);
