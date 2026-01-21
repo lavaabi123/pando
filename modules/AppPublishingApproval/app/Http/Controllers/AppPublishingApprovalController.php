@@ -31,12 +31,12 @@ class AppPublishingApprovalController extends Controller
 
         $subquery = DB::table('posts as p1')
     ->select(
-        'p1.grouping_data',
-        DB::raw('MAX(p1.id) as latest_post_id'),
-        DB::raw('GROUP_CONCAT(DISTINCT a.avatar ORDER BY a.id SEPARATOR "|||") as avatars'),
-		DB::raw('GROUP_CONCAT(DISTINCT a.url ORDER BY a.id SEPARATOR "|||") as urls'),
-		DB::raw('GROUP_CONCAT(DISTINCT a.social_network ORDER BY a.id SEPARATOR "|||") as social_networks')
-    )
+    'p1.grouping_data',
+    DB::raw('MAX(p1.id) as latest_post_id'),
+    DB::raw('GROUP_CONCAT(DISTINCT CONCAT(a.id, ":::", a.avatar) ORDER BY a.id SEPARATOR "|||") as avatars'),
+    DB::raw('GROUP_CONCAT(DISTINCT CONCAT(a.id, ":::", a.url) ORDER BY a.id SEPARATOR "|||") as urls'),
+    DB::raw('GROUP_CONCAT(DISTINCT CONCAT(a.id, ":::", a.social_network) ORDER BY a.id SEPARATOR "|||") as social_networks')
+)
     ->leftJoin('posts as p2', 'p1.grouping_data', '=', 'p2.grouping_data')
     ->leftJoin('accounts as a', 'p2.account_id', '=', 'a.id')
     ->where('p1.brand_id', session('brand_id'))

@@ -18,20 +18,28 @@
     <div class="{{ (!empty($from) ? 'col-md-12 col-lg-12' : 'col-md-6 col-lg-4') }}  mb-4">
         <div class="card hp-100 draft-card">
 			<div class="card-header px-3">
-                <input class="form-check-input checkbox-item" type="checkbox" name="id[]">
-				
-                <div class="me-auto ms-2">
-                    <div class="me-3 position-relative me-3">				
-						<div class="card-title fw-normal fs-12 d-flex">
-							@php
-								$avatars = explode('|||', $value->avatars);
-								$urls = explode('|||', $value->urls);
-								$socialNetworks = explode('|||', $value->social_networks);
-							@endphp
+                <input class="form-check-input checkbox-item me-2" type="checkbox" name="id[]">
+				<div class="me-auto">
+                    <div class="position-relative w-140 after-shadow overflow-hidden">				
+						<div class="card-title fw-normal fs-12 horizontal-scroll d-flex">
+								@php
+    $avatars = collect(explode('|||', $value->avatars ?? ''))->map(function($item) {
+        return explode(':::', $item)[1] ?? '';
+    })->filter();
+    
+    $urls = collect(explode('|||', $value->urls ?? ''))->map(function($item) {
+        return explode(':::', $item)[1] ?? '';
+    })->filter();
+    
+    $socialNetworks = collect(explode('|||', $value->social_networks ?? ''))->map(function($item) {
+        return explode(':::', $item)[1] ?? '';
+    })->filter();
+    
+@endphp
 							
 							@if(!empty($value->avatars))
 								@foreach($avatars as $kj => $ava)								
-									<div class="d-flex flex-stack ms-2">
+									<div class="me-2">
 										<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
 											<img data-src="{{ Media::url($ava) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">									
 											<span class="position-absolute b-0 r-0">
@@ -64,11 +72,11 @@
                     <p class="lastEdit text-primary fs-12 mb-0">Last Edited: {{ $value->updated_at ? $value->updated_at->format('M d, Y h:i A') : 'N/A' }}</p>
                     <div class="d-flex mt-3">
                         <div class="flex-grow-1">
-                            <p class="card-text text-gray-600 mb-3 fs-14">{{ $caption ?: 'No caption.' }}</p>
+                            <p class="card-text mb-3 fs-13">{{ $caption ?: 'No caption.' }}</p>
                             <div class="d-flex gap-2 flex-wrap">
                             </div>
                         </div>
-                        <div class="size-80 me-3 overflow-hidden b-r-10 d-flex justify-content-center align-items-center fs-30 text-primary bg-primary-100 border border-primary-200 img-wrap">
+                        <div class="size-80 ms-3 overflow-hidden b-r-10 d-flex justify-content-center align-items-center fs-30 text-primary bg-primary-100 border border-primary-200 img-wrap">
                         	@switch($type)
 							    @case('media')
 							        <img src="{{ Media::url($img) }}" class="img-fluid rounded-3 shadow-sm"/>

@@ -80,7 +80,7 @@ if($post){
                                 </div>
                                 @endcan
                             </div>
-                            <div class="d-flex justify-content-between align-items-center border-gray-400 border border-top-0 bbr-r-15 bbl-r-15 compose-icons">
+                            <div class="d-flex justify-content-between align-items-center border-gray-400 border border-top-0 bbr-r-15 bbl-r-15 horizontal-scroll compose-icons">
                                 <div class="d-flex compose-type">
                                     @can("appfiles")
                                     <div class="border-gray-400">

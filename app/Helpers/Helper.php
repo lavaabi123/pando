@@ -703,7 +703,7 @@ if(!function_exists('groupArray')){
 if (!function_exists("get_social_media_icon")) {
     function get_social_media_icon($network)
     {
-        $network = strtolower(str_replace('_', ' ', $network));
+        $network = strtolower($network);
         
         $icons = [
             'facebook' => '<i class="post-media fab fa-facebook-f" style="background-color: #0074fa;color: #fff;"></i>',
@@ -712,7 +712,7 @@ if (!function_exists("get_social_media_icon")) {
             'instagram' => '<i class="post-media fab fa-instagram" style="color: #fff; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); right: 13px;"></i>',
             'linkedin' => '<i class="post-media fab fa-linkedin" style="color: #fff; background-color: #0077b5; right: 13px;"></i>',
             'pinterest' => '<i class="post-media fab fa-pinterest" style="color: #cd2029; right: 13px;"></i>',
-            'google business' => '<i class="post-media fab fa-google" style="color: #4b88ef; right: 13px;"></i>',
+            'google_business_profile' => '<i class="post-media fab fa-google" style="color: #fff;background-color:#4285F4; right: 13px;"></i>',
             'tiktok' => '<i class="post-media fab fa-tiktok" style="color: #000; right: 13px;"></i>',
             'youtube' => '<i class="post-media fab fa-youtube" style="color: #ff0000; right: 13px;"></i>',
         ];
@@ -734,8 +734,8 @@ if (!function_exists("get_social_media_image")) {
 			echo '<i class="fab fa-linkedin" style="color: #fff;background: #0077b5;border-radius: 50%;height: 20px;width: 20px;text-align: center;line-height: 22px;font-size: 14px;"></i>';
 		}elseif(strtolower($network) == 'pinterest'){
 			echo '<i class="post-media fab fa-pinterest" style="color: #cd2029;right: 13px;"></i>';
-		}elseif(str_replace("_", " ", strtolower($network)) == 'google_business'){
-			echo '<i class="post-media fab fa-googlemybusiness" style="color: #4b88ef;right: 13px;"></i>';
+		}elseif(strtolower($network) == 'google_business_profile'){
+			echo '<i class="post-media fab fa-google" style="color: #4b88ef;right: 13px;"></i>';
 		}elseif(str_replace("_", " ", strtolower($network)) == 'tiktok'){
 			echo '<i class="post-media fab fa-tiktok" style="color: #4b88ef;right: 13px;"></i>';
 		}elseif(str_replace("_", " ", strtolower($network)) == 'youtube'){
@@ -759,8 +759,8 @@ if (!function_exists("get_social_media_icon_large")) {
 			echo '<i class="fab fa-linkedin" style="color:#0077b5;right: 13px;"></i>';
 		}elseif(strtolower($network) == 'pinterest'){
 			echo '<i class="fab fa-pinterest" style="color: #cd2029;right: 13px;"></i>';
-		}elseif(str_replace("_", " ", strtolower($network)) == 'google_business'){
-			echo '<i class="fab fa-googlemybusiness" style="color: #4b88ef;right: 13px;"></i>';
+		}elseif(strtolower($network) == 'google_business_profile'){
+			echo '<i class="fab fa-google" style="color: #4b88ef;right: 13px;"></i>';
 		}elseif(str_replace("_", " ", strtolower($network)) == 'tiktok'){
 			echo '<i class="fab fa-tiktok" style="color: #4b88ef;right: 13px;"></i>';
 		}elseif(str_replace("_", " ", strtolower($network)) == 'youtube'){
