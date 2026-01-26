@@ -888,7 +888,35 @@ span.svg-icons svg {
 #calendar-new {
     min-width: auto;
 }
-
+.after-shadow::after, .horizontal-scroll::after {
+	content: "";
+	width:40px;
+	height:100%;
+	position: absolute;
+	top:0;
+	right:0;
+	background: linear-gradient(270deg, white, transparent);
+}
+.horizontal-scroll {
+    overflow-x: auto;
+	position: relative;
+}
+.horizontal-scroll::-webkit-scrollbar {
+	height: 0px;
+}
+.after-shadow .horizontal-scroll > div:last-child {
+	padding-right: 25px;
+}
+#approval-list-content .approval-card, #draft-list-content .draft-card {
+    height: auto !important;
+}
+.schedule-list {
+    margin-left: -17px;
+    margin-right: -17px;
+}
+.schedules-detail .card {
+    border-radius: 0 !important;
+}
 /** Footer **/
 .footer {
     border-top: 2px solid #767676;

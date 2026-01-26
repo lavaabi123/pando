@@ -15,14 +15,32 @@
         $commentCount = $comments->count();
     ?>
 
-    <div class="col-md-6 col-lg-4 mb-4">
+    <div class="<?php echo e((!empty($from) ? 'col-md-12 col-lg-12' : 'col-md-6 col-lg-4')); ?>  mb-4">
         <div class="card hp-100 approval-card">
             <div class="card-header px-3">
                 <input class="form-check-input checkbox-item" type="checkbox" name="id[]">
                 <div class="me-auto ms-2">
-                    <div class="w-40 me-3 position-relative me-3">
-                        <img src="https://itspando.com/writable/avatar/672fe716b4bee.png" class="w-100 rounded-circle" alt="">	
-                        <i class="fab fa-facebook-square" style="bottom: 0;position: absolute;right: -7px;color: #3b5998;"></i>
+                    <div class="me-3 position-relative me-3">				
+						<div class="card-title fw-normal fs-12 d-flex">
+							<?php
+								$avatars = explode('|||', $value->avatars);
+								$urls = explode('|||', $value->urls);
+								$socialNetworks = explode('|||', $value->social_networks);
+							?>
+							
+							<?php if(!empty($value->avatars)): ?>
+								<?php $__currentLoopData = $avatars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kj => $ava): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>								
+									<div class="d-flex flex-stack ms-2">
+										<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+											<img data-src="<?php echo e(Media::url($ava)); ?>" src="<?php echo e(theme_public_asset('img/default.png')); ?>" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='<?php echo e(theme_public_asset('img/default.png')); ?>'">									
+											<span class="position-absolute b-0 r-0">
+												<div class="w-100"><?php echo get_social_media_icon($socialNetworks[$kj]); ?></div>
+											</span>
+										</div>
+									</div>
+								<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+							<?php endif; ?>
+						</div>				
                     </div>
                 </div>
                 <div class="d-flex gap-6">
@@ -72,7 +90,7 @@
                 </div>
             </div>
             
-            <div class="card-footer fs-12 d-flex flex-column border-0 gap-8 px-3">
+            <div class="card-footer fs-12 d-flex flex-column border-0 gap-8 px-3 align-items-start">
                 <div class="scheduleDetails d-flex gap-2 flex-column gap-8 py-2">
                     <div class="d-flex align-items-center gap-8">
                         <div class="text-primary"><?php echo file_get_contents(public_path('img/time.svg')); ?></div>

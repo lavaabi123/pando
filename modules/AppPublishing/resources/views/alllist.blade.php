@@ -44,9 +44,9 @@
                         <div class="border-danger border-top-dashed border-1"></div>
                     @endif
                     
-                    <div class="card-header px-4 border-0 m-l-25">
+                    <div class="card-header p-3 border-0">
                         
-                        <div class="card-title fw-normal fs-12">
+                        <div class="card-title fw-normal fs-12 d-flex">
                             @php
                                 $avatars = explode(',', $post->avatars);
                                 $urls = explode(',', $post->urls);
@@ -61,9 +61,9 @@
                                     @endphp
                                     
                                     <div class="d-flex flex-stack">
-                                        <div class="symbol symbol-40px me-3">
-                                            <img src="{{ Media::url($ava) }}" class="align-self-center rounded-circle border" alt="">
-                                            <a href="{{ $urls[$kj] ?? '#' }}" target="_blank" class="text-gray-800 text-hover-primary fs-14 fw-bold">
+                                        <div class="size-30 me-2 position-relative">
+                                            <img src="{{ Media::url($ava) }}" class="align-self-center rounded-circle border w-100" alt="">
+                                            <a href="{{ $urls[$kj] ?? '#' }}" target="_blank" class="position-absolute b-0 r-0">
                                                 {{ get_social_media_icon_large(trim($socialNetworks[$kj])) }}
                                             </a>
                                         </div>
@@ -72,15 +72,15 @@
                             @endif
                         </div>
 
-                        <div class="card-toolbar">
-                            <a href="{{ url_app('post?post_id=' . $post->ids) }}" class="btn btn-sm px-3 btn-light-primary me-2">
-                                <i class="fal fa-edit fs-14 pe-0"></i>
+                        <div class="card-toolbar d-flex gap-6">
+                            <a href="{{ url_app('post?post_id=' . $post->ids) }}" class="icon-with-circle">
+                                {!! file_get_contents(public_path('img/post.svg')) !!}
                             </a>
-                            <a href="{{ url_app('post?type=duplicate&post_id=' . $post->ids) }}" class="btn btn-sm px-3 btn-light-primary me-2" title="{{ __('Duplicate Post') }}" data-toggle="tooltip" data-placement="top">
-                                <i class="fal fa-clone fs-14 pe-0"></i>
+                            <a href="{{ url_app('post?type=duplicate&post_id=' . $post->ids) }}" class="icon-with-circle" title="{{ __('Duplicate Post') }}" data-toggle="tooltip" data-placement="top">
+                                {!! file_get_contents(public_path('img/duplicate.svg')) !!}
                             </a>
-                            <a href="{{ module_url('delete') }}" class="btn btn-sm px-3 btn-light-danger actionItem" data-remove="item" data-id="{{ $post->grouping_data }}" data-confirm="{{ __('Are you sure to delete this items?') }}" data-call-success="location.reload();">
-                                <i class="fal fa-trash-alt fs-14 pe-0"></i>
+                            <a href="{{ module_url('delete') }}" class="icon-with-circle actionItem" data-remove="item" data-id="{{ $post->grouping_data }}" data-confirm="{{ __('Are you sure to delete this items?') }}" data-call-success="location.reload();">
+                                {!! file_get_contents(public_path('img/delete.svg')) !!}
                             </a>
                             
                             @if($post->status == 3)
@@ -121,89 +121,91 @@
 
                     </div>
 
-                    <div class="card-body p-20">
+                    <div class="card-body p-3">
                         
                         <div class="d-flex align-items-center">
                         
                             <div class="symbol symbol-40px me-3">
                                 <input type="checkbox" value="{{ $post->id }}" name="approval_post_ids[]"/>
                             </div>
+							
+							<div class="d-block w-100">
                             
-                            <div class="symbol symbol-100px me-3 overflow-hidden w-80 border b-r-10">
+								<div class="symbol symbol-100px me-3 mb-1 overflow-hidden w-80 border b-r-10 float-start">
 
-                                @if($post->type == "media")
-                                    @if(!empty($data->medias))
-                                        @if(count($data->medias) > 1)
-                                            <div class="owl-carousel owl-theme">
-                                                @foreach($data->medias as $index => $media)
-                                                    @if(is_image($media))
-                                                        <div class="item w-80 h-80 b-r-10 cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($media) }}" style="background-image: url('{{ Media::url($media) }}');"></div>
-                                                    @else
-                                                        <div class="item w-80 h-80 b-r-10">
-                                                            <div class="fm-list-media rounded d-flex flex-column align-items-center justify-content-center fs-40 text-xc cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($media) }}" style="height:100%">
-                                                                <video class="videotag" width="100%" height="100%" poster="" style="background-color: #093f730d">
-                                                                    <source src="{{ Media::url($media) }}" type="video/mp4">
-                                                                    Your browser does not support the video tag.
-                                                                </video>
-                                                                <button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 5px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
-                                                                    <svg aria-hidden="true" focusable="false" data-prefix="fad" data-icon="play-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-play-circle fa-w-16" style="width: 20px;margin-left: auto;margin-right: auto;">
-                                                                        <g class="fa-group">
-                                                                            <path fill="black" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" opacity="0.5" class="fa-secondary"></path>
-                                                                            <path fill="white" d="M371.7 280l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" class="fa-primary"></path>
-                                                                        </g>
-                                                                    </svg>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    @endif
-                                                @endforeach
-                                            </div>
-                                        @else
-                                            @if(is_image($data->medias[0]))
-                                                <div class="item w-80 h-80 b-r-10 cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($data->medias[0]) }}" style="background-size: cover;background-image: url('{{ Media::url($data->medias[0]) }}');"></div>
-                                            @else
-                                                <div class="item w-80 h-80 b-r-10">
-                                                    <div class="fm-list-media rounded d-flex flex-column align-items-center justify-content-center fs-40 text-xc cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($data->medias[0]) }}" style="height:100%">
-                                                        <video class="videotag" width="100%" height="100%" poster="" style="background-color: #093f730d">
-                                                            <source src="{{ Media::url($data->medias[0]) }}" type="video/mp4">
-                                                            Your browser does not support the video tag.
-                                                        </video>
-                                                        <button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 5px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
-                                                            <svg aria-hidden="true" focusable="false" data-prefix="fad" data-icon="play-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-play-circle fa-w-16" style="width: 20px;margin-left: auto;margin-right: auto;">
-                                                                <g class="fa-group">
-                                                                    <path fill="black" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" opacity="0.5" class="fa-secondary"></path>
-                                                                    <path fill="white" d="M371.7 280l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" class="fa-primary"></path>
-                                                                </g>
-                                                            </svg>
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            @endif
-                                        @endif
-                                    @else
-                                        <div class="owl-carousel owl-theme">
-                                            @if($post->link_icon)
-                                                <div class="item w-80 h-80 b-r-10" style="background-image: url('{{ $post->link_icon }}');"></div>
-                                            @endif
-                                        </div>
-                                    @endif
-                                @elseif($post->type == "link")
-                                    <a href="{{ $data->link ?? '#' }}" target="_blank" class="d-flex align-items-center justify-content-center w-99 h-99 fs-30 bg-light-primary">
-                                        <i class="fal fa-link"></i>
-                                    </a>
-                                @else
-                                    <div class="d-flex align-items-center justify-content-center w-80 h-80 fs-30 text-primary bg-light-primary">
-                                        <i class="fal fa-align-center"></i>
-                                    </div>
-                                @endif
+									@if($post->type == "media")
+										@if(!empty($data->medias))
+											@if(count($data->medias) > 1)
+												<div class="owl-carousel owl-theme">
+													@foreach($data->medias as $index => $media)
+														@if(is_image($media))
+															<div class="item w-80 h-80 b-r-10 cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($media) }}" style="background-image: url('{{ Media::url($media) }}');"></div>
+														@else
+															<div class="item w-80 h-80 b-r-10">
+																<div class="fm-list-media rounded d-flex flex-column align-items-center justify-content-center fs-40 text-xc cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($media) }}" style="height:100%">
+																	<video class="videotag" width="100%" height="100%" poster="" style="background-color: #093f730d">
+																		<source src="{{ Media::url($media) }}" type="video/mp4">
+																		Your browser does not support the video tag.
+																	</video>
+																	<button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 5px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
+																		<svg aria-hidden="true" focusable="false" data-prefix="fad" data-icon="play-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-play-circle fa-w-16" style="width: 20px;margin-left: auto;margin-right: auto;">
+																			<g class="fa-group">
+																				<path fill="black" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" opacity="0.5" class="fa-secondary"></path>
+																				<path fill="white" d="M371.7 280l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" class="fa-primary"></path>
+																			</g>
+																		</svg>
+																	</button>
+																</div>
+															</div>
+														@endif
+													@endforeach
+												</div>
+											@else
+												@if(is_image($data->medias[0]))
+													<div class="item w-80 h-80 b-r-10 cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($data->medias[0]) }}" style="background-size: cover;background-image: url('{{ Media::url($data->medias[0]) }}');"></div>
+												@else
+													<div class="item w-80 h-80 b-r-10">
+														<div class="fm-list-media rounded d-flex flex-column align-items-center justify-content-center fs-40 text-xc cursor-pointer" onclick="prepHrefzoom1(this)" data-src="{{ Media::url($data->medias[0]) }}" style="height:100%">
+															<video class="videotag" width="100%" height="100%" poster="" style="background-color: #093f730d">
+																<source src="{{ Media::url($data->medias[0]) }}" type="video/mp4">
+																Your browser does not support the video tag.
+															</video>
+															<button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 5px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
+																<svg aria-hidden="true" focusable="false" data-prefix="fad" data-icon="play-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-play-circle fa-w-16" style="width: 20px;margin-left: auto;margin-right: auto;">
+																	<g class="fa-group">
+																		<path fill="black" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" opacity="0.5" class="fa-secondary"></path>
+																		<path fill="white" d="M371.7 280l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" class="fa-primary"></path>
+																	</g>
+																</svg>
+															</button>
+														</div>
+													</div>
+												@endif
+											@endif
+										@else
+											<div class="owl-carousel owl-theme">
+												@if($post->link_icon)
+													<div class="item w-80 h-80 b-r-10" style="background-image: url('{{ $post->link_icon }}');"></div>
+												@endif
+											</div>
+										@endif
+									@elseif($post->type == "link")
+										<a href="{{ $data->link ?? '#' }}" target="_blank" class="d-flex align-items-center justify-content-center w-99 h-99 fs-30 bg-light-primary">
+											<i class="fal fa-link"></i>
+										</a>
+									@else
+										<div class="d-flex align-items-center justify-content-center w-80 h-80 fs-30 text-primary bg-light-primary">
+											<i class="fal fa-align-center"></i>
+										</div>
+									@endif
 
-                            </div>
+								</div>
                             
-                            <div class="d-flex flex-row-fluid flex-wrap">
-                                <div class="flex-grow-1 me-2">
-                                    <span class="text-gray-600 d-block overflow-auto">
+                            
+                                <div class="flex-grow-1">
+                                    <p class="fs-13 mb-2">
                                         {!! nl2br(e($data->caption ?? '')) !!}
-                                    </span>
+                                    </p>
                                     <span class="text-muted fw-semibold d-block fs-13">
                                         <i class="fal fa-calendar-alt"></i> {{ date("h:i A", $post->time_post) }}
                                     </span>

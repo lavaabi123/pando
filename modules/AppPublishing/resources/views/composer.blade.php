@@ -453,7 +453,7 @@ if($post){
 			<div class="tab-content" id="myTabContent">	
 				<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
 					<div class="compose-calendar-new compose-preview d-flex flex-column flex-fill bg-white min-w-300">
-					<div class="wp-100 mx-auto p-2">
+					<div class="wp-100 mx-auto p-3">
 					<div class="calendar-header">
 						
 						<div class="border p-2 b-r-20 d-flex flex-wrap gap-8 justify-content-between align-items-center w-sm-100">

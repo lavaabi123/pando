@@ -617,7 +617,7 @@ protected function updateTeamStats($teamId, $socialNetwork, $type, $postType = n
             'post_social_id' => $post_social_id,
             'created'        => $data['created'] ?? time(),
             'message'        => $message,
-			'brand_id' => session('brand_id'),
+			'brand_id' => $data['brand_id'] ?? session('brand_id'),
         ]);
     }
 

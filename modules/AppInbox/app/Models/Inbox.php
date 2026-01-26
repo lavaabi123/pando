@@ -419,6 +419,214 @@ class Inbox extends Model
 			}
 		}	 
     }
+	
+	public static function get_tiktok_messages($brand_id = '') {
+		$query = DB::table('accounts')
+			->where('social_network', 'tiktok');
+
+		if (!empty($brand_id)) {
+			$query->where('brand_id', $brand_id);
+		}
+
+		$result = $query->orderBy('created', 'ASC')->get();
+
+		if (!empty($result)) {
+			foreach ($result as $tiktok_account) {
+				try {
+					// Get conversations list
+					$conversations = self::getTiktokConversations($tiktok_account->token);
+					
+					if (!empty($conversations['data']['conversations'])) {
+						$message_ids = [];
+						
+						foreach ($conversations['data']['conversations'] as $conversation) {
+							// Get messages for each conversation
+							$messages = self::getTiktokConversationMessages(
+								$tiktok_account->token, 
+								$conversation['conversation_id']
+							);
+							
+							if (!empty($messages['data']['messages'])) {
+								foreach ($messages['data']['messages'] as $message) {
+									// Determine message direction
+									$totype = ($message['sender_id'] == $tiktok_account->pid) ? 'me' : '';
+									
+									// Set avatar images
+									if ($message['sender_id'] == $tiktok_account->pid) {
+										$from_image = $tiktok_account->avatar;
+										$to_image = theme_public_asset('img/default.png');
+									} else {
+										$from_image = theme_public_asset('img/default.png');
+										$to_image = $tiktok_account->avatar;
+									}
+									
+									// Get participant info
+									$participant = self::getTiktokParticipantInfo(
+										$conversation['participants'] ?? [], 
+										$message['sender_id'],
+										$tiktok_account->pid
+									);
+									
+									$data = [
+										'user_id' => '1',
+										'account_id' => $tiktok_account->id,
+										'post_id' => '',
+										'brand_id' => $tiktok_account->brand_id,
+										'team_id' => $tiktok_account->team_id,
+										'conversation_id' => $conversation['conversation_id'],
+										'media_type' => 'tiktok',
+										'inbox_type' => 'Messenger',
+										'message' => $message['text'] ?? '',
+										'story' => '',
+										'shares' => '',
+										'attachments' => self::getTiktokAttachments($message),
+										'from_name' => $participant['from_name'],
+										'from_user_id' => $message['sender_id'],
+										'to_name' => $participant['to_name'],
+										'to_type' => $totype,
+										'to_user_id' => $participant['to_user_id'],
+										'from_image' => $from_image,
+										'to_image' => $to_image,
+										'message_id' => $message['message_id'],
+										'created_time' => date('Y-m-d H:i:s', $message['create_time']),
+									];
+									
+									// Check if record exists
+									$exists = DB::table('inbox')
+										->where('message_id', $data['message_id'])
+										->count();
+									
+									if ($exists) {
+										DB::table('inbox')
+											->where('message_id', $data['message_id'])
+											->update($data);
+									} else {
+										try {
+											DB::table('inbox')->insert($data);
+										} catch (\Exception $e) {
+											logger()->error('[TikTok Messages] Insert failed: ' . $e->getMessage());
+										}
+									}
+									
+									$message_ids[] = $message['message_id'];
+								}
+							}
+						}
+						
+						// Cleanup old messages
+						if (!empty($message_ids)) {
+							DB::table('inbox')
+								->whereNotIn('message_id', $message_ids)
+								->where('inbox_type', 'Messenger')
+								->where('media_type', 'tiktok')
+								->where('account_id', $tiktok_account->id)
+								->delete();
+						}
+					}
+					
+				} catch (\Exception $e) {
+					logger()->error('[TikTok Messages] Error for account ' . $tiktok_account->id, [
+						'error' => $e->getMessage(),
+						'file' => $e->getFile(),
+						'line' => $e->getLine(),
+					]);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Get TikTok conversations list
+	 */
+	protected static function getTiktokConversations(string $accessToken): array
+	{
+		$response = \Http::withHeaders([
+			'Authorization' => 'Bearer ' . $accessToken,
+			'Content-Type' => 'application/json',
+		])->get('https://open.tiktokapis.com/v2/message/conversations/', [
+			'max_count' => 50, // Adjust as needed
+		]);
+		
+		if ($response->successful()) {
+			return $response->json();
+		}
+		
+		logger()->warning('[TikTok Messages] Failed to fetch conversations', [
+			'status' => $response->status(),
+			'body' => $response->body(),
+		]);
+		
+		return [];
+	}
+
+	/**
+	 * Get messages for a specific conversation
+	 */
+	protected static function getTiktokConversationMessages(string $accessToken, string $conversationId): array
+	{
+		$response = \Http::withHeaders([
+			'Authorization' => 'Bearer ' . $accessToken,
+			'Content-Type' => 'application/json',
+		])->get('https://open.tiktokapis.com/v2/message/list/', [
+			'conversation_id' => $conversationId,
+			'max_count' => 100, // Adjust as needed
+		]);
+		
+		if ($response->successful()) {
+			return $response->json();
+		}
+		
+		logger()->warning('[TikTok Messages] Failed to fetch messages', [
+			'conversation_id' => $conversationId,
+			'status' => $response->status(),
+			'body' => $response->body(),
+		]);
+		
+		return [];
+	}
+
+	/**
+	 * Extract participant information
+	 */
+	protected static function getTiktokParticipantInfo(array $participants, string $senderId, string $accountPid): array
+	{
+		$from_name = '';
+		$to_name = '';
+		$to_user_id = '';
+		
+		foreach ($participants as $participant) {
+			if ($participant['user_id'] == $senderId) {
+				$from_name = $participant['display_name'] ?? $participant['username'] ?? '';
+			} else {
+				$to_name = $participant['display_name'] ?? $participant['username'] ?? '';
+				$to_user_id = $participant['user_id'];
+			}
+		}
+		
+		return [
+			'from_name' => $from_name,
+			'to_name' => $to_name,
+			'to_user_id' => $to_user_id,
+		];
+	}
+
+	/**
+	 * Extract attachments from TikTok message
+	 */
+	protected static function getTiktokAttachments(array $message): string
+	{
+		if (!empty($message['attachments'])) {
+			foreach ($message['attachments'] as $attachment) {
+				if (!empty($attachment['image_url'])) {
+					return $attachment['image_url'];
+				}
+				if (!empty($attachment['video_url'])) {
+					return $attachment['video_url'];
+				}
+			}
+		}
+		return '';
+	}
 	public static function get_mentions($brandId = null)
 {
     try {

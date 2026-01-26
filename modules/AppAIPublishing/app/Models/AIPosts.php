@@ -31,8 +31,9 @@ class AIPosts extends Model
             return $currentPage;
         });
 
-        $postsQuery = self::query()
+        $postsQuery = self::query()->select('*')
             ->where("team_id", request()->team_id)
+			->where("brand_id", session('brand_id'))
             ->orderByDesc('changed');
 
         if ($search) {
@@ -136,7 +137,7 @@ class AIPosts extends Model
 
     public static function getAIPosts(int $numberRecords)
     {
-        $posts = self::query()
+        $posts = self::query()->select('*')
             ->where("time_post", "<=", time())
             ->where("status", 1)
             ->orderByDesc('changed')

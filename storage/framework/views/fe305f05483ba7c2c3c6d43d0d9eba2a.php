@@ -839,7 +839,6 @@ function changeTodayCounts(dayType, button) {
             team_id: '<?php echo e($teamId ?? ""); ?>'
         },
         success: function(response) {
-            console.log('Response:', response);
             
             // Update counts
             $('#total_scheduled_post').text(response.total_scheduled_post.toLocaleString());
@@ -889,6 +888,7 @@ function changeTodayCounts(dayType, button) {
             }
         },
         accessibility: {
+			enabled: false,
             point: {
                 valueSuffix: ' posts'
             }
@@ -1248,16 +1248,15 @@ function changeTodayCounts(dayType, button) {
 
 <script>
 (function() {
-    console.log('Dashboard item loaded, initializing daterange...');
     
     // Wait for DOM to be ready
     setTimeout(function() {
         if (typeof Main !== 'undefined' && typeof Main.dateRange === 'function') {
-            console.log('Calling Main.dateRange()');
+            
             Main.dateRange();
             
             // Setup date change handler
-            setupDateChangeHandler();
+            //setupDateChangeHandler();
         } else {
             console.error('Main.dateRange() not available');
         }

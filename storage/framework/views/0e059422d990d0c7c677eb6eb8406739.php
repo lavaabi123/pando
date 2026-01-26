@@ -9,13 +9,68 @@
         $network = $value->social_network ?? 'N/A';
         $type = $value->type ?? 'N/A';
         $status = ($value->result == 1) ? 'Ready' : 'Draft';
+		
+        // Get comments
+        $comments = $value->comments ?? collect();
+        $commentCount = $comments->count();
     ?>
 
-    <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card hp-100 draft-card border-0 shadow-sm">
-            <div class="card-body p-4">
+    <div class="<?php echo e((!empty($from) ? 'col-md-12 col-lg-12' : 'col-md-6 col-lg-4')); ?>  mb-4">
+        <div class="card hp-100 draft-card">
+			<div class="card-header px-3">
+                <input class="form-check-input checkbox-item" type="checkbox" name="id[]">
+				
+                <div class="me-auto ms-2">
+                    <div class="me-3 position-relative me-3">				
+						<div class="card-title fw-normal fs-12 d-flex">
+							<?php
+								$avatars = explode('|||', $value->avatars);
+								$urls = explode('|||', $value->urls);
+								$socialNetworks = explode('|||', $value->social_networks);
+							?>
+							
+							<?php if(!empty($value->avatars)): ?>
+								<?php $__currentLoopData = $avatars; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $kj => $ava): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>								
+									<div class="d-flex flex-stack ms-2">
+										<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+											<img data-src="<?php echo e(Media::url($ava)); ?>" src="<?php echo e(theme_public_asset('img/default.png')); ?>" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='<?php echo e(theme_public_asset('img/default.png')); ?>'">									
+											<span class="position-absolute b-0 r-0">
+												<div class="w-100"><?php echo get_social_media_icon($socialNetworks[$kj]); ?></div>
+											</span>
+										</div>
+									</div>
+								<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+							<?php endif; ?>
+						</div>				
+                    </div>
+                </div>
+				
+				
+                <div class="d-flex gap-6">
+                    <a href="<?php echo e(url_app("publishing/preview")); ?>" class="icon-with-circle actionItem" data-popup="pubishingPreviewModal" data-id="<?php echo e($value->grouping_data); ?>" data-call-success="AppPubishing.closePopoverCalendar();" data-bs-title="Move to Approval" data-bs-toggle="tooltip" data-bs-placement="top"><?php echo file_get_contents(public_path('img/arrow.svg')); ?></a>
+                    <a href="<?php echo e(module_url("update")); ?>" class="icon-with-circle actionItem" data-id="<?php echo e($value->id_secure); ?>" data-popup="groupModal" data-call-success="" data-bs-title="Duplicate Post" data-bs-toggle="tooltip" data-bs-placement="top">
+                        <?php echo file_get_contents(public_path('img/duplicate.svg')); ?>
+
+                    </a>
+                    <a href="<?php echo e(url_app("publishing/composer")); ?>" class="icon-with-circle actionItem" data-id="<?php echo e($value->id_secure); ?>" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();" data-bs-title="Edit" data-bs-toggle="tooltip" data-bs-placement="top">
+                        <?php echo file_get_contents(public_path('img/post.svg')); ?>
+
+                    </a>
+                    <a href="<?php echo e(url_app("publishing/destroy")); ?>" class="icon-with-circle actionItem" data-id="<?php echo e($value->grouping_data); ?>" data-call-success="location.reload();" data-bs-title="Delete Post" data-bs-toggle="tooltip" data-bs-placement="top" data-confirm="<?php echo e(__('Are you sure to delete this post?')); ?>">
+                        <?php echo file_get_contents(public_path('img/delete.svg')); ?>
+
+                    </a>
+                </div>
+            </div>
+            <div class="card-body p-3 pt-2">
                 <div class="card-content">
-                    <div class="d-flex">
+                    <p class="lastEdit text-primary fs-12 mb-0">Last Edited: <?php echo e($value->updated_at ? $value->updated_at->format('M d, Y h:i A') : 'N/A'); ?></p>
+                    <div class="d-flex mt-3">
+                        <div class="flex-grow-1">
+                            <p class="card-text text-gray-600 mb-3 fs-14"><?php echo e($caption ?: 'No caption.'); ?></p>
+                            <div class="d-flex gap-2 flex-wrap">
+                            </div>
+                        </div>
                         <div class="size-80 me-3 overflow-hidden b-r-10 d-flex justify-content-center align-items-center fs-30 text-primary bg-primary-100 border border-primary-200 img-wrap">
                         	<?php switch($type):
 							    case ('media'): ?>
@@ -30,26 +85,37 @@
 							        <i class="fa-light fa-align-center"></i>
 							<?php endswitch; ?>
                         </div>
-                        <div class="flex-grow-1">
-                            <p class="card-text text-gray-600 mb-3 fs-14"><?php echo e($caption ?: 'No caption.'); ?></p>
-                            <div class="d-flex gap-2 flex-wrap">
-                            </div>
-                        </div>
                     </div>
                 </div>
 
 
             </div>
-            <div class="card-footer fs-12 d-flex justify-content-center gap-8">
-	            <a href="<?php echo e(url_app("publishing/composer")); ?>" class="d-flex flex-fill gap-8 align-items-center justify-content-center text-gray-900 text-hover-primary fw-5 border-end actionItem" data-append-content="composer-scheduling" data-id="<?php echo e($value->id_secure); ?>" da data-call-success="AppPubishing.openCompose();">
-	                <i class="fa-light fa-pen-to-square"></i>
-	                <span><?php echo e(__("Edit")); ?></span>
-	            </a>
-	            <a href="<?php echo e(url_app("publishing/destroy")); ?>" class="d-flex flex-fill gap-8 align-items-center justify-content-center text-gray-900 text-hover-primary fw-5 actionItem" data-id="<?php echo e($value->id_secure); ?>" data-confirm="<?php echo e(__("Are you sure you want to delete this?")); ?>" data-call-success="Main.ajaxScroll(true)">
-	                <i class="fa-light fa-trash-can"></i>
-	                <span><?php echo e(__("Delete")); ?></span>
-	            </a>
-	        </div>
+            <div class="card-footer fs-12 d-flex flex-column border-0 gap-8 px-3 align-items-start">
+                <div class="scheduleDetails d-flex gap-2 flex-column gap-8 py-2">
+                    <div class="d-flex align-items-center gap-8">
+                        <div class="text-primary"><?php echo file_get_contents(public_path('img/time.svg')); ?></div>
+                        <a href="#" class="btn btn-secondary btn-sm">Schedule</a>
+                        <p class="s_dateTime mb-0 fw-6 text-gray-500 fs-12">
+                            <input type="text" style="color:#7ec476;cursor: pointer;" data-selecteddate="" class="border-0 date_approval fs-12" autocomplete="off" data-id="<?php echo e($value->id); ?>" name="" value="<?php echo e($value->time_post ? date('m/d/Y h:i A', $value->time_post) : ''); ?>" readonly="">
+                        </p>
+                    </div>
+                    <div class="d-flex align-items-center gap-8">
+                        <div class="text-primary"><?php echo file_get_contents(public_path('img/msg.svg')); ?></div>
+                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm open-comment-modal" data-post-id="<?php echo e($value->id_secure); ?>">
+                            Comment <?php if($commentCount > 0): ?><span class="badge bg-primary ms-1"><?php echo e($commentCount); ?></span><?php endif; ?>
+                        </a>
+                        <?php if($commentCount > 0): ?>
+                            <?php $lastComment = $comments->last(); ?>
+                            <p class="s_comment mb-0 fw-6 text-gray-500 fs-12">
+                                <?php echo e($lastComment->user_name ?? 'User'); ?> - <?php echo e(Str::limit($lastComment->comment, 30)); ?> (<?php echo e($lastComment->created_at ? $lastComment->created_at->format('M d, Y h:i A') : ''); ?>)
+                            </p>
+                        <?php else: ?>
+                            <p class="s_comment mb-0 fw-6 text-gray-500 fs-12">No comments yet</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+               
+            </div>
 
         </div>
     </div>

@@ -60,7 +60,7 @@
 
             </div>
             <div class="card-body text-success bg-dark">
-                <pre class="mb-0"><?php echo e($value['expression']); ?> <?php echo e($value['url'] ?? $value['command']); ?></pre>
+                <pre class="mb-0"><?php echo e($value['expression']); ?> curl -fsS "<?php echo e($value['url'] ?? $value['command']); ?>" >/dev/null 2>&1</pre>
             </div>
             <?php endif; ?>
             <div class="card-body bg-gray-100 fw-5 fs-12 py-2 px-3">

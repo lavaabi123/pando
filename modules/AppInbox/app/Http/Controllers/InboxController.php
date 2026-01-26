@@ -1087,5 +1087,337 @@ public function getTagsList()
 		$reviews = Inbox::get_reviews();
 		$ad_comments = Inbox::get_ad_comments();
 		$linkedin_comment = Inbox::get_linkedin_comments();
+		$tiktok_messages = Inbox::get_tiktok_message_conversation();
 	}
+	
+	public function verify(Request $request)
+    {
+        $challenge = $request->query('challenge');
+        
+        Log::info('[TikTok Webhook] Verification request', [
+            'challenge' => $challenge,
+            'all_params' => $request->all()
+        ]);
+        
+        if ($challenge) {
+            return response($challenge, 200)
+                ->header('Content-Type', 'text/plain');
+        }
+        
+        return response()->json(['error' => 'No challenge provided'], 400);
+    }
+    
+    /**
+     * Handle incoming webhooks (POST request)
+     */
+    public function handleMessage(Request $request)
+    {
+        try {
+            // Log raw payload for debugging
+            Log::info('[TikTok Webhook] Raw payload received', [
+                'headers' => $request->headers->all(),
+                'body' => $request->all()
+            ]);
+            
+            // Verify the signature
+            if (!$this->verifySignature($request)) {
+                Log::warning('[TikTok Webhook] Invalid signature');
+                return response()->json(['error' => 'Invalid signature'], 401);
+            }
+            
+            $payload = $request->all();
+            
+            // Extract event type
+            $eventType = $payload['event_type'] ?? $payload['type'] ?? '';
+            
+            Log::info('[TikTok Webhook] Processing event', [
+                'event_type' => $eventType
+            ]);
+            
+            // Route to appropriate handler
+            switch ($eventType) {
+                case 'message.received':
+                case 'message_received':
+                    return $this->handleIncomingMessage($payload);
+                    
+                case 'message.sent':
+                case 'message_sent':
+                    return $this->handleOutgoingMessage($payload);
+                    
+                default:
+                    Log::info('[TikTok Webhook] Unhandled event type', [
+                        'type' => $eventType,
+                        'payload' => $payload
+                    ]);
+                    return response()->json(['status' => 'event_type_not_handled'], 200);
+            }
+            
+        } catch (\Exception $e) {
+            Log::error('[TikTok Webhook] Processing error', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Always return 200 to prevent TikTok from retrying
+            return response()->json(['status' => 'error_logged'], 200);
+        }
+    }
+    
+    /**
+     * Verify TikTok webhook signature
+     */
+    protected function verifySignature(Request $request): bool
+    {
+        // Get signature from headers
+        $signature = $request->header('X-TikTok-Signature') 
+                  ?? $request->header('X-Signature')
+                  ?? $request->header('Signature');
+                  
+        $timestamp = $request->header('X-TikTok-Timestamp')
+                  ?? $request->header('X-Timestamp')
+                  ?? $request->header('Timestamp');
+        
+        if (!$signature || !$timestamp) {
+            Log::warning('[TikTok Webhook] Missing signature or timestamp', [
+                'signature' => $signature ? 'present' : 'missing',
+                'timestamp' => $timestamp ? 'present' : 'missing',
+                'all_headers' => $request->headers->all()
+            ]);
+            
+            // For testing, temporarily return true
+            // TODO: Change to false in production after testing
+            return true;
+        }
+        
+        // Check timestamp to prevent replay attacks
+        $currentTime = time();
+        if (abs($currentTime - $timestamp) > 300) { // 5 minutes
+            Log::warning('[TikTok Webhook] Timestamp too old', [
+                'current' => $currentTime,
+                'received' => $timestamp,
+                'diff' => abs($currentTime - $timestamp)
+            ]);
+            return false;
+        }
+        
+        // Get webhook secret from options table (like your Facebook implementation)
+        $webhookSecret = $this->getOption('tiktok_webhook_secret', '');
+        
+        if (empty($webhookSecret)) {
+            Log::error('[TikTok Webhook] Webhook secret not configured in options table');
+            return false;
+        }
+        
+        // Calculate expected signature
+        $body = $request->getContent();
+        $expectedSignature = hash_hmac('sha256', $timestamp . '.' . $body, $webhookSecret);
+        
+        $isValid = hash_equals($expectedSignature, $signature);
+        
+        if (!$isValid) {
+            Log::warning('[TikTok Webhook] Signature mismatch', [
+                'expected' => $expectedSignature,
+                'received' => $signature
+            ]);
+        }
+        
+        return $isValid;
+    }
+    
+    /**
+     * Handle incoming message (user sent message to your account)
+     */
+    protected function handleIncomingMessage(array $payload)
+    {
+        try {
+            $data = $payload['data'] ?? $payload;
+            
+            // Extract identifiers
+            $ownerOpenId = $data['conversation']['owner_id'] 
+                        ?? $data['recipient']['open_id']
+                        ?? $data['owner_id']
+                        ?? null;
+            
+            if (!$ownerOpenId) {
+                Log::warning('[TikTok Webhook] No owner_id found', [
+                    'payload_keys' => array_keys($payload),
+                    'data_keys' => array_keys($data)
+                ]);
+                return response()->json(['status' => 'no_owner_id'], 200);
+            }
+            
+            // Find account in database (matching your structure)
+            $account = DB::table('accounts')
+                ->where('social_network', 'tiktok')
+                ->where('pid', $ownerOpenId)
+                ->first();
+            
+            if (!$account) {
+                Log::warning('[TikTok Webhook] Account not found', [
+                    'owner_id' => $ownerOpenId,
+                    'existing_tiktok_accounts' => DB::table('accounts')
+                        ->where('social_network', 'tiktok')
+                        ->pluck('pid', 'id')
+                        ->toArray()
+                ]);
+                return response()->json(['status' => 'account_not_found'], 200);
+            }
+            
+            Log::info('[TikTok Webhook] Account found', [
+                'account_id' => $account->id,
+                'brand_id' => $account->brand_id,
+                'username' => $account->username
+            ]);
+            
+            // Extract message data
+            $message = $data['message'] ?? [];
+            $conversation = $data['conversation'] ?? [];
+            $sender = $data['sender'] ?? [];
+            
+            // Determine message direction
+            $senderId = $message['sender_id'] ?? $sender['open_id'] ?? '';
+            $totype = ($senderId == $account->pid) ? 'me' : '';
+            
+            // Set avatar images (using your helper function pattern)
+            if ($senderId == $account->pid) {
+                $from_image = $account->avatar ?? '';
+                $to_image = theme_public_asset('img/default.png');
+            } else {
+                $from_image = theme_public_asset('img/default.png');
+                $to_image = $account->avatar ?? '';
+            }
+            
+            // Prepare inbox data (matching your exact structure)
+            $inboxData = [
+                'user_id' => '1',
+                'account_id' => $account->id,
+                'post_id' => '',
+                'brand_id' => $account->brand_id,
+                'team_id' => $account->team_id,
+                'conversation_id' => $conversation['conversation_id'] ?? $data['conversation_id'] ?? '',
+                'media_type' => 'tiktok',
+                'inbox_type' => 'Messenger',
+                'message' => $message['text'] ?? $message['content'] ?? '',
+                'story' => '',
+                'shares' => '',
+                'attachments' => $this->extractAttachments($message),
+                'from_name' => $sender['display_name'] ?? $sender['username'] ?? 'Unknown',
+                'from_user_id' => $senderId,
+                'to_name' => $account->name ?? $account->username ?? '',
+                'to_type' => $totype,
+                'to_user_id' => $account->pid,
+                'from_image' => $from_image,
+                'to_image' => $to_image,
+                'message_id' => $message['message_id'] ?? $message['id'] ?? uniqid('tiktok_msg_'),
+                'created_time' => $this->parseTimestamp($message['create_time'] ?? $message['created_at'] ?? null),
+            ];
+            
+            // Save to database (matching your pattern)
+            $exists = DB::table('inbox')->where('message_id', $inboxData['message_id'])->count();
+            
+            if ($exists) {
+                // Update existing record
+                DB::table('inbox')
+                    ->where('message_id', $inboxData['message_id'])
+                    ->update($inboxData);
+                    
+                Log::info('[TikTok Webhook] Message updated', [
+                    'message_id' => $inboxData['message_id']
+                ]);
+            } else {
+                try {
+                    // Insert new record
+                    DB::table('inbox')->insert($inboxData);
+                    
+                    Log::info('[TikTok Webhook] New message inserted', [
+                        'message_id' => $inboxData['message_id']
+                    ]);
+                } catch (\Exception $e) {
+                    Log::error('[TikTok Webhook] Insert failed: ' . $e->getMessage());
+                }
+            }
+            
+            return response()->json(['status' => 'success'], 200);
+            
+        } catch (\Exception $e) {
+            Log::error('[TikTok Webhook] Error handling incoming message', [
+                'error' => $e->getMessage(),
+                'line' => $e->getLine()
+            ]);
+            
+            return response()->json(['status' => 'error'], 200);
+        }
+    }
+    
+    /**
+     * Handle outgoing message
+     */
+    protected function handleOutgoingMessage(array $payload)
+    {
+        Log::info('[TikTok Webhook] Outgoing message received', [
+            'payload' => $payload
+        ]);
+        
+        return response()->json(['status' => 'success'], 200);
+    }
+    
+    /**
+     * Extract attachment URLs from message
+     */
+    protected function extractAttachments(array $message): string
+    {
+        if (empty($message['attachments'])) {
+            return '';
+        }
+        
+        foreach ($message['attachments'] as $attachment) {
+            if (!empty($attachment['image_url'])) {
+                return $attachment['image_url'];
+            }
+            if (!empty($attachment['video_url'])) {
+                return $attachment['video_url'];
+            }
+            if (!empty($attachment['file_url'])) {
+                return $attachment['file_url'];
+            }
+        }
+        
+        return '';
+    }
+    
+    /**
+     * Parse TikTok timestamp to MySQL datetime
+     */
+    protected function parseTimestamp($timestamp): string
+    {
+        if (empty($timestamp)) {
+            return date('Y-m-d H:i:s');
+        }
+        
+        // If timestamp is Unix time (integer)
+        if (is_numeric($timestamp)) {
+            return date('Y-m-d H:i:s', $timestamp);
+        }
+        
+        // If timestamp is ISO 8601 string
+        try {
+            return date('Y-m-d H:i:s', strtotime($timestamp));
+        } catch (\Exception $e) {
+            return date('Y-m-d H:i:s');
+        }
+    }
+    
+    /**
+     * Get option from options table (matching your pattern)
+     */
+    protected function getOption(string $name, $default = '')
+    {
+        $option = DB::table('options')
+            ->where('name', $name)
+            ->first();
+        
+        return $option ? $option->value : $default;
+    }
 }

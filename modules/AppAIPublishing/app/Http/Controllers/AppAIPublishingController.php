@@ -5,6 +5,7 @@ namespace Modules\AppAIPublishing\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\AppAIPublishing\Models\AIPosts;
+use Illuminate\Support\Facades\Auth;
 use Modules\AppFiles\Models\Files;
 use Channels;
 use Arr;
@@ -15,7 +16,7 @@ class AppAIPublishingController extends Controller
 
     public function index()
     {
-        $total = AIPosts::where("team_id", request()->team_id)->count();
+        $total = AIPosts::where("team_id", request()->team_id)->where("brand_id", session('brand_id'))->count();
         return view('appaipublishing::index',[
             "total" => $total
         ]);
@@ -169,6 +170,7 @@ class AppAIPublishingController extends Controller
         // Prepare data to be inserted/updated
         $data = [
             "team_id"  => $team_id,
+			"brand_id" => session('brand_id'),
             "accounts" => json_encode($accounts),
             "name"     => $name,
             "prompts"  => json_encode($prompts),
@@ -176,6 +178,8 @@ class AppAIPublishingController extends Controller
             "end_date" => ($end_date == 0 ? null : $end_date),
             "changed"  => time(),
             "time_post" => $next_time,
+			"grouping_data" => session('brand_id').Auth::id().time(),
+            "user_id"  => Auth::id(),
         ];
 
         $item = DB::table("ai_posts")

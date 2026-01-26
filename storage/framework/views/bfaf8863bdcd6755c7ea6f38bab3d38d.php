@@ -80,12 +80,16 @@
 					  <?php if(!empty($accounts)): ?>
 					  <ul class="list-unstyled symbol py-1">
 						<?php $__currentLoopData = $accounts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-						  <li class="py-0 d-flex align-items-center">
+						  <li class="py-0 d-flex align-items-center mb-2">
 						  <input type="checkbox" name="accounts[]" value="<?php echo e($value->id); ?>" class="me-2">
-						  <div class="symbol symbol-35px px-3 py-2" style="padding-left: 0 !important;">
-									<img src="<?php echo e(Media::url($value->avatar)); ?>" style="width:25px; height:25px" class="rounded-circle align-self-center" alt="">
-									<?php echo get_social_media_icon($value->social_network); ?>							
-								</div><span data-toggle="tooltip" data-placement="top" title="<?php echo e($value->name); ?>" class="text-truncate"><?php echo e($value->name); ?></span><!----><!---->
+						  
+							<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
+								<img data-src="<?php echo e(Media::url($value->avatar)); ?>" src="<?php echo e(theme_public_asset('img/default.png')); ?>" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='<?php echo e(theme_public_asset('img/default.png')); ?>'">
+								<span class="position-absolute b-0 r-0">
+									<div class="w-100"><?php echo get_social_media_icon($value->social_network); ?></div>
+								</span>
+							</div>
+							<span data-toggle="tooltip" data-placement="top" title="<?php echo e($value->name); ?>" class="text-truncate ms-2"><?php echo e($value->name); ?></span><!----><!---->
 						  
 						  </li>							  
 						<?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
@@ -320,7 +324,7 @@
 					</div>
 					<!-- Detail View -->
 					<div class="col-md-6 h-100">
-						<div class="bg-grey border b-r-30 px-3 pb-3 h-100">
+						<div class="bg-grey border b-r-30 p-3 h-100">
 							<div id="inbox-detail-container" class="h-100">
 								<!-- Detail view will be loaded here via AJAX -->
 								<div class="text-center py-5 text-muted">
@@ -422,15 +426,16 @@
 </div>
 
 <script>
-window.routes = {
-inboxAjax: <?php echo json_encode(route('inbox.ajax_list'), 15, 512) ?>,
-addTag: <?php echo json_encode(route('inbox.add_tag'), 15, 512) ?>,
-inboxDetail: <?php echo json_encode(route('inbox.ajax_list_detail'), 15, 512) ?>,
-};
 function clear_form(){
 	$('#filter_form')[0].reset();
 }
 </script>
 <?php $__env->stopSection(); ?>
+
+<style>
+.dropdown-toggle::after{
+	display:none !important;
+}
+</style>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp82\htdocs\pando-laravel\modules\AppInbox\app\Providers/../../resources/views/index.blade.php ENDPATH**/ ?>

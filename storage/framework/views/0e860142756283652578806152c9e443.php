@@ -40,7 +40,7 @@ if($post){
         </div>
         <?php endif; ?>
 
-        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-500" action="<?php echo e(url_app("publishing/save")); ?>" id="compose-editor" data-redirect="<?php echo e(module_url("calendar")); ?>">
+        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-500 mb-0" action="<?php echo e(url_app("publishing/save")); ?>" id="compose-editor" data-redirect="<?php echo e(module_url("calendar")); ?>">
 
             <div class="d-flex flex-column flex-column-fluid overflow-y-auto py-2">
                 <div class="max-w-750 wp-100 mx-auto p-3">
@@ -80,60 +80,60 @@ if($post){
                                 </div>
                                 <?php endif; ?>
                             </div>
-                            <div class="d-flex flex-column justify-content-between align-items-center flex-wrap border-gray-400 border border-top-0 bbr-r-15 bbl-r-15">
-                                <div class="d-flex compose-type justify-content-between w-100">
+                            <div class="d-flex justify-content-between align-items-center border-gray-400 border border-top-0 bbr-r-15 bbl-r-15 compose-icons">
+                                <div class="d-flex compose-type">
                                     <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check("appfiles")): ?>
-                                    <div class="border border-gray-400">
-                                        <label for="compose_type_media" class="px-3 py-2 d-block text-gray-700 activeItem <?php echo e($postType=="media"?"bg-primary-100 text-primary":""); ?>" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
+                                    <div class="border-gray-400">
+                                        <label for="compose_type_media" class="d-block text-gray-700 activeItem <?php echo e($postType=="media"?"bg-primary-10 text-primary":""); ?>" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-camera"></i>
                                         </label>
                                         <input type="radio" name="type" class="d-none" id="compose_type_media" value="media" <?php echo e($postType=="media"?"checked":""); ?>>
                                     </div>
                                     <?php endif; ?>
-                                    <div class="border border-gray-400">
-                                        <label for="compose_type_link" class="px-3 py-2 d-block text-gray-700 activeItem <?php echo e($postType=="link"?"bg-primary-100 text-primary":""); ?>" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
+                                    <div class="border-gray-400">
+                                        <label for="compose_type_link" class="d-block text-gray-700 activeItem <?php echo e($postType=="link"?"bg-primary-10 text-primary":""); ?>" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-link"></i>
                                         </label>
                                         <input type="radio" name="type" class="d-none" id="compose_type_link" value="link" <?php echo e($postType=="link"?"checked":""); ?>>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <label for="compose_type_text" class="px-3 py-2 d-block text-gray-700 activeItem <?php echo e($postType=="text"?"bg-primary-100 text-primary":""); ?>" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
+                                    <div class="border-gray-400">
+                                        <label for="compose_type_text" class="d-block text-gray-700 activeItem <?php echo e($postType=="text"?"bg-primary-10 text-primary":""); ?>" data-parent=".compose-type" data-add="bg-primary-100 text-primary" data-remove="text-gray-700">
                                             <i class="fa-light fa-align-center"></i>
                                             <input type="radio" name="type" class="d-none" id="compose_type_text" value="text" <?php echo e($postType=="text"?"checked":""); ?>>
                                         </label>
                                     </div>
                                 </div>
-                                <div class="d-flex compose-type flex-wrap">   
+                                <div class="d-flex compose-type">   
 									<?php if(get_option("ai_status", 1) && Gate::allows('appaicontents')): ?>
-									<div class="border">
-										<a href="<?php echo e(route("app.ai-contents.popupAIContent")); ?>" class="px-3 py-2 d-block text-gray-700 actionItem" data-popup="aiContentModal" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="<?php echo e(__('AI Template')); ?>" data-bs-html="true" data-bs-content="<?php echo __('Start by choosing a prompt from the Prompt Templates panel.'); ?>"><i class="fa-light fa-sparkles"></i></a>
+									<div class="">
+										<a href="<?php echo e(route("app.ai-contents.popupAIContent")); ?>" class="d-block text-gray-700 actionItem" data-popup="aiContentModal" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="<?php echo e(__('AI Template')); ?>" data-bs-html="true" data-bs-content="<?php echo __('Start by choosing a prompt from the Prompt Templates panel.'); ?>"><i class="fa-light fa-sparkles"></i></a>
 									</div>
 									<?php endif; ?>
 									
                                     <?php if(get_option("ai_status", 1) && Gate::allows('appaicontents')): ?>
-                                    <div class="border">
-                                        <a href="javascript:void(0);" class="px-3 py-2 d-block text-gray-700 generalAIContent" data-url="<?php echo e(route('app.ai-contents.create_content')); ?>" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="<?php echo e(__('AI Content')); ?>" data-bs-html="true" data-bs-content="<?php echo __('Enter a prompt in the caption box and click this button. Our AI will generate the perfect content for you with just one click.<br/><br/><b>Example:</b> Create a motivational quote for Monday morning.'); ?>"><i class="fa-light fa-wand-magic-sparkles p-0"></i></a>
+                                    <div class="">
+                                        <a href="javascript:void(0);" class="d-block text-gray-700 generalAIContent" data-url="<?php echo e(route('app.ai-contents.create_content')); ?>" data-bs-toggle="popover" data-bs-trigger="hover focus" data-bs-placement="top" data-bs-title="<?php echo e(__('AI Content')); ?>" data-bs-html="true" data-bs-content="<?php echo __('Enter a prompt in the caption box and click this button. Our AI will generate the perfect content for you with just one click.<br/><br/><b>Example:</b> Create a motivational quote for Monday morning.'); ?>"><i class="fa-light fa-wand-magic-sparkles p-0"></i></a>
                                     </div>
                                     <?php endif; ?>
 
                                     <?php if(get_option("url_shorteners_platform", 0) && Gate::allows('appmediasearch')): ?>
-                                    <div class="border border-gray-400">
-                                        <a href="<?php echo e(url_app("url-shorteners/shorten")); ?>" class="px-3 py-2 d-block text-gray-700 text-nowrap actionMultiItem" data-call-success="AppPubishing.shorten(result);" data-bs-title="<?php echo e(__("Shorten Links")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fa-light fa-link-simple"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="<?php echo e(url_app("url-shorteners/shorten")); ?>" class="d-block text-gray-700 text-nowrap actionMultiItem" data-call-success="AppPubishing.shorten(result);" data-bs-title="<?php echo e(__("Shorten Links")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fa-light fa-link-simple"></i></a>
                                     </div>
                                     <?php endif; ?>
 
                                     <?php if(Gate::allows('appcaptions')): ?>
-                                    <div class="border border-gray-400">
-                                        <a href="<?php echo e(route('app.hashtags.get_hashtag')); ?>" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getHashtagOffCanvas" data-bs-title="<?php echo e(__("Get Hashtag")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-hashtag p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="<?php echo e(route('app.hashtags.get_hashtag')); ?>" class="d-block text-gray-700 actionItem" data-offcanvas="getHashtagOffCanvas" data-bs-title="<?php echo e(__("Get Hashtag")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-hashtag p-0"></i></a>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <a href="<?php echo e(route('app.captions.get_caption')); ?>" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getCaptionOffCanvas" data-bs-title="<?php echo e(__("Get Caption")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-closed-captioning p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="<?php echo e(route('app.captions.get_caption')); ?>" class="d-block text-gray-700 actionItem" data-offcanvas="getCaptionOffCanvas" data-bs-title="<?php echo e(__("Get Caption")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-closed-captioning p-0"></i></a>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <a href="<?php echo e(route('app.handles.get_handle')); ?>" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getHandleOffCanvas" data-bs-title="<?php echo e(__("Get Handle")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-grip p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="<?php echo e(route('app.handles.get_handle')); ?>" class="d-block text-gray-700 actionItem" data-offcanvas="getHandleOffCanvas" data-bs-title="<?php echo e(__("Get Handle")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-grip p-0"></i></a>
                                     </div>
-                                    <div class="border border-gray-400">
-                                        <a href="<?php echo e(route('app.replies.get_reply')); ?>" class="px-3 py-2 d-block text-gray-700 actionItem" data-offcanvas="getReplyOffCanvas" data-bs-title="<?php echo e(__("Get Replies")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-comment-alt-lines p-0"></i></a>
+                                    <div class="border-gray-400">
+                                        <a href="<?php echo e(route('app.replies.get_reply')); ?>" class="d-block text-gray-700 actionItem" data-offcanvas="getReplyOffCanvas" data-bs-title="<?php echo e(__("Get Replies")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-comment-alt-lines p-0"></i></a>
                                     </div>
                                     <!--<div class="border">
                                         <a href="<?php echo e(route('app.captions.save_caption')); ?>" class="px-3 py-2 d-block text-gray-700 actionItem" data-popup="saveCaptionModal" data-bs-title="<?php echo e(__("Save caption")); ?>" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-save p-0"></i></a>
@@ -141,49 +141,49 @@ if($post){
                                     <?php endif; ?>
 									
 									<div style="display:none;" data-word-count="280" 
-										 class="word-reduce count-word-x px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-x lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="X character limit">
 										<i class="fa-brands fa-x-twitter"></i>
 										<span class="ps-2 fs-12 fw-6">280</span>
 									</div>
 
 									<div style="display:none;" data-word-count="5000" 
-										 class="word-reduce count-word-facebook px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-facebook lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Facebook character limit">
 										<i class="fab fa-facebook-f"></i>
 										<span class="ps-2 fs-12 fw-6">5000</span>
 									</div>
 
 									<div style="display:none;" data-word-count="3000" 
-										 class="word-reduce count-word-linkedin px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-linkedin lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="LinkedIn character limit">
 										<i class="fa-brands fa-linkedin-in"></i>
 										<span class="ps-2 fs-12 fw-6">3000</span>
 									</div>
 
 									<div style="display:none;" data-word-count="2200" 
-										 class="word-reduce count-word-instagram px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-instagram lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Instagram character limit">
 										<i class="fab fa-instagram"></i>
 										<span class="ps-2 fs-12 fw-6">2200</span>
 									</div>
 
 									<div style="display:none;" data-word-count="500" 
-										 class="word-reduce count-word-pinterest px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="word-reduce count-word-pinterest lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Pinterest character limit">
 										<i class="fa-brands fa-pinterest"></i>
 										<span class="ps-2 fs-12 fw-6">500</span>
 									</div>
 
 									<div style="display:none;" data-word-count="30" 
-										 class="count-word-hashtag px-2 py-2  align-items-center justify-content-center text-gray-500 border border-gray-400" 
+										 class="count-word-hashtag px-2 py-2  align-items-center justify-content-center text-gray-500 border-gray-400" 
 										 title="Hashtag limit">
 										<i class="fa fa-hashtag"></i>
 										<div class="d-flex flex-column align-items-center">
 											<span class="fs-10 fw-6"><span class="hashtag-current">0</span>/30</span>
 										</div>
 									</div>
-                                    <div class="count-word px-3 text-gray-700 border-gray-400 py-2 border">
+                                    <div class="count-word text-gray-700 border-gray-400 lh-1">
                                         <span>0</span>
                                     </div>
 									
@@ -433,16 +433,16 @@ if($post){
                                 }
                             }
                         ?>
-                        <button class="btn btn-dark btnPostNow <?php echo e($button == 1 ? '' : 'd-none'); ?>"><?php echo e(__("Post now")); ?></button>
-                        <button class="btn btn-dark btnSchedulePost <?php echo e($button == 2 ? '' : 'd-none'); ?>"><?php echo e(__("Schedule")); ?></button>
-                        <button class="btn btn-dark btnSaveDraft <?php echo e($button == 3 ? '' : 'd-none'); ?>"><?php echo e(__(" Save as Draft")); ?></button>
-                        <button class="btn btn-dark btnSaveApproval <?php echo e($button == 4 ? '' : 'd-none'); ?>"><?php echo e(__(" Save as Approval")); ?></button>
+                        <button class="btn btn-dark btnPostNow btn-sm <?php echo e($button == 1 ? '' : 'd-none'); ?>"><?php echo e(__("Post now")); ?></button>
+                        <button class="btn btn-dark btnSchedulePost btn-sm <?php echo e($button == 2 ? '' : 'd-none'); ?>"><?php echo e(__("Schedule")); ?></button>
+                        <button class="btn btn-dark btnSaveDraft btn-sm <?php echo e($button == 3 ? '' : 'd-none'); ?>"><?php echo e(__(" Save as Draft")); ?></button>
+                        <button class="btn btn-dark btnSaveApproval btn-sm <?php echo e($button == 4 ? '' : 'd-none'); ?>"><?php echo e(__(" Save as Approval")); ?></button>
                     </div>
                 </div>
             </div>
             
         </form>
-		<div class="w-100 position-relative p-4 overflow-auto">
+		<div class="w-100 position-relative p-3 overflow-auto">
 		<ul class="nav nav-tabs position-relative" id="myTab" role="tablist">
 			  <li class="nav-item" role="presentation">
 				<button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true"><span class="text">Scheduled Post</span></button>
@@ -460,7 +460,7 @@ if($post){
 			<div class="tab-content" id="myTabContent">	
 				<div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
 					<div class="compose-calendar-new compose-preview d-flex flex-column flex-fill bg-white min-w-300">
-					<div class="wp-100 mx-auto p-4">
+					<div class="wp-100 mx-auto p-2">
 					<div class="calendar-header">
 						
 						<div class="border p-2 b-r-20 d-flex flex-wrap gap-8 justify-content-between align-items-center w-sm-100">
@@ -477,7 +477,7 @@ if($post){
 							</div>
 							<div class="d-flex">
 								<div class="btn-group">	
-									<button data-toggle="tooltip" data-placement="bottom" title="" data-bs-original-title="Add a note to a calendar date" class="bg-transparent d-flex align-items-center dropdown-toggle dropdown-arrow-hide" onclick="open_notes_modal()">
+									<button data-toggle="tooltip" data-placement="bottom" title="" data-bs-original-title="Add a note to a calendar date" class="bg-transparent fs-13 fw-medium d-flex align-items-center dropdown-toggle dropdown-arrow-hide" onclick="open_notes_modal()">
 										<span class="add-icon"><?php echo file_get_contents(public_path('img/note.svg')); ?></span> <?php echo e(__('Take Notes')); ?>
 
 									</button>
@@ -491,7 +491,7 @@ if($post){
 									<i class="fa-light fa-angle-left"></i>
 								</div>
 								<div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
-								<div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
+								<div class="fs-18 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
 								<div class="fs-20 calendar-event-new" data-calendar-type="next">
 									<i class="fa-light fa-angle-right"></i>
 								</div>
@@ -596,7 +596,7 @@ if($post){
 						<div class="card-body px-2 py-0">
 							<div class="d-flex flex-grow-1 align-items-center justify-content-center gap-8 w-100">
 								<div class="text-center">
-									<div class="fw-bold fs-10">[[post_count]]</div>
+									<div class="fw-normal fs-9">[[post_count]]</div>
 									
 								</div>
 							</div>	
@@ -776,7 +776,7 @@ if($post){
 <?php $__env->stopSection(); ?>
 <style>
 .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{
-	min-height:0em;
+    min-height:0em;
 }
 .fc {
     min-width: auto;
@@ -789,13 +789,12 @@ if($post){
 .ui-datepicker {
     z-index: 10060 !important; /* Bootstrap modal z-index is 1050 */
 }
-
 /* If using jQuery UI datepicker */
 .ui-datepicker-div {
     z-index: 10060 !important;
 }
 .ui-datepicker-wrap{
-	z-index: 10060 !important;
+    z-index: 10060 !important;
 }
 .modal {
     z-index: 10005 !important;
@@ -804,27 +803,23 @@ if($post){
     display: flex !important;
     align-items: center;
 }
-
 .fc-daygrid-day-number {
     display: inline-block;
 }
-
 .note-dots-container {
     position: absolute !important;
-    left: 28px !important; 
+    left: 20px !important; 
 }
 .fc-daygrid-day-number {
     display: inline-flex !important;
     align-items: center !important;
 }
-
 .fc-daygrid-day-top {
     display: flex !important;
     justify-content: flex-start !important;
     align-items: center !important;
     padding: 2px 4px !important;
 }
-
 /* Make date number have fixed positioning */
 .fc-daygrid-day-number {
     display: inline-flex !important;
@@ -832,7 +827,6 @@ if($post){
     min-width: auto !important;
     position: relative !important;
 }
-
 /* Note dots container - absolute positioned to not affect layout */
 .note-dots-container {
     display: inline-flex !important;
@@ -840,36 +834,87 @@ if($post){
     margin-left: 4px !important;
     align-items: center !important;
 }
-
 /* Individual dot */
 .note-dot {
-    width: 8px !important;
-    height: 8px !important;
+    width: 6px !important;
+    height: 6px !important;
     background-color: #28a745 !important;
     border-radius: 50% !important;
     display: inline-block !important;
     flex-shrink: 0 !important;
     box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
 }
-
 .note-dot:hover {
     transform: scale(1.2);
     transition: transform 0.15s ease;
 }
 .fc table tr > td.fc-day a.fc-daygrid-day-number{
-	border:none !important;
+    border:none !important;
 }
 .fc .fc-daygrid-day-top{
-	flex-direction: row;
+    flex-direction: row;
 }
 .note-count {
-    font-size: 9px !important;
+    font-size: 6px !important;
     color: #28a745 !important;
     font-weight: bold !important;
     white-space: nowrap !important;
 }
 .pointer {
-	cursor: pointer !important;
+    cursor: pointer !important;
+}
+
+/* ========================================
+   NEW: Calendar Row Height Consistency Fix
+   ======================================== */
+
+/* Force all calendar rows to same height */
+.fc .fc-daygrid-body tr {
+    height: 40px !important;
+}
+
+/* Set consistent day cell height */
+.fc .fc-daygrid-day {
+    height: 40px !important;
+}
+
+/* Prevent day frame from expanding */
+.fc .fc-daygrid-day-frame {
+    height: 40px !important;
+    min-height: 40px !important;
+    max-height: 100px !important;
+}
+
+/* Control event container to not expand rows */
+.fc .fc-daygrid-day-events {
+    max-height: 40px !important;
+    overflow: hidden;
+}
+
+/* Ensure event harness doesn't affect row height */
+.fc .fc-daygrid-event-harness {
+    position: relative;
+}
+
+/* Remove any bottom margin that causes expansion */
+.fc .fc-daygrid-day-bottom {
+    margin-top: 0 !important;
+}
+.fc-scrollgrid-sync-table{
+	height:360px !important;
+}
+#calendar-new{
+	height:410px !important;
+}
+/* Remove today's date highlight */
+.fc .fc-day-today {
+    background-color: transparent !important;
+    background: none !important;
+}
+
+/* Also remove any additional today styling */
+.fc .fc-day-today .fc-daygrid-day-frame {
+    background-color: transparent !important;
 }
 </style>
 <?php $__env->startPush('scripts'); ?>

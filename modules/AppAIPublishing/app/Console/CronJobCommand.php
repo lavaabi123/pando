@@ -25,7 +25,6 @@ class CronJobCommand extends Command
     public function handle()
     {
         \Log::info("CronJobCommand executed at " . now());
-
         try {
             $posts = AIPosts::getAIPosts(5);
 
@@ -69,9 +68,8 @@ class CronJobCommand extends Command
                     $this->updateOptions($options, $title);
                     $medias = $this->fetchImages($data['include_media'] ?? null, $caption, $post->team_id);
 
-                    $postData = $this->preparePostData($accounts, $post->id, $caption, $medias, $options);
-
-                    if (!empty($postData)) {
+                    $postData = $this->preparePostData($accounts, $post->id, $caption, $medias, $options, $post);
+                    if (!empty($postData)) {				
                         $this->handlePosting($post, $postData);
                     }
 
@@ -345,7 +343,7 @@ class CronJobCommand extends Command
      *
      * @return object[]       An array of objects containing the prepared post data.
      */
-    private function preparePostData($accounts, $postId, $caption, $medias, $options)
+    private function preparePostData($accounts, $postId, $caption, $medias, $options, $post)
     {
         if (is_array($accounts)) {
             if (!empty($accounts) && is_numeric(reset($accounts))) {
@@ -363,7 +361,7 @@ class CronJobCommand extends Command
         $type    = !empty($medias) ? 'media' : 'text';
         $now     = time();
 
-        return $accounts->filter()->map(function ($account) use ($postId, $caption, $medias, $options, $type, $now) {
+        return $accounts->filter()->map(function ($account) use ($postId, $caption, $medias, $options, $type, $now, $post) {
             if (!isset($account->id, $account->team_id, $account->social_network)) {
                 return null;
             }
@@ -371,6 +369,9 @@ class CronJobCommand extends Command
             return (object) [
                 'id_secure'        => rand_string(),
                 'team_id'          => $account->team_id,
+				'user_id' 		=> $post->user_id,
+				'brand_id' => $post->brand_id,
+				'grouping_data' => $post->grouping_data,
                 'campaign'         => 0,
                 'labels'           => json_encode([]),
                 'account_id'       => $account->id,
@@ -406,7 +407,6 @@ class CronJobCommand extends Command
     {
         $validator = Publishing::validate($postData);
         $canPost = json_decode($validator["can_post"]);
-
         if (!empty($canPost) || $validator["status"] === "success") {
             $result = Publishing::post($postData, $canPost);
             $this->logResult($post->id, 1, $result['message']);

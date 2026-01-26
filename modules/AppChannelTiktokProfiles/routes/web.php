@@ -13,7 +13,12 @@ use Modules\AppChannelTiktokProfiles\Http\Controllers\AppChannelTiktokProfilesCo
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+Route::prefix('webhooks/tiktok')->group(function () {
+    Route::get('/messages', '\Modules\AppChannelTiktokProfiles\app\Http\Controllers\WebhookController@verify')
+        ->name('webhooks.tiktok.verify');
+    Route::post('/messages', '\Modules\AppChannelTiktokProfiles\app\Http\Controllers\WebhookController@handle')
+        ->name('webhooks.tiktok.handle');
+});
 
 Route::middleware(['web', 'auth'])->group(function () {
     Route::group(["prefix" => "app"], function () {

@@ -67,7 +67,7 @@
                     <div class="col-md-12">
                         <div class="mb-4">
                             <label for="name" class="form-label">{{ __('Scopes') }}</label>
-                            <input class="form-control" name="tiktok_scopes" id="tiktok_scopes" type="text" value="{{ get_option("tiktok_scopes", "user.info.basic,user.info.profile,user.info.stats,video.list,video.publish") }}">
+                            <input class="form-control" name="tiktok_scopes" id="tiktok_scopes" type="text" value="{{ get_option("tiktok_scopes", "user.info.basic,user.info.profile,user.info.stats,video.list,video.upload") }}">
                         </div>
                     </div>
                     <div class="col-md-12">

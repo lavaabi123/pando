@@ -24,7 +24,7 @@ $groups = DB::table('groups')->get();
                         <span class="fw-5 fs-14"><?php echo e(__("Please select a account")); ?></span>
                     </div>
                 </div>
-                <div class="am-selected-list">
+                <div class="am-selected-list horizontal-scroll d-flex">
                 </div>
             </div>
             <div class="am-selected-arrow">
@@ -81,15 +81,18 @@ $groups = DB::table('groups')->get();
                     <?php $__currentLoopData = $channels; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <?php if (app(\Illuminate\Contracts\Auth\Access\Gate::class)->check($permission . "." . strtolower($value->module))): ?>
                             <div class="search-accounts">
-                                <label class="am-choice-item d-flex gap-12 border-top px-3 py-3"
+                                <label class="am-choice-item d-flex gap-12 border-top px-3 py-2"
                                     for="am_<?php echo e($value->id); ?>"
                                     data-pid="<?php echo e($value->pid); ?>"
                                     data-social-network="<?php echo e($value->social_network); ?>"
                                     data-avatar="<?php echo e(Media::url($value->avatar)); ?>"
                                     data-username="<?php echo e($value->username); ?>"
                                     data-name="<?php echo e($value->name); ?>">
-                                    <div class="size-40">
+                                    <div class="min-w-20 text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
                                         <img src="<?php echo e(Media::url($value->avatar)); ?>" class="wp-100 hp-100 b-r-6 border">
+										<span class="position-absolute b-0 r-0">
+											<div class="w-100"><?php echo get_social_media_icon($value->social_network); ?></div>
+										</span>
                                     </div>
                                     <div class="d-flex align-items-center flex-grow-1 text-truncate">
                                         <div class="flex-grow-1 me-2 text-truncate">
@@ -113,16 +116,19 @@ $groups = DB::table('groups')->get();
                                     <div class="am-choice-item-selected d-none">
                                         <div class="am-selected-item border rounded p-2 me-2 min-w-100 max-w-150 float-start mb-1"
                                             data-id="<?php echo e($value->id_secure); ?>" data-network="<?php echo e($value->social_network); ?>">
-                                            <div class="d-flex align-items-center gap-8">
-                                                <div class="size-20 min-w-20">
+                                            <div class="d-flex align-items-center gap-6">
+                                                <div class="min-w-20 size-20 position-relative">
                                                     <img src="<?php echo e(Media::url($value->avatar)); ?>"
-                                                         class="d-flex wp-100 hp-100 b-r-6 border <?php echo e($value->login_type!=1 ? 'border-danger-300' : ''); ?>">
+                                                         class="d-flex wp-100 hp-100 b-r-7 <?php echo e($value->login_type!=1 ? 'border-danger-300' : ''); ?>">
+												    <span class="position-absolute t-8 l-8">
+														<div class="w-100"><?php echo get_social_media_icon($value->social_network); ?></div>
+													</span>
                                                 </div>
                                                 <div class="d-flex align-items-center text-truncate">
                                                     <div class="text-gray-800 fs-12 fw-bold text-truncate"><?php echo e($value->name); ?></div>
                                                 </div>
                                                 <a href="javascript:void(0);" class="d-flex align-items-center m-r-10 remove">
-                                                    <div class="text-gray-800 text-hover-danger fs-12 fw-bold ps-2"><i class="fal fa-times"></i></div>
+                                                    <div class="text-gray-800 text-hover-danger fs-12 fw-bold ps-1"><i class="fal fa-times"></i></div>
                                                 </a>
                                             </div>
                                         </div>
