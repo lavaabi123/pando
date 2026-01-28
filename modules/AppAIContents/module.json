@@ -40,7 +40,7 @@
             },
             {
                 "uri": "app/ai-strategy",
-                "name": "AI Strategy",
+                "name": "AI Content Strategy",
 				"role": "client",
 				"platform": 1,
                 "position": 20100,
