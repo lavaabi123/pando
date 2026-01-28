@@ -55,7 +55,7 @@
 
 <div class="gradient-bg main-services text-center my-4 p-4 b-r-20 justify-content-xl-evenly">
 	<div class="p-4 d-flex gap-20 justify-content-xl-evenly">
-		<a class="icons" href="{{ url_app('publishing') }}">
+		<a class="icons" href="{{ url_app('publishing/composer') }}">
 			<div class="mb-3" style="fill:var(--d-primary);">
 				{!! file_get_contents(public_path('img/post.svg')) !!}
 			</div>

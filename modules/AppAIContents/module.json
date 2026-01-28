@@ -15,15 +15,40 @@
         ]
     },
     "permission": true,
-    "menu": {
+	"menu": {
         "uri": "app/ai-contents",
         "role": "client",
         "platform": 1,
         "section": "top",
         "tab_id": 10,
-        "position": 20000,
-        "name": "AI Contents",
+        "tab_name": "More",
+        "position": 200000,
+        "name": "AI Tools",
         "color": "#6e3f14",
-        "icon": "fa-light fa-sparkles"
+        "icon": "fa-light fa-sparkles",
+        "sub_menu": [
+            {
+                "uri": "app/ai-contents",
+                "name": "AI Contents",
+				"role": "client",
+				"platform": 1,
+				"tab_id": 10,
+                "position": 20200,
+				"section": "top",
+                "icon": "fa-light fa-sparkles",
+                "color": "#992527"
+            },
+            {
+                "uri": "app/ai-strategy",
+                "name": "AI Strategy",
+				"role": "client",
+				"platform": 1,
+                "position": 20100,
+				"tab_id": 10,
+				"section": "top",
+                "icon": "fa-light fa-sparkles",
+                "color": "#992527"
+            }
+        ]
     }
 }

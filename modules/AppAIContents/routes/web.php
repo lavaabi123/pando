@@ -26,5 +26,15 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::post('popup-ai-content', [AppAIContentsController::class, 'popupAIContent'])->name('app.ai-contents.popupAIContent');
 
         });
+// AI Content Strategy Routes
+Route::middleware(['web', 'auth'])->prefix('ai-strategy')->name('ai-strategy.')->group(function () {
+    Route::get('/', [AppAIContentsController::class, 'showContentStrategy'])->name('index');
+    Route::post('/calendar/generate', [AppAIContentsController::class, 'generateContentCalendar'])->name('calendar.generate');
+    Route::post('/topics/research', [AppAIContentsController::class, 'researchTopics'])->name('topics.research');
+    Route::post('/competitor/analyze', [AppAIContentsController::class, 'analyzeCompetitor'])->name('competitor.analyze');
+    Route::post('/hashtags/research', [AppAIContentsController::class, 'researchHashtags'])->name('hashtags.research');
+    Route::post('/content/adapt', [AppAIContentsController::class, 'adaptContent'])->name('content.adapt');
+    Route::get('/plans', [AppAIContentsController::class, 'getContentPlans'])->name('plans');
+});
     });
 });

@@ -151,7 +151,7 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/lazysizes/lazysizes.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
-    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=10.7"></script>	
+    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=10.11"></script>	
     <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.21') }}"></script>
 	@stack('scripts')
     @yield('script')

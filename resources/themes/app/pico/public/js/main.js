@@ -341,7 +341,6 @@ var Main = new (function ()
         var selected_item_html = item.find(".am-choice-item-selected").html();
         $(".am-selected-list").append(selected_item_html);
         $(".am-selected-empty").hide();
-
         $(".option-network").addClass("d-none");
         $('.am-selected-list .am-selected-item').each(function() {
             var network = $(this).data("network");
@@ -382,8 +381,18 @@ var Main = new (function ()
         // Show or hide empty message
         if (checkedCount === 0) {
             $(".am-selected-empty").show();
+            $(".option-network").addClass("d-none");
         } else {
             $(".am-selected-empty").hide();
+            
+            // Show corresponding network options
+            $(".option-network").addClass("d-none");
+            $('.am-selected-list .am-selected-item').each(function() {
+                var network = $(this).data("network");
+                if (network) {
+                    $(`[data-option-network="${network}"]`).removeClass("d-none");
+                }
+            });
         }
     },
 
