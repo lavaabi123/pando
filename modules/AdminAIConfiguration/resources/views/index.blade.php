@@ -47,7 +47,7 @@
                 <p class="text-muted small mb-3">
                     {{ __('Download the latest AI models JSON file from our website, then upload it here to update your system.') }}
                     <br>
-                    <a href="https://stackposts.com/ai_models.json" target="_blank">
+                    <a href="https://itspando.com/ai_models.json" target="_blank">
                         <i class="fal fa-download me-1"></i>{{ __('Download JSON file') }}
                     </a>
                 </p>

@@ -77,7 +77,7 @@ class PaymentService implements RecurringPaymentInterface
                 'custom_id' => $customId,
                 'subscriber' => $subscriber,
                 'application_context' => [
-                    'brand_name'          => get_option('website_title', config('site.title', 'Stackposts')),
+                    'brand_name'          => get_option('website_title', config('site.title', 'Pando')),
                     'locale'              => 'en-US',
                     'shipping_preference' => 'NO_SHIPPING',
                     'user_action'         => 'SUBSCRIBE_NOW',

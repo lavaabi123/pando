@@ -12,7 +12,7 @@
                 </h1>
                 <div class="d-flex align-items-center gap-20 fw-5 fs-14">
                     <div class="d-flex gap-8">
-                        <span class="text-gray-600">{{ __("Explore full detail and purchase this module for your Stackposts system") }}</span>
+                        <span class="text-gray-600">{{ __("Explore full detail and purchase this module for your Pando system") }}</span>
                     </div>
                 </div>
 
@@ -187,7 +187,7 @@
                         <div class="col-6 mb-3 text-end">Laravel</div>
 
                         <div class="col-6 mb-3"><strong>{{ __('Compatible') }}:</strong></div>
-                        <div class="col-6 mb-3 text-end">Stackposts 6+</div>
+                        <div class="col-6 mb-3 text-end">Pando 6+</div>
 
                         <div class="col-6 mb-3"><strong>{{ __('Tags') }}:</strong></div>
                         <div class="col-6 mb-3 text-end">Laravel</div>

@@ -3,7 +3,7 @@
 @section('sub_header')
     <x-sub-header 
         title="{{ __('Manage Addons') }}" 
-        description="{{ __('Discover and install powerful modules for Stackposts') }}" 
+        description="{{ __('Discover and install powerful modules for Pando') }}" 
     >
         <div class="d-flex gap-8">
             <form action="{{ url()->current() }}" method="GET">
