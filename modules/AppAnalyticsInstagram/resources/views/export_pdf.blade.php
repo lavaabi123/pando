@@ -36,14 +36,14 @@
         }
 
         .section {
-            margin-bottom: 30px;
+            
         }
 
         .table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
-            margin-bottom: 46px;
+            margin-bottom: 30px;
         }
 
         .table th, .table td {
@@ -71,6 +71,7 @@
 			page-break-inside: avoid;
 			box-sizing: border-box;
 			border: 1px solid #e0e0e0;
+			height: 230px
 		}
 
 		.chart-container:nth-child(odd) {
@@ -120,6 +121,17 @@
             font-weight: bold;
             color: #000;
         }
+		
+		/* Keep first page content together */
+		.first-page-content {
+			page-break-inside: avoid;
+			page-break-after: avoid;
+		}
+		
+		.first-page-charts {
+			page-break-before: avoid;
+			page-break-after: auto;
+		}
 
     </style>
 </head>
@@ -160,7 +172,7 @@
     </div>
 
 
-    <div class="section">
+    <div class="section first-page-content">
         <h3>{{ __('Profile Overview') }}</h3>
         <table class="table">
             <thead>
@@ -206,18 +218,31 @@
         </table>
     </div>
 	
-	
+	{{-- FIRST 2 CHARTS ON FIRST PAGE --}}
     @if (!empty($charts) && is_array($charts))
-        <div class="section">
-           <!-- <h3>{{ __('Charts') }}</h3>-->
-            @foreach ($charts as $chart)
-                @if(isset($chart['base64']))
+        <div class="section first-page-charts">
+            <h3>{{ __('Chart View') }}</h3>
+            @foreach ($charts as $index => $chart)
+                @if($index < 2 && isset($chart['base64']))
 					<div class="chart-container">
                         <img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}" data-social="instagram">
                     </div>
                 @endif
             @endforeach
         </div>
+		
+		{{-- REMAINING CHARTS ON NEXT PAGES --}}
+		@if(count($charts) > 2)
+			<div class="section" style="page-break-before: always;">
+				@foreach ($charts as $index => $chart)
+					@if($index >= 2 && isset($chart['base64']))
+						<div class="chart-container">
+							<img class="chart" src="{{ $chart['base64'] }}" alt="{{ $chart['title'] ?? 'Chart' }}" data-social="instagram">
+						</div>
+					@endif
+				@endforeach
+			</div>
+		@endif
     @endif
 
     <div class="section">

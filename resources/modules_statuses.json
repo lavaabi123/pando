@@ -114,5 +114,6 @@
     "AppPublishing.zip": true,
     "AppChannels.zip": true,
     "Auth.zip": true,
-    "AppAIContents.zip": true
+    "AppAIContents.zip": true,
+    "AdminAIConfiguration.zip": true
 }

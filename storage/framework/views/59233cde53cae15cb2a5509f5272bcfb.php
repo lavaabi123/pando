@@ -11,7 +11,11 @@
 				<li>Updating Design Daily</li>
 				<li>Testing Usability Daily</li>
 				<li>Dreaming Constantly</li></ul>
-				<a href="<?php echo e(url('auth/login')); ?>" class="btn btn-primary" data-swiper-animation="fadeInUp" data-duration="1s" data-delay="1.5s">Login<span></span></a> 
+				<?php if(Auth::check()): ?>
+					<a href="<?php echo e(url('app/dashboard')); ?>" class="btn btn-primary" data-swiper-animation="fadeInUp" data-duration="1s" data-delay="1.5s">Dashboard<span></span></a> 
+				<?php else: ?>
+					<a href="<?php echo e(url('auth/login')); ?>" class="btn btn-primary" data-swiper-animation="fadeInUp" data-duration="1s" data-delay="1.5s">Login<span></span></a> 
+				<?php endif; ?>				
 			</div>
 			<div class="col-sm-5 pt-4 pt-sm-5">
 				<img class="img-fluid px-5 pt-md-4" src="<?php echo e(theme_public_asset('images/headers/girl.png')); ?>" alt="">	

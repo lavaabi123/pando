@@ -1,5 +1,5 @@
 <section class="relative w-screen min-h-screen flex flex-column flex-sm-row items-stretch overflow-hidden bg-white overflow-x-hidden">
-    <?php echo $__env->make("partials/login-screen", ["name" => __("A Social Media Management Platform")], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+    @include("partials/login-screen", ["name" => __("A Social Media Management Platform")])
     <div class="flex content-right flex-col justify-center flex-1 px-8 py-16 bg-white z-10 ">
 	
 	<div x-data class="min-h-screen overflow-hidden">
@@ -16,32 +16,26 @@
             <div class="rounded-2xl shadow-xl p-8 text-center bg-base-100/90">
 
                 <!-- Logo/Icon -->
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4
-                    <?php echo e($status ? 'bg-success/20' : 'bg-error/20'); ?>">
-                    <i class="fas <?php echo e($status ? 'fa-check-circle text-success' : 'fa-times-circle text-error'); ?> text-3xl"></i>
+                <div class="inline-flex items-center justify-center w-16 h-16 rounded-full mb-4 bg-success/20">
+                    <i class="fas fa-check-circle text-success text-3xl"></i>
                 </div>
 
                 <!-- Title -->
                 <h2 class="text-2xl font-bold text-base-content mb-2">
-                    <?php echo e($status ? __('Activation Successful!') : __('Activation Failed')); ?>
-
+                    Signup successful!
                 </h2>
 
                 <!-- Message -->
                 <p class="text-base-content mt-2">
-                    <?php echo e($message ?? ($status
-                        ? __('Your account has been activated. You can now login.')
-                        : __('The activation link is invalid, expired or your account was already activated.'))); ?>
-
+                    Please check your email and click the activation link to activate your account.
                 </p>
 
                 <!-- Action Button -->
                 <div class="mt-8">
-                    <a href="<?php echo e(url('auth/login')); ?>"
+                    <a href="{{ url('auth/login') }}"
                        class="mb-8 py-4 px-9 w-full inline-block text-white font-semibold border border-indigo-700 rounded-xl shadow-4xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200 text-center">
                         <i class="fa fa-arrow-left mr-2"></i>
-                        <?php echo e(__("Back to Login")); ?>
-
+                        {{ __("Back to Login") }}
                     </a>
                 </div>
             </div>
@@ -49,4 +43,4 @@
     </div>
 </div>
     </div>
-</section><?php /**PATH C:\xampp82\htdocs\pando-laravel\resources\themes\guest\nova\resources\views/auth/activation.blade.php ENDPATH**/ ?>
+</section>

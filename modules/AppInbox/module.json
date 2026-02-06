@@ -14,7 +14,7 @@
             "resources/assets/js/inbox.js"
         ]
     },
-    "permission": false,
+    "permission": true,
     "menu": {
         "uri": "app/inbox",
         "role": "client",

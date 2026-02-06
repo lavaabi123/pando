@@ -64,7 +64,69 @@
             </div>
         </div>
     </div>
+<div class="loading" style="display: none;">
+    <div class="loading-overlay"></div>
+    <div class="loading-spinner">
+        <div class="spinner"></div>
+        <p class="loading-text">Processing...</p>
+    </div>
+</div>
+<style>
+/* Loading Overlay */
+.loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.loading-spinner {
+    position: relative;
+    z-index: 10000;
+    text-align: center;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    margin: 0 auto 15px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #ff8c00;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loading-text {
+    margin: 0;
+    color: #333;
+    font-size: 16px;
+    font-weight: 600;
+}
+</style>
     <script type="text/javascript" src="{{ theme_public_asset('js/jquery.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}"></script>
 </body>

@@ -19,6 +19,8 @@ Route::group(['middleware' => 'web'], function () {
     Route::group(["prefix" => "auth"], function () {
         Route::group(['middleware' => ['guest']], function() {
             Route::get('signup', [AuthController::class, 'signup'])->name("signup");
+            Route::get('signup/{plan}', [AuthController::class, 'signup'])->name("signup");
+            Route::get('thankyou', [AuthController::class, 'thankyou'])->name("thankyou");
             Route::get('login', [AuthController::class, 'login'])->name("login");
             Route::get('forgot-password', [AuthController::class, 'forgotPassword'])->name("forgot_password");
             Route::get('recovery-password', [AuthController::class, 'recoveryPassword'])->name("password.reset");

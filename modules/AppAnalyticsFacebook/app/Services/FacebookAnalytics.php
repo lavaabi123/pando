@@ -99,6 +99,8 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	    $postHistoryList = $this->getPostHistoryList($accountId, $since, $until);
 	    $fansLocationMapChart = $this->getFansLocationMapChartData($accountId, $since, $until);
 	    $topFansCountries = $this->getTopFansCountries($accountId, $since, $until);
+		$dailyMetrics = $this->getDailyMetrics($accountId, $since, $until);
+		$videoMetrics = $this->getVideoMetrics($accountId, $since, $until);
 
 	    return [
 	        'status' => 'success',
@@ -118,10 +120,65 @@ class FacebookAnalytics implements SocialAnalyticsInterface
 	        'videoPlayMethodChart' => $videoPlayMethodChart,
 	        'postHistoryList' => $postHistoryList,
 	        'fansLocationMapChart' => $fansLocationMapChart,
-	        'topFansCountries' => $topFansCountries
+	        'topFansCountries' => $topFansCountries,
+			'dailyMetrics' => $dailyMetrics,
+			'videoMetrics' => $videoMetrics
 	    ];
 	}
+	public function getVideoMetrics(int $accountId, string $since, string $until): array
+    {
+        $metrics = [
+            'page_video_views_organic',
+            'page_video_views_paid',
+            'page_video_views_autoplayed',
+            'page_video_views_click_to_play',
+            'page_video_complete_views_30s_organic',
+            'page_video_complete_views_30s_paid'
+        ];
+    
+        $data = SocialAnalytics::where('account_id', $accountId)
+            ->whereIn('metric', $metrics)
+            ->whereBetween('date', [$since, $until])
+            ->select('metric', DB::raw('SUM(value) as total_value'))
+            ->groupBy('metric')
+            ->get()
+            ->keyBy('metric');
+    
+        $result = [];
+        foreach ($metrics as $metric) {
+            $result[$metric] = (int) ($data[$metric]->total_value ?? 0);
+        }
+    
+        return $result;
+    }
+	public function getDailyMetrics(int $accountId, string $since, string $until): array
+	{
+		$metrics = [
+			'page_impressions_unique',
+			'page_impressions_paid_unique',
+			'page_post_engagements',
+			'page_actions_post_reactions_total',
+			'page_views_total',
+			'page_follows'
+		];
 
+		$data = SocialAnalytics::where('account_id', $accountId)
+			->whereIn('metric', $metrics)
+			->whereBetween('date', [$since, $until])
+			->orderBy('date')
+			->get();
+
+		$grouped = [];
+		foreach ($data as $row) {
+			$date = $row->date;
+			if (!isset($grouped[$date])) {
+				$grouped[$date] = [];
+			}
+			$grouped[$date][$row->metric] = (int) $row->value;
+		}
+
+		return $grouped;
+	}
 	public function getFacebookOverview(int $accountId, string $since, string $until): array
 	{
 	    $metrics = [

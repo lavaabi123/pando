@@ -23,8 +23,11 @@ class AuthController extends Controller
     {
         return view('auth::login');
     }
-
-    public function signup(Request $request)
+	public function thankyou(Request $request)
+    {
+        return view('auth::thankyou');
+    }
+    public function signup(Request $request, $plan_id = "")
     {
         if(!get_option("auth_signup_page_status", 1)){
             return redirect()->route('home');
@@ -169,7 +172,7 @@ class AuthController extends Controller
             'email'         => $request->email,
             'username'      => $request->username,
             'password'      => Hash::make($request->password),
-            'timezone'      => "America/Los_Angeles",//$request->timezone,
+            'timezone'      => !empty($request->timezone) ? $request->timezone : "America/Los_Angeles",
             'avatar'        => text2img($request->fullname),
             'secret_key'    => rand_string(32),
             'status'        => get_option('auth_activation_email_new_user_status', 0) ? 1 : 2,
@@ -197,7 +200,7 @@ class AuthController extends Controller
                 "error_type" => 4,
                 "class" => "text-success",
                 "message" => __("Signup successful! Please check your email and click the activation link to activate your account."),
-                "redirect" => url('auth/login'),
+                "redirect" => url('auth/thankyou'),
             ];
         } else {
             if (get_option('auth_welcome_email_new_user_status', 0)) {

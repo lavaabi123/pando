@@ -71,6 +71,7 @@
 			page-break-inside: avoid;
 			box-sizing: border-box;
 			border: 1px solid #e0e0e0;
+			height:200px;
 		}
 
 		.chart-container:nth-child(odd) {
@@ -187,7 +188,7 @@
      <!-- Performance Trends -->
     @if (!empty($charts) && is_array($charts))
         <div class="section">
-            <h3>{{ __('Performance Trends') }}</h3>
+            <h3 style="margin-bottom:20px;">{{ __('Performance Trends') }}</h3>
             @foreach ($charts as $chart)
                 @if(isset($chart['base64']) && isset($chart['id']))
                     <div class="chart-container">
@@ -199,7 +200,7 @@
     @endif
 
     <!-- Daily Breakdown -->
-    <!--<div class="section page-break">
+    <div class="section page-break">
         <h3>{{ __('Daily Performance Breakdown') }}</h3>
         <table class="table">
             <thead>
@@ -227,11 +228,11 @@
                 @endforeach
             </tbody>
         </table>
-    </div>-->
+    </div>
 
     <!-- Video Metrics (if available) -->
-    @if (($analytics['metrics']['page_video_views_organic'] ?? 0) > 0 || ($analytics['metrics']['page_video_views_paid'] ?? 0) > 0)
-    <!--<div class="section">
+    @if (($analytics['videoMetrics']['page_video_views_organic'] ?? 0) > 0 || ($analytics['videoMetrics']['page_video_views_paid'] ?? 0) > 0)
+    <div class="section">
         <h3>{{ __('Video Performance') }}</h3>
         <table class="table">
             <thead>
@@ -243,28 +244,32 @@
             <tbody>
                 <tr>
                     <td>{{ __('Organic Video Views') }}</td>
-                    <td class="highlight">{{ number_format($analytics['metrics']['page_video_views_organic'] ?? 0) }}</td>
+                    <td class="highlight">{{ number_format($analytics['videoMetrics']['page_video_views_organic'] ?? 0) }}</td>
                 </tr>
                 <tr>
                     <td>{{ __('Paid Video Views') }}</td>
-                    <td class="highlight">{{ number_format($analytics['metrics']['page_video_views_paid'] ?? 0) }}</td>
+                    <td class="highlight">{{ number_format($analytics['videoMetrics']['page_video_views_paid'] ?? 0) }}</td>
                 </tr>
                 <tr>
                     <td>{{ __('Autoplayed Video Views') }}</td>
-                    <td class="highlight">{{ number_format($analytics['metrics']['page_video_views_autoplayed'] ?? 0) }}</td>
+                    <td class="highlight">{{ number_format($analytics['videoMetrics']['page_video_views_autoplayed'] ?? 0) }}</td>
                 </tr>
                 <tr>
                     <td>{{ __('Click-to-Play Video Views') }}</td>
-                    <td class="highlight">{{ number_format($analytics['metrics']['page_video_views_click_to_play'] ?? 0) }}</td>
+                    <td class="highlight">{{ number_format($analytics['videoMetrics']['page_video_views_click_to_play'] ?? 0) }}</td>
                 </tr>
                 <tr>
                     <td>{{ __('30s+ Complete Views (Organic)') }}</td>
-                    <td class="highlight">{{ number_format($analytics['metrics']['page_video_complete_views_30s_organic'] ?? 0) }}</td>
+                    <td class="highlight">{{ number_format($analytics['videoMetrics']['page_video_complete_views_30s_organic'] ?? 0) }}</td>
+                </tr>
+                <tr>
+                    <td>{{ __('30s+ Complete Views (Paid)') }}</td>
+                    <td class="highlight">{{ number_format($analytics['videoMetrics']['page_video_complete_views_30s_paid'] ?? 0) }}</td>
                 </tr>
             </tbody>
         </table>
-    </div>-->
-    @endif
+    </div>
+@endif
 
     <!-- Summary -->
     <div class="section">

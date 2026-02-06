@@ -171,7 +171,7 @@ class PricingService
     {
         $typeKeys = array_keys(Plan::getTypes());
 
-        $query = PlanModel::where('status', 1);
+        $query = PlanModel::where('status', 1)->where('type', 1);
 
         if($plan_id){
             $query->where("id", $plan_id);

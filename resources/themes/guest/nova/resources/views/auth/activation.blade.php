@@ -1,4 +1,8 @@
-<div x-data class="min-h-screen overflow-hidden">
+<section class="relative w-screen min-h-screen flex flex-column flex-sm-row items-stretch overflow-hidden bg-white overflow-x-hidden">
+    @include("partials/login-screen", ["name" => __("A Social Media Management Platform")])
+    <div class="flex content-right flex-col justify-center flex-1 px-8 py-16 bg-white z-10 ">
+	
+	<div x-data class="min-h-screen overflow-hidden">
     <div class="absolute inset-x-0 -top-3 -z-10 transform-gpu overflow-hidden px-36 blur-3xl" aria-hidden="true">
         <div class="min-h-[100vh] overflow-hidden pt-10 pb-10"
              style="background: 
@@ -41,3 +45,5 @@
         </div>
     </div>
 </div>
+    </div>
+</section>

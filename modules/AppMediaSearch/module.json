@@ -8,7 +8,7 @@
         "Modules\\AppMediaSearch\\Providers\\AppMediaSearchServiceProvider"
     ],
     "files": [],
-    "_disabled_permission": true,
+    "permission": false,
     "_disabled_menu": {
         "uri": "app/search-media",
         "role": "client",

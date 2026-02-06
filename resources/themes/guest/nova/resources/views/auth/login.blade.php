@@ -3,7 +3,7 @@
     @include("partials/login-screen", ["name" => __("A Social Media Management Platform")])
 
     <div class="flex content-right flex-col justify-center flex-1 px-8 py-16 bg-white z-10 ">
-        <form class="actionForm max-w-md mx-auto w-full" action="{{ module_url('do_login') }}" method="POST">
+        <form class="actionForm max-w-md mx-auto w-full" action="{{ module_url('do_login') }}" method="POST" data-loading="1">
             <!--<div class="show-on-mobile">
                 <a class="mb-4 inline-block" href="{{ url('') }}">
                     <img class="h-10" src="{{ url( get_option("website_logo_brand_dark", asset('public/img/logos.png')) ) }}" alt="">
@@ -43,6 +43,7 @@ then you are a part of the journey!</p>
             </div>
 
             <div class="msg-error mb-2"></div>
+            <div class="msg-success mb-2"></div>
 
             <button type="submit" class="w-full btn btn-primary">
                 {{ __("Sign In") }}

@@ -911,11 +911,19 @@ span.svg-icons svg {
     height: auto !important;
 }
 .schedule-list {
-    margin-left: -17px;
-    margin-right: -17px;
+    /*margin-left: -17px;
+    margin-right: -17px;*/
 }
 .schedules-detail .card {
     border-radius: 0 !important;
+}
+#inbox-list-container .pagination-container {
+    position: sticky;
+    bottom: 0;
+    background: #fff;
+}
+#inbox-list-container .inbox-item:last-child {
+	margin-bottom:0 !important;
 }
 /** Footer **/
 .footer {

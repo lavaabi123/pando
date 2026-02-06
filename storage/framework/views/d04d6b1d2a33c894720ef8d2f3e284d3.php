@@ -3,7 +3,7 @@
     <?php echo $__env->make("partials/login-screen", ["name" => __("Create an account & get started.")], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
     <div class="flex flex-col justify-center flex-1 px-8 py-16 bg-blueGray-100 z-10" style="background-image: url(<?php echo e(theme_public_asset('images/pattern-light-big.svg')); ?>); background-position: center;">
-        <form class="actionForm max-w-md mx-auto w-full space-y-5" action="<?php echo e(module_url('do_signup')); ?>" method="POST">
+        <form class="actionForm max-w-md mx-auto w-full space-y-5" action="<?php echo e(module_url('do_signup')); ?>" method="POST" data-loading="1">
             <div class="show-on-mobile">
                 <a class="mb-4 inline-block" href="<?php echo e(url('')); ?>">
                     <img class="h-10" src="<?php echo e(url( get_option("website_logo_brand_dark", asset('public/img/logo-brand-dark.png')) )); ?>" alt="">
@@ -57,6 +57,22 @@
                        placeholder="<?php echo e(__('Re-enter your password')); ?>" required>
                 <p class="password-confirmation-message mt-1 text-sm"></p>
             </div>
+			
+			  <!-- Timezone -->
+		    <div>
+		        <label for="timezone" class="block text-gray-700 font-semibold mb-2"><?php echo e(__("Timezone")); ?></label>
+		        <select id="timezone" name="timezone"
+		                class="select select-bordered input-lg w-full px-4 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300 outline-none"
+		                required>
+		            <option value=""><?php echo e(__("Select your timezone")); ?></option>
+		            <?php $__currentLoopData = timezone_identifiers_list(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tz): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+		                <option value="<?php echo e($tz); ?>" <?php echo e(old('timezone') == $tz ? 'selected' : ''); ?>>
+		                    <?php echo e($tz); ?>
+
+		                </option>
+		            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+		        </select>
+		    </div>
 
             <div class="mb-3">
                 <?php echo Captcha::render(); ?>
@@ -266,7 +282,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 strength = 'Very Strong';
             }
             passwordMessage.textContent = '✓ Password is ' + strength;
-            passwordMessage.className = 'password-validation-message mt-1 text-sm text-green-600';
+            passwordMessage.className = 'password-validation-message mt-1 text-sm text-success';
             passwordInput.classList.remove('border-red-500', 'border-orange-500');
             passwordInput.classList.add('border-green-500');
         }

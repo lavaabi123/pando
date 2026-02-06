@@ -12,7 +12,7 @@
             </div>
             <div class="w-auto">
                 <div class="flex items-center justify-between">
-                    <div class="w-auto hidden">
+                    <div class="w-auto ">
                         <ul class="flex items-center mr-16">
                             <li class="mr-9 font-medium hover:text-gray-700">
                                 <a href="{{ url('') }}"
@@ -20,12 +20,12 @@
                                     {{ __("Home") }}
                                 </a>
                             </li>
-                            <li class="mr-9 font-medium hover:text-gray-700">
+                            <!--<li class="mr-9 font-medium hover:text-gray-700">
                                 <a href="{{ url('') }}#features"
                                    class="{{ request()->is('/') && str_contains(request()->fullUrl(), '#features') ? 'text-indigo-600' : '' }}">
                                     {{ __("Features") }}
                                 </a>
-                            </li>
+                            </li>-->
                             <li class="mr-9 font-medium hover:text-gray-700">
                                 <a href="{{ url('pricing') }}"
                                    class="{{ request()->is('pricing*') ? 'text-indigo-600' : '' }}">
@@ -105,8 +105,11 @@
                                 </div>
                                 @if(get_option("auth_signup_page_status", 1))
                                 <div class="w-auto hidden lg:block">
-                                    <a href="{{ url('auth/signup') }}" class="btn btn-primary">
+                                    <!--<a href="{{ url('auth/signup') }}" class="btn btn-primary">
                                         {{ __("Sign Up") }}
+                                    </a>-->
+									<a href="{{ url('pricing') }}" class="btn btn-primary">
+                                        {{ __("Start Your Free Trial") }}
                                     </a>
                                 </div>
                                 @endif

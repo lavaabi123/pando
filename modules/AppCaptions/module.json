@@ -8,7 +8,7 @@
         "Modules\\AppCaptions\\Providers\\AppCaptionsServiceProvider"
     ],
     "files": [],
-    "permission": true,
+    "permission": false,
     "menu": {
         "uri": "app/captions",
         "role": "client",

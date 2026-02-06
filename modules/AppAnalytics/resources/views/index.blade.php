@@ -17,10 +17,10 @@
 @endsection
 
 @section('content')
-    <div class="container pb-5 row">
+    <div class="container pb-5 row row-cols-5">
         @forelse ($analytics as $network => $data)
-            <div class="mb-5 col-md-3">
-                <h4 class="fw-6 fs-18 mb-4">{{ $network }}</h4>
+            <div class="mb-5 col">
+                <h4 class="fw-6 fs-18 mb-2">{{ $network }}</h4>
                 <div class="row">
                     @foreach ($data as $key => $value)
                     <div class="col-md-12">
