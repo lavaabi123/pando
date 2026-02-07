@@ -69,6 +69,6 @@
     </div>
 
     <script type="text/javascript" src="<?php echo e(theme_public_asset('js/jquery.min.js')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>"></script>
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js?v=1.3')); ?>"></script>
 </body>
 </html><?php /**PATH C:\xampp82\htdocs\pando-laravel\resources\themes\guest\nova\resources\views/layouts/app.blade.php ENDPATH**/ ?>

@@ -92,10 +92,18 @@
             <div class="msg-error mb-2"></div>
 
             <!-- Submit -->
-            <button type="submit" id="signup-submit-btn"
+            <!--<button type="submit" id="signup-submit-btn"
                     class="mb-8 py-4 px-9 w-full text-white font-semibold border border-indigo-700 rounded-xl shadow-4xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200">
                 {{ __("Sign Up") }}
-            </button>
+            </button>-->
+			
+			
+			<button type="submit" id="signup-submit-btn" class="w-full btn btn-primary submit-btn">
+				<span class="btn-text">{{ __("Sign Up") }}</span>
+				<span class="btn-loader" style="display: none;">
+					<i class="fas fa-spinner fa-spin"></i> {{ __("Signing Up...") }}
+				</span>
+			</button>
 
             <!-- Switch to Sign In -->
             <p class="text-center text-base-content/80 pt-4">

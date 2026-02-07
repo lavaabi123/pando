@@ -47,10 +47,17 @@ then you are a part of the journey!</p>
             <div class="msg-error mb-2"></div>
             <div class="msg-success mb-2"></div>
 
-            <button type="submit" class="w-full btn btn-primary">
+            <!--<button type="submit" class="w-full btn btn-primary">
                 <?php echo e(__("Sign In")); ?>
 
-            </button>
+            </button>-->
+			<button type="submit" class="w-full btn btn-primary submit-btn">
+				<span class="btn-text"><?php echo e(__("Sign In")); ?></span>
+				<span class="btn-loader" style="display: none;">
+					<i class="fas fa-spinner fa-spin"></i> <?php echo e(__("Signing in...")); ?>
+
+				</span>
+			</button>
                 <?php
                     $socials = [
                         'google' => [

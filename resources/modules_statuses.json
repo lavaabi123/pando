@@ -115,5 +115,6 @@
     "AppChannels.zip": true,
     "Auth.zip": true,
     "AppAIContents.zip": true,
-    "AdminAIConfiguration.zip": true
+    "AdminAIConfiguration.zip": true,
+    "AppAnalyticsFacebook.zip": true
 }

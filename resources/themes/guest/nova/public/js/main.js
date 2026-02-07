@@ -217,6 +217,13 @@ var Main = new (function () {
             if(loading == undefined || loading == 1){
                 Main.overplay();
             }
+			
+			// Show button loading state
+			var submitBtn = that.find('.submit-btn, button[type="submit"]');
+			if(submitBtn.length) {
+				submitBtn.find('.btn-text').hide();
+				submitBtn.find('.btn-loader').show();
+			}
 
             //Call Before
             if(call_before != undefined){
@@ -303,7 +310,13 @@ var Main = new (function () {
                         $(that).siblings().removeClass(activeClass);
                         $(that).addClass(activeClass);
                     }
-
+					
+					var submitBtn = that.find('.submit-btn, button[type="submit"]');
+					if(submitBtn.length) {
+						submitBtn.find('.btn-text').show();
+						submitBtn.find('.btn-loader').hide();
+					}
+					
                     //Hide Loading
                     Main.overplay(true);
                     that.removeClass("disabled");
