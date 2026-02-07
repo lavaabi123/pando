@@ -18,7 +18,7 @@
                     $data = json_decode($post->data);
                 @endphp
                 
-                <div class="card item overflow-hidden">
+                <div class="card item overflow-hidden border-bottom-0">
 
                     {{-- Status Ribbon --}}
                     @if($post->status == 1)
@@ -79,7 +79,7 @@
                             <a href="{{ url_app('post?type=duplicate&post_id=' . $post->ids) }}" class="icon-with-circle" title="{{ __('Duplicate Post') }}" data-toggle="tooltip" data-placement="top">
                                 {!! file_get_contents(public_path('img/duplicate.svg')) !!}
                             </a>
-                            <a href="{{ module_url('delete') }}" class="icon-with-circle actionItem" data-remove="item" data-id="{{ $post->grouping_data }}" data-confirm="{{ __('Are you sure to delete this items?') }}" data-call-success="location.reload();">
+                            <a href="{{ module_url('delete') }}" class="icon-with-circle delete-btn actionItem" data-remove="item" data-id="{{ $post->grouping_data }}" data-confirm="{{ __('Are you sure to delete this items?') }}" data-call-success="location.reload();">
                                 {!! file_get_contents(public_path('img/delete.svg')) !!}
                             </a>
                             
@@ -121,9 +121,9 @@
 
                     </div>
 
-                    <div class="card-body p-3">
+                    <div class="card-body p-3 pt-0">
                         
-                        <div class="d-flex align-items-center">
+                        <div class="d-flex align-items-start">
                         
                             <div class="symbol symbol-40px me-3">
                                 <input type="checkbox" value="{{ $post->id }}" name="approval_post_ids[]"/>
@@ -131,7 +131,7 @@
 							
 							<div class="d-block w-100">
                             
-								<div class="symbol symbol-100px me-3 mb-1 overflow-hidden w-80 border b-r-10 float-start">
+								<div class="symbol symbol-100px me-3 mb-1 overflow-hidden w-80 border b-r-10 float-start position-relative">
 
 									@if($post->type == "media")
 										@if(!empty($data->medias))
@@ -147,7 +147,7 @@
 																		<source src="{{ Media::url($media) }}" type="video/mp4">
 																		Your browser does not support the video tag.
 																	</video>
-																	<button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 5px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
+																	<button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 27px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
 																		<svg aria-hidden="true" focusable="false" data-prefix="fad" data-icon="play-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-play-circle fa-w-16" style="width: 20px;margin-left: auto;margin-right: auto;">
 																			<g class="fa-group">
 																				<path fill="black" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" opacity="0.5" class="fa-secondary"></path>
@@ -170,7 +170,7 @@
 																<source src="{{ Media::url($data->medias[0]) }}" type="video/mp4">
 																Your browser does not support the video tag.
 															</video>
-															<button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 5px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
+															<button type="button" class="text-white playbtn" href="javascript:void(0)" style="position: absolute;top: 27px;margin: auto;background: none;border: none;width: 33px;height: 23px;">
 																<svg aria-hidden="true" focusable="false" data-prefix="fad" data-icon="play-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="svg-inline--fa fa-play-circle fa-w-16" style="width: 20px;margin-left: auto;margin-right: auto;">
 																	<g class="fa-group">
 																		<path fill="black" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm115.7 272l-176 101c-15.8 8.8-35.7-2.5-35.7-21V152c0-18.4 19.8-29.8 35.7-21l176 107c16.4 9.2 16.4 32.9 0 42z" opacity="0.5" class="fa-secondary"></path>
@@ -219,8 +219,8 @@
                         @php
                             $resultData = json_decode($post->result);
                         @endphp
-                        <div class="card-footer bg-light-success text-success py-3 px-4 d-flex justify-content-between">
-                            <span class="me-2">{{ __("Post Published") }}</span>
+                        <div class="card-footer bg-light-success text-success py-2 px-3 d-flex justify-content-between">
+                            <span class="me-2 fs-12">{{ __("Post Published") }}</span>
                         </div>
                     @endif
 					
@@ -228,8 +228,8 @@
                         @php
                             $resultData = json_decode($post->result);
                         @endphp
-                        <div class="card-footer bg-light-warning text-warning py-3 px-4 d-flex justify-content-between">
-                            <span class="me-2">{{ __("Waiting for Approval") }}</span>
+                        <div class="card-footer bg-light-warning text-warning py-2 px-3 d-flex justify-content-between">
+                            <span class="me-2 fs-12">{{ __("Waiting for Approval") }}</span>
                         </div>
                     @endif
 
@@ -237,7 +237,7 @@
                         @php
                             $error = json_decode($post->result);
                         @endphp
-                        <div class="card-footer bg-light-danger text-danger py-3 px-4">
+                        <div class="card-footer bg-light-danger text-danger py-2 px-3 fs-13">
                             {{ $error->message ?? 'Error occurred' }}
                         </div>
                     @endif

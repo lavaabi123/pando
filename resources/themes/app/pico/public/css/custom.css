@@ -510,6 +510,9 @@ a.menu-link.active {
 .sidebar .menu .menu-item .menu-link .menu-arrow {
 	display: none;
 }
+.menu-bottom .card {
+    border-radius: 0 !important;
+}
 /** Home Page **/
 .developer {
     background: #ffffff88;
@@ -809,6 +812,8 @@ ul#myTab li button.active {
 .calendar-scroll .fc-highlight-day {
     background-color: color-mix(in srgb, var(--d-secondary) 10%, transparent) !important;
     border-color: var(--d-secondary) !important;
+    border-width: 0px !important;
+    box-shadow: 0 0 0 1px var(--d-secondary) inset !important;
 }
 .compose .fc-daygrid-day-events .card {
 	background: var(--d-primary);
@@ -855,6 +860,19 @@ span.svg-icons svg {
 }
 .schedule-list span.badge i {
 	margin: -20px -20px 0 0;
+}
+.schedules-detail .size-30 a > i {
+    background: var(--white);
+    padding: 2px;
+    border-radius: 100%;
+    display: flex;
+    font-size: 8px;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1 / 1;
+    width: 13px;
+    height: 13px;
+	border: 2px solid var(--bs-border-color);
 }
 .compose-icons {
 	overflow-x: auto;
@@ -910,9 +928,9 @@ span.svg-icons svg {
 #approval-list-content .approval-card, #draft-list-content .draft-card {
     height: auto !important;
 }
-.schedule-list {
-    /*margin-left: -17px;
-    margin-right: -17px;*/
+.compose-calendar-new .schedule-list {
+    margin-left: -17px;
+    margin-right: -17px;
 }
 .schedules-detail .card {
     border-radius: 0 !important;
