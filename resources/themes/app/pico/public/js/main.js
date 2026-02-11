@@ -2817,16 +2817,105 @@ Main.exportCharts = function() {
         }
         
         Main.showNotify('', "Preparing charts for export...", 'info');
-        
+        function getChartInstanceById(id) {
+    // ApexCharts
+    if (window.ChartInstances?.[id]) return window.ChartInstances[id];
+
+    // Highcharts
+    if (window.Highcharts) {
+        const el = document.getElementById(id);
+        const idx = el?.getAttribute('data-highcharts-chart');
+
+        if (idx !== null && typeof idx !== 'undefined' && Highcharts.charts[Number(idx)]) {
+            return Highcharts.charts[Number(idx)];
+        }
+
+        const found = Highcharts.charts.find(c => c && c.renderTo && c.renderTo.id === id);
+        if (found) return found;
+    }
+
+    return null;
+}
+
+function getExportSVG(chart) {
+    const isHighcharts = !!(window.Highcharts && chart && chart.renderTo && typeof chart.getSVG === "function");
+    if (!isHighcharts) return chart.getSVG();
+
+    const isPie = (chart.series && chart.series[0] && chart.series[0].type === 'pie')
+        || (chart.options && chart.options.chart && chart.options.chart.type === 'pie');
+
+    // BIGGER export size for pies => looks great in PDF
+    if (isPie) {
+        return chart.getSVG({
+            chart: {
+                width: 900,
+                height: 520,
+                spacingTop: 10,
+                spacingLeft: 10,
+                spacingRight: 10,
+                spacingBottom: 10
+            },
+            plotOptions: {
+                pie: {
+                    size: '90%',
+                    innerSize: '70%',
+                    center: ['50%', '42%'],
+                    dataLabels: { enabled: false }
+                }
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'center',
+                verticalAlign: 'bottom',
+                itemMarginTop: 6,
+                itemMarginBottom: 6,
+                itemStyle: { fontSize: '16px' }
+            }
+        });
+    }
+
+    // Default Highcharts export size for non-pies
+    return chart.getSVG({ chart: { width: 1000, height: 600 } });
+}
+
         const convertChartPromises = chartIds.map(id => {
             return new Promise((resolve) => {
-                const chart = window.ChartInstances?.[id];
-                
-                if (!chart || typeof chart.getSVG !== "function") {
-                    //console.warn(`Chart with ID '${id}' is either invalid or not initialized.`);
-                    resolve(null);
-                    return;
-                }
+                const getChartInstanceById = (id) => {
+				// 1) ApexCharts (your existing)
+				if (window.ChartInstances?.[id]) return window.ChartInstances[id];
+
+				// 2) Highcharts
+				if (window.Highcharts) {
+					const el = document.getElementById(id);
+					const idx = el?.getAttribute('data-highcharts-chart');
+
+					// Most reliable: by index
+					if (idx !== null && typeof idx !== 'undefined' && Highcharts.charts[Number(idx)]) {
+						return Highcharts.charts[Number(idx)];
+					}
+
+					// Fallback: search by renderTo.id
+					const found = Highcharts.charts.find(c => c && c.renderTo && c.renderTo.id === id);
+					if (found) return found;
+				}
+
+				return null;
+			};
+
+			const chart = getChartInstanceById(id);
+
+			if (!chart) {
+				resolve(null);
+				return;
+			}
+
+			// Support both APIs (Apex: getSVG, Highcharts: getSVG)
+			if (typeof chart.getSVG !== "function") {
+				resolve(null);
+				return;
+			}
+
+			const svg = getExportSVG(chart);
                 
                 try {
                     const svg = chart.getSVG();
@@ -2892,8 +2981,10 @@ Main.exportCharts = function() {
                         const titleHeight = 35;
                         const titleMarginBottom = 15;
                         const titleMarginTop = 10;
-                        const bottomSpace = 100;
-                        const sideSpace = 40;
+                        const isPieChart = ($(`#${id}`).attr('data-highcharts-chart') !== undefined);
+
+						const bottomSpace = isPieChart ? 40 : 100;
+						const sideSpace  = isPieChart ? 25 : 40;
                         
                         const totalTitleSpace = titleHeight + titleMarginBottom + titleMarginTop;
                         

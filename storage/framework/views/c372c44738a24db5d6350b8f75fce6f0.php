@@ -32,10 +32,10 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
-    <div class="container pb-5 row">
+    <div class="container pb-5 row row-cols-5">
         <?php $__empty_1 = true; $__currentLoopData = $analytics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $network => $data): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-            <div class="mb-5 col-md-3">
-                <h4 class="fw-6 fs-18 mb-4"><?php echo e($network); ?></h4>
+            <div class="mb-5 col">
+                <h4 class="fw-6 fs-18 mb-2"><?php echo e($network); ?></h4>
                 <div class="row">
                     <?php $__currentLoopData = $data; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $value): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="col-md-12">

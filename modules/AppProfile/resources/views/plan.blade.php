@@ -95,60 +95,174 @@
                             
                         </div>
                     </div>
-                    <div class="flex-fill">
-                        <div class="border-bottom fw-semibold fs-14 text-uppercase px-4 py-3">
-                            {{ __("Plan Permissions") }}
-                        </div>
-                        <div class="p-4">
-                            @foreach($plan_detail['features']??[] as $feature)
-                                <li class="mb-2 d-flex align-items-center gap-1">
-                                    <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
-                                        <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
-                                    </span>
+                   <div class="flex-fill">
+    <div class="border-bottom fw-semibold fs-14 text-uppercase px-4 py-3">
+        {{ __("Plan Permissions") }}
+    </div>
+    <div class="p-4">
+        @if(!empty($plan_detail))
+            @php
+		
+                $permissions = $plan_detail['permissions'] ?? [];
+                
+                // Helper function to get permission value
+                $getPermValue = function($key) use ($permissions) {
+                    $perm = collect($permissions)->firstWhere('key', $key);
+                    return $perm['value'] ?? null;
+                };
+                
+                // Get key values
+                $maxChannels = $getPermValue('max_channels');
+                $maxPosts = $getPermValue('apppublishing.max_post');
+                $aiWordCredits = $getPermValue('ai_word_credits');
+                $maxStorage = $getPermValue('appfiles.max_storage');
+                $hasAnalytics = $getPermValue('appanalytics');
+                $hasAIPublishing = $getPermValue('appaipublishing');
+            @endphp
 
-                                    {{ __($feature['label']) }}
-                                    {{-- Popup info icon --}}
-                                    @if(!empty($feature['subfeature']))
-                                        <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
-                                            <span class="info-hover-icon" tabindex="0">
-                                                <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
-                                            </span>
-                                            <div class="features-popup shadow-lg">
-                                                @foreach($feature['subfeature'] as $group)
-                                                    <div class="fw-bold mb-1 small px-3 pt-2">
-                                                        {{ __($group['tab_name'] ?? '') }}
-                                                    </div>
-                                                    <ul class="list-unstyled mb-2 px-3">
-                                                        @foreach($group['items'] as $item)
-                                                            <li class="d-flex align-items-center">
-                                                                <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
-                                                                    <i class="fa-regular fa-{{$feature['check'] ? 'check' : 'xmark' }}"></i>
-                                                                </span>
-                                                                {{ __($item['label']) }}
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                @endforeach
+            <ul class="list-unstyled">
+                {{-- Social Media Accounts --}}
+                @if($maxChannels)
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        @if($maxChannels == -1 || $maxChannels > 10000)
+                            {{ __("Unlimited Social Media Accounts") }}
+                        @else
+                            {{ number_format($maxChannels) }} {{ __("Social Media Accounts") }}
+                        @endif
+                    </li>
+                @endif
+
+                {{-- Posts per Month --}}
+                @if($maxPosts)
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        @if($maxPosts == -1 || $maxPosts > 100000)
+                            {{ __("Unlimited Posts per Month") }}
+                        @else
+                            {{ number_format($maxPosts) }} {{ __("Posts per Month") }}
+                        @endif
+                    </li>
+                @endif
+
+                {{-- AI Word Credits --}}
+                @if($aiWordCredits)
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        @if($aiWordCredits == -1 || $aiWordCredits > 1000000)
+                            {{ __("Unlimited AI Word Credits") }}
+                        @else
+                            {{ number_format($aiWordCredits) }} {{ __("AI Word Credits") }}
+                        @endif
+                    </li>
+                @endif
+
+                {{-- Storage --}}
+                @if($maxStorage)
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        @if($maxStorage == -1 || $maxStorage > 100000)
+                            {{ __("Unlimited Storage") }}
+                        @else
+                            {{ number_format($maxStorage) }} {{ __("MB Storage") }}
+                        @endif
+                    </li>
+                @endif
+
+                {{-- Analytics --}}
+                @if($hasAnalytics)
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        {{ __("Analytics") }}
+                    </li>
+				@else
+					<li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-danger">
+                            <i class="fa-regular fa-xmark"></i>
+                        </span>
+                        {{ __("Analytics") }}
+                    </li>
+                @endif
+
+                {{-- AI Publishing --}}
+                @if($hasAIPublishing)
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        {{ __("AI Publishing") }}
+                    </li>
+				@else
+					<li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-danger">
+                            <i class="fa-regular fa-xmark"></i>
+                        </span>
+                        {{ __("AI Publishing") }}
+                    </li>
+                @endif
+
+                {{-- Show other boolean features --}}
+                @foreach($plan_detail['features']??[] as $feature)
+                    @if($feature['key'] !== 'access_feature')
+                        <li class="mb-2 d-flex align-items-center gap-1">
+                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
+                                <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
+                            </span>
+
+                            {{ __($feature['label']) }}
+                            
+                            {{-- Popup info icon for subfeatures --}}
+                            @if(!empty($feature['subfeature']))
+                                <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
+                                    <span class="info-hover-icon" tabindex="0">
+                                        <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
+                                    </span>
+                                    <div class="features-popup shadow-lg">
+                                        @foreach($feature['subfeature'] as $group)
+                                            <div class="fw-bold mb-1 small px-3 pt-2">
+                                                {{ __($group['tab_name'] ?? '') }}
                                             </div>
-                                        </div>
-                                    @endif
-                                </li>
-                            @endforeach
-
-                            @empty($plan_detail)
-                                <div class="text-center py-5">
-                                    <span class="d-inline-block mb-2 fs-70">
-                                        <i class="fa fa-box-open text-primary"></i>
-                                    </span>
-                                    <div class="fw-semibold text-gray-700" style="opacity:.85">
-                                        {{ __("No features available for this plan.") }}
+                                            <ul class="list-unstyled mb-2 px-3">
+                                                @foreach($group['items'] as $item)
+                                                    <li class="d-flex align-items-center">
+                                                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
+                                                            <i class="fa-regular fa-{{$feature['check'] ? 'check' : 'xmark' }}"></i>
+                                                        </span>
+                                                        {{ __($item['label']) }}
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endforeach
                                     </div>
                                 </div>
-                            @endempty
-
-                        </div>
-                    </div>
+                            @endif
+                        </li>
+                    @endif
+                @endforeach
+            </ul>
+        @else
+            <div class="text-center py-5">
+                <span class="d-inline-block mb-2 fs-70">
+                    <i class="fa fa-box-open text-primary"></i>
+                </span>
+                <div class="fw-semibold text-gray-700" style="opacity:.85">
+                    {{ __("No features available for this plan.") }}
                 </div>
+            </div>
+        @endif
+    </div>
+</div>
+			   </div>
             </div>
         </div>
 
@@ -161,7 +275,7 @@
         </div>
 
         <div class="d-flex mx-auto justify-content-center mb-5">
-            <ul class="nav nav-tabs justify-content-center mb-4 gap-0 b-r-20 border border-gray-300 overflow-hidden" id="pricingTab" role="tablist">
+            <!--<ul class="nav nav-tabs justify-content-center mb-4 gap-0 b-r-20 border border-gray-300 overflow-hidden" id="pricingTab" role="tablist">
                 @foreach($planTypes as $typeKey => $typeLabel)
                     <li class="nav-item {{ $typeKey==2?"border-start border-end border-gray-300":"" }}" role="presentation">
                         <button
@@ -178,107 +292,225 @@
                         </button>
                     </li>
                 @endforeach
-            </ul>
+            </ul>-->
         </div>
 
-        {{-- Plans content --}}
-        <div class="tab-content" id="pricingTabContent">
-            @foreach($planTypes as $typeKey => $typeLabel)
-                <div class="tab-pane fade @if($loop->first) show active @endif" 
-                    id="content-{{ $typeKey }}" 
-                    role="tabpanel"
-                    aria-labelledby="tab-{{ $typeKey }}">
-                    <div class="row justify-content-center gy-4">
-                        @forelse($pricing[$typeKey] ?? [] as $plan)
-                            <div class="col-md-3">
-                                <div class="card pricing-card hp-100 text-center border-0 shadow-sm">
-                                    <div class="card-body py-5 position-relative">
-                                        @if(!empty($plan['featured']))
-                                            <span class="position-absolute top-0 end-0 bg-primary-400 wp-100 text-white px-3 py-2 small fw-bold btr-r-25 btl-r-25 text-uppercase">
-                                                {{ __('Featured') }}
+       {{-- Plans content --}}
+<div class="tab-content" id="pricingTabContent">
+    @foreach($planTypes as $typeKey => $typeLabel)
+        <div class="tab-pane fade @if($loop->first) show active @endif" 
+            id="content-{{ $typeKey }}" 
+            role="tabpanel"
+            aria-labelledby="tab-{{ $typeKey }}">
+            <div class="row justify-content-center gy-4">
+                @forelse($pricing[$typeKey] ?? [] as $plan)
+                    @php
+                        $isCurrentPlan = isset($user) && $user->plan_id == ($plan['id'] ?? null);
+                        $isFreePlan = $plan['free_plan'];
+                        $isFeatured = !empty($plan['featured']);
+                        $permissions = $plan['permissions'] ?? [];
+                        
+                        // Helper function to get permission value
+                        $getPermValue = function($key) use ($permissions) {
+                            $perm = collect($permissions)->firstWhere('key', $key);
+                            return $perm['value'] ?? null;
+                        };
+                        
+                        // Get key values
+                        $maxChannels = $getPermValue('max_channels');
+                        $maxPosts = $getPermValue('apppublishing.max_post');
+                        $aiWordCredits = $getPermValue('ai_word_credits');
+                        $maxStorage = $getPermValue('appfiles.max_storage');
+                        $hasAnalytics = $getPermValue('appanalytics');
+                        $hasAIPublishing = $getPermValue('appaipublishing');
+                    @endphp
+
+                    <div class="col-md-3">
+                        <div class="card pricing-card hp-100 text-center border-0 shadow-sm {{ $isFeatured ? 'border-2 border-primary' : '' }}">
+                            <div class="card-body py-5 position-relative">
+                                @if($isFeatured)
+                                    <span class="position-absolute top-0 end-0 bg-primary-400 wp-100 text-white px-3 py-2 small fw-bold btr-r-25 btl-r-25 text-uppercase">
+                                        {{ __('Featured') }}
+                                    </span>
+                                @endif
+                                
+                                <span class="text-uppercase fw-bold text-primary mb-2 d-block" style="letter-spacing:1px;">
+                                    {{ __($plan['name'] ?? '-') }}
+                                </span>
+
+                                <h2 class="fw-bold mb-0 mt-2 fs-35">
+                                    @if($isFreePlan)
+                                        {{ price(0) }}
+                                        <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
+                                    @else
+                                        {{ price($plan['price'] ?? 0) }}
+                                        <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
+                                    @endif
+                                </h2>
+                                <div class="mb-2 text-muted mb-4">{{ $plan['desc'] ?? '' }}</div>
+                                
+                                <ul class="list-unstyled text-start mb-4 mx-auto max-w-240">
+                                    {{-- Social Media Accounts --}}
+                                    @if($maxChannels)
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
                                             </span>
-                                        @endif
-                                        <span class="text-uppercase fw-bold text-primary mb-2 d-block" style="letter-spacing:1px;">
-                                            {{ __($plan['name'] ?? '-') }}
-                                        </span>
-                                        @php
-                                            $isFreePlan = $plan['free_plan'];
-                                        @endphp
+                                            <span class="fs-14">
+                                                @if($maxChannels == -1 || $maxChannels > 10000)
+                                                    {{ __("Unlimited Social Media Accounts") }}
+                                                @else
+                                                    {{ number_format($maxChannels) }} {{ __("Social Media Accounts") }}
+                                                @endif
+                                            </span>
+                                        </li>
+                                    @endif
 
-                                        <h2 class="fw-bold mb-0 mt-2 fs-35">
-                                            @if($isFreePlan)
-                                                {{ price(0) }}
-                                                <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
-                                            @else
-                                                {{ price($plan['price'] ?? 0) }}
-                                                <small class="fs-14 text-muted">/{{ strtolower(__($typeLabel)) }}</small>
-                                            @endif
-                                        </h2>
-                                        <div class="mb-2 text-muted mb-4">{{ $plan['desc'] ?? '' }}</div>
-                                        <ul class="list-unstyled text-start mb-4 mx-auto max-w-240">
-                                            @foreach($plan['features'] as $feature)
-                                                <li class="mb-2 d-flex align-items-center gap-1">
-                                                    <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
-                                                        <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
-                                                    </span>
+                                    {{-- Posts per Month --}}
+                                    @if($maxPosts)
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">
+                                                @if($maxPosts == -1 || $maxPosts > 100000)
+                                                    {{ __("Unlimited Posts per Month") }}
+                                                @else
+                                                    {{ number_format($maxPosts) }} {{ __("Posts per Month") }}
+                                                @endif
+                                            </span>
+                                        </li>
+                                    @endif
 
-                                                    {{ __($feature['label']) }}
-                                                    {{-- Popup info icon --}}
-                                                    @if(!empty($feature['subfeature']))
-                                                        <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
-                                                            <span class="info-hover-icon" tabindex="0">
-                                                                <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
-                                                            </span>
-                                                            <div class="features-popup shadow-lg">
-                                                                @foreach($feature['subfeature'] as $group)
-                                                                    <div class="fw-bold mb-1 fs-12 px-3 pt-2">
-                                                                        {{ __($group['tab_name'] ?? '') }}
-                                                                    </div>
-                                                                    <ul class="list-unstyled mb-2 px-3">
-                                                                        @foreach($group['items'] as $item)
-                                                                            <li class="d-flex align-items-center">
-                                                                                <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
-                                                                                    <i class="fa-regular fa-{{$feature['check'] ? 'check' : 'xmark' }}"></i>
-                                                                                </span>
-                                                                                <span class="text-gray-700 fs-14">{{ __($item['label']) }}</span>
-                                                                            </li>
-                                                                        @endforeach
-                                                                    </ul>
-                                                                @endforeach
-                                                            </div>
+                                    {{-- AI Word Credits --}}
+                                    @if($aiWordCredits)
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">
+                                                @if($aiWordCredits == -1 || $aiWordCredits > 1000000)
+                                                    {{ __("Unlimited AI Word Credits") }}
+                                                @else
+                                                    {{ number_format($aiWordCredits) }} {{ __("AI Word Credits") }}
+                                                @endif
+                                            </span>
+                                        </li>
+                                    @endif
+
+                                    {{-- Storage --}}
+                                    @if($maxStorage)
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">
+                                                @if($maxStorage == -1 || $maxStorage > 100000)
+                                                    {{ __("Unlimited Storage") }}
+                                                @else
+                                                    {{ number_format($maxStorage) }} {{ __("MB Storage") }}
+                                                @endif
+                                            </span>
+                                        </li>
+                                    @endif
+
+                                    {{-- Analytics --}}
+                                    @if($hasAnalytics)
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">{{ __("Analytics") }}</span>
+                                        </li>
+									@else
+										<li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-xmark"></i>
+                                            </span>
+                                            <span class="fs-14">{{ __("Analytics") }}</span>
+                                        </li>
+                                    @endif
+
+                                    {{-- AI Publishing --}}
+                                    @if($hasAIPublishing)
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">{{ __("AI Publishing") }}</span>
+                                        </li>
+									@else
+										<li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-xmark"></i>
+                                            </span>
+                                            <span class="fs-14">{{ __("AI Publishing") }}</span>
+                                        </li>
+                                    @endif
+
+                                    {{-- Show other boolean features --}}
+                                    @foreach($plan['features'] as $feature)
+                                        @if($feature['key'] !== 'access_feature')
+                                            <li class="mb-2 d-flex align-items-center gap-1">
+                                                <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
+                                                    <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
+                                                </span>
+
+                                                <span class="fs-14">{{ __($feature['label']) }}</span>
+                                                
+                                                {{-- Popup info icon --}}
+                                                @if(!empty($feature['subfeature']))
+                                                    <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
+                                                        <span class="info-hover-icon" tabindex="0">
+                                                            <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
+                                                        </span>
+                                                        <div class="features-popup shadow-lg">
+                                                            @foreach($feature['subfeature'] as $group)
+                                                                <div class="fw-bold mb-1 fs-12 px-3 pt-2">
+                                                                    {{ __($group['tab_name'] ?? '') }}
+                                                                </div>
+                                                                <ul class="list-unstyled mb-2 px-3">
+                                                                    @foreach($group['items'] as $item)
+                                                                        <li class="d-flex align-items-center">
+                                                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
+                                                                                <i class="fa-regular fa-{{$feature['check'] ? 'check' : 'xmark' }}"></i>
+                                                                            </span>
+                                                                            <span class="text-gray-700 fs-14">{{ __($item['label']) }}</span>
+                                                                        </li>
+                                                                    @endforeach
+                                                                </ul>
+                                                            @endforeach
                                                         </div>
-                                                    @endif
-                                                </li>
-                                            @endforeach
-                                        </ul>
-
-                                        @php
-                                            $isCurrentPlan = isset($user) && $user->plan_id == ($plan['id'] ?? null);
-                                            $isFreePlan = $plan['free_plan'];
-                                        @endphp
-
-                                        @if($isCurrentPlan)
-                                            <button class="btn btn-outline-secondary text-gray-700 border-gray-300 btn-lg w-100 rounded-5" disabled>
-                                                {{ __("Current Plan") }}
-                                            </button>
-                                        @elseif($isFreePlan)
-                                            <a href="{{ route('plan.activate', $plan['id_secure']) }}" data-confirm="{{ __("Are you sure you want to switch to this plan?") }}" class="btn btn-light btn-lg w-100 rounded-5 actionItem" data-redirect="">
-                                                {{ __("Start for Free") }}
-                                            </a>
-                                        @else
-                                            <a href="{{ route('payment.index', $plan['id_secure']) }}" class="btn btn-dark btn-lg w-100 rounded-5">
-                                                {{ __("Choose Plan") }}
-                                            </a>
+                                                    </div>
+                                                @endif
+                                            </li>
                                         @endif
-                                    </div>
-                                </div>
+                                    @endforeach
+                                </ul>
+
+                                @if($isCurrentPlan)
+                                    <button class="btn btn-outline-secondary text-gray-700 border-gray-300 btn-lg w-100 rounded-5" disabled>
+                                        {{ __("Current Plan") }}
+                                    </button>
+                                @elseif($isFreePlan)
+                                    <a href="{{ route('plan.activate', $plan['id_secure']) }}" data-confirm="{{ __("Are you sure you want to switch to this plan?") }}" class="btn btn-light btn-lg w-100 rounded-5 actionItem" data-redirect="">
+                                        {{ __("Start for Free") }}
+                                    </a>
+                                @else
+                                    <a href="{{ route('payment.index', $plan['id_secure']) }}" class="btn btn-dark btn-lg w-100 rounded-5">
+                                        {{ __("Choose Plan") }}
+                                    </a>
+                                @endif
                             </div>
-                        @empty
-                            <div class="col-12 text-center text-muted py-5">{{ __('No plans available.') }}</div>
-                        @endforelse
+                        </div>
                     </div>
-                </div>
-            @endforeach
+                @empty
+                    <div class="col-12 text-center text-muted py-5">{{ __('No plans available.') }}</div>
+                @endforelse
+            </div>
         </div>
-    </div>
+    @endforeach
+</div>
+
+ </div>
 @endsection

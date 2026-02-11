@@ -118,65 +118,191 @@
                             
                         </div>
                     </div>
-                    <div class="flex-fill">
-                        <div class="border-bottom fw-semibold fs-14 text-uppercase px-4 py-3">
-                            <?php echo e(__("Plan Permissions")); ?>
+                   <div class="flex-fill">
+    <div class="border-bottom fw-semibold fs-14 text-uppercase px-4 py-3">
+        <?php echo e(__("Plan Permissions")); ?>
 
-                        </div>
-                        <div class="p-4">
-                            <?php $__currentLoopData = $plan_detail['features']??[]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <li class="mb-2 d-flex align-items-center gap-1">
-                                    <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-danger'); ?>">
-                                        <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
+    </div>
+    <div class="p-4">
+        <?php if(!empty($plan_detail)): ?>
+            <?php
+		
+                $permissions = $plan_detail['permissions'] ?? [];
+                
+                // Helper function to get permission value
+                $getPermValue = function($key) use ($permissions) {
+                    $perm = collect($permissions)->firstWhere('key', $key);
+                    return $perm['value'] ?? null;
+                };
+                
+                // Get key values
+                $maxChannels = $getPermValue('max_channels');
+                $maxPosts = $getPermValue('apppublishing.max_post');
+                $aiWordCredits = $getPermValue('ai_word_credits');
+                $maxStorage = $getPermValue('appfiles.max_storage');
+                $hasAnalytics = $getPermValue('appanalytics');
+                $hasAIPublishing = $getPermValue('appaipublishing');
+            ?>
+
+            <ul class="list-unstyled">
+                
+                <?php if($maxChannels): ?>
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        <?php if($maxChannels == -1 || $maxChannels > 10000): ?>
+                            <?php echo e(__("Unlimited Social Media Accounts")); ?>
+
+                        <?php else: ?>
+                            <?php echo e(number_format($maxChannels)); ?> <?php echo e(__("Social Media Accounts")); ?>
+
+                        <?php endif; ?>
+                    </li>
+                <?php endif; ?>
+
+                
+                <?php if($maxPosts): ?>
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        <?php if($maxPosts == -1 || $maxPosts > 100000): ?>
+                            <?php echo e(__("Unlimited Posts per Month")); ?>
+
+                        <?php else: ?>
+                            <?php echo e(number_format($maxPosts)); ?> <?php echo e(__("Posts per Month")); ?>
+
+                        <?php endif; ?>
+                    </li>
+                <?php endif; ?>
+
+                
+                <?php if($aiWordCredits): ?>
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        <?php if($aiWordCredits == -1 || $aiWordCredits > 1000000): ?>
+                            <?php echo e(__("Unlimited AI Word Credits")); ?>
+
+                        <?php else: ?>
+                            <?php echo e(number_format($aiWordCredits)); ?> <?php echo e(__("AI Word Credits")); ?>
+
+                        <?php endif; ?>
+                    </li>
+                <?php endif; ?>
+
+                
+                <?php if($maxStorage): ?>
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        <?php if($maxStorage == -1 || $maxStorage > 100000): ?>
+                            <?php echo e(__("Unlimited Storage")); ?>
+
+                        <?php else: ?>
+                            <?php echo e(number_format($maxStorage)); ?> <?php echo e(__("MB Storage")); ?>
+
+                        <?php endif; ?>
+                    </li>
+                <?php endif; ?>
+
+                
+                <?php if($hasAnalytics): ?>
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        <?php echo e(__("Analytics")); ?>
+
+                    </li>
+				<?php else: ?>
+					<li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-danger">
+                            <i class="fa-regular fa-xmark"></i>
+                        </span>
+                        <?php echo e(__("Analytics")); ?>
+
+                    </li>
+                <?php endif; ?>
+
+                
+                <?php if($hasAIPublishing): ?>
+                    <li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        <?php echo e(__("AI Publishing")); ?>
+
+                    </li>
+				<?php else: ?>
+					<li class="mb-2 d-flex align-items-center gap-1">
+                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-danger">
+                            <i class="fa-regular fa-xmark"></i>
+                        </span>
+                        <?php echo e(__("AI Publishing")); ?>
+
+                    </li>
+                <?php endif; ?>
+
+                
+                <?php $__currentLoopData = $plan_detail['features']??[]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <?php if($feature['key'] !== 'access_feature'): ?>
+                        <li class="mb-2 d-flex align-items-center gap-1">
+                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-danger'); ?>">
+                                <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
+                            </span>
+
+                            <?php echo e(__($feature['label'])); ?>
+
+                            
+                            
+                            <?php if(!empty($feature['subfeature'])): ?>
+                                <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
+                                    <span class="info-hover-icon" tabindex="0">
+                                        <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
                                     </span>
+                                    <div class="features-popup shadow-lg">
+                                        <?php $__currentLoopData = $feature['subfeature']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div class="fw-bold mb-1 small px-3 pt-2">
+                                                <?php echo e(__($group['tab_name'] ?? '')); ?>
 
-                                    <?php echo e(__($feature['label'])); ?>
-
-                                    
-                                    <?php if(!empty($feature['subfeature'])): ?>
-                                        <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
-                                            <span class="info-hover-icon" tabindex="0">
-                                                <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
-                                            </span>
-                                            <div class="features-popup shadow-lg">
-                                                <?php $__currentLoopData = $feature['subfeature']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <div class="fw-bold mb-1 small px-3 pt-2">
-                                                        <?php echo e(__($group['tab_name'] ?? '')); ?>
-
-                                                    </div>
-                                                    <ul class="list-unstyled mb-2 px-3">
-                                                        <?php $__currentLoopData = $group['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                            <li class="d-flex align-items-center">
-                                                                <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-gray-600'); ?>">
-                                                                    <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
-                                                                </span>
-                                                                <?php echo e(__($item['label'])); ?>
-
-                                                            </li>
-                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                    </ul>
-                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </div>
-                                        </div>
-                                    <?php endif; ?>
-                                </li>
-                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            <ul class="list-unstyled mb-2 px-3">
+                                                <?php $__currentLoopData = $group['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                    <li class="d-flex align-items-center">
+                                                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-gray-600'); ?>">
+                                                            <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
+                                                        </span>
+                                                        <?php echo e(__($item['label'])); ?>
 
-                            <?php if(empty($plan_detail)): ?>
-                                <div class="text-center py-5">
-                                    <span class="d-inline-block mb-2 fs-70">
-                                        <i class="fa fa-box-open text-primary"></i>
-                                    </span>
-                                    <div class="fw-semibold text-gray-700" style="opacity:.85">
-                                        <?php echo e(__("No features available for this plan.")); ?>
-
+                                                    </li>
+                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                            </ul>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </div>
                                 </div>
                             <?php endif; ?>
+                        </li>
+                    <?php endif; ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+            </ul>
+        <?php else: ?>
+            <div class="text-center py-5">
+                <span class="d-inline-block mb-2 fs-70">
+                    <i class="fa fa-box-open text-primary"></i>
+                </span>
+                <div class="fw-semibold text-gray-700" style="opacity:.85">
+                    <?php echo e(__("No features available for this plan.")); ?>
 
-                        </div>
-                    </div>
                 </div>
+            </div>
+        <?php endif; ?>
+    </div>
+</div>
+			   </div>
             </div>
         </div>
 
@@ -190,7 +316,7 @@
         </div>
 
         <div class="d-flex mx-auto justify-content-center mb-5">
-            <ul class="nav nav-tabs justify-content-center mb-4 gap-0 b-r-20 border border-gray-300 overflow-hidden" id="pricingTab" role="tablist">
+            <!--<ul class="nav nav-tabs justify-content-center mb-4 gap-0 b-r-20 border border-gray-300 overflow-hidden" id="pricingTab" role="tablist">
                 <?php $__currentLoopData = $planTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $typeKey => $typeLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <li class="nav-item <?php echo e($typeKey==2?"border-start border-end border-gray-300":""); ?>" role="presentation">
                         <button
@@ -208,118 +334,243 @@
                         </button>
                     </li>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </ul>
+            </ul>-->
         </div>
 
-        
-        <div class="tab-content" id="pricingTabContent">
-            <?php $__currentLoopData = $planTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $typeKey => $typeLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                <div class="tab-pane fade <?php if($loop->first): ?> show active <?php endif; ?>" 
-                    id="content-<?php echo e($typeKey); ?>" 
-                    role="tabpanel"
-                    aria-labelledby="tab-<?php echo e($typeKey); ?>">
-                    <div class="row justify-content-center gy-4">
-                        <?php $__empty_1 = true; $__currentLoopData = $pricing[$typeKey] ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <div class="col-md-3">
-                                <div class="card pricing-card hp-100 text-center border-0 shadow-sm">
-                                    <div class="card-body py-5 position-relative">
-                                        <?php if(!empty($plan['featured'])): ?>
-                                            <span class="position-absolute top-0 end-0 bg-primary-400 wp-100 text-white px-3 py-2 small fw-bold btr-r-25 btl-r-25 text-uppercase">
-                                                <?php echo e(__('Featured')); ?>
+       
+<div class="tab-content" id="pricingTabContent">
+    <?php $__currentLoopData = $planTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $typeKey => $typeLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <div class="tab-pane fade <?php if($loop->first): ?> show active <?php endif; ?>" 
+            id="content-<?php echo e($typeKey); ?>" 
+            role="tabpanel"
+            aria-labelledby="tab-<?php echo e($typeKey); ?>">
+            <div class="row justify-content-center gy-4">
+                <?php $__empty_1 = true; $__currentLoopData = $pricing[$typeKey] ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $plan): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
+                        $isCurrentPlan = isset($user) && $user->plan_id == ($plan['id'] ?? null);
+                        $isFreePlan = $plan['free_plan'];
+                        $isFeatured = !empty($plan['featured']);
+                        $permissions = $plan['permissions'] ?? [];
+                        
+                        // Helper function to get permission value
+                        $getPermValue = function($key) use ($permissions) {
+                            $perm = collect($permissions)->firstWhere('key', $key);
+                            return $perm['value'] ?? null;
+                        };
+                        
+                        // Get key values
+                        $maxChannels = $getPermValue('max_channels');
+                        $maxPosts = $getPermValue('apppublishing.max_post');
+                        $aiWordCredits = $getPermValue('ai_word_credits');
+                        $maxStorage = $getPermValue('appfiles.max_storage');
+                        $hasAnalytics = $getPermValue('appanalytics');
+                        $hasAIPublishing = $getPermValue('appaipublishing');
+                    ?>
 
+                    <div class="col-md-3">
+                        <div class="card pricing-card hp-100 text-center border-0 shadow-sm <?php echo e($isFeatured ? 'border-2 border-primary' : ''); ?>">
+                            <div class="card-body py-5 position-relative">
+                                <?php if($isFeatured): ?>
+                                    <span class="position-absolute top-0 end-0 bg-primary-400 wp-100 text-white px-3 py-2 small fw-bold btr-r-25 btl-r-25 text-uppercase">
+                                        <?php echo e(__('Featured')); ?>
+
+                                    </span>
+                                <?php endif; ?>
+                                
+                                <span class="text-uppercase fw-bold text-primary mb-2 d-block" style="letter-spacing:1px;">
+                                    <?php echo e(__($plan['name'] ?? '-')); ?>
+
+                                </span>
+
+                                <h2 class="fw-bold mb-0 mt-2 fs-35">
+                                    <?php if($isFreePlan): ?>
+                                        <?php echo e(price(0)); ?>
+
+                                        <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
+                                    <?php else: ?>
+                                        <?php echo e(price($plan['price'] ?? 0)); ?>
+
+                                        <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
+                                    <?php endif; ?>
+                                </h2>
+                                <div class="mb-2 text-muted mb-4"><?php echo e($plan['desc'] ?? ''); ?></div>
+                                
+                                <ul class="list-unstyled text-start mb-4 mx-auto max-w-240">
+                                    
+                                    <?php if($maxChannels): ?>
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
                                             </span>
-                                        <?php endif; ?>
-                                        <span class="text-uppercase fw-bold text-primary mb-2 d-block" style="letter-spacing:1px;">
-                                            <?php echo e(__($plan['name'] ?? '-')); ?>
+                                            <span class="fs-14">
+                                                <?php if($maxChannels == -1 || $maxChannels > 10000): ?>
+                                                    <?php echo e(__("Unlimited Social Media Accounts")); ?>
 
-                                        </span>
-                                        <?php
-                                            $isFreePlan = $plan['free_plan'];
-                                        ?>
+                                                <?php else: ?>
+                                                    <?php echo e(number_format($maxChannels)); ?> <?php echo e(__("Social Media Accounts")); ?>
 
-                                        <h2 class="fw-bold mb-0 mt-2 fs-35">
-                                            <?php if($isFreePlan): ?>
-                                                <?php echo e(price(0)); ?>
+                                                <?php endif; ?>
+                                            </span>
+                                        </li>
+                                    <?php endif; ?>
 
-                                                <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
-                                            <?php else: ?>
-                                                <?php echo e(price($plan['price'] ?? 0)); ?>
+                                    
+                                    <?php if($maxPosts): ?>
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">
+                                                <?php if($maxPosts == -1 || $maxPosts > 100000): ?>
+                                                    <?php echo e(__("Unlimited Posts per Month")); ?>
 
-                                                <small class="fs-14 text-muted">/<?php echo e(strtolower(__($typeLabel))); ?></small>
-                                            <?php endif; ?>
-                                        </h2>
-                                        <div class="mb-2 text-muted mb-4"><?php echo e($plan['desc'] ?? ''); ?></div>
-                                        <ul class="list-unstyled text-start mb-4 mx-auto max-w-240">
-                                            <?php $__currentLoopData = $plan['features']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <li class="mb-2 d-flex align-items-center gap-1">
-                                                    <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-danger'); ?>">
-                                                        <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
-                                                    </span>
+                                                <?php else: ?>
+                                                    <?php echo e(number_format($maxPosts)); ?> <?php echo e(__("Posts per Month")); ?>
 
-                                                    <?php echo e(__($feature['label'])); ?>
+                                                <?php endif; ?>
+                                            </span>
+                                        </li>
+                                    <?php endif; ?>
 
-                                                    
-                                                    <?php if(!empty($feature['subfeature'])): ?>
-                                                        <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
-                                                            <span class="info-hover-icon" tabindex="0">
-                                                                <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
-                                                            </span>
-                                                            <div class="features-popup shadow-lg">
-                                                                <?php $__currentLoopData = $feature['subfeature']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                    <div class="fw-bold mb-1 fs-12 px-3 pt-2">
-                                                                        <?php echo e(__($group['tab_name'] ?? '')); ?>
+                                    
+                                    <?php if($aiWordCredits): ?>
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">
+                                                <?php if($aiWordCredits == -1 || $aiWordCredits > 1000000): ?>
+                                                    <?php echo e(__("Unlimited AI Word Credits")); ?>
 
-                                                                    </div>
-                                                                    <ul class="list-unstyled mb-2 px-3">
-                                                                        <?php $__currentLoopData = $group['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                            <li class="d-flex align-items-center">
-                                                                                <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-gray-600'); ?>">
-                                                                                    <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
-                                                                                </span>
-                                                                                <span class="text-gray-700 fs-14"><?php echo e(__($item['label'])); ?></span>
-                                                                            </li>
-                                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                                    </ul>
-                                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                            </div>
+                                                <?php else: ?>
+                                                    <?php echo e(number_format($aiWordCredits)); ?> <?php echo e(__("AI Word Credits")); ?>
+
+                                                <?php endif; ?>
+                                            </span>
+                                        </li>
+                                    <?php endif; ?>
+
+                                    
+                                    <?php if($maxStorage): ?>
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">
+                                                <?php if($maxStorage == -1 || $maxStorage > 100000): ?>
+                                                    <?php echo e(__("Unlimited Storage")); ?>
+
+                                                <?php else: ?>
+                                                    <?php echo e(number_format($maxStorage)); ?> <?php echo e(__("MB Storage")); ?>
+
+                                                <?php endif; ?>
+                                            </span>
+                                        </li>
+                                    <?php endif; ?>
+
+                                    
+                                    <?php if($hasAnalytics): ?>
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14"><?php echo e(__("Analytics")); ?></span>
+                                        </li>
+									<?php else: ?>
+										<li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-xmark"></i>
+                                            </span>
+                                            <span class="fs-14"><?php echo e(__("Analytics")); ?></span>
+                                        </li>
+                                    <?php endif; ?>
+
+                                    
+                                    <?php if($hasAIPublishing): ?>
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14"><?php echo e(__("AI Publishing")); ?></span>
+                                        </li>
+									<?php else: ?>
+										<li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-xmark"></i>
+                                            </span>
+                                            <span class="fs-14"><?php echo e(__("AI Publishing")); ?></span>
+                                        </li>
+                                    <?php endif; ?>
+
+                                    
+                                    <?php $__currentLoopData = $plan['features']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feature): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php if($feature['key'] !== 'access_feature'): ?>
+                                            <li class="mb-2 d-flex align-items-center gap-1">
+                                                <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-danger'); ?>">
+                                                    <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
+                                                </span>
+
+                                                <span class="fs-14"><?php echo e(__($feature['label'])); ?></span>
+                                                
+                                                
+                                                <?php if(!empty($feature['subfeature'])): ?>
+                                                    <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
+                                                        <span class="info-hover-icon" tabindex="0">
+                                                            <i class="fa fa-info-circle text-primary" style="cursor:pointer;"></i>
+                                                        </span>
+                                                        <div class="features-popup shadow-lg">
+                                                            <?php $__currentLoopData = $feature['subfeature']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <div class="fw-bold mb-1 fs-12 px-3 pt-2">
+                                                                    <?php echo e(__($group['tab_name'] ?? '')); ?>
+
+                                                                </div>
+                                                                <ul class="list-unstyled mb-2 px-3">
+                                                                    <?php $__currentLoopData = $group['items']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                        <li class="d-flex align-items-center">
+                                                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 <?php echo e($feature['check'] ? 'text-success' : 'text-gray-600'); ?>">
+                                                                                <i class="fa-regular fa-<?php echo e($feature['check'] ? 'check' : 'xmark'); ?>"></i>
+                                                                            </span>
+                                                                            <span class="text-gray-700 fs-14"><?php echo e(__($item['label'])); ?></span>
+                                                                        </li>
+                                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                                </ul>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                         </div>
-                                                    <?php endif; ?>
-                                                </li>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </ul>
-
-                                        <?php
-                                            $isCurrentPlan = isset($user) && $user->plan_id == ($plan['id'] ?? null);
-                                            $isFreePlan = $plan['free_plan'];
-                                        ?>
-
-                                        <?php if($isCurrentPlan): ?>
-                                            <button class="btn btn-outline-secondary text-gray-700 border-gray-300 btn-lg w-100 rounded-5" disabled>
-                                                <?php echo e(__("Current Plan")); ?>
-
-                                            </button>
-                                        <?php elseif($isFreePlan): ?>
-                                            <a href="<?php echo e(route('plan.activate', $plan['id_secure'])); ?>" data-confirm="<?php echo e(__("Are you sure you want to switch to this plan?")); ?>" class="btn btn-light btn-lg w-100 rounded-5 actionItem" data-redirect="">
-                                                <?php echo e(__("Start for Free")); ?>
-
-                                            </a>
-                                        <?php else: ?>
-                                            <a href="<?php echo e(route('payment.index', $plan['id_secure'])); ?>" class="btn btn-dark btn-lg w-100 rounded-5">
-                                                <?php echo e(__("Choose Plan")); ?>
-
-                                            </a>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </li>
                                         <?php endif; ?>
-                                    </div>
-                                </div>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </ul>
+
+                                <?php if($isCurrentPlan): ?>
+                                    <button class="btn btn-outline-secondary text-gray-700 border-gray-300 btn-lg w-100 rounded-5" disabled>
+                                        <?php echo e(__("Current Plan")); ?>
+
+                                    </button>
+                                <?php elseif($isFreePlan): ?>
+                                    <a href="<?php echo e(route('plan.activate', $plan['id_secure'])); ?>" data-confirm="<?php echo e(__("Are you sure you want to switch to this plan?")); ?>" class="btn btn-light btn-lg w-100 rounded-5 actionItem" data-redirect="">
+                                        <?php echo e(__("Start for Free")); ?>
+
+                                    </a>
+                                <?php else: ?>
+                                    <a href="<?php echo e(route('payment.index', $plan['id_secure'])); ?>" class="btn btn-dark btn-lg w-100 rounded-5">
+                                        <?php echo e(__("Choose Plan")); ?>
+
+                                    </a>
+                                <?php endif; ?>
                             </div>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                            <div class="col-12 text-center text-muted py-5"><?php echo e(__('No plans available.')); ?></div>
-                        <?php endif; ?>
+                        </div>
                     </div>
-                </div>
-            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <div class="col-12 text-center text-muted py-5"><?php echo e(__('No plans available.')); ?></div>
+                <?php endif; ?>
+            </div>
         </div>
-    </div>
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+</div>
+
+ </div>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp82\htdocs\pando-laravel\modules/AppProfile\resources/views/plan.blade.php ENDPATH**/ ?>
