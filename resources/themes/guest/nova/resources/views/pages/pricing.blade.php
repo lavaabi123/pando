@@ -1,2 +1,2 @@
 @include("partials.pricing")
-@include("partials.faqs")
+<!--@include("partials.faqs")-->

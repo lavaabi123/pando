@@ -1,68 +1,56 @@
-<section class="relative w-screen min-h-screen flex items-stretch overflow-hidden bg-white overflow-x-hidden">
+<section class="relative w-screen min-h-screen flex flex-column flex-sm-row items-stretch overflow-hidden bg-white overflow-x-hidden">
 
     @include("partials/login-screen", ["name" => __("Create an account & get started.")])
 
-    <div class="flex flex-col justify-center flex-1 px-8 py-16 bg-blueGray-100 z-10" style="background-image: url({{ theme_public_asset('images/pattern-light-big.svg') }}); background-position: center;">
+    <div class="flex flex-col justify-center flex-1 px-8 py-16 bg-white z-10">
         <form class="actionForm max-w-md mx-auto w-full space-y-5" action="{{ module_url('do_signup') }}" method="POST" data-loading="1">
             <div class="show-on-mobile">
                 <a class="mb-4 inline-block" href="{{ url('') }}">
                     <img class="h-10" src="{{ url( get_option("website_logo_brand_dark", asset('public/img/logo-brand-dark.png')) ) }}" alt="">
                 </a>
-                <h2 class="mb-16 text-4xl md:text-4xl font-bold font-heading tracking-px-n leading-tight">
+                <h2 class="mb-10 text-4xl md:text-4xl font-bold font-heading tracking-px-n leading-tight">
                     {{ __("Create an account & get started.") }}
                 </h2>
             </div>
-            
+            <h4 class="fw-bold fs-5 mt-4 mb-3 d-none d-sm-block">Welcome! Sign up</h4>
             <!-- Full Name -->
-            <div>
-                <label for="fullname" class="block text-gray-700 font-semibold mb-2">{{ __("Full Name") }}</label>
-                <input type="text" id="fullname" name="fullname"
-                       class="input input-bordered input-lg w-full px-4 py-3.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300 outline-none"
-                       placeholder="{{ __('Enter your full name') }}" required>
+            <div class="mb-3">
+                <!--<label for="fullname" class="block text-gray-700 font-semibold mb-2">{{ __("Full Name") }}</label>-->
+                <input type="text" id="fullname" name="fullname" class="form-control" placeholder="{{ __('Enter your full name') }}" required>
             </div>
 
             <!-- Email -->
-            <div>
-                <label for="email" class="block text-gray-700 font-semibold mb-2">{{ __("Email Address") }}</label>
-                <input type="email" id="email" name="email"
-                       class="input input-bordered input-lg w-full px-4 py-3.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300 outline-none"
-                       placeholder="{{ __('Enter your email address') }}" required>
+            <div class="mb-3">
+                <!--<label for="email" class="block text-gray-700 font-semibold mb-2">{{ __("Email Address") }}</label>-->
+                <input type="email" id="email" name="email" class="form-control" placeholder="{{ __('Enter your email address') }}" required>
                 <p class="email-validation-message mt-1 text-sm"></p>
             </div>
 
             <!-- Username -->
-            <div>
-                <label for="username" class="block text-gray-700 font-semibold mb-2">{{ __("Username") }}</label>
-                <input type="text" id="username" name="username"
-                       class="input input-bordered input-lg w-full px-4 py-3.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300 outline-none"
-                       placeholder="{{ __('Choose a username') }}" required>
+            <div class="mb-3">
+                <!--<label for="username" class="block text-gray-700 font-semibold mb-2">{{ __("Username") }}</label>-->
+                <input type="text" id="username" name="username" class="form-control" placeholder="{{ __('Choose a username') }}" required>
                 <p class="username-validation-message mt-1 text-sm"></p>
             </div>
 
             <!-- Password -->
-            <div>
-                <label for="password" class="block text-gray-700 font-semibold mb-2">{{ __("Password") }}</label>
-                <input type="password" id="password" name="password"
-                       class="input input-bordered input-lg w-full px-4 py-3.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300 outline-none"
-                       placeholder="{{ __('Enter your password') }}" required>
+            <div class="mb-3">
+                <!--<label for="password" class="block text-gray-700 font-semibold mb-2">{{ __("Password") }}</label>-->
+                <input type="password" id="password" name="password" class="form-control" placeholder="{{ __('Enter your password') }}" required>
                 <p class="password-validation-message mt-1 text-sm"></p>
             </div>
 
             <!-- Confirm Password -->
-            <div>
-                <label for="password_confirmation" class="block text-gray-700 font-semibold mb-2">{{ __("Confirm Password") }}</label>
-                <input type="password" id="password_confirmation" name="password_confirmation"
-                       class="input input-bordered input-lg w-full px-4 py-3.5 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300 outline-none"
-                       placeholder="{{ __('Re-enter your password') }}" required>
+            <div class="mb-3">
+                <!--<label for="password_confirmation" class="block text-gray-700 font-semibold mb-2">{{ __("Confirm Password") }}</label>-->
+                <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="{{ __('Re-enter your password') }}" required>
                 <p class="password-confirmation-message mt-1 text-sm"></p>
             </div>
 			
 			  <!-- Timezone -->
-		    <div>
-		        <label for="timezone" class="block text-gray-700 font-semibold mb-2">{{ __("Timezone") }}</label>
-		        <select id="timezone" name="timezone"
-		                class="select select-bordered input-lg w-full px-4 text-gray-700 font-medium bg-white border border-gray-300 rounded-lg focus:ring focus:ring-indigo-300 outline-none"
-		                required>
+		    <div class="mb-3">
+		        <!--<label for="timezone" class="block text-gray-700 font-semibold mb-2">{{ __("Timezone") }}</label>-->
+		        <select id="timezone" name="timezone" class="form-control" required>
 		            <option value="">{{ __("Select your timezone") }}</option>
 		            @foreach(timezone_identifiers_list() as $tz)
 		                <option value="{{ $tz }}" {{ old('timezone') == $tz ? 'selected' : '' }}>

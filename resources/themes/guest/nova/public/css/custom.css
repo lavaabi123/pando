@@ -79,6 +79,16 @@ a:focus, a:focus-visible {
     background: #000000;
     border-color: #000000;
     color: #ffffff; }
+.bg-primary {
+	background: #fd8107 !important;
+	color: #ffffff;
+}
+.hover\:bg-black:hover {
+    background: #000000 !important;
+}
+.hover\:bg-primary:hover {
+	background: #fd8107 !important;
+}
 .form-control {
     border: none;
     border-radius: 0px;

@@ -8,7 +8,7 @@
         
         {{-- Header --}}
         <div class="text-center mb-12">
-            <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-4">
+            <h1 class="text-4xl md:text-6xl fw-bolder text-gray-900 mb-4">
                 {{ __("Pricing") }}
             </h1>
             <p class="text-xl text-gray-600 max-w-3xl mx-auto mb-10">
@@ -88,12 +88,12 @@
 
                     <div class="relative">
                         {{-- Card --}}
-                        <div class="h-full bg-white rounded-2xl transition-all duration-300 hover:shadow-2xl {{ $isFeatured ? 'border-2 border-indigo-500 shadow-xl scale-105 lg:scale-110' : 'border border-gray-200 shadow-lg hover:border-indigo-300' }}">
+                        <div class="h-full bg-white rounded-5 transition-all duration-300 hover:shadow-2xl {{ $isFeatured ? 'border-1 border-indigo-500 shadow-xl scale-105 lg:scale-110' : 'border border-gray-200 shadow-lg hover:border-indigo-300' }}">
                             
                             {{-- Featured Badge --}}
                             @if($isFeatured)
-                                <div class="absolute -top-5 left-1/2 -translate-x-1/2 z-20">
-                                    <div class="bg-indigo-600 text-white px-6 py-2 rounded-full text-sm font-bold uppercase tracking-wider shadow-lg">
+                                <div class="absolute left-0 top-4  right-0 d-flex justify-content-center -translate-y-1/2 z-20">
+                                    <div class="bg-indigo-600 text-white px-6 py-2 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg">
                                         {{ __('Most Popular') }}
                                     </div>
                                 </div>
@@ -140,7 +140,8 @@
                                 {{-- CTA Button --}}
                                 <div class="mb-8">
                                     <a href="{{ url('auth/signup', $plan['id_secure']) }}" 
-                                       class="block w-full py-4 px-6 text-center font-bold rounded-xl transition-all duration-300 transform hover:scale-105 {{ $isFeatured ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg hover:shadow-xl' : 'bg-white text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-600 hover:text-white shadow-md' }}">
+                                       class="btn btn-primary w-100 border-0 {{ $isFeatured ? 'bg-primary hover:bg-black' : 'bg-black text-white border-2 border-indigo-600 hover:bg-primary hover:text-white shadow-md' }}">
+									   <!-- {{ $isFeatured ? 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg hover:shadow-xl' : 'bg-white text-indigo-600 border-2 border-indigo-600 hover:bg-indigo-600 hover:text-white shadow-md' }} -->
                                         <span class="flex items-center justify-center gap-2">
                                             {{ __("TRY FOR FREE") }}
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

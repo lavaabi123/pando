@@ -1,9 +1,9 @@
-<div class="content_left flex flex-col justify-between flex-1 px-8 pt-13 bg-white z-10">
+<div class="content_left flex flex-col justify-between flex-1 px-8 pt-13 z-10">
     <img class="absolute left-0 z-20 bottom-0 pointer-events-none hide-on-mobile" src="{{ theme_public_asset('images/sign-up/gradient.svg') }}" alt="" />
 	<div class="row justify-between h-100">
     <div class="col-md-8 mx-auto self-center">
         <a class="mb-0 inline-block" href="{{ url('') }}">
-            <img class="h-20" src="{{ url( get_option("website_logo_brand_dark ", asset('public/img/logos.png')) ) }}" alt="">
+            <img class="h-20" src="{{ url(asset('public/img/logos.png')) }}" alt="">
         </a>
         <h2 class="mb-32 fs-1 font-heading tracking-px-n leading-tight">
             {{ $name ?? __("Welcome Back") }}
