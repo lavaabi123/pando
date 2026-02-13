@@ -10,6 +10,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
 use Illuminate\Pagination\Paginator;
 use Auth;
+use App\Helpers\Inbox_Helper;
 
 class AppBrandsController extends Controller
 {
@@ -103,6 +104,13 @@ class AppBrandsController extends Controller
         if ($items->total() === 0 && $current_page > 1) {
             return ms(['status' => 0]);
         }
+		
+		// Add inbox counts using helper
+		$brandIds = $items->pluck('id')->toArray();
+		$inboxCounts = Inbox_Helper::getInboxCountsByBrands($brandIds);
+		foreach ($items as $brand) {
+			$brand->unread_count = $inboxCounts[$brand->id] ?? 0;
+		}
 
 		if(!empty($request->input('from')) && $request->input('from') == 'header'){
 			return ms([

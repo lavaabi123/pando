@@ -51,6 +51,9 @@
                     @if(!isset($value['sub_menu']))
                         <div class="menu-item">
                             <a class="menu-link flex-grow-1 align-items-center {{ menu_active($value['uri']) ? 'text-primary' : '' }}" href="{{ url( $value['uri'] ) }}">
+							@if($value['name'] == 'Inbox')
+								<span class="inbox-count-badge position-absolute top-10 start-60 translate-middle badge rounded-pill bg-danger text-white">0</span>
+							@endif
                                 <div class="menu-icon fs-18 {{ menu_active($value['uri']) ? 'text-primary' : 'text-gray-900' }}">
                                     <i class="{{ $value['icon'] }}" {!! Core::sidebarColor() !!}></i>
                                 </div>

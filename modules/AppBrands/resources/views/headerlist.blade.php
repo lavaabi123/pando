@@ -15,9 +15,10 @@
 									<div class="brand-avatar-placeholder">{{ strtoupper(substr($brand->name, 0, 1)) }}</div>
 								@endif
 								
-								@if(!empty($brand->unread_count) && $brand->unread_count > 0)
-									<span class="brand-badge">{{ $brand->unread_count }}</span>
-								@endif
+								<div class="brand-badge inbox-count-badge-{{ $brand->id }}" 
+									  style="display: {{ (!empty($brand->unread_count) && $brand->unread_count > 0) ? 'inline-block' : 'none' }};">
+									{{ (!empty($brand->unread_count) && $brand->unread_count > 99) ? '99+' : ($brand->unread_count ?? 0) }}
+								</div>
 							</div>
 							
 							<!-- Brand Name (clickable area for selection) -->

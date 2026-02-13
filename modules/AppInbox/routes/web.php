@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Modules\AppInbox\Http\Controllers\InboxController;
+use App\Helpers\Inbox_Helper;
 
 /*
 |--------------------------------------------------------------------------
@@ -31,5 +32,64 @@ Route::group(["prefix" => "app"], function () {
 		Route::post('/set-favourite', [InboxController::class, 'setFavourite'])->name('inbox.set_favourite');
 		Route::post('/assign-user', [InboxController::class, 'assignUser'])->name('inbox.assign_user');
 		Route::get('/cron', [InboxController::class, 'cron'])->name('inbox.cron');
+		Route::get('/inbox-count', function (Request $request) {
+			$brandId = session('brand_id');
+			$count = Inbox_Helper::getInboxCount($brandId);			
+			return response()->json([
+				'success' => true,
+				'count' => $count
+			]);
+		})->name('inbox.count');
 	});
+});
+Route::group(["prefix" => "app"], function () {
+    Route::get('/brands/inbox-counts', function () {
+        $userId = session('user_id');
+        
+        // Get role
+        $role = DB::table('users')->where('id', $userId)->value('role');
+        
+        if ((int)$role === 2) {
+            // SUPER ADMIN: get all brands
+            $brandIds = DB::table('brands')->pluck('id')->toArray();
+        } else {
+            $memberRow = DB::table('team_members')
+                ->select('team_id')
+                ->where('uid', $userId)
+                ->first();
+            $isMember = (bool) $memberRow;
+            $teamId = $isMember ? $memberRow->team_id : $userId;
+            
+            if (!$isMember) {
+                // TEAM ADMIN
+                $brandIds = DB::table('brands')
+                    ->where('team_id', $teamId)
+                    ->pluck('id')
+                    ->toArray();
+            } else {
+                // TEAM MEMBER
+                $brandIds = DB::table('brands as b')
+                    ->leftJoin('user_brands as ub', function ($join) use ($userId, $teamId) {
+                        $join->on('ub.brand_id', '=', 'b.id')
+                             ->where('ub.user_id', '=', $userId)
+                             ->where('ub.team_id', '=', $teamId);
+                    })
+                    ->where('b.team_id', $teamId)
+                    ->where(function ($q) use ($userId) {
+                        $q->where('b.user_id', $userId)
+                          ->orWhereNotNull('ub.user_id');
+                    })
+                    ->distinct()
+                    ->pluck('b.id')
+                    ->toArray();
+            }
+        }
+        
+        $counts = Inbox_Helper::getInboxCountsByBrands($brandIds);
+        
+        return response()->json([
+            'success' => true,
+            'counts' => $counts
+        ]);
+    })->name('brands.inbox.counts');
 });
