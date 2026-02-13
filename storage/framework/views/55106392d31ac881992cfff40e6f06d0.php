@@ -51,6 +51,9 @@
                     <?php if(!isset($value['sub_menu'])): ?>
                         <div class="menu-item">
                             <a class="menu-link flex-grow-1 align-items-center <?php echo e(menu_active($value['uri']) ? 'text-primary' : ''); ?>" href="<?php echo e(url( $value['uri'] )); ?>">
+							<?php if($value['name'] == 'Inbox'): ?>
+								<span class="inbox-count-badge position-absolute top-10 start-60 translate-middle badge rounded-pill bg-danger text-white">0</span>
+							<?php endif; ?>
                                 <div class="menu-icon fs-18 <?php echo e(menu_active($value['uri']) ? 'text-primary' : 'text-gray-900'); ?>">
                                     <i class="<?php echo e($value['icon']); ?>" <?php echo Core::sidebarColor(); ?>></i>
                                 </div>

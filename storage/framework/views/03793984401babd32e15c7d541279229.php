@@ -156,7 +156,7 @@
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/lazysizes/lazysizes.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/datatables/datatables.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/fullcalendar/index.global.min.js')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=10.15"></script>	
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=10.17"></script>	
     <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js?v=1.21')); ?>"></script>
 	<?php echo $__env->yieldPushContent('scripts'); ?>
     <?php echo $__env->yieldContent('script'); ?>
@@ -171,6 +171,61 @@ inboxAjax: <?php echo json_encode(route('inbox.ajax_list'), 15, 512) ?>,
 addTag: <?php echo json_encode(route('inbox.add_tag'), 15, 512) ?>,
 inboxDetail: <?php echo json_encode(route('inbox.ajax_list_detail'), 15, 512) ?>,
 };
+</script>
+<script>
+function updateInboxCount() {
+    const url = <?php echo json_encode(route('inbox.count'), 15, 512) ?>;
+    
+    fetch(url)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                updateInboxBadge(data.count);
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching inbox count:', error);
+        });
+}
+
+function updateInboxBadge(count) {
+    // Get current brand ID from session (the selected brand)
+    const currentBrandId = '<?php echo session('brand_id'); ?>';
+    
+    // Update main inbox badge in navigation
+    const badge = document.querySelector('.inbox-count-badge');
+    if (badge) {
+        if (count > 0) {
+            badge.textContent = count > 99 ? '99+' : count;
+            badge.style.display = 'inline-block';
+        } else {
+            badge.style.display = 'inline-block';
+        }
+    }
+    
+    // Update the badge for current brand in the brand list
+    if (currentBrandId) {
+        const brandBadge = document.querySelector('.inbox-count-badge-'+currentBrandId);
+        if (brandBadge) {
+            if (count > 0) {
+                brandBadge.textContent = count > 99 ? '99+' : count;
+                brandBadge.style.display = 'inline-block';
+            } else {
+                brandBadge.style.display = 'none';
+            }
+        }
+    }
+}
+
+// Start polling when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Initial count
+    updateInboxCount();
+    
+    setInterval(() => {
+        updateInboxCount();
+    }, 30000); // 5 minutes
+});
 </script>
 </body>
 </html><?php /**PATH C:\xampp82\htdocs\pando-laravel\resources\themes\app\pico\resources\views/layouts/app.blade.php ENDPATH**/ ?>
