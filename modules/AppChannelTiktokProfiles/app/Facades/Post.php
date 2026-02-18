@@ -110,6 +110,9 @@ class Post extends Facade
         $medias = $data->medias ?? [];
         $caption = $data->caption ?? '';
         $videoPath = Media::url($medias[0] ?? '');
+        
+        // Get TikTok settings if provided
+        $tiktokSettings = $data->tiktok_settings ?? null;
 
         $errors = self::validator($post);
         if ($errors) {
@@ -121,7 +124,7 @@ class Post extends Facade
         }
 
         try {
-            $uploadResult = self::uploadVideo($videoPath, $caption);
+            $uploadResult = self::uploadVideo($videoPath, $caption, $tiktokSettings);
             if ($uploadResult['status'] != 1) {
                 return $uploadResult;
             }
@@ -141,22 +144,35 @@ class Post extends Facade
         }
     }
 
-    protected static function uploadVideo($videoPath, $caption)
+    protected static function uploadVideo($videoPath, $caption, $settings = [])
     {
         try {
-
-            if(!get_option("tiktok_mode", 0)){
-                $privacy = Connector::PRIVACY_PRIVATE;
-                $comments_off  = true;
-                $duet_off = true;
-                $stitch_off = true;
-            }else{
-                $privacy = Connector::PRIVACY_PUBLIC;
-                $comments_off  = false;
-                $duet_off = false;
-                $stitch_off = false;
+            // Use settings provided (either from inline form or default)
+            if (!empty($settings)) {
+                // Map privacy level
+                $privacyMap = [
+                    'PUBLIC_TO_EVERYONE' => Connector::PRIVACY_PUBLIC,
+                    'MUTUAL_FOLLOW_FRIENDS' => Connector::PRIVACY_FRIENDS,
+                    'SELF_ONLY' => Connector::PRIVACY_PRIVATE,
+                ];
+                $privacy = $privacyMap[$settings['privacy_level']] ?? Connector::PRIVACY_PUBLIC;
+                $comments_off = $settings['disable_comment'] ?? false;
+                $duet_off = $settings['disable_duet'] ?? false;
+                $stitch_off = $settings['disable_stitch'] ?? false;
+            } else {
+                // Fallback to mode-based settings
+                if(!get_option("tiktok_mode", 0)){
+                    $privacy = Connector::PRIVACY_PRIVATE;
+                    $comments_off  = true;
+                    $duet_off = true;
+                    $stitch_off = true;
+                }else{
+                    $privacy = Connector::PRIVACY_PUBLIC;
+                    $comments_off  = false;
+                    $duet_off = false;
+                    $stitch_off = false;
+                }
             }
-
 
             $video = new VideoFromUrl($videoPath, $caption, $privacy, $comments_off, $duet_off, $stitch_off);
             $publishInfo = $video->publish(self::$tiktok);

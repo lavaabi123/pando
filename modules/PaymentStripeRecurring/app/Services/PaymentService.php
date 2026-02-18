@@ -228,7 +228,8 @@ class PaymentService implements RecurringPaymentInterface
 	    }
 
 	    $object = $event->data->object;
-	    $subscriptionId = $object->subscription ?? $object->id ?? null;
+		
+	    $subscriptionId = $object->parent->subscription_details->subscription ?? $object->id ?? null;
 	    $transactionId  = $object->payment_intent ?? $object->charge ?? $object->id;
 
 	    $plan = null;

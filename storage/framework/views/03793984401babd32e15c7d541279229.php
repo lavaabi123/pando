@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     setInterval(() => {
         updateInboxCount();
-    }, 30000); // 5 minutes
+    }, 300000); // 5 minutes
 });
 </script>
 </body>

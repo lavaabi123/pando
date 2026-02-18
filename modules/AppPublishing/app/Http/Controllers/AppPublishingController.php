@@ -730,6 +730,14 @@ class AppPublishingController extends Controller
             "medias"  => $medias,
             "options" => $options,
         ];
+        
+        // Add TikTok settings if provided
+        if ($request->has('tiktok_settings')) {
+            $tiktokSettings = json_decode($request->tiktok_settings, true);
+            if ($tiktokSettings) {
+                $postData['tiktok_settings'] = $tiktokSettings;
+            }
+        }
 
         $data = [
             "campaign"         => $campaignId,
