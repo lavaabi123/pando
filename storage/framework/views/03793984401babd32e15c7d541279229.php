@@ -156,7 +156,7 @@
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/lazysizes/lazysizes.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/datatables/datatables.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/fullcalendar/index.global.min.js')); ?>"></script>
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=10.17"></script>	
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=10.18"></script>	
     <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js?v=1.21')); ?>"></script>
 	<?php echo $__env->yieldPushContent('scripts'); ?>
     <?php echo $__env->yieldContent('script'); ?>

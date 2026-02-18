@@ -1667,7 +1667,18 @@ var Main = new (function ()
 
                     //Redirect
                     Main.redirect(rediect, result.status);
-
+					if(result.status == 1 && result.tiktok_processing === true) {
+						if (typeof showTikTokProcessingNotification === 'function') {
+							showTikTokProcessingNotification();
+						} else {
+							Main.showNotify(
+								'TikTok Upload', 
+								'Your video is being uploaded to TikTok. It may take a few minutes for your content to process and be visible on your profile.',
+								'success'
+							);
+						}
+						return; // Important: stops regular message from showing
+					}
                     //Message
                     if(result.status != undefined){
 

@@ -130,7 +130,8 @@ class Post extends Facade
             }
             return [
                 "status" => 1,
-                "message" => __("Successfully posted to TikTok"),
+                "message" => __("Your video is being uploaded to TikTok. It may take a few minutes for your content to process and be visible on your profile."),
+				"tiktok_processing"=>true,
                 "id" => $uploadResult['id'],
                 "url" => $uploadResult['url'],
                 "type" => "media"

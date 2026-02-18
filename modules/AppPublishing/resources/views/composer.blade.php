@@ -766,6 +766,7 @@ if($post){
     </div>
 </div>
 @endsection
+@include('apppublishing::partials.tiktok-processing-notice')
 <style>
 .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{
     min-height:0em;
