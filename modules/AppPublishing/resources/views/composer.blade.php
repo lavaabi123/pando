@@ -122,7 +122,7 @@ if($post){
                                     </div>
                                     @endif
 
-                                    @if(Gate::allows('appcaptions'))
+                                    <?php // @if(Gate::allows('appcaptions')) ?>
                                     <div class="border-gray-400">
                                         <a href="{{ route('app.hashtags.get_hashtag') }}" class="d-block text-gray-700 actionItem" data-offcanvas="getHashtagOffCanvas" data-bs-title="{{ __("Get Hashtag") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-hashtag p-0"></i></a>
                                     </div>
@@ -138,7 +138,7 @@ if($post){
                                     <!--<div class="border">
                                         <a href="{{ route('app.captions.save_caption') }}" class="px-3 py-2 d-block text-gray-700 actionItem" data-popup="saveCaptionModal" data-bs-title="{{ __("Save caption") }}" data-bs-toggle="tooltip" data-bs-placement="top"><i class="fal fa-save p-0"></i></a>
                                     </div>-->
-                                    @endif
+                                    <?php // @endif ?>
 									{{-- Character count indicators for each social network --}}
 									<div style="display:none;" data-word-count="280" 
 										 class="word-reduce count-word-x lh-1 align-items-center justify-content-center text-gray-500 border-gray-400" 
