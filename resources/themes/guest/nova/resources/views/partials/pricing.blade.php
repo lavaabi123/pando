@@ -102,7 +102,7 @@
                             <div class="p-8 lg:p-10">
                                 {{-- Plan Name --}}
                                 <div class="mb-6">
-                                    <h3 class="text-lg font-bold uppercase tracking-wider mb-3 {{ $isFeatured ? 'text-indigo-600' : 'text-green-600' }}">
+                                    <h3 class="text-lg font-bold uppercase tracking-wider mb-1 {{ $isFeatured ? 'text-indigo-600' : 'text-green-600' }}">
                                         {{ __($plan['name'] ?? '-') }}
                                     </h3>
                                     <p class="text-gray-600 text-base min-h-[48px]">

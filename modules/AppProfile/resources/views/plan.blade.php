@@ -20,49 +20,52 @@
 @section('content')
     @include("appprofile::partials.profile-header")
     
-    <div class="container py-5 pricing">
+    <div class="container py-4 pricing">
 
         @include("components.main-message")
 
-        <div class="mb-5">
+        <div class="mb-2">
             <x-sub-header
                 title="{{ __('Subscription Plan') }}"
                 description="{{ __('Manage your plan. Upgrade for more features!') }}"
             />
         </div>
 
-        <div class="card shadow-sm rounded-4 mb-5 mx-auto">
+        <div class="card shadow-sm rounded-4 mb-5 mx-auto border-2 bg-gray-100">
             <div class="card-body p-0">
                 <div class="d-flex flex-column flex-md-row">
                     <!-- Left: Plan Info -->
                     <div class="flex-fill border-end-md mb-4 mb-md-0">
-                        <div class="border-bottom fw-semibold fs-14 text-uppercase px-4 py-3">
+                        <div class="border-bottom fw-6 fs-16 p-3">
                             {{ __("Your Plan") }}
                         </div>
                         <div class="p-4 fs-14">
-                            <div class="size-50 d-flex gap-10 align-items-center bg-gray-100 border border-gray-200 fs-25 justify-content-center b-r-20 mb-2">
-                                <i class="fa-light fa-user-crown text-warning"></i>
-                            </div>
-                            <div class="mb-2 fw-semibold fs-20"><b>{{ $plan->name ?? __("No Plan") }}</b>
-                                @if($plan && $plan->free_plan)
-                                    <span class="badge badge-outline badge-light badge-pill badge-sm position-relative t--5">
-                                        {{ __("Free Plan") }}
-                                    </span>
-                                @endif
-                            </div>
-                            <div class="mb-2">
-                                {{ __('Expiration date :') }}
-                                <b class="{{ $expired ? 'text-danger' : 'text-success' }}">
-                                    @if($user->expiration_date == -1)
-                                        {{ __('Unlimited') }}
-                                    @elseif($user->expiration_date)
-                                        {{ date_show($user->expiration_date) }}
-                                    @else
-                                        {{ __('N/A') }}
-                                    @endif
-                                </b>
-                            </div>
-
+							<div class="d-flex gap-10">
+								<div class="size-50 d-flex align-items-center bg-gray-100 border border-gray-200 fs-25 justify-content-center b-r-15">
+									<i class="fa-light fa-user-crown text-warning"></i>
+								</div>
+								<div class="d-flex flex-column gap-1">
+									<div class="fs-20"><b>{{ $plan->name ?? __("No Plan") }}</b>
+										@if($plan && $plan->free_plan)
+											<span class="badge badge-outline badge-light badge-pill badge-sm position-relative t--5">
+												{{ __("Free Plan") }}
+											</span>
+										@endif
+									</div>
+									<div class="mb-2">
+										{{ __('Expiration date :') }}
+										<b class="{{ $expired ? 'text-danger' : 'text-success' }}">
+											@if($user->expiration_date == -1)
+												{{ __('Unlimited') }}
+											@elseif($user->expiration_date)
+												{{ date_show($user->expiration_date) }}
+											@else
+												{{ __('N/A') }}
+											@endif
+										</b>
+									</div>
+								</div>
+							</div>
                             <div class="mt-4 mb-1 d-flex justify-content-between align-items-center">
                                 <span class="fs-12">{{ __('Credits used') }}</span>
                                 <span class="small fw-bold text-primary">{{ $credit_summary['progress_label'] }}</span>
@@ -84,7 +87,7 @@
                             
                             <div class="d-flex gap-10 mt-4 flex-wrap">
                                 @if($plan && Plan::hasSubscription())
-                                <a href="{{ route("payment.cancel_subscription") }}" class="btn btn-outline btn-danger btn-md actionItem" data-confirm="{{ __("Are you sure you want to cancel your subscription?") }}" data-redirect="">{{ __("Cancel Subscription") }}</a>
+                                <a href="{{ route("payment.cancel_subscription") }}" class="btn btn-outline btn-danger btn-md actionItem b-r-20" data-confirm="{{ __("Are you sure you want to cancel your subscription?") }}" data-redirect="">{{ __("Cancel Subscription") }}</a>
                                 @else
                                     @if($plan && !$plan->free_plan)
                                     <a href="#pricingTab" class="btn btn-warning btn-md">{{ __("Upgrade Plan") }}</a>
@@ -95,8 +98,8 @@
                             
                         </div>
                     </div>
-                   <div class="flex-fill">
-    <div class="border-bottom fw-semibold fs-14 text-uppercase px-4 py-3">
+                   <div class="flex-grow-0">
+    <div class="border-bottom fw-6 fs-16 p-3">
         {{ __("Plan Permissions") }}
     </div>
     <div class="p-4">
@@ -120,11 +123,11 @@
                 $hasAIPublishing = $getPermValue('appaipublishing');
             @endphp
 
-            <ul class="list-unstyled">
+            <ul class="list-unstyled with-mark fw-6">
                 {{-- Social Media Accounts --}}
                 @if($maxChannels)
                     <li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                             <i class="fa-regular fa-check"></i>
                         </span>
                         @if($maxChannels == -1 || $maxChannels > 10000)
@@ -138,7 +141,7 @@
                 {{-- Posts per Month --}}
                 @if($maxPosts)
                     <li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                             <i class="fa-regular fa-check"></i>
                         </span>
                         @if($maxPosts == -1 || $maxPosts > 100000)
@@ -152,7 +155,7 @@
                 {{-- AI Word Credits --}}
                 @if($aiWordCredits)
                     <li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                             <i class="fa-regular fa-check"></i>
                         </span>
                         @if($aiWordCredits == -1 || $aiWordCredits > 1000000)
@@ -166,7 +169,7 @@
                 {{-- Storage --}}
                 @if($maxStorage)
                     <li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                             <i class="fa-regular fa-check"></i>
                         </span>
                         @if($maxStorage == -1 || $maxStorage > 100000)
@@ -180,14 +183,14 @@
                 {{-- Analytics --}}
                 @if($hasAnalytics)
                     <li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                             <i class="fa-regular fa-check"></i>
                         </span>
                         {{ __("Analytics") }}
                     </li>
 				@else
 					<li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-danger">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-danger">
                             <i class="fa-regular fa-xmark"></i>
                         </span>
                         {{ __("Analytics") }}
@@ -197,14 +200,14 @@
                 {{-- AI Publishing --}}
                 @if($hasAIPublishing)
                     <li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                             <i class="fa-regular fa-check"></i>
                         </span>
                         {{ __("AI Publishing") }}
                     </li>
 				@else
 					<li class="mb-2 d-flex align-items-center gap-1">
-                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-danger">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-danger">
                             <i class="fa-regular fa-xmark"></i>
                         </span>
                         {{ __("AI Publishing") }}
@@ -215,7 +218,7 @@
                 @foreach($plan_detail['features']??[] as $feature)
                     @if($feature['key'] !== 'access_feature')
                         <li class="mb-2 d-flex align-items-center gap-1">
-                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
+                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
                                 <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
                             </span>
 
@@ -232,10 +235,10 @@
                                             <div class="fw-bold mb-1 small px-3 pt-2">
                                                 {{ __($group['tab_name'] ?? '') }}
                                             </div>
-                                            <ul class="list-unstyled mb-2 px-3">
+                                            <ul class="list-unstyled with-mark mb-2 px-3">
                                                 @foreach($group['items'] as $item)
                                                     <li class="d-flex align-items-center">
-                                                        <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
+                                                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
                                                             <i class="fa-regular fa-{{$feature['check'] ? 'check' : 'xmark' }}"></i>
                                                         </span>
                                                         {{ __($item['label']) }}
@@ -274,7 +277,7 @@
             </p>
         </div>
 
-        <div class="d-flex mx-auto justify-content-center mb-5">
+        <div class="d-flex mx-auto justify-content-center mb-0">
             <!--<ul class="nav nav-tabs justify-content-center mb-4 gap-0 b-r-20 border border-gray-300 overflow-hidden" id="pricingTab" role="tablist">
                 @foreach($planTypes as $typeKey => $typeLabel)
                     <li class="nav-item {{ $typeKey==2?"border-start border-end border-gray-300":"" }}" role="presentation">
@@ -326,12 +329,14 @@
                     @endphp
 
                     <div class="col-md-3">
-                        <div class="card pricing-card hp-100 text-center border-0 shadow-sm {{ $isFeatured ? 'border-2 border-primary' : '' }}">
-                            <div class="card-body py-5 position-relative">
+                        <div class="card pricing-card hp-100 text-center border-2 bg-gray-100 shadow-sm {{ $isFeatured ? 'border-2 border-primary' : '' }}">
+                            <div class="card-body py-4 position-relative">
                                 @if($isFeatured)
-                                    <span class="position-absolute top-0 end-0 bg-primary-400 wp-100 text-white px-3 py-2 small fw-bold btr-r-25 btl-r-25 text-uppercase">
-                                        {{ __('Featured') }}
-                                    </span>
+									<div class="position-absolute top-0 end-0 start-0 translate-middle-y">
+										<span class="bg-primary text-uppercase text-white fw-6 px-3 py-1 b-r-20 fs-12">
+											{{ __('Featured') }}
+										</span>
+									</div>
                                 @endif
                                 
                                 <span class="text-uppercase fw-bold text-primary mb-2 d-block" style="letter-spacing:1px;">
@@ -349,11 +354,11 @@
                                 </h2>
                                 <div class="mb-2 text-muted mb-4">{{ $plan['desc'] ?? '' }}</div>
                                 
-                                <ul class="list-unstyled text-start mb-4 mx-auto max-w-240">
+                                <ul class="list-unstyled with-mark mb-4 max-w-240">
                                     {{-- Social Media Accounts --}}
                                     @if($maxChannels)
                                         <li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-check"></i>
                                             </span>
                                             <span class="fs-14">
@@ -369,7 +374,7 @@
                                     {{-- Posts per Month --}}
                                     @if($maxPosts)
                                         <li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-check"></i>
                                             </span>
                                             <span class="fs-14">
@@ -385,7 +390,7 @@
                                     {{-- AI Word Credits --}}
                                     @if($aiWordCredits)
                                         <li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-check"></i>
                                             </span>
                                             <span class="fs-14">
@@ -401,7 +406,7 @@
                                     {{-- Storage --}}
                                     @if($maxStorage)
                                         <li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-check"></i>
                                             </span>
                                             <span class="fs-14">
@@ -417,14 +422,14 @@
                                     {{-- Analytics --}}
                                     @if($hasAnalytics)
                                         <li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-check"></i>
                                             </span>
                                             <span class="fs-14">{{ __("Analytics") }}</span>
                                         </li>
 									@else
 										<li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-xmark"></i>
                                             </span>
                                             <span class="fs-14">{{ __("Analytics") }}</span>
@@ -434,14 +439,14 @@
                                     {{-- AI Publishing --}}
                                     @if($hasAIPublishing)
                                         <li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-check"></i>
                                             </span>
                                             <span class="fs-14">{{ __("AI Publishing") }}</span>
                                         </li>
 									@else
 										<li class="mb-2 d-flex align-items-center gap-1">
-                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 text-success">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-xmark"></i>
                                             </span>
                                             <span class="fs-14">{{ __("AI Publishing") }}</span>
@@ -452,7 +457,7 @@
                                     @foreach($plan['features'] as $feature)
                                         @if($feature['key'] !== 'access_feature')
                                             <li class="mb-2 d-flex align-items-center gap-1">
-                                                <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
+                                                <span class="d-flex align-items-center justify-content-center fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
                                                     <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
                                                 </span>
 
@@ -469,10 +474,10 @@
                                                                 <div class="fw-bold mb-1 fs-12 px-3 pt-2">
                                                                     {{ __($group['tab_name'] ?? '') }}
                                                                 </div>
-                                                                <ul class="list-unstyled mb-2 px-3">
+                                                                <ul class="list-unstyled with-mark mb-2 px-3">
                                                                     @foreach($group['items'] as $item)
                                                                         <li class="d-flex align-items-center">
-                                                                            <span class="d-flex align-items-center justify-content-center size-20 d-block bg-gray-100 border border-gray-300 b-r-50 fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
+                                                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
                                                                                 <i class="fa-regular fa-{{$feature['check'] ? 'check' : 'xmark' }}"></i>
                                                                             </span>
                                                                             <span class="text-gray-700 fs-14">{{ __($item['label']) }}</span>

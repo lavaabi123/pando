@@ -198,6 +198,29 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
     box-shadow: 0 1px 0px #4f5b5b;
     margin-bottom: 10px;
 }
+#accordionMenu .badge.badge {
+	padding: 0.2rem;
+}
+a.btn.btn-dark {
+    background: var(--d-primary) !important;
+    font-size: 13px !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 8px 16px !important;
+    line-height: normal !important;
+    height: auto !important;
+    font-weight: 600 !important;
+    border: none;
+    border-radius: 30px;
+}
+a.btn.btn-dark:hover, a.btn.btn-dark:active, a.btn.btn-dark:focus {
+	background: var(--bg-black) !important;
+}
+a.btn.btn-dark i {
+    font-size: 12px !important;
+    font-weight: 600;
+    margin-right: 0 !important;
+}
 /* Custom Brand Dropdown */
 .custom-brand-dropdown {
     position: relative;
@@ -946,4 +969,32 @@ span.svg-icons svg {
 /** Footer **/
 .footer {
     border-top: 2px solid #767676;
+}
+/** Sub Header **/
+.subHeader .gap-8.mb-3 {
+    margin-bottom: 0 !important;
+    gap: 0.25rem !important;
+}
+.subHeader .py-3 > div {
+	margin-bottom:0 !important;
+}
+.bg-polygon.subHeader {
+    background: #f2f2f2;
+}
+.with-mark i {
+    font-weight: 700;
+    width: 10px;
+    text-align: center;
+}
+.nav.nav-tabs .nav-link {
+	color: var(--black);
+}
+.nav.nav-tabs .nav-link.active {
+    color: var(--d-primary);
+    border-bottom-color: var(--d-primary);
+}
+@media (min-width: 768px) {
+    .pricing .border-end-md {
+        border-right: 2px solid #dee2e6 !important;
+    }
 }
