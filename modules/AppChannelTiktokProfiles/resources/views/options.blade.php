@@ -126,6 +126,14 @@
                 <a href="https://www.tiktok.com/legal/music-usage-confirmation" target="_blank" style="color: #00D4FF;">Music Usage Confirmation</a>.
             </p>
         </div>
+		
+		<div class="alert alert-info border-0 mb-0" style="background-color: #FFF9E6; border-left: 4px solid #FFB800 !important;">
+            <div class="d-flex align-items-start">
+                <div style="font-size: 14px; color: #161823;">
+                    After you post your video to TikTok, <strong>it may take a few minutes for your content to process and be visible on your profile.</strong>
+                </div>
+            </div>
+        </div>
 
     </div>
 </div>
