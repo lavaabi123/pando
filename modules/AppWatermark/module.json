@@ -8,6 +8,7 @@
         "Modules\\AppWatermark\\Providers\\AppWatermarkServiceProvider"
     ],
     "files": [],
+	"show_in_pricing": false,
     "permission": false,
     "dis_menu": {
         "uri": "app/watermark",

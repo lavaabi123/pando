@@ -107,6 +107,9 @@ class PricingService
         $build = function($features) use (&$build, $permissions) {
             $list = [];
             foreach ($features as $feature) {
+				if ($this->isHiddenFromPricing($feature['key'])) {
+					continue;
+				}
                 $value = $permissions[$feature['key']] ?? null;
                 $subList = [];
                 if (!empty($feature['subfeature'])) {
@@ -127,7 +130,25 @@ class PricingService
         return $build($this->features);
     }
 
-    
+    protected function isHiddenFromPricing(string $alias): bool
+	{
+		static $cache = [];
+
+		if (array_key_exists($alias, $cache)) {
+			return $cache[$alias];
+		}
+
+		foreach (glob(base_path('Modules/*/module.json')) as $file) {
+			$json = json_decode(file_get_contents($file), true) ?? [];
+			if (($json['alias'] ?? '') === $alias) {
+				$cache[$alias] = isset($json['show_in_pricing']) && $json['show_in_pricing'] === false;
+				return $cache[$alias];
+			}
+		}
+
+		$cache[$alias] = false;
+		return false;
+	}
     protected function groupSubFeaturesByTab(array $subfeatures, $permissions, $build)
     {
         $grouped = [];
