@@ -253,34 +253,10 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <h5 class="fs-5 fs-16 mb-0">{{ __('Page Views') }}</h5>
-
-                        <div class="d-flex align-items-center" style="justify-content:flex-end;">
-                            <div role="button" id="data-labels_page_views" class="me-3" data-toggle="tooltip" data-placement="bottom" title="{{ __('Toggle Label') }}"><i class="fal fa-tags"></i></div>
-                            <div role="button" id="markers_page_views" class="me-3" data-toggle="tooltip" data-placement="bottom" title="{{ __('Toggle Marker') }}"><i class="fal fa-map-pin"></i></div>
-                            <div role="button" id="line_page_views" class="me-3" data-toggle="tooltip" data-placement="bottom" title="{{ __('Line') }}"><i class="fal fa-line-chart"></i></div>
-                            <div role="button" id="area_page_views" class="me-3" data-toggle="tooltip" data-placement="bottom" title="{{ __('Area') }}"><i class="fal fa-area-chart"></i></div>
-                            <div role="button" id="toggle_page_views" class="me-3" data-toggle="tooltip" data-placement="bottom" title="{{ __('Table') }}"><i class="fal fa-table"></i></div>
-                        </div>
-                    </div>
+                    <h5 class="fs-5 fs-16">{{ __('Page Views') }}</h5>
                 </div>
                 <div class="card-body border-bottom">
                     <div id="page-views-chart" class="export-chart" style="height: 300px;"></div>
-                
-                    <div id="page-views-table-wrapper" class="d-none">
-                        <div class="table-responsive">
-                            <table class="table table-sm mb-0" id="datatable_page_views">
-                                <thead>
-                                    <tr>
-                                        <th>{{ __('Date') }}</th>
-                                        <th class="text-end">{{ __('Page Views') }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
-                    </div>
                 </div>
                 <div class="d-flex card-body p-0">
                     <div class="flex-fill px-4 py-3">
@@ -374,7 +350,7 @@
                     <h5 class="fs-5 fs-16">{{ __('Video View Completion') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div id="video-view-pie-chart" class="export-chart" style="height: 300px;"></div>
+                    <div id="video-view-pie-chart" class="export-chart" style="height: 250px;"></div>
                 </div>
 
             </div>
@@ -386,7 +362,7 @@
                     <h5 class="fs-5 fs-16">{{ __('Video Organic vs Paid Views') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div id="video-views-pie-chart" class="export-chart" style="height: 300px;"></div>
+                    <div id="video-views-pie-chart" class="export-chart" style="height: 250px;"></div>
                 </div>
             </div>
         </div>
@@ -397,7 +373,7 @@
                     <h5 class="fs-5 fs-16">{{ __('Video Play Methods') }}</h5>
                 </div>
                 <div class="card-body">
-                    <div id="video-play-method-chart" class="export-chart" style="height: 300px;"></div>
+                    <div id="video-play-method-chart" class="export-chart" style="height: 250px;"></div>
                 </div>
             </div>
         </div>
@@ -654,7 +630,7 @@ Main.Chart('column', gainedLostFanChartData.series, 'gained-lost-fans-chart', {
 });
 
 var pageViewsData = {!! json_encode($analytics['page_views_chart']) !!};
-var pageViewsChart = Main.Chart('areaspline', pageViewsData.series, 'page-views-chart', {
+Main.Chart('areaspline', pageViewsData.series, 'page-views-chart', {
     xAxis: {
         categories: pageViewsData.categories,
         title: { text: '' },
@@ -705,92 +681,6 @@ var pageViewsChart = Main.Chart('areaspline', pageViewsData.series, 'page-views-
         }
     }
 });
-
-
-// ---- Page Views chart tools (WEB only) ----
-(function () {
-    if (!window.ChartInstances || !window.ChartInstances['page-views-chart']) return;
-
-    const chart = window.ChartInstances['page-views-chart'];
-
-    // Build table from categories + first series data
-    try {
-        const categories = (pageViewsData && pageViewsData.categories) ? pageViewsData.categories : [];
-        const series0 = chart.series && chart.series[0] ? chart.series[0] : null;
-        const tbody = document.querySelector('#datatable_page_views tbody');
-        if (tbody && series0) {
-            tbody.innerHTML = '';
-            const points = series0.data || [];
-            categories.forEach((label, i) => {
-                const y = points[i] ? points[i].y : (Array.isArray(series0.options.data) ? series0.options.data[i] : 0);
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${label ?? ''}</td><td class="text-end">${Number(y || 0).toLocaleString()}</td>`;
-                tbody.appendChild(tr);
-            });
-        }
-    } catch (e) {
-        // ignore table build errors
-    }
-
-    let enableDataLabels = false;
-    let enableMarkers = false;
-
-    const showChartHideTable = () => {
-        const chartEl = document.getElementById('page-views-chart');
-        const tableWrap = document.getElementById('page-views-table-wrapper');
-        if (chartEl) chartEl.style.display = 'block';
-        if (tableWrap) tableWrap.classList.add('d-none');
-    };
-
-    const showTableHideChart = () => {
-        const chartEl = document.getElementById('page-views-chart');
-        const tableWrap = document.getElementById('page-views-table-wrapper');
-        if (chartEl) chartEl.style.display = 'none';
-        if (tableWrap) tableWrap.classList.remove('d-none');
-    };
-
-    const btnLabels = document.getElementById('data-labels_page_views');
-    const btnMarkers = document.getElementById('markers_page_views');
-    const btnLine = document.getElementById('line_page_views');
-    const btnArea = document.getElementById('area_page_views');
-    const btnToggle = document.getElementById('toggle_page_views');
-
-    if (btnLabels) btnLabels.addEventListener('click', () => {
-        showChartHideTable();
-        chart.series.forEach(s => s.update({ dataLabels: { enabled: enableDataLabels } }, false));
-        chart.redraw();
-        enableDataLabels = !enableDataLabels;
-    });
-
-    if (btnMarkers) btnMarkers.addEventListener('click', () => {
-        showChartHideTable();
-        chart.series.forEach(s => s.update({ marker: { enabled: enableMarkers } }, false));
-        chart.redraw();
-        enableMarkers = !enableMarkers;
-    });
-
-    if (btnLine) btnLine.addEventListener('click', () => {
-        showChartHideTable();
-        chart.series.forEach(s => s.update({ type: 'spline' }, false));
-        chart.redraw();
-    });
-
-    if (btnArea) btnArea.addEventListener('click', () => {
-        showChartHideTable();
-        chart.series.forEach(s => s.update({ type: 'areaspline' }, false));
-        chart.redraw();
-    });
-
-    if (btnToggle) btnToggle.addEventListener('click', () => {
-        const chartEl = document.getElementById('page-views-chart');
-        if (chartEl && chartEl.style.display === 'none') {
-            showChartHideTable();
-        } else {
-            showTableHideChart();
-        }
-    });
-})();
-
 var postReachChart = {!! json_encode($analytics['postReachSummaryChart']) !!};
 Main.Chart('column', postReachChart.series, 'post-reach-chart', {
     title: { text: '{{ __("Post Reach Metrics") }}' },
@@ -907,217 +797,26 @@ Main.Chart('column', postEngagementChartData.series, 'post-engagement-chart', {
 	colors: ['#6366f1', '#ec4899', '#ff9800', '#14b8a6']
 });
 
-var videoCompletionData = {!! json_encode($analytics['videoViewCompletionChart']) !!};
-var totalViews = 0;
-videoCompletionData.forEach(function(item) {
-    totalViews += item.y || item[1] || 0;
+Main.Chart('pie', {!! json_encode($analytics['videoViewCompletionChart']) !!}, 'video-view-pie-chart', {
+    title: { text: '{{ __("Video View Distribution") }}' },
+    legend: { enabled: true },
+    plotOptions: { pie: { showInLegend: true } },
+	colors: ['#52c41a', '#ff9800']
 });
 
-Highcharts.chart('video-view-pie-chart', {
-    chart: {
-        type: 'pie',
-        height: 300,
-        spacingBottom: 20,
-        backgroundColor: 'transparent'
-    },
-    title: {
-        text: ''  // Empty (it's hidden anyway)
-    },
-    subtitle: {
-        useHTML: true,  // IMPORTANT: Enables HTML formatting
-        text: '<div style="text-align:center;">' +
-              '<div style="font-size:25px; font-weight:bold; color:#333; line-height:1.2;">' + 
-              totalViews.toLocaleString() + 
-              '</div>' +
-              '<div style="font-size:12px; color:#999; margin-top:5px;">' +
-              'Total Views' +
-              '</div>' +
-              '</div>',
-        align: 'center',
-        verticalAlign: 'middle',
-        y: -25  // Centered vertically
-    },
-    tooltip: {
-        enabled: false
-    },
-    credits: {
-        enabled: false
-    },
-    plotOptions: {
-        pie: {
-            innerSize: '70%',
-            size: '100%',
-            center: ['50%', '45%'],
-            dataLabels: {
-                enabled: false
-            },
-            showInLegend: true
-        }
-    },
-    legend: {
-        enabled: true,
-        align: 'center',
-        verticalAlign: 'bottom',
-        layout: 'horizontal',
-        y: -10,
-        itemStyle: {
-            fontSize: '12px',
-            color: '#666',
-            fontWeight: 'normal'
-        },
-        itemDistance: 0,
-		labelFormatter: function() {
-            return this.name + ' - <b>' + this.y.toLocaleString() + '</b>';
-        }
-    },
-    series: [{
-        name: 'Views',
-        colorByPoint: true,
-        data: videoCompletionData
-    }],
-    colors: ['#70ad47', '#ffc000']
+Main.Chart('pie', {!! json_encode($analytics['videoOrganicPaidChart']) !!}, 'video-views-pie-chart', {
+    title: { text: '{{ __("Video Views: Organic vs Paid") }}' },
+    legend: { enabled: true },
+    plotOptions: { pie: { showInLegend: true } },
+	colors: ['#13c2c2', '#ff4d4f'] 
 });
 
-var videoOrganicPaidData = {!! json_encode($analytics['videoOrganicPaidChart']) !!};
-
-var totalOrganicPaid = 0;
-videoOrganicPaidData.forEach(function (item) {
-    totalOrganicPaid += item.y || item[1] || 0;
+Main.Chart('pie', {!! json_encode($analytics['videoPlayMethodChart']) !!}, 'video-play-method-chart', {
+    title: { text: '{{ __("Video Plays: Click vs Auto") }}' },
+    legend: { enabled: true },
+    plotOptions: { pie: { showInLegend: true } },
+	colors: ['#4096ff', '#ff7875', '#faad14']
 });
-
-Highcharts.chart('video-views-pie-chart', {
-    chart: {
-        type: 'pie',
-        height: 300,
-        spacingBottom: 20,
-        backgroundColor: 'transparent'
-    },
-
-    title: { text: '' },
-
-    subtitle: {
-        useHTML: true,
-        text:
-            '<div style="text-align:center;">' +
-                '<div style="font-size:25px; font-weight:bold; color:#333; line-height:1.2;">' +
-                    totalOrganicPaid.toLocaleString() +
-                '</div>' +
-                '<div style="font-size:12px; color:#999; margin-top:5px;">Total Views</div>' +
-            '</div>',
-        align: 'center',
-        verticalAlign: 'middle',
-        y: -25
-    },
-
-    tooltip: { enabled: false },
-    credits: { enabled: false },
-
-    plotOptions: {
-        pie: {
-            innerSize: '70%',
-            size: '100%',
-            center: ['50%', '45%'],
-            dataLabels: { enabled: false },
-            showInLegend: true
-        }
-    },
-
-    legend: {
-		enabled: true,
-		layout: 'vertical',
-		align: 'center',
-		verticalAlign: 'bottom',
-		itemMarginTop: 6,
-		itemMarginBottom: 6,
-		itemStyle: {
-			fontSize: '12px',
-			color: '#666',
-			fontWeight: 'normal'
-		},
-		labelFormatter: function () {
-			return this.name + ' - <b>' + this.y.toLocaleString() + '</b>';
-		}
-	},
-
-    series: [{
-        name: 'Views',
-        colorByPoint: true,
-        data: videoOrganicPaidData
-    }],
-
-    colors: ['#13c2c2', '#ff4d4f'] // Organic / Paid
-});
-
-var videoPlayMethodData = {!! json_encode($analytics['videoPlayMethodChart']) !!};
-
-var totalPlayMethods = 0;
-videoPlayMethodData.forEach(function (item) {
-    totalPlayMethods += item.y || item[1] || 0;
-});
-
-Highcharts.chart('video-play-method-chart', {
-    chart: {
-        type: 'pie',
-        height: 300,
-        spacingBottom: 20,
-        backgroundColor: 'transparent'
-    },
-
-    title: { text: '' },
-
-    subtitle: {
-        useHTML: true,
-        text:
-            '<div style="text-align:center;">' +
-                '<div style="font-size:25px; font-weight:bold; color:#333; line-height:1.2;">' +
-                    totalPlayMethods.toLocaleString() +
-                '</div>' +
-                '<div style="font-size:12px; color:#999; margin-top:5px;">Total Plays</div>' +
-            '</div>',
-        align: 'center',
-        verticalAlign: 'middle',
-        y: -25
-    },
-
-    tooltip: { enabled: false },
-    credits: { enabled: false },
-
-    plotOptions: {
-        pie: {
-            innerSize: '70%',
-            size: '100%',
-            center: ['50%', '45%'],
-            dataLabels: { enabled: false },
-            showInLegend: true
-        }
-    },
-
-    legend: {
-		enabled: true,
-		layout: 'vertical',
-		align: 'center',
-		verticalAlign: 'bottom',
-		itemMarginTop: 6,
-		itemMarginBottom: 6,
-		itemStyle: {
-			fontSize: '12px',
-			color: '#666',
-			fontWeight: 'normal'
-		},
-		labelFormatter: function () {
-			return this.name + ' - <b>' + this.y.toLocaleString() + '</b>';
-		}
-	},
-
-    series: [{
-        name: 'Plays',
-        colorByPoint: true,
-        data: videoPlayMethodData
-    }],
-
-    colors: ['#4096ff', '#ff7875', '#faad14'] // Click / Auto / Other
-});
-
 
 const fansLocationMapChart = {!! json_encode($analytics['fansLocationMapChart']) !!};
 Main.Chart('map', fansLocationMapChart, 'fans-map-chart', {

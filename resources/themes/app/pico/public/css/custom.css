@@ -66,6 +66,8 @@ a {
     font-size: 13px !important;
     border-radius: 30px !important;
 	border: none !important;
+	line-height: 1.3rem;
+    height: auto !important;
 }
 .btn.btn-primary {
 	background: var(--d-primary);
@@ -110,6 +112,9 @@ a {
 .card .card-body {
     padding: 1.25rem 1.25rem;
 }
+.card .card-header, .card .card-header * {
+    font-weight: 600;
+}
 /** Color Picker End **/
 
 /** Input Fields Start **/
@@ -128,6 +133,7 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 	background: var(--d-primary) !important;
 	border-color: var(--d-primary) !important;
 }
+
 /** Input Fields End **/
 .gradient-bg {
     background: linear-gradient(90deg, var(--d-primary), var(--d-secondary));
@@ -140,7 +146,7 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
     font-size: 14px;
     font-family: "Open Sans";
 	min-height: 167px;
-    min-width: 167px;
+    /*min-width: 167px;*/
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -207,19 +213,33 @@ a.btn.btn-dark {
     text-transform: uppercase;
     letter-spacing: 1px;
     padding: 8px 16px !important;
-    line-height: normal !important;
+    line-height: 1.3rem !important;
     height: auto !important;
     font-weight: 600 !important;
     border: none;
     border-radius: 30px;
 }
 a.btn.btn-dark:hover, a.btn.btn-dark:active, a.btn.btn-dark:focus {
-	background: var(--bg-black) !important;
+	background: var(--black) !important;
 }
 a.btn.btn-dark i {
     font-size: 12px !important;
     font-weight: 600;
     margin-right: 0 !important;
+}
+.btn.btn-light {
+    background: var(--d-secondary) !important;
+}
+.btn.btn-light:hover, .btn.btn-light:active, .btn.btn-light:focus {
+	background: var(--black) !important;
+}
+.btn.btn-sm {
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.btn.btn-sm i {
+    font-weight: 700;
 }
 /* Custom Brand Dropdown */
 .custom-brand-dropdown {
@@ -563,7 +583,7 @@ a.menu-link.active {
 }
 .main {
     width: calc(100% - 250px);
-	background: #fbfdff;
+	background: #f5f5f5;
 	overflow-y: auto;
 }
 .card {
@@ -717,7 +737,10 @@ i.post-media {
 #filter_form label {
     align-items: center;
 }
-
+#daterange svg {
+    width: 18px;
+    height: 18px;
+}
 /*** Approval Page **/
 
 .scheduleDetails svg {
@@ -818,7 +841,10 @@ ul#myTab li button.active {
 	border-radius: 0 0 2rem 2rem;
     overflow: hidden;
 }
-
+form .calendar-header .btn.dropdown-toggle {
+    padding: 7px 20px !important;
+    line-height: 1.5rem;
+}
 .calendar-scroll {
 	background: #f9f9f9;
 	    border-radius: 1.5rem;
@@ -992,6 +1018,19 @@ span.svg-icons svg {
 .nav.nav-tabs .nav-link.active {
     color: var(--d-primary);
     border-bottom-color: var(--d-primary);
+}
+.cViews button.btn {
+    border-radius: 100% !important;
+    aspect-ratio: 1 / 1;
+    padding: 10px;
+    border: none;
+    margin-right: 5px;
+}
+.cViews button.btn i {
+    font-size: 0.9rem;
+}
+.mViews .btn {
+	border: none;
 }
 @media (min-width: 768px) {
     .pricing .border-end-md {

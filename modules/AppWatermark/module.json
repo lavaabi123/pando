@@ -8,8 +8,8 @@
         "Modules\\AppWatermark\\Providers\\AppWatermarkServiceProvider"
     ],
     "files": [],
-    "permission": true,
-    "menu": {
+    "permission": false,
+    "dis_menu": {
         "uri": "app/watermark",
         "role": "client",
         "platform": 1,

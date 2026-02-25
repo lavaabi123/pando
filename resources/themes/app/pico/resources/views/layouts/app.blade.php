@@ -83,9 +83,9 @@
                 @csrf
 
                 @hasSection('sub_header')
-                    <div class="border-bottom mb-5 bg-polygon">
+                    <div class="border-bottom mb-4 bg-polygon subHeader">
                         <div class="container">
-                            <div class="pt-4 pb-4">
+                            <div class="py-3">
                                 @yield('sub_header')
                             </div>
                         </div>
@@ -96,9 +96,9 @@
             </form>
         @else
             @hasSection('sub_header')
-                <div class="border-bottom mb-5 bg-polygon">
+                <div class="border-bottom mb-4 bg-polygon subHeader">
                     <div class="container">
-                        <div class="pt-4 pb-4">
+                        <div class="py-3">
                             @yield('sub_header')
                         </div>
                     </div>
@@ -152,19 +152,18 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=10.18"></script>	
-    <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.21') }}"></script>
+    <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.28') }}"></script>
 	@stack('scripts')
     @yield('script')
     {!! Script::renderJs() !!}
     {!! Script::renderRaw() !!}
-	
-<script>	
-window.routes = {
-inboxAjax: @json(route('inbox.ajax_list')),
-addTag: @json(route('inbox.add_tag')),
-inboxDetail: @json(route('inbox.ajax_list_detail')),
-};
-</script>
+    <script>	
+    window.routes = {
+    inboxAjax: @json(route('inbox.ajax_list')),
+    addTag: @json(route('inbox.add_tag')),
+    inboxDetail: @json(route('inbox.ajax_list_detail')),
+    };
+    </script>
 <script>
 function updateInboxCount() {
     const url = @json(route('inbox.count'));

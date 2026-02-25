@@ -1,18 +1,14 @@
 @extends('layouts.app')
 
 @section('sub_header')
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <div style="flex: 1;">
-            <x-sub-header 
-                title="{{ __('Social Analytics') }}" 
-                description="{{ __('Track and compare performance across social media platforms.') }}"
-            />
-        </div>
-        <div>
-            <a href="{{ route('app.analytics.consolidated', ['brand_id' => session('brand_id')]) }}" class="btn btn-primary">
-                <i class="fa fa-file-pdf"></i> {{ __('View Consolidated Analytics Overview') }}
-            </a>
-        </div>
+    <div class="d-flex justify-content-between align-items-center">
+		<x-sub-header 
+			title="{{ __('Social Analytics') }}" 
+			description="{{ __('Track and compare performance across social media platforms.') }}"
+		/>
+		<a href="{{ route('app.analytics.consolidated', ['brand_id' => session('brand_id')]) }}" class="btn btn-primary">
+			<i class="fa fa-file-pdf"></i> {{ __('View Consolidated Analytics Overview') }}
+		</a>
     </div>
 @endsection
 

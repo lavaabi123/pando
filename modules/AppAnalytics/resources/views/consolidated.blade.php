@@ -3,7 +3,7 @@
 @section('content')
 
 @section('sub_header')
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="d-flex justify-content-between align-items-center">
         <div style="flex: 1;">
             <x-sub-header 
                 title="{{ __('Consolidated Analytics Overview') }}" 

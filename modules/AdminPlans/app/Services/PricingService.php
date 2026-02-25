@@ -177,7 +177,7 @@ class PricingService
             $query->where("id", $plan_id);
         }
 
-        $plans = $query->orderByDesc('position')->get();
+        $plans = $query->orderBy('position')->get();
 
         $grouped = [];
 

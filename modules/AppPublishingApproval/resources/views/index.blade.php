@@ -25,7 +25,7 @@
     <div class="composer-scheduling position-absolute zIndex-9 wp-100 hp-100 top-0 d-none"></div>
     <div class="container">
 
-        <div class="ajax-scroll" data-url="{{ module_url("list") }}" data-resp=".approval-list" data-scroll="document">
+        <div class="ajax-scroll" data-url="{{ module_url("list") }}" data-resp=".approval-list" data-scroll="document" data-call-success="initHorizontalScroll();">
 
             <div class="row approval-list">
                 <div class="mb-50"></div>

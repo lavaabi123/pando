@@ -26,122 +26,109 @@
         <form method="POST">
             
             <div class="calendar-header d-flex flex-wrap gap-8 justify-content-between align-items-center px-4 py-3 border-bottom">
-				<div class="d-flex flex-wrap gap-8 justify-content-center align-items-center w-sm-100">
-                    <div class="btn-group btn-group-sm d-none d-sm-block">
-                        <button type="button" class="btn btn-light calendar-event" data-calendar-type="dayGridMonth" data-bs-title="{{ __("Month view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
-                            <i class="fa-light fa-calendar-days"></i>
-                        </button>
-                        <button type="button" class="btn btn-light calendar-event" data-calendar-type="timeGridWeek" data-bs-title="{{ __("Week view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
-                            <i class="fa-light fa-columns-3"></i>
-                        </button>
-                        <button type="button" class="btn btn-light calendar-event" data-calendar-type="listWeek" data-bs-title="{{ __("List view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
-                            <i class="fa-duotone fa-light fa-list-ul"></i>
-                        </button>
-                    </div>
-
-                </div>
-                <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
-                    <div>
-                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="prev">
-                            <i class="fa-light fa-angle-left"></i>
-                        </div>
-                    </div>
+				<div class="btn-group cViews d-none d-sm-block">
+					<button type="button" class="btn btn-light calendar-event" data-calendar-type="dayGridMonth" data-bs-title="{{ __("Month view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+						<i class="fas fa-light fa-calendar-days"></i>
+					</button>
+					<button type="button" class="btn btn-light calendar-event" data-calendar-type="timeGridWeek" data-bs-title="{{ __("Week view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+						<i class="fas fa-light fa-columns-3"></i>
+					</button>
+					<button type="button" class="btn btn-light calendar-event" data-calendar-type="listWeek" data-bs-title="{{ __("List view") }}" data-bs-toggle="tooltip" data-bs-placement="top">
+						<i class="fas fa-light fa-list-ul"></i>
+					</button>
+				</div>
+                <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100 mViews">
+					<div class="btn btn-light rounded-circle size-40 calendar-event" data-calendar-type="prev">
+						<i class="fa-light fa-angle-left fw-7"></i>
+					</div>
                     <div class="fs-16 fw-6 text-gray-800 calendar-title d-block d-md-none"></div>
 					<div class="fs-20 fw-6 text-gray-800 calendar-title d-none d-md-block"></div>
-                    <div>
-                        <div class="btn btn-sm btn-light rounded-circle border-gray-300 size-32 fs-20 calendar-event" data-calendar-type="next">
-                            <i class="fa-light fa-angle-right"></i>
-                        </div>
-                    </div>
+					<div class="btn btn-light rounded-circle size-40 calendar-event" data-calendar-type="next">
+						<i class="fa-light fa-angle-right fw-7"></i>
+					</div>
                     <!--<div class="d-none d-md-block">
                         <div class="btn btn-sm btn-light b-r-50 border-gray-300 calendar-event" data-calendar-type="today">{{ __("Today") }}</div>
                     </div>-->
 				</div>
                 <div class="d-flex justify-content-between align-items-center gap-8 w-sm-100">
-					
-                    <div class="d-flex">
-                        <div class="btn-group position-static">
-                            <button type="button" class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
-                                <i class="fa-light fa-filter"></i> {{ __("Filters") }}
-                            </button>
-                            <div class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-full max-w-250" data-popper-placement="bottom-end">
-                                <div class="d-flex border-bottom px-3 py-2 fw-6 fs-16 gap-8">
-                                    <span><i class="fa-light fa-filter"></i></span>
-                                    <span>{{ __("Filters") }}</span>
-                                </div>
-                                <div class="p-3">
-                                    <div class="mb-3">
-                                        <label class="form-label">{{ __("Status") }}</label>
-                                        <select class="form-select calendar-filter" name="status">
-                                            <option value="">{{ __("All") }}</option>
-                                            <option value="3">{{ __("Processing") }}</option>
-                                            <option value="4">{{ __("Published") }}</option>
-                                            <option value="5">{{ __("Unpublished") }}</option>
-                                            <option value="2">{{ __("Waiting Approve") }}</option>
-                                            <option value="6">{{ __("Pause/Stop") }}</option>
-                                        </select>
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="form-label">{{ __("Social network") }}</label>
-                                        <select class="form-select calendar-filter" name="module_name">
-                                            <option value="">{{ __("All") }}</option>
-                                            @if( !empty( Channels::channels() ) )
-                                                @foreach( Channels::channels() as $channel )
-                                                    
-                                                    @if( !empty( $channel ) && isset( $channel['items']  ) )
-                                                        @foreach( $channel['items'] as $item )
-                                                            <option value="{{ $item['id'] }}">{{ $item['module_name'] }}</option>
-                                                        @endforeach
-                                                    @endif
-                                           
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
+					<div class="btn-group position-static">
+						<button type="button" class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
+							<i class="fa-light fa-filter"></i> {{ __("Filters") }}
+						</button>
+						<div class="dropdown-menu dropdown-menu-end border-2 border-gray-300 b-r-20 w-full max-w-250 pt-1" data-popper-placement="bottom-end">
+							<div class="d-flex border-bottom-2 px-3 py-2 fw-6 fs-16 gap-8">
+								<span><i class="fa-light fa-filter"></i></span>
+								<span>{{ __("Filters") }}</span>
+							</div>
+							<div class="p-3">
+								<div class="mb-3">
+									<label class="form-label mb-1">{{ __("Status") }}</label>
+									<select class="form-select calendar-filter border-2 b-r-30" name="status">
+										<option value="">{{ __("All") }}</option>
+										<option value="3">{{ __("Processing") }}</option>
+										<option value="4">{{ __("Published") }}</option>
+										<option value="5">{{ __("Unpublished") }}</option>
+										<option value="2">{{ __("Waiting Approve") }}</option>
+										<option value="6">{{ __("Pause/Stop") }}</option>
+									</select>
+								</div>
+								<div class="mb-3">
+									<label class="form-label mb-1">{{ __("Social network") }}</label>
+									<select class="form-select calendar-filter border-2 b-r-30" name="module_name">
+										<option value="">{{ __("All") }}</option>
+										@if( !empty( Channels::channels() ) )
+											@foreach( Channels::channels() as $channel )
+												
+												@if( !empty( $channel ) && isset( $channel['items']  ) )
+													@foreach( $channel['items'] as $item )
+														<option value="{{ $item['id'] }}">{{ $item['module_name'] }}</option>
+													@endforeach
+												@endif
+									   
+											@endforeach
+										@endif
+									</select>
+								</div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">{{ __("Campaign") }}</label>
-                                        <select class="form-select calendar-filter" name="campaign">
-                                            <option value="">{{ __("All") }}</option>
-                                            @if( !empty( $campaigns ) )
-                                                @foreach( $campaigns as $value )
-                                                    <option value="{{ $value->id }}">{{ $value->name }}</option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
+								<div class="mb-3">
+									<label class="form-label mb-1">{{ __("Campaign") }}</label>
+									<select class="form-select calendar-filter border-2 b-r-30" name="campaign">
+										<option value="">{{ __("All") }}</option>
+										@if( !empty( $campaigns ) )
+											@foreach( $campaigns as $value )
+												<option value="{{ $value->id }}">{{ $value->name }}</option>
+											@endforeach
+										@endif
+									</select>
+								</div>
 
-                                    <div class="mb-3">
-                                        <label class="form-label">{{ __("Labels") }}</label>
-                                        <select class="form-select calendar-filter" name="label">
-                                            <option value="">{{ __("All") }}</option>
-                                            @if( !empty( $labels ) )
-                                                @foreach( $labels as $value )
-                                                    <option value="{{ $value->id }}">{{ $value->name }}</option>
-                                                @endforeach
-                                            @endif
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-flex">
-                        <div class="btn-group">
-                            <button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
-                                <i class="fa-light fa-grid-2"></i> {{ __('Actions') }}
-                            </button>
-                            <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-2 w-100 max-w-150">
-                                <li>
-                                    <a class="dropdown-item p-2 rounded d-flex gap-8 fw-5 fs-14 actionMultiItem" href="{{ module_url("destroy-by-filters") }}" data-confirm="{{ __("Delete all scheduled posts matching your filters. Are you sure?") }}" data-call-success="AppPubishing.reloadCalendar();">
-                                        <span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can-list"></i></span>
-                                        <span>{{ __('Delete') }}</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
+								<div class="mb-0">
+									<label class="form-label mb-1">{{ __("Labels") }}</label>
+									<select class="form-select calendar-filter border-2 b-r-30" name="label">
+										<option value="">{{ __("All") }}</option>
+										@if( !empty( $labels ) )
+											@foreach( $labels as $value )
+												<option value="{{ $value->id }}">{{ $value->name }}</option>
+											@endforeach
+										@endif
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="btn-group">
+						<button class="btn btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
+							<i class="fa-light fa-grid-2"></i> {{ __('Actions') }}
+						</button>
+						<ul class="dropdown-menu dropdown-menu-end border-2 border-gray-300 b-r-20 px-2 w-100 max-w-150">
+							<li>
+								<a class="dropdown-item p-2 rounded d-flex gap-8 fw-5 fs-14 actionMultiItem" href="{{ module_url("destroy-by-filters") }}" data-confirm="{{ __("Delete all scheduled posts matching your filters. Are you sure?") }}" data-call-success="AppPubishing.reloadCalendar();">
+									<span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can-list"></i></span>
+									<span>{{ __('Delete') }}</span>
+								</a>
+							</li>
+						</ul>
+					</div>
                 </div>
                 
             </div>

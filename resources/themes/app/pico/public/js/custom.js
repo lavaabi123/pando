@@ -458,18 +458,24 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-(function () {
-  function enableHorizontalScroll(selector) {
-    document.querySelectorAll(selector).forEach(el => {
-      el.addEventListener('wheel', function (e) {
-        if (e.deltaY === 0) return;
- 
-        e.preventDefault();
-        el.scrollLeft += e.deltaY;
-      }, { passive: false });
+// Put this in your main JS file or in a script tag
+function initHorizontalScroll() {
+    document.querySelectorAll('.horizontal-scroll').forEach(container => {
+        // Clone to remove any existing listeners (avoid duplicates)
+        const clone = container.cloneNode(true);
+        container.parentNode.replaceChild(clone, container);
+        
+        // Add fresh listener to the cloned element
+        clone.addEventListener('wheel', function(e) {
+            if (this.scrollWidth > this.clientWidth) {
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                this.scrollLeft += e.deltaY;
+            }
+        }, { passive: false, capture: true });
     });
-  }
- 
-  // expose globally
-  window.enableHorizontalScroll = enableHorizontalScroll;
-})();
+}
+
+// Initial load
+document.addEventListener('DOMContentLoaded', initHorizontalScroll);

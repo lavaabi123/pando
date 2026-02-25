@@ -48,34 +48,36 @@
     <div class="container pb-3">
         <div class="d-flex align-items-center justify-content-between">
             <div class="table-info"></div>
-            <div class="d-flex flex-wrap gap-8">    
+            <div class="d-flex flex-wrap gap-8 searchFilter">    
                 <div class="d-flex">
-                    <div class="form-control form-control-sm">
-                        <span class="btn btn-icon">
-                            <i class="fa-duotone fa-solid fa-magnifying-glass"></i>
-                        </span>
-                        <input class="ajax-scroll-filter" name="keyword" placeholder="{{ __('Search') }}" type="text" {{ !$brandSelected ? 'disabled' : '' }}>
-                        <button class="btn btn-icon" {{ !$brandSelected ? 'disabled' : '' }}>
-                            <div class="form-check form-check-sm mb-0">
-                                <input class="form-check-input checkbox-all" id="select_all" type="checkbox" {{ !$brandSelected ? 'disabled' : '' }}>
-                            </div>
+                    <div class="form-control form-control-sm border-2">
+                        <button class="btn btn-icon">
+                            <i class="fas fa-magnifying-glass"></i>
                         </button>
+                        <input class="ajax-scroll-filter" name="keyword" placeholder="{{ __('Search') }}" type="text" {{ !$brandSelected ? 'disabled' : '' }}>
+                        <!--<button class="btn btn-icon" {{ !$brandSelected ? 'disabled' : '' }}>
+                            
+                        </button>-->
+						
                     </div>
                 </div>
+				<div class="form-check p-0">
+					<input class="form-check-input checkbox-all ml-0" id="select_all" type="checkbox" {{ !$brandSelected ? 'disabled' : '' }}>
+				</div>
                 <div class="d-flex">
                     <div class="btn-group position-static">
-                        <button class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true" {{ !$brandSelected ? 'disabled' : '' }}>
+                        <button class="btn btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true" {{ !$brandSelected ? 'disabled' : '' }}>
                             <i class="fa-light fa-filter"></i> {{ __("Filters") }}
                         </button>
-                        <div class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-full max-w-250" data-popper-placement="bottom-end">
-                            <div class="d-flex border-bottom px-3 py-2 fw-6 fs-16 gap-8">
+                        <div class="dropdown-menu dropdown-menu-end border-2 border-gray-300 b-r-20 w-full max-w-250 pt-1" data-popper-placement="bottom-end">
+                            <div class="d-flex border-bottom-2 px-3 py-2 fw-6 fs-16 gap-8">
                                 <span><i class="fa-light fa-filter"></i></span>
                                 <span>{{ __("Filters") }}</span>
                             </div>
                             <div class="p-3">
                                 <div class="mb-3">
-                                    <label class="form-label">{{ __("Status") }}</label>
-                                    <select class="form-select ajax-scroll-filter" name="status">
+                                    <label class="form-label mb-1">{{ __("Status") }}</label>
+                                    <select class="form-select ajax-scroll-filter border-2 b-r-30" name="status">
                                         <option value="-1">{{ __("All") }}</option>
                                         <option value="1">{{ __("Active") }}</option>
                                         <option value="0">{{ __("Disconnected") }}</option>
@@ -83,8 +85,8 @@
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="form-label">{{ __("Social network") }}</label>
-                                    <select class="form-select ajax-scroll-filter" name="module_name">
+                                    <label class="form-label mb-1">{{ __("Social network") }}</label>
+                                    <select class="form-select ajax-scroll-filter  border-2 b-r-30" name="module_name">
                                         <option value="">{{ __("All") }}</option>
                                         @if( !empty( $channels ) )
                                             @foreach( $channels as $channel )
@@ -103,10 +105,10 @@
                 </div>
                 <div class="d-flex">
                     <div class="btn-group position-static">
-                        <button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true" {{ !$brandSelected ? 'disabled' : '' }}>
+                        <button class="btn btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true" {{ !$brandSelected ? 'disabled' : '' }}>
                             <i class="fa-light fa-grid-2"></i> {{ __("Actions") }}
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-2 w-100 max-w-125" data-popper-placement="bottom-end">
+                        <ul class="dropdown-menu dropdown-menu-end border-2 border-gray-300 b-r-20 px-2 w-100 max-w-125" data-popper-placement="bottom-end">
                             <li>
                                 <a class="dropdown-item p-2 rounded d-flex gap-8 fw-5 fs-14 actionMultiItem" href="{{ module_url("status/active") }}" data-call-success="Main.ajaxScroll(true)">
                                     <span class="size-16 me-1 text-center"><i class="fa-light fa-check"></i></span>

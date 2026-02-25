@@ -103,9 +103,10 @@ class PaymentService implements RecurringPaymentInterface
 
     public function cancelSubscription(string $subscriptionId)
 	{
+	    //echo $subscriptionId;exit;
 	    try {
 	        $subscription = $this->stripe->subscriptions->retrieve($subscriptionId);
-
+	        
 	        $cancelStatuses = ['canceled', 'unpaid', 'incomplete_expired'];
 	        if (in_array($subscription->status, $cancelStatuses)) {
 	            return [
@@ -228,7 +229,7 @@ class PaymentService implements RecurringPaymentInterface
 	    }
 
 	    $object = $event->data->object;
-		
+	    
 	    $subscriptionId = $object->parent->subscription_details->subscription ?? $object->id ?? null;
 	    $transactionId  = $object->payment_intent ?? $object->charge ?? $object->id;
 

@@ -15,7 +15,7 @@
         ]
     },
     "permission": true,
-	"menu": {
+    "menu": {
         "uri": "app/ai-contents",
         "role": "client",
         "platform": 1,

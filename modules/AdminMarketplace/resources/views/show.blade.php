@@ -6,14 +6,12 @@
 
     <div class="container">
         <div class="d-flex flex-column flex-lg-row flex-md-column align-items-md-start align-items-lg-center justify-content-between">
-            <div class="d-flex flex-column gap-8 mb-3">
-                <h1 class="fs-20 font-medium lh-1 text-gray-900">
-                    <span class="fw-6">{{ $product['name'] ?? __('Module Detail') }}</span>
+            <div class="d-flex flex-column gap-5">
+                <h1 class="fs-20 lh-1 text-black">
+                    <span class="fw-7">{{ $product['name'] ?? __('Module Detail') }}</span>
                 </h1>
-                <div class="d-flex align-items-center gap-20 fw-5 fs-14">
-                    <div class="d-flex gap-8">
+                <div class="fw-4 fs-14">
                         <span class="text-gray-600">{{ __("Explore full detail and purchase this module for your Pando system") }}</span>
-                    </div>
                 </div>
 
                 <div class="d-flex gap-20">

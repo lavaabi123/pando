@@ -709,13 +709,13 @@ class LinkedinAnalytics implements SocialAnalyticsInterface
 	 */
     protected function syncLinkedinData(int $accountId, string $organizationId, string $accessToken, string $since, string $until): void
 	{
-	    if (\Analytics::shouldFetchSocialAnalytics($accountId, 'linkedin', 'page')) {
+	    //if (\Analytics::shouldFetchSocialAnalytics($accountId, 'linkedin', 'page')) {
 	        $this->syncFollowerStatistics($accountId, $organizationId, $accessToken, $since, $until);
 	        $this->syncPostsAndInsights($accountId, $organizationId, $accessToken, $since, $until);
 	        $this->syncOrganizationPostSummary($accountId, $organizationId, $accessToken, $since, $until);
 	        $this->syncOrganizationPageStatistics($accountId, $organizationId, $accessToken, $since, $until);
 	        \Analytics::markSynced($accountId, 'linkedin', 'page');
-	    }
+	    //}
 	}
 
     protected function syncFollowerStatistics(int $accountId, string $organizationId, string $accessToken): void
