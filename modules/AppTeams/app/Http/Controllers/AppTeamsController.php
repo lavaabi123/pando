@@ -408,8 +408,8 @@ class AppTeamsController extends Controller
 
         foreach ($brandIds as $bid) {
             DB::table('user_brands')->updateOrInsert(
-                ['user_id' => $member->uid,'ids' => rand_string() , 'brand_id' => $bid],
-                ['role_id' => $roleId, 'team_id' => $member->team_id]
+                ['user_id' => $member->uid, 'brand_id' => $bid],          // match on these
+                ['ids' => rand_string(), 'role_id' => $roleId, 'team_id' => $member->team_id]  // set these
             );
         }
     });
