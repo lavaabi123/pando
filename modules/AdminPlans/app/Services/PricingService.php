@@ -138,7 +138,7 @@ class PricingService
 			return $cache[$alias];
 		}
 
-		foreach (glob(base_path('Modules/*/module.json')) as $file) {
+		foreach (glob(base_path('modules/*/module.json')) as $file) {
 			$json = json_decode(file_get_contents($file), true) ?? [];
 			if (($json['alias'] ?? '') === $alias) {
 				$cache[$alias] = isset($json['show_in_pricing']) && $json['show_in_pricing'] === false;
