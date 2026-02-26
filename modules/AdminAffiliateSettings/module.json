@@ -9,7 +9,7 @@
     ],
     "files": [],
     "permission": true,
-    "menu": {
+    "dis_menu": {
         "uri": "admin/affiliate-setings",
         "role": "admin",
         "platform": 1,

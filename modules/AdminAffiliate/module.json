@@ -9,8 +9,8 @@
     ],
 
     "files": [],
-    "permission": true,
-    "menu": {
+    "permission": false,
+    "dis_menu": {
         "uri": "admin/affiliate/report",
         "role": "admin",
         "platform": 0,
