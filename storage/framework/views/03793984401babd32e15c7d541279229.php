@@ -88,9 +88,9 @@
                 <?php echo csrf_field(); ?>
 
                 <?php if (! empty(trim($__env->yieldContent('sub_header')))): ?>
-                    <div class="border-bottom mb-5 bg-polygon">
+                    <div class="border-bottom mb-4 bg-polygon subHeader">
                         <div class="container">
-                            <div class="pt-4 pb-4">
+                            <div class="py-3">
                                 <?php echo $__env->yieldContent('sub_header'); ?>
                             </div>
                         </div>
@@ -101,9 +101,9 @@
             </form>
         <?php else: ?>
             <?php if (! empty(trim($__env->yieldContent('sub_header')))): ?>
-                <div class="border-bottom mb-5 bg-polygon">
+                <div class="border-bottom mb-4 bg-polygon subHeader">
                     <div class="container">
-                        <div class="pt-4 pb-4">
+                        <div class="py-3">
                             <?php echo $__env->yieldContent('sub_header'); ?>
                         </div>
                     </div>
@@ -157,21 +157,20 @@
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/datatables/datatables.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('plugins/fullcalendar/index.global.min.js')); ?>"></script>
     <script type="text/javascript" src="<?php echo e(theme_public_asset('js/main.js')); ?>?version=10.18"></script>	
-    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js?v=1.21')); ?>"></script>
+    <script type="text/javascript" src="<?php echo e(theme_public_asset('js/custom.js?v=1.28')); ?>"></script>
 	<?php echo $__env->yieldPushContent('scripts'); ?>
     <?php echo $__env->yieldContent('script'); ?>
     <?php echo Script::renderJs(); ?>
 
     <?php echo Script::renderRaw(); ?>
 
-	
-<script>	
-window.routes = {
-inboxAjax: <?php echo json_encode(route('inbox.ajax_list'), 15, 512) ?>,
-addTag: <?php echo json_encode(route('inbox.add_tag'), 15, 512) ?>,
-inboxDetail: <?php echo json_encode(route('inbox.ajax_list_detail'), 15, 512) ?>,
-};
-</script>
+    <script>	
+    window.routes = {
+    inboxAjax: <?php echo json_encode(route('inbox.ajax_list'), 15, 512) ?>,
+    addTag: <?php echo json_encode(route('inbox.add_tag'), 15, 512) ?>,
+    inboxDetail: <?php echo json_encode(route('inbox.ajax_list_detail'), 15, 512) ?>,
+    };
+    </script>
 <script>
 function updateInboxCount() {
     const url = <?php echo json_encode(route('inbox.count'), 15, 512) ?>;

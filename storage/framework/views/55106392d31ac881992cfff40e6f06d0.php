@@ -50,11 +50,11 @@
 
                     <?php if(!isset($value['sub_menu'])): ?>
                         <div class="menu-item">
-                            <a class="menu-link flex-grow-1 align-items-center <?php echo e(menu_active($value['uri']) ? 'text-primary' : ''); ?>" href="<?php echo e(url( $value['uri'] )); ?>">
-							<?php if($value['name'] == 'Inbox'): ?>
+                            <a class="menu-link flex-grow-1 align-items-center <?php echo e(menu_active($value['uri']) ? 'active' : ''); ?>" href="<?php echo e(url( $value['uri'] )); ?>">
+                                <?php if($value['name'] == 'Inbox'): ?>
 								<span class="inbox-count-badge position-absolute top-10 start-60 translate-middle badge rounded-pill bg-danger text-white">0</span>
-							<?php endif; ?>
-                                <div class="menu-icon fs-18 <?php echo e(menu_active($value['uri']) ? 'text-primary' : 'text-gray-900'); ?>">
+							    <?php endif; ?>
+                                <div class="menu-icon fs-18 <?php echo e(menu_active($value['uri']) ? '' : 'text-gray-900'); ?>">
                                     <i class="<?php echo e($value['icon']); ?>" <?php echo Core::sidebarColor(); ?>></i>
                                 </div>
                                 <div class="menu-title d-flex align-items-center flex-grow-1 fs-14 fw-5 text-truncate" <?php echo menu_active($value['uri']) ? Core::sidebarColor() : ''; ?>>
@@ -77,8 +77,8 @@
                             }
                         ?>
                         <div class="menu-item">
-                            <div class="menu-link flex-grow-1 align-items-center collapsed <?php echo e($is_sub_active ? 'text-primary' : ''); ?>" data-bs-toggle="collapse" data-bs-target="#menu-<?php echo e($key); ?>">
-                                <div class="menu-icon fs-18 <?php echo e($is_sub_active ? 'text-primary' : 'text-gray-900'); ?>">
+                            <div class="menu-link flex-grow-1 align-items-center collapsed <?php echo e($is_sub_active ? 'active' : ''); ?>" data-bs-toggle="collapse" data-bs-target="#menu-<?php echo e($key); ?>">
+                                <div class="menu-icon fs-18 <?php echo e($is_sub_active ? '' : 'text-gray-900'); ?>">
                                     <i class="<?php echo e($value["icon"]); ?>" <?php echo Core::sidebarColor(); ?>></i>
                                 </div>
                                 <div class="menu-title d-flex align-items-center flex-grow-1 fs-14 fw-5" <?php echo $is_sub_active ? Core::sidebarColor() : ''; ?>>
@@ -94,7 +94,7 @@
                             <div  id="menu-<?php echo e($key); ?>" class="menu-accordion accordion-collapse collapse <?php echo e($is_sub_active ? 'show' : ''); ?>" data-bs-parent="#accordionMenu">
                                 <?php $__currentLoopData = $sub_menus; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sub_menu): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="menu-item">
-                                    <a class="menu-link <?php echo e(menu_active($sub_menu['uri']) ? 'active text-primary' : ''); ?>" href="<?php echo e(url($sub_menu['uri'])); ?>">
+                                    <a class="menu-link <?php echo e(menu_active($sub_menu['uri']) ? 'active' : ''); ?>" href="<?php echo e(url($sub_menu['uri'])); ?>">
                                         <span class="menu-bullet"></span>
                                         <span class="menu-title d-flex align-items-center flex-grow-1 fs-13"><?php echo e(__($sub_menu['name'])); ?></span>
                                     </a>

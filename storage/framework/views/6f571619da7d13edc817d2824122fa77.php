@@ -1,5 +1,5 @@
 <?php $__env->startSection('content'); ?>
-    <div class="container py-5">
+    <div class="container py-4">
         
         <?php echo $__env->make("components.main-message", array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
 
