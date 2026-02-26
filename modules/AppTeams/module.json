@@ -8,6 +8,7 @@
         "Modules\\AppTeams\\Providers\\AppTeamsServiceProvider"
     ],
     "files": [],
+	"hide_template": true,
     "permission": true,
     "menu": {
         "uri": "app/teams",

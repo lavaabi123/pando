@@ -11,6 +11,19 @@ class AdminMailTemplatesController extends Controller
     public function index()
     {
         $allTemplates = \MailSender::getTemplates();
+		foreach ($allTemplates as $module => &$templates) {
+			$moduleObj = \Module::find($module);
+			if (!$moduleObj) continue;
+
+			$moduleJsonPath = $moduleObj->getPath() . '/module.json';
+			
+			if (file_exists($moduleJsonPath)) {
+				$moduleJson = json_decode(file_get_contents($moduleJsonPath), true) ?? [];
+				if (!empty($moduleJson['hide_template'])) {
+					$templates = [];
+				}
+			}
+		}
         return view('adminmailtemplates::index', [
             "allTemplates" => $allTemplates
         ]);

@@ -9,7 +9,7 @@
     ],
     "files": [],
     "permission": true,
-    "_disabled_menu": {
+    "menu": {
         "uri": "app/support",
         "role": "client",
         "platform": 0,

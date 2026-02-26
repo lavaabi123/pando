@@ -9,7 +9,7 @@
     ],
     "files": [],
     "permission": true,
-    "menu": {
+    "dis_menu": {
         "uri": "admin/mail/themes",
         "role": "admin",
         "platform": 0,
