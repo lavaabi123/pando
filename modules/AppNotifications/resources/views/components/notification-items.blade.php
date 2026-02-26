@@ -60,7 +60,7 @@
                     	@if(is_null($item->read_at))
                             <span class="badge badge-dark text-white h-20">{{ __('New') }}</span>
                         @endif
-                        d
+                        
                     	<span>{!! nl2br(e($message)) !!}</span>
                 	</div>
                     @if($item->url)
