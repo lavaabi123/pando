@@ -275,7 +275,7 @@ if (!function_exists('datetime_show')) {
                 ? Carbon::createFromTimestamp($data, $tz)
                 : ($data instanceof \Carbon\Carbon ? $data->copy()->setTimezone($tz) : Carbon::parse($data, $tz));
 
-            $format = get_option('format_datetime', 'd/m/Y H:i');
+            $format = get_option('format_datetime', 'm/d/Y H:i');
             return $dt->format($format);
         } catch (\Exception $e) {
             return '';

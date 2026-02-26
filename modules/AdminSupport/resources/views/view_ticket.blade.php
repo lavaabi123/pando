@@ -45,7 +45,7 @@
                 </div>
 
                 <div class="d-flex gap-8">
-                    @if($ticket->status == 2)
+                    @if($ticket->status == 1)
                     <a class="btn btn-success btn-sm actionItem" data-id="{{ $ticket->id_secure }}" href="{{ module_url("status/resolved") }}" data-redirect="{{ route('admin.support.ticket', $ticket->id_secure) }}">
                         <span><i class="fa-light fa-circle-check"></i></span>
                         <span>{{ __("Resolved") }}</span>
