@@ -4,7 +4,7 @@ $user_id = Auth::user()->id;
 
 @if($comments["pagination"]["last_page"] == $page || ($comments["pagination"]["last_page"] == 0 && $page == 1))
 
-    @if($user_id == $ticket->user_id)
+    @if($user_id == $ticket->open_by)
         <div class="d-flex justify-content-end gap-8 align-items-top mb-4">
             <div>
                 <div class="d-flex align-items-center gap-8 mb-2 justify-content-end">
@@ -28,7 +28,7 @@ $user_id = Auth::user()->id;
             <div>
                 <div class="d-flex align-items-center gap-8 mb-2">
                     <div class="fw-5 fs-12">
-                        {{ $ticket->user_fullname }}
+                        {{ $ticket->open_by_fullname }}
                     </div>
                     <div class="size-4 bg-gray-300 b-r-100"></div>
                     <div class="text-gray-600 fs-12">{{ time_elapsed_string($ticket->created) }}</div>

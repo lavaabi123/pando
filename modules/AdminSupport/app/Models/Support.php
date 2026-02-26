@@ -154,6 +154,7 @@ class Support extends Model
         $ticket = DB::table('support_tickets as t')
             ->leftJoin('support_categories as c', 't.cate_id', '=', 'c.id')
             ->leftJoin('users as u', 't.user_id', '=', 'u.id')
+            ->leftJoin('users as ob', 't.open_by', '=', 'ob.id')
             ->leftJoin('support_types as s', 't.type_id', '=', 's.id')
             ->leftJoinSub($labelsSub, 'lbl', function ($join) {
                 $join->on('lbl.ticket_id', '=', 't.id');
@@ -167,6 +168,8 @@ class Support extends Model
                 's.icon as type_icon',
                 'u.fullname as user_fullname',
                 'u.avatar as user_avatar',
+                'ob.fullname as open_by_fullname',
+                'ob.avatar as open_by_avatar', 
                 'lbl.label_ids',
                 'lbl.label_names',
                 'lbl.label_colors',
