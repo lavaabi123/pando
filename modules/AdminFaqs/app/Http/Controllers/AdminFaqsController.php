@@ -169,7 +169,7 @@ class AdminFaqsController extends Controller
             'content'   => $request->input('content'),
             'status'    => (int)$request->input('status'),
             'type'      => $this->type,
-            'cate_id'   => $request->input('cate_id'),
+            'cate_id'   => $request->input('cate_id') ?? 0,
             'changed'   => time(),
             'created'   => time(),
         ];
