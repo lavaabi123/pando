@@ -2,8 +2,8 @@
 
 @section('sub_header')
     <x-sub-header
-        title="{{ __('Embed Code') }}"
-        description="{{ __('Code snippet to display external content on websites.') }}"
+        title="{{ __('Notification Banner') }}"
+        description="{{ __('Code snippet to display notification banner on top of the website.') }}"
     >
     </x-sub-header>
 @endsection

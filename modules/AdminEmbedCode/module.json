@@ -22,7 +22,7 @@
         "sub_menu": [
             {
                 "uri": "admin/embed-code",
-                "name": "Embed Code",
+                "name": "Notification Banner",
                 "position": 250000,
                 "icon": "fa-light fa-bell",
                 "color": "#cdd888"
