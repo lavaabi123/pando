@@ -37,6 +37,42 @@
                 </div>
             </div>
         </div>
+		
+        <div class="card shadow-none border-gray-300 mb-4">
+            <div class="card-header">
+                <div class="fw-6">{{ __("Bitly") }}</div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="mb-4">
+                            <label class="form-label">{{ __('Status') }}</label>
+                            <div class="d-flex gap-8 flex-column flex-lg-row flex-md-column">
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="bitly_status" value="1" id="bitly_status_1" {{ get_option("bitly_status", 0)==1?"checked":"" }}>
+                                    <label class="form-check-label mt-1" for="bitly_status_1">
+                                        {{ __('Enable') }}
+                                    </label>
+                                </div>
+                                <div class="form-check me-3">
+                                    <input class="form-check-input" type="radio" name="bitly_status" value="0" id="bitly_status_0"{{ get_option("bitly_status", 0)==0?"checked":"" }}>
+                                    <label class="form-check-label mt-1" for="bitly_status_0">
+                                        {{ __('Disable') }}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <div class="mb-4">
+                            <label for="bitly_api_key" class="form-label">{{ __('API Token') }}</label>
+                            <input class="form-control" name="bitly_api_key" id="bitly_api_key" type="text" value="{{ get_option("bitly_api_key", "") }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card shadow-none border-gray-300 mb-4">
             <div class="card-header">
                 <div class="fw-6">{{ __("Short.io") }}</div>
@@ -72,41 +108,6 @@
                         <div class="mb-4">
                             <label for="shortio_domain" class="form-label">{{ __('Domain') }}</label>
                             <input class="form-control" name="shortio_domain" id="shortio_domain" type="text" value="{{ get_option("shortio_domain", "") }}">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card shadow-none border-gray-300 mb-4">
-            <div class="card-header">
-                <div class="fw-6">{{ __("Bitly") }}</div>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="mb-4">
-                            <label class="form-label">{{ __('Status') }}</label>
-                            <div class="d-flex gap-8 flex-column flex-lg-row flex-md-column">
-                                <div class="form-check me-3">
-                                    <input class="form-check-input" type="radio" name="bitly_status" value="1" id="bitly_status_1" {{ get_option("bitly_status", 0)==1?"checked":"" }}>
-                                    <label class="form-check-label mt-1" for="bitly_status_1">
-                                        {{ __('Enable') }}
-                                    </label>
-                                </div>
-                                <div class="form-check me-3">
-                                    <input class="form-check-input" type="radio" name="bitly_status" value="0" id="bitly_status_0"{{ get_option("bitly_status", 0)==0?"checked":"" }}>
-                                    <label class="form-check-label mt-1" for="bitly_status_0">
-                                        {{ __('Disable') }}
-                                    </label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-12">
-                        <div class="mb-4">
-                            <label for="bitly_api_key" class="form-label">{{ __('API Token') }}</label>
-                            <input class="form-control" name="bitly_api_key" id="bitly_api_key" type="text" value="{{ get_option("bitly_api_key", "") }}">
                         </div>
                     </div>
                 </div>
