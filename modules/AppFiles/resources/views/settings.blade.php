@@ -56,7 +56,7 @@
                 </div>
             </div>
         </div>
-        <div class="card shadow-none border-gray-300 mb-4">
+        <!--<div class="card shadow-none border-gray-300 mb-4">
             <div class="card-header">
                 <div class="fw-6">{{ __("Amazon S3") }}</div>
             </div>
@@ -412,7 +412,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
         <div class="mt-4">
             <button type="submit" class="btn btn-dark b-r-10 w-100">
                 {{ __('Save changes') }}
