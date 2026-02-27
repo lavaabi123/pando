@@ -9,7 +9,7 @@
     ],
     "files": [],
     "permission": false,
-    "menu": {
+    "dis_menu": {
         "uri": "app/x_unofficial/profile",
         "role": "client",
         "platform": 1,
