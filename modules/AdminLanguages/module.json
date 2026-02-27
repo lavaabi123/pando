@@ -9,7 +9,7 @@
     ],
     "files": [],
     "permission": true,
-    "menu": {
+    "dis_menu": {
         "uri": "admin/languages",
         "role": "admin",
         "platform": 0,
