@@ -207,7 +207,7 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 #accordionMenu .badge.badge {
 	padding: 0.2rem;
 }
-a.btn.btn-dark {
+.btn.btn-dark {
     background: var(--d-primary) !important;
     font-size: 13px !important;
     text-transform: uppercase;
@@ -219,10 +219,10 @@ a.btn.btn-dark {
     border: none;
     border-radius: 30px;
 }
-a.btn.btn-dark:hover, a.btn.btn-dark:active, a.btn.btn-dark:focus {
+.btn.btn-dark:hover, .btn.btn-dark:active, .btn.btn-dark:focus {
 	background: var(--black) !important;
 }
-a.btn.btn-dark i {
+.btn.btn-dark i {
     font-size: 12px !important;
     font-weight: 600;
     margin-right: 0 !important;
@@ -1031,6 +1031,28 @@ span.svg-icons svg {
 }
 .mViews .btn {
 	border: none;
+}
+/** AI-publishing **/
+.inputField input, .inputField select, .inputField .form-control, .inputField .form-select {
+    border-width: 2px !important;
+    border-radius: 30px;
+}
+.inputField .btn-input {
+	border-width: 2px !important;
+	border-radius: 25px;
+}
+.inputField .account_manager .am-choice-box .am-selected-box {
+    border-radius: 20px !important;
+    border-width: 2px !important;
+}
+.inputField .account_manager .am-choice-box .am-selected-box .am-selected-list .am-selected-item {
+	margin-bottom: 0 !important;
+}
+.inputField .option-network .form-control {
+    border-radius: 15px !important;
+}
+.select2-dropdown {
+    border-width: 2px;
 }
 @media (min-width: 768px) {
     .pricing .border-end-md {
