@@ -9,7 +9,7 @@
     ],
     "files": [],
     "permission": true,
-    "menu": {
+    "dis_menu": {
         "uri": "admin/themes/frontend",
         "role": "admin",
         "platform": 1,
