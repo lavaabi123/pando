@@ -8,7 +8,7 @@
         "Modules\\AdminBroadcast\\Providers\\AdminBroadcastServiceProvider"
     ],
     "files": [],
-    "menu": {
+    "dis_menu": {
         "uri": "admin/settings/broadcast",
         "role": "admin",
         "platform": 1,
