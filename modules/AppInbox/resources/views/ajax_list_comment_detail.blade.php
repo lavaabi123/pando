@@ -53,9 +53,9 @@
 				</div>
        
 
-        <div class="comments-section p-3 maxHeight-wos" style="max-height: 500px; overflow-y: auto;">
+        <div class="comments-section py-3 maxHeight-wos" style="max-height: 500px; overflow-y: auto;">
             @foreach($lists as $comment)
-                <div class="comment-item mb-3">
+                <div class="comment-item px-3 mb-3">
                     <div class="d-flex">
 						<div class="text-gray-600 size-30 min-w-30 d-flex align-items-center justify-content-between position-relative">
 							<img data-src="{{ Media::url($comment['from_image']) }}" src="{{ theme_public_asset('img/default.png') }}" class="b-r-100 w-full h-full border-1 lazyload" onerror="this.src='{{ theme_public_asset('img/default.png') }}'">
@@ -163,7 +163,7 @@
 							</div>	
 							<p class="ms-2 fw-7 mb-0 fs-11"><?php echo $lists[0]['to_name']; ?></p>				
 						</div>
-						<textarea class="form-control fw-4 mt-2 border b-r-30 p-3" rows="4" cols="10"  name="comment" placeholder="" required></textarea>
+						<textarea class="form-control fw-4 mt-2 border-2 b-r-15 p-3" rows="4" cols="10"  name="comment" placeholder="" required></textarea>
 						<div class="btm-option d-flex justify-content-between">
 						<ul class="d-flex align-items-center">
 						</ul>
@@ -211,7 +211,7 @@
 							</div>	
 						<p class="ms-2 fw-7 mb-0 fs-11"><?php echo $lists[0]['to_name']; ?></p>							
 						</div>
-						<textarea class="form-control fw-4 mt-2 border b-r-30 p-3" rows="6" cols="10"  name="comment" placeholder="" required></textarea>
+						<textarea class="form-control fw-4 mt-2 border-2 b-r-15 p-3" rows="6" cols="10"  name="comment" placeholder="" required></textarea>
 						<div class="btm-option d-flex justify-content-between">
 						<ul class="d-flex align-items-center">
 						</ul>

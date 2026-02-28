@@ -18,7 +18,7 @@
 
 @if(count($templates) > 0)
 	@foreach($templates as $value)
-		<a href="javascript:void(0);" class="col-12 mb-3 p-3 border b-r-6 addToField text-gray-700 fw-5 fs-13 bg-light bg-hover-success-100 search-list closeAICate" data-field="[name='prompt']" data-refresh="1" data-content="{{ $value->content }}">
+		<a href="javascript:void(0);" class="col-12 mb-3 p-3 border-2 b-r-15 addToField border-gray-300 text-gray-700 fw-5 fs-14 bg-light bg-hover-success-100 search-list closeAICate" data-field="[name='prompt']" data-refresh="1" data-content="{{ $value->content }}">
 			{{ $value->content }}
 		</a>
 	@endforeach

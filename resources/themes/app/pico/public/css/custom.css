@@ -1051,8 +1051,23 @@ span.svg-icons svg {
 .inputField .option-network .form-control {
     border-radius: 15px !important;
 }
+.inputField textarea.form-control {
+    border-radius: 20px;
+}
+#strategyTabContent label {
+    margin-bottom: 8px;
+    font-size: 13px;
+}
+#strategyTabContent.inputField input, #strategyTabContent.inputField select, #strategyTabContent.inputField .form-control, #strategyTabContent.inputField .form-select {
+	margin-bottom: 10px;
+}
+#strategyTabContent h5 {
+    font-weight: 600;
+    margin-bottom: 20px;
+}
 .select2-dropdown {
     border-width: 2px;
+    border: 2px solid #000000 !important;
 }
 @media (min-width: 768px) {
     .pricing .border-end-md {

@@ -3,16 +3,16 @@
 @section('content')
 <div class="container-fluid">
     <div class="row">
-        <div class="col-12">
+        <div class="col-md-7 mx-auto py-4">
             <div class="card">
                 <div class="card-header">
-                    <h3>AI Content Strategy</h3>
-                    <p class="text-muted">Generate intelligent content strategies with AI</p>
+                    <h4>AI Content Strategy</h4>
+                    <p class="text-muted mb-0">Generate intelligent content strategies with AI</p>
                 </div>
                 <div class="card-body">
                     
                     <!-- Nav Tabs - Compatible with Bootstrap 4 & 5 -->
-                    <ul class="nav nav-tabs" id="strategyTabs" role="tablist">
+                    <ul class="nav nav-tabs justify-content-between" id="strategyTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <a class="nav-link active" id="calendar-tab" data-toggle="tab" data-bs-toggle="tab" href="#calendar" role="tab" aria-controls="calendar" aria-selected="true">
                                 <i class="fas fa-calendar-alt"></i> Content Calendar
@@ -36,12 +36,12 @@
                     </ul>
 
                     <!-- Tab Content -->
-                    <div class="tab-content mt-4" id="strategyTabContent">
+                    <div class="tab-content mt-4 inputField" id="strategyTabContent">
                         
                         <!-- Content Calendar Tab -->
                         <div class="tab-pane fade show active" id="calendar" role="tabpanel" aria-labelledby="calendar-tab">
-                            <h4>Generate Content Calendar</h4>
-                            <form id="calendar-form">
+                            <h5>Generate Content Calendar</h5>
+                            <form id="calendar-form" class="">
                                 @csrf
                                 <div class="row">
                                     <div class="col-md-6">
@@ -75,12 +75,12 @@
 
                                 <div class="form-group">
                                     <label>Select Platforms</label>
-                                    <div>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="facebook" checked> Facebook</label>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="instagram" checked> Instagram</label>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="linkedin"> LinkedIn</label>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="twitter"> Twitter</label>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="tiktok"> TikTok</label>
+                                    <div class="d-flex gap-8 align-items-center">
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="facebook" checked> Facebook</label>
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="instagram" checked> Instagram</label>
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="linkedin"> LinkedIn</label>
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="twitter"> Twitter</label>
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="tiktok"> TikTok</label>
                                     </div>
                                 </div>
 
@@ -99,7 +99,7 @@
                                     </div>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-dark w-100 mt-2">
                                     <i class="fas fa-magic"></i> Generate Calendar
                                 </button>
                             </form>
@@ -111,7 +111,7 @@
 
                         <!-- Hashtag Research Tab -->
                         <div class="tab-pane fade" id="hashtags" role="tabpanel" aria-labelledby="hashtags-tab">
-                            <h4>Hashtag Research</h4>
+                            <h5>Hashtag Research</h5>
                             <form id="hashtags-form">
                                 @csrf
                                 <div class="form-group">
@@ -145,7 +145,7 @@
                                     <input type="number" name="count" class="form-control" value="15" min="5" max="30">
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-dark w-100 mt-2">
                                     <i class="fas fa-hashtag"></i> Research Hashtags
                                 </button>
                             </form>
@@ -157,7 +157,7 @@
 
                         <!-- Topic Research Tab -->
                         <div class="tab-pane fade" id="topics" role="tabpanel" aria-labelledby="topics-tab">
-                            <h4>Topic Research</h4>
+                            <h5>Topic Research</h5>
                             <form id="topics-form">
                                 @csrf
                                 <div class="form-group">
@@ -175,7 +175,7 @@
                                     <input type="text" name="target_audience" class="form-control" placeholder="e.g., Small business owners">
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-dark w-100 mt-2">
                                     <i class="fas fa-search"></i> Research Topics
                                 </button>
                             </form>
@@ -187,7 +187,7 @@
 
                         <!-- Competitor Analysis Tab -->
                         <div class="tab-pane fade" id="competitor" role="tabpanel" aria-labelledby="competitor-tab">
-                            <h4>Competitor Analysis</h4>
+                            <h5>Competitor Analysis</h5>
                             <form id="competitor-form">
                                 @csrf
                                 <div class="row">
@@ -212,11 +212,11 @@
 
                                 <div class="form-group">
                                     <label>Platforms They're On</label>
-                                    <div>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="facebook"> Facebook</label>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="instagram"> Instagram</label>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="linkedin"> LinkedIn</label>
-                                        <label class="mr-3"><input type="checkbox" name="platforms[]" value="twitter"> Twitter</label>
+                                    <div class="d-flex gap-8 align-items-center">
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="facebook"> Facebook</label>
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="instagram"> Instagram</label>
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="linkedin"> LinkedIn</label>
+                                        <label class="d-flex gap-8 align-items-center"><input class="mb-0" type="checkbox" name="platforms[]" value="twitter"> Twitter</label>
                                     </div>
                                 </div>
 
@@ -225,7 +225,7 @@
                                     <textarea name="sample_content" class="form-control" rows="4" placeholder="Paste some of their recent posts here..."></textarea>
                                 </div>
 
-                                <button type="submit" class="btn btn-primary">
+                                <button type="submit" class="btn btn-dark w-100 mt-2">
                                     <i class="fas fa-chart-bar"></i> Analyze Competitor
                                 </button>
                             </form>
