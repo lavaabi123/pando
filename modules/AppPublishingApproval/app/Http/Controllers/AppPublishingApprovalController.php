@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\AppPublishing\Models\Posts;
 use Illuminate\Pagination\Paginator;
-use Mpdf\Mpdf;
+use Barryvdh\DomPDF\Facade\Pdf;
 use DB;
 
 class AppPublishingApprovalController extends Controller
@@ -105,29 +105,23 @@ $schedules = Posts::select('posts.*', 'grouped.avatars', 'grouped.urls', 'groupe
             return $row;
         });
 
-        $mpdf = new Mpdf([
-            'mode'              => 'utf-8',
-            'format'            => 'A4',
-            'default_font'      => 'dejavusans',
-            'autoScriptToLang'  => true,
-            'autoLangToFont'    => true,
-            'margin_top'        => 0,
-            'margin_bottom'     => 0,
-            'margin_left'       => 0,
-            'margin_right'      => 0,
-            'margin_header'     => 0,
-            'margin_footer'     => 0,
-        ]);
         $html = view('apppublishingapproval::pdf', [
-            'result'     => $result,
-            'brand_name' => session('brand_name', auth()->user()->name ?? 'Brand'),
-        ])->render();
+			'result'     => $result,
+			'brand_name' => session('brand_name', auth()->user()->name ?? 'Brand'),
+		])->render();
 
-        $pdf_name = session('brand_name', 'Brand') . '-Social-Media-Draft-' . date('Mj');
-        $mpdf->WriteHTML($html);
+		$pdf_name = session('brand_name', 'Brand') . '-Social-Media-Draft-' . date('Mj');
 
-        return response($mpdf->Output($pdf_name . '.pdf', 'D'))
-            ->header('Content-Type', 'application/pdf')
-            ->header('Content-Disposition', 'attachment; filename="' . $pdf_name . '.pdf"');
+		$pdf = Pdf::loadHTML($html)
+			->setPaper('a4', 'portrait')
+			->setOptions([
+				'isRemoteEnabled'    => true,
+				'isHtml5ParserEnabled' => true,
+				'defaultFont'        => 'sans-serif',
+				'dpi'                => 96,
+				'defaultMediaType'   => 'print',
+			]);
+
+		return $pdf->download($pdf_name . '.pdf');
     }
 }

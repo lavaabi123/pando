@@ -129,8 +129,8 @@ td { word-break:break-all; overflow-wrap:break-word; }
 <table width="100%" cellpadding="0" cellspacing="0"
     style="<?php echo $headerBgB64 ? 'background-image:url('.$headerBgB64.');' : 'background-color:#2ecc71;' ?>background-size:cover;padding:15px 25px 15px 0;">
     <tr>
-        <td><img src="<?php echo $logoB64; ?>" style="width:40%;"/></td>
-        <td align="right">
+        <td style="background:transparent;"><img src="<?php echo $logoB64; ?>" style="width:40%;"/></td>
+        <td align="right" style="background:transparent;">
             <h1 style="color:#fff;margin:0;font-size:21px;font-weight:bold;">Brand: <?php echo htmlspecialchars($brand_name); ?></h1>
             <p style="color:#fff;margin:0;font-size:16px;font-weight:bold;">Created on: <?php echo date("M d, Y"); ?></p>
         </td>
@@ -185,7 +185,7 @@ if ($avatarData) {
 
 $network = strtolower(str_replace('_', '', $value->social_network ?? ''));
 if (isset($socialIcons[$network])) {
-    echo '<img src="' . $socialIcons[$network] . '" style="width:10px;height:10px;margin-left:-8px;margin-top:-10px;position:absolute;"/>';
+    echo '<img src="' . $socialIcons[$network] . '" style="width:10px;height:10px;position:absolute;"/>';
 }
 if (($value->social_networks_count ?? 0) > 1) {
     echo '<span style="vertical-align:middle;">&nbsp;and ' . ($value->social_networks_count - 1) . ' more</span>';
@@ -207,7 +207,7 @@ if (($value->social_networks_count ?? 0) > 1) {
                 $caption = mb_convert_encoding($caption, 'UTF-8', 'UTF-8');
                 if (!empty(trim($caption))):
                 ?>
-                <p style="line-height:18pt;padding:8px;font-size:11px;word-break:break-all;overflow-wrap:break-word;margin-top:10px">
+                <p style="padding:8px;font-size:11px;word-break:break-all;overflow-wrap:break-word;margin-top:10px">
                     <?php echo forceBreakWords(nl2br(htmlspecialchars($caption)), 15); ?>
                 </p>
                 <?php endif; ?>
@@ -220,14 +220,16 @@ if (($value->social_networks_count ?? 0) > 1) {
 $pics = [];
 if (!empty($data->medias)) {
     foreach ($data->medias as $media) {
-        // Laravel equivalent of get_file_url()
-        $mediaPath = str_starts_with($media, 'http') 
-            ? $media 
-            : url('storage/' . ltrim($media, '/'));
+        
+        // Use local file path for better reliability
+        $localPath = storage_path('app/public/' . ltrim($media, '/'));
+        
+        // Build URL as fallback
+        $mediaPath = file_exists($localPath) ? $localPath : url('storage/' . ltrim($media, '/'));
 
-        // Laravel equivalent of is_image()
         if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $media)) {
-            $pics[] = getResizedBase64Image($mediaPath, 400, $iconCache);
+            $b = getResizedBase64Image($mediaPath, 400, $iconCache);
+            if ($b) $pics[] = $b;
             continue;
         }
 
@@ -237,25 +239,29 @@ if (!empty($data->medias)) {
               ?? $data->linkedin_thumbnail
               ?? '';
 
-        // Validate thumb is a real URL
+        // Validate thumb is a real image URL
         if (!empty($thumb) && !preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $thumb)) {
             $thumb = '';
         }
 
         // ffmpeg fallback
-        // Final fallback - default video thumbnail image
-		if ($thumb === '') {
-			$ffmpeg    = env('ffmpeg_path', 'ffmpeg');
-			$localPath = storage_path('app/public/' . ltrim($media, '/'));
-			$outputFile = storage_path('app/public/tmp_thumb_' . time() . '.jpg');
-			$cmd = "\"{$ffmpeg}\" -i \"{$localPath}\" -ss 00:00:01 -vframes 1 \"{$outputFile}\" 2>NUL";
-			exec($cmd);
-
-			if (file_exists($outputFile)) {
-				$thumb = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($outputFile));
-				unlink($outputFile); // clean up
-			}
-		}
+        if ($thumb === '') {
+    $localVideo = storage_path('app/public/' . ltrim($media, '/'));
+    
+    if (function_exists('shell_exec') && file_exists($localVideo)) {
+        $ffmpeg     = env('ffmpeg_path', 'ffmpeg');
+        $outputFile = storage_path('app/public/tmp_thumb_' . time() . '.jpg');
+        
+        // Linux/server command (no 2>NUL - that's Windows only)
+        $cmd    = "\"{$ffmpeg}\" -i \"{$localVideo}\" -ss 00:00:01 -vframes 1 \"{$outputFile}\" 2>/dev/null";
+        shell_exec($cmd);
+        
+        if (file_exists($outputFile)) {
+            $thumb = 'data:image/jpeg;base64,' . base64_encode(file_get_contents($outputFile));
+            unlink($outputFile);
+        }
+    }
+}
 
         if ($thumb !== '') {
             $pics[] = getResizedBase64Image($thumb, 400, $iconCache);
@@ -278,16 +284,22 @@ if (count($pics) === 0 && !empty($value->link_icon)) {
  ******************************************************************/
     $totalPics  = count($pics);
 
-	if ($totalPics > 0) {
-		$cellWidth  = 220;
-		$imgsPerRow = min($totalPics, 3);
-		$imgPx      = floor(($cellWidth - ($imgsPerRow * 8)) / $imgsPerRow);
+	if (!empty($pics)) {
+    $totalPics  = count($pics);
+    $cellWidth  = 220;
+    $imgsPerRow = min($totalPics, 3);
+    $imgPx      = floor(($cellWidth - ($imgsPerRow * 8)) / $imgsPerRow);
 
-		foreach ($pics as $base64) {
-			echo '<img src="' . $base64 . '" style="width:' . $imgPx . 'px; height:auto; float:left; padding:4px">';
-		}
-		echo '<div style="clear:both;"></div>';
-	}
+    // Dompdf works better with table layout than float
+    echo '<table width="100%" cellpadding="2" cellspacing="2"><tr>';
+    foreach ($pics as $idx => $base64) {
+        if ($idx > 0 && $idx % $imgsPerRow === 0) echo '</tr><tr>';
+        echo '<td style="text-align:center;">
+                <img src="' . $base64 . '" style="width:' . $imgPx . 'px; height:auto;">
+              </td>';
+    }
+    echo '</tr></table>';
+}
 }
 
 ?>
