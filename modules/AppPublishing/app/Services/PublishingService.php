@@ -641,7 +641,8 @@ protected function updateTeamStats($teamId, $socialNetwork, $type, $postType = n
         $startTimestamp = $quotaResetAt ? intval($quotaResetAt) : now()->startOfMonth()->timestamp;
         $endTimestamp = $nextQuotaResetAt;
 
-        $used = PostStat::where('team_id', $teamId)->where('brand_id', session('brand_id'))
+        //->where('brand_id', session('brand_id'))
+        $used = PostStat::where('team_id', $teamId)
             ->where('status', 4)
             ->whereBetween('created', [$startTimestamp, $endTimestamp])
             ->count();

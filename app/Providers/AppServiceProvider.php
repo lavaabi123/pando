@@ -113,9 +113,14 @@ class AppServiceProvider extends ServiceProvider
                     Session::regenerateToken();
                     header("Location: ". url(""));
                 }
+                $current_team_id = session('current_team_id');
+                $team = Teams::where('id', $current_team_id)->first();
+
+                /*request()->merge(['team' => $team ]);
+                request()->merge(['team_id' => $team->id]);*/
 
                 request()->merge(['team' => $team ]);
-                request()->merge(['team_id' => $team->id]);
+                request()->merge(['team_id' => $current_team_id]);
 
                 $view->with("user", $user);
                 $view->with("team", $team);
