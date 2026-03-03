@@ -81,13 +81,13 @@ if (!function_exists('menu_active')) {
     function menu_active($uri) {
         if (is_array($uri)) {
             foreach ($uri as $u) {
-                if (request()->is($u) || request()->is($u . '/*')) {
+                if (request()->is($u)) {
                     return true;
                 }
             }
             return false;
         }
-        return request()->is($uri) || request()->is($uri . '/*');
+        return request()->is($uri);
     }
 }
 
