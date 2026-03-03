@@ -219,6 +219,9 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
     border: none;
     border-radius: 30px;
 }
+.btn.btn-dark.btn-sm {
+	padding: 5px 16px !important;
+}
 .btn.btn-dark:hover, .btn.btn-dark:active, .btn.btn-dark:focus {
 	background: var(--black) !important;
 }
