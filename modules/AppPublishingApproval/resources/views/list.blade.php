@@ -18,7 +18,7 @@
     <div class="{{ (!empty($from) ? 'col-md-12 col-lg-12' : 'col-md-6 col-lg-4') }}  mb-4">
         <div class="card h-100 approval-card">
             <div class="card-header px-3">
-                <input class="form-check-input checkbox-item me-2" type="checkbox" name="id[]">
+                <input class="form-check-input checkbox-item me-2" type="checkbox" name="id[]" data-id="{{ $value->id }}" value="{{ $value->id }}">
                 <div class="me-auto">
                     <div class="position-relative w-140 after-shadow overflow-hidden">				
 						<div class="card-title fw-normal fs-12 horizontal-scroll d-flex">
