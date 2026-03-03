@@ -21,6 +21,7 @@
 					<a href="{{ module_url() }}" class="nav-link fw-5 px-2 py-1 fs-14 {{ Request::segment(3) == ""?"active":"" }}" >
 						<i class="fa-light fa-user me-1 fs-16 fw-4"></i> {{ __('Account') }}
 					</a>
+					@if(session('effective_owner') == 1)
 					<a href="{{ module_url('plan') }}" class="nav-link fw-5 px-2 py-1 fs-14 {{ Request::segment(3) == "plan"?"active":"" }}">
 						<i class="fa-light fa-box-open me-1 fs-16 fw-4"></i> {{ __('Plan') }}
 					</a>
@@ -30,6 +31,7 @@
 					<a href="{{ module_url('settings') }}" class="nav-link fw-5 px-2 py-1 fs-14 d-none {{ Request::segment(3) == "settings"?"active":"" }}">
 						<i class="fa-light fa-gear me-1 fs-16 fw-4"></i> {{ __('Settings') }}
 					</a>
+					@endif
 				</div>
 			</nav>
 		</div>

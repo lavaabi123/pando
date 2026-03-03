@@ -62,7 +62,7 @@
                                                @if(!get_option("auth_user_change_email_status", 0)) disabled @endif>
                                     </div>
                                 </div>
-                                <div class="col-12">
+                                <div class="col-12 d-none">
                                     <label for="language" class="form-label">{{ __('Language') }}</label>
                                     <div class="input-group" >
                                         <span class="btn btn-input"><i class="fa-light fa-globe"></i></span>

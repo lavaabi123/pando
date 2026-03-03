@@ -41,18 +41,20 @@
                     <span class="size-18 me-1 text-center"><i class="fa-light fa-user"></i></span>
                     <span>{{ __("Profile") }}</span>
                 </a>
-                <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="{{ url_app('profile/plan') }}">
-                    <span class="size-18 me-1 text-center"><i class="fa-light fa-box-open"></i></span>
-                    <span>{{ __("Plan") }}</span>
-                </a>
-                <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="{{ url_app('profile/billing') }}">
-                    <span class="size-18 me-1 text-center"><i class="fa-light fa-ballot-check"></i></span>
-                    <span>{{ __("Billing") }}</span>
-                </a>
-                <a class="dropdown-item py-2 px-2 rounded d-flex gap-6  d-none" href="{{ url_app('profile/settings') }}">
-                    <span class="size-18 me-1 text-center"><i class="fa-light fa-gear"></i></span>
-                    <span>{{ __("Settings") }}</span>
-                </a>
+                @if(session('effective_owner') == 1)
+                    <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="{{ url_app('profile/plan') }}">
+                        <span class="size-18 me-1 text-center"><i class="fa-light fa-box-open"></i></span>
+                        <span>{{ __("Plan") }}</span>
+                    </a>
+                    <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="{{ url_app('profile/billing') }}">
+                        <span class="size-18 me-1 text-center"><i class="fa-light fa-ballot-check"></i></span>
+                        <span>{{ __("Billing") }}</span>
+                    </a>
+                    <a class="dropdown-item py-2 px-2 rounded d-flex gap-6 d-none" href="{{ url_app('profile/settings') }}">
+                        <span class="size-18 me-1 text-center"><i class="fa-light fa-gear"></i></span>
+                        <span>{{ __("Settings") }}</span>
+                    </a>
+                 @endif
             </div>
             <div><hr class="dropdown-divider"></div>
             <div class="px-3 d-flex flex-column gap-2">
@@ -79,9 +81,11 @@
                             @endif
                         </div>
                     </div>
+                    @if(session('effective_owner') == 1)
                     <div>
                         <a href="{{ route('app.profile', 'plan') }}" class="btn btn-primary btn-sm fs-12 w-100">{{ __("Upgrade") }}</a>
                     </div>
+                    @endif
                 </div>
             </div>
             <div class="mt-2 mb-2 border-top pt-2 px-3">

@@ -57,9 +57,11 @@
                         style="width: {{ $progressValue }}%;">
                     </div>
                 </div>
-                <a href="{{ route('app.profile', 'plan') }}" class="btn btn-sm btn-dark wp-100 mt-2">
-                    {{ __('Upgrade / Details') }}
-                </a>
+                @if(session('effective_owner') == 1)
+                    <a href="{{ route('app.profile', 'plan') }}" class="btn btn-sm btn-dark wp-100 mt-2">
+                        {{ __('Upgrade / Details') }}
+                    </a>
+                 @endif
             </div>
         </div>
     </div>

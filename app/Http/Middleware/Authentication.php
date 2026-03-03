@@ -149,6 +149,38 @@ class Authentication
             * END PROCESS TEAM
              */
             
+            //Resolve Effective Plan (Owner / Member) - Start
+            if ($team->owner == $user->id) {
+                // User is owner
+                $effectivePlanId = $user->plan_id;
+                $effectiveExpiration = $user->expiration_date;
+                $effectiveOwner = 1;
+            } else {
+                // User is member → get owner's plan
+                $owner = User::find($team->owner);
+                $effectivePlanId = $owner->plan_id;
+                $effectiveExpiration = $owner->expiration_date;    
+                $effectiveOwner = 0;            
+            }
+
+            // Attach effective plan dynamically (no DB update)
+            /*$user->effective_plan_id = $effectivePlanId;
+            $user->effective_expiration_date = $effectiveExpiration;
+            $user->effective_owner = $effectiveOwner;*/
+
+            // Make available everywhere
+            $request->attributes->set('effective_plan_id', $effectivePlanId);
+            $request->attributes->set('effective_expiration_date', $effectiveExpiration);
+            $request->attributes->set('effective_owner', $effectiveOwner);
+
+            session([
+                'effective_plan_id' => $effectivePlanId,
+                'effective_expiration_date' => $effectiveExpiration,
+                'effective_owner' => $effectiveOwner
+            ]);
+
+            //Resolve Effective Plan (Owner / Member) - End
+
             self::checkPermissions($user, $team);
 
             $request->team_id = $team->id;
@@ -364,6 +396,9 @@ class Authentication
         }
 
         foreach ($grouped_menus as &$menu_item) {
+            if (session('effective_owner') == 0 && $menu_item["id"] == "appteams") {
+                continue;
+            }
             if (isset($sub_menus[$menu_item['name']])) {
 
                 $sub_menu_list = $sub_menus[$menu_item['name']];
