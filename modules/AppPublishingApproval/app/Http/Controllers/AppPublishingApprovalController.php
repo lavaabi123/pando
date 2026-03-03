@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Modules\AppPublishing\Models\Posts;
 use Illuminate\Pagination\Paginator;
+use Barryvdh\DomPDF\Facade\Pdf;
 use DB;
 
 class AppPublishingApprovalController extends Controller
@@ -78,5 +79,49 @@ $schedules = Posts::select('posts.*', 'grouped.avatars', 'grouped.urls', 'groupe
             ])->render()
         ]);
     } 
-	
+
+    public function pdf(Request $request)
+    {
+        ini_set('memory_limit', '1024M');
+        ini_set('pcre.backtrack_limit', '800000000');
+        set_time_limit(300);
+
+        $ids = $request->input('ids');
+        if (is_string($ids)) {
+            $ids = array_filter(array_map('trim', explode(',', $ids)));
+        }
+        $ids = is_array($ids) ? array_filter($ids, 'strlen') : [];
+
+        if (empty($ids)) {
+            return response()->json(['status' => 'error', 'message' => 'No posts selected'], 400);
+        }
+
+        $result = Posts::whereIn('id', $ids)->get();
+        $result = $result->map(function ($row) {
+            $row->social_networks_count = DB::table('posts')
+                ->where('time_post', $row->time_post)
+                ->where('grouping_data', $row->grouping_data)
+                ->count();
+            return $row;
+        });
+
+        $html = view('apppublishingapproval::pdf', [
+			'result'     => $result,
+			'brand_name' => session('brand_name', auth()->user()->name ?? 'Brand'),
+		])->render();
+
+		$pdf_name = session('brand_name', 'Brand') . '-Social-Media-Draft-' . date('Mj');
+
+		$pdf = Pdf::loadHTML($html)
+			->setPaper('a4', 'portrait')
+			->setOptions([
+				'isRemoteEnabled'    => true,
+				'isHtml5ParserEnabled' => true,
+				'defaultFont'        => 'sans-serif',
+				'dpi'                => 96,
+				'defaultMediaType'   => 'print',
+			]);
+
+		return $pdf->download($pdf_name . '.pdf');
+    }
 }

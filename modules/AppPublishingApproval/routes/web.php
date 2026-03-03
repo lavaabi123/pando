@@ -25,6 +25,24 @@ Route::group(["prefix" => "app"], function () {
             Route::post('save', [AppPublishingApprovalController::class, 'save'])->name('app.publishing.approval.save');
             Route::post('destroy', [AppPublishingApprovalController::class, 'destroy'])->name('app.publishing.approval.destroy');
             Route::post('status/{any}', [AppPublishingApprovalController::class, 'status'])->name('app.publishing.approval.status');
+            Route::post('pdf', [AppPublishingApprovalController::class, 'pdf'])->name('app.publishing.approval.pdf');
+Route::get('test-pdf-html', function() {
+    $ids = \DB::table('posts')->where('brand_id', session('brand_id'))->where('status', 2)->limit(3)->pluck('id')->toArray();
+    
+    $result = \Modules\AppPublishing\Models\Posts::whereIn('id', $ids)->get();
+    $result = $result->map(function ($row) {
+        $row->social_networks_count = \DB::table('posts')
+            ->where('time_post', $row->time_post)
+            ->where('grouping_data', $row->grouping_data)
+            ->count();
+        return $row;
+    });
+
+    return view('apppublishingapproval::pdf', [
+        'result'     => $result,
+        'brand_name' => session('brand_name', 'TEST BRAND'),
+    ]);
+});			
         });
     });
 });

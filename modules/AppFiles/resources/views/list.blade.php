@@ -22,7 +22,7 @@
     </nav>
     @endif
 
-    <div class="col-md-12 {{ !$folder?"mt-5":""; }}">
+    <div class="col-md-12 {{ !$folder?"mt-0":""; }}">
         @if($folders->count() > 0)
         <div class="d-flex pb-3">
             <div class="fs-18 text-gray-900 fw-5">{{ __("Folder") }}</div>  
@@ -33,30 +33,30 @@
         <div class="row">
             @foreach($folders as $value)
             <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                <label class="position-relative bg-light border b-r-10 p-4 w-100 pointer" for="folder_{{ $value->id_secure }}">
+                <label class="position-relative bg-light border b-r-15 p-4 w-100 pointer" for="folder_{{ $value->id_secure }}">
                     <div class="position-absolute r-10 t-10">
                         <input class="d-none form-check-input ajax-scroll-filter" type="radio" name="folder_id" value="{{ $value->id_secure }}" id="folder_{{ $value->id_secure }}">
                     </div>
                     <div class="d-flex align-items-center justify-content-between mb-2">
                         <div class="fs-28 text-warning">
-                            <i class="fa-light fa-folder-open"></i>
+                            <i class="fa-light fa-folder-open fw-9"></i>
                         </div>
                         <div class="position-relative">
                             <div class="dropdown dropdown-hover">
                                 <a class="dropdown-toggle dropdown-arrow-hide text-gray-900" data-bs-toggle="dropdown" data-bs-animation="fade">
-                                    <i class="fa-light fa-grid-2"></i>
+                                    <i class="fa-light fa-grid-2 fw-9"></i>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end right-0 p-2 border-1 border-gray-300 max-w-80 w-100">
                                     <li>
                                         <a class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 actionItem" href="{{ module_url("update_folder") }}" data-id="{{ $value->id_secure }}" data-popup="updateFolderModal">
-                                            <span class="size-16 me-1 text-center"><i class="fa-light fa-pen-to-square"></i></span>
+                                            <span class="size-16 me-1 text-center"><i class="fa-light fa-pen-to-square fw-9"></i></span>
                                             <span class="fw-5">{{ __("Edit") }}</span>
                                         </a>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 actionItem" href="{{ module_url("destroy") }}" data-id="{{ $value->id_secure }}" data-call-success="Main.ajaxScroll(true)">
-                                            <span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can"></i></span>
+                                            <span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can fw-9"></i></span>
                                             <span class="fw-5">{{ __("Delete") }}</span>
                                         </a>
                                     </li>
@@ -103,9 +103,9 @@
     @endphp
 
     <div class="col-lg-2 col-md-4 col-sm-6 col-6 mb-4">
-        <div class="bg-light border b-r-10 position-relative">
+        <div class="bg-light border b-r-15 position-relative">
             <label 
-                class="w-100 h-150 border-bottom btl-r-10 btr-r-10 d-flex align-items-center justify-content-center 
+                class="w-100 h-150 border-bottom btl-r-15 btr-r-15 d-flex align-items-center justify-content-center 
                        text-{{ $detectType['color'] }} bg-{{ $detectType['color'] }}-100 position-relative overflow-hidden" 
                 for="file_{{ $value->id_secure }}"
                 @if($value->detect == "image")
@@ -138,14 +138,14 @@
                 <div class="position-relative">
                     <div class="btn-group">
                         <a class="dropdown-toggle dropdown-arrow-hide text-gray-900" data-bs-toggle="dropdown" data-bs-animation="fade">
-                            <i class="fa-light fa-grid-2"></i>
+                            <i class="fa-light fa-grid-2 fw-9"></i>
                         </a>
                         <ul class="dropdown-menu dropdown-menu-end right-0 p-2 border-1 border-gray-300">
                             @can('appfiles.image_editor')
                                 @if($value->detect == "image")
                                 <li>
                                     <button type="button" class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 editImage" data-file="{{ Media::url($value->file) }}" data-id="{{ $value->id_secure }}">
-                                        <span class="size-16 me-1 text-center"><i class="fa-light fa-edit"></i></span>
+                                        <span class="size-16 me-1 text-center"><i class="fa-light fa-edit fw-9"></i></span>
                                         <span class="fw-5">{{ __("Edit Image") }}</span>
                                     </button>
                                 </li>
@@ -154,7 +154,7 @@
                             @endcan
                             <li>
                                 <a class="dropdown-item py-2 px-2 rounded d-flex gap-8 fs-14 actionItem" href="{{ module_url("destroy") }}" data-id="{{ $value->id_secure }}" data-call-success="Main.ajaxScroll(true)">
-                                    <span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can"></i></span>
+                                    <span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can fw-9"></i></span>
                                     <span class="fw-5">{{ __("Delete") }}</span>
                                 </a>
                             </li>
