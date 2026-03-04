@@ -90,7 +90,7 @@
                                 <a href="{{ route("payment.cancel_subscription") }}" class="btn btn-outline btn-danger btn-md actionItem b-r-20" data-confirm="{{ __("Are you sure you want to cancel your subscription?") }}" data-redirect="">{{ __("Cancel Subscription") }}</a>
                                 @else
                                     @if($plan && !$plan->free_plan)
-                                    <a href="#pricingTab" class="btn btn-warning btn-md">{{ __("Upgrade Plan") }}</a>
+                                    <a href="#pricingTabContent" class="btn btn-warning btn-md">{{ __("Upgrade Plan") }}</a>
                                     <a href="{{ route('payment.index', $plan->id_secure) }}" class="btn btn-dark btn-md">{{ __("Renew Plan") }}</a>
                                     @endif
                                 @endif
