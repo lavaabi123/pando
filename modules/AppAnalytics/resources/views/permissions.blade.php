@@ -6,14 +6,14 @@
                 {{ __("Analytics") }}
             </label>
         </div>
-        <input class="form-control d-none" name="labels[appanalytics]" type="text" value="Channels">
+        <input class="form-control d-none" name="labels[appanalytics]" type="text" value="Analytics">
     </div>
     <div class="card-body">
         <div class="row">
             <div class="col-md-12 allow_analytics">
                 <div class="mb-0">
                     <div class="d-flex gap-8 justify-content-between border-bottom mb-3 pb-2">
-                        <div class="fw-5 text-gray-800 fs-14 mb-2">{{ __('Allow channels') }}</div>
+                        <div class="fw-5 text-gray-800 fs-14 mb-2">{{ __('Allow Analytics for') }}</div>
                         <div class="form-check">
                             <input class="form-check-input checkbox-all" data-checkbox-parent=".allow_analytics" type="checkbox" value="" id="allow_analytics">
                             <label class="form-check-label" for="allow_analytics">
