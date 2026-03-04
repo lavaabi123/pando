@@ -49,7 +49,7 @@
                     className: 'min-w-80 text-danger text-center',
                     render: function (data, type, row){
                     
-                        if (row.status == 2) {
+                        if (row.status == 1) {
                             return `<span class="badge badge-outline badge-sm badge-success"><i class="fal fa-check-circle me-2"></i> {{ __("Active") }}</span>`;
                         }else{
                             return `<span class="badge badge-outline badge-sm badge-danger"><i class="fa-light fa-circle-xmark me-2"></i> {{ __("Cancel") }}</span>`;
