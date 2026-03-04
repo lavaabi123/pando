@@ -167,7 +167,7 @@ class AdminPaymentHistoryController extends Controller
             ]
         ];
 
-        $dataTableService = \DataTable::make(PaymentHistory::class, $this->Datatable, $whereConditions, $joins);
+        $dataTableService = \DataTable::make($this->table, $this->Datatable, $whereConditions, $joins);
         $data = $dataTableService->getData($request);
         return response()->json($data);
     }
