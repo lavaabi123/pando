@@ -122,8 +122,13 @@ class PlanService
         if ($plan->free_plan || $plan->type == 3) {
             $expiration_date = -1;
         } elseif ($user->plan_id == $planId && $plan->type != 3) {
-            $mainDays = $plan->type == 1 ? 30 : 365;
-            $expiration_date = ($curExpiration > $now ? $curExpiration : $now) + 86400 * $mainDays;
+            //$mainDays = $plan->type == 1 ? 30 : 365;
+            //$expiration_date = ($curExpiration > $now ? $curExpiration : $now) + 86400 * $mainDays;
+            if ($plan->type == 1) {
+				$expiration_date = Carbon::now()->addMonth()->timestamp;
+			} else {
+				$expiration_date = Carbon::now()->addYear()->timestamp;
+			}
         } elseif ($oldPlan && $oldPlan->type == 2 && $plan->type == 1) {
             $oldUnit = $oldPlan->price / 365;
             $remainCredit = $remainDays * $oldUnit;
@@ -136,8 +141,13 @@ class PlanService
         } elseif ($oldPlan && $oldPlan->type == 1 && $plan->type == 2) {
             $expiration_date = $now + 86400 * 365;
         } else {
-            $mainDays = $plan->type == 1 ? 30 : 365;
-            $expiration_date = ($curExpiration > $now ? $curExpiration : $now) + 86400 * $mainDays;
+            //$mainDays = $plan->type == 1 ? 30 : 365;
+            //$expiration_date = ($curExpiration > $now ? $curExpiration : $now) + 86400 * $mainDays;
+            if ($plan->type == 1) {
+				$expiration_date = Carbon::now()->addMonth()->timestamp;
+			} else {
+				$expiration_date = Carbon::now()->addYear()->timestamp;
+			}
         }
 
         $user->plan_id = $planId;
@@ -171,7 +181,7 @@ class PlanService
                 return ['status' => 'free', 'redirect' => url_app("dashboard")];
             }
             if ($plan->trial_day) {
-                $trialDays = (int) ($plan->trial_days ?? 7);
+                $trialDays = (int) ($plan->trial_day ?? 7);
                 self::updateUserPlan($user, $plan, 'trial', $trialDays);
                 return [
                     'status' => 'trial',
