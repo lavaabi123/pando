@@ -95,11 +95,11 @@ then you are a part of the journey!</p>
         </form>
 
         <!-- Switch to signup -->
-        <!--@if(get_option("auth_signup_page_status", 1))
+        @if(get_option("auth_signup_page_status", 1))
             <p class="text-center pt-4">
                 {{ __("Don't have an account?") }}
-                <a href="{{ url('auth/signup') }}" class="text-indigo-600 hover:text-indigo-700 font-medium">{{ __("Sign up") }}</a>
+                <a href="{{ url('pricing') }}" class="text-indigo-600 hover:text-indigo-700 font-medium">{{ __("Sign up") }}</a>
             </p>
-        @endif-->
+        @endif
     </div>
 </section>
