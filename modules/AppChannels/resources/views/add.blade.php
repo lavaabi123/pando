@@ -62,7 +62,7 @@
                 <div class="mt-4">
                     <button type="submit" class="btn btn-dark w-100" href="{{ module_url("create") }}">
                         <span><i class="fa-light fa-plus"></i></span>
-                        <span>{{ __('Add new') }}</span>
+                        <span>{{ __('Add') }}</span>
                     </button>
                 </div>
             @elseif($result['status'] == 0)
