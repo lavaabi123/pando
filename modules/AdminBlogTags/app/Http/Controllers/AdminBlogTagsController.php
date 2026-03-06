@@ -135,7 +135,7 @@ public function save(Request $request, $id = null)
         if ($validator->passes()) {
             $values = [
                 'name' => $request->input('name'),
-				'slug'    => \Str::slug($request->input('name')),
+                'slug' => \Str::slug($request->input('name')),
                 'desc' => $request->input('desc'),
                 'icon' => $request->input('icon'),
                 'color' => $request->input('color'),

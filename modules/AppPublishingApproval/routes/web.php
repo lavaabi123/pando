@@ -37,7 +37,7 @@ Route::get('test-pdf-html', function() {
             ->count();
         return $row;
     });
-
+//echo "<pre>";print_r($result);exit;
     return view('apppublishingapproval::pdf', [
         'result'     => $result,
         'brand_name' => session('brand_name', 'TEST BRAND'),

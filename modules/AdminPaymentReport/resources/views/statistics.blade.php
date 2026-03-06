@@ -46,7 +46,7 @@
 
 <div class="row">
 
-	<div class="col-md-4 mb-4">
+	<div class="col-md-4 mb-3">
 		<div class="card shadow-sm">
 			<div class="card-header">
 				<div class="fw-5">{{ __('Total Income') }}</div>
@@ -139,7 +139,7 @@
 
 	</div>
 
-	<div class="col-md-8 mb-4">
+	<div class="col-md-8 mb-3">
 		
 		<div class="card hp-100">
 			<div class="card-header">
@@ -156,7 +156,7 @@
 
 	</div>
 
-	<div class="col-md-12 mb-4">
+	<div class="col-md-12 mb-3">
 		
 		<div class="card">
 			<div class="card-header">
@@ -169,7 +169,7 @@
 
 	</div>
 
-	<div class="col-md-12 mb-4">
+	<div class="col-md-12 mb-3">
 		
 		<div class="card">
 			<div class="card-header">
@@ -182,7 +182,7 @@
 
 	</div>
 
-	<div class="col-md-12 mb-4">
+	<div class="col-md-12 mb-3">
 		<div class="card hp-100">
 			<div class="card-header">
 				<div class="fw-5">{{  __("Latest Payments") }}</div>
@@ -194,12 +194,12 @@
 			    	<tr>
 						<td class="w-220 text-truncate">
 							<div class="d-flex align-items-center max-w-250 gap-12 ps-2">
-								<div class="size-45 size-child border border-primary-200 pf-2 b-r-100">
+								<div class="size-40 size-child border border-primary-200 pf-2 b-r-100">
 									<img src="{{ Media::url($payment->user_avatar) }}" class="b-r-100">
 								</div>
 								<div class="d-flex flex-column max-w-250">
 									<div>
-										<div class="fs-12 fw-5 lh-1.1 text-truncate">{{ $payment->user_fullname }}</div>
+										<div class="fs-13 fw-6 lh-1 text-truncate">{{ $payment->user_fullname }}</div>
 										<div class="fs-12 text-gray-600 text-truncate">{{ $payment->user_email }}</div>
 									</div>
 								</div>

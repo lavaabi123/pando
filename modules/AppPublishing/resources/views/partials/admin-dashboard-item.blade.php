@@ -34,7 +34,7 @@
         : 0;
 @endphp
 
-<div class="fw-bold fs-20 pb-4 pt-5">{{ __("Post Stats") }}</div>
+<h3 class="title-md sec-label">{{ __("Post Stats") }}</h3>
 
 <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
 
@@ -130,7 +130,7 @@
 <div class="row mt-4">
 
     {{-- Chart: Success vs Failed Over Time --}}
-    <div class="col-md-12 mb-4">
+    <div class="col-md-12 mb-3">
         <div class="card border-0 shadow-sm">
             <div class="card-header">
                 <h5 class="fw-5 fs-16">{{ __('Successful vs Failed Posts Over Time') }}</h5>
@@ -158,7 +158,7 @@
     </div>
 
     {{-- Chart: Posts by Team --}}
-    <div class="col-md-6 mb-4">
+    <div class="col-md-6 mb-3">
         <div class="card border-0 shadow-sm">
             <div class="card-header">
                 <div class="fw-5">
@@ -170,7 +170,7 @@
     </div>
 
     {{-- Chart: Posts by Social Network --}}
-    <div class="col-md-6 mb-4">
+    <div class="col-md-6 mb-3">
         <div class="card border-0 shadow-sm">
             <div class="card-header">
                 <div class="fw-5">
@@ -182,7 +182,7 @@
     </div>
 
     {{-- Chart: Posts by Status --}}
-    <div class="col-md-12 mb-4">
+    <div class="col-md-12 mb-3">
         <div class="card border-0 shadow-sm">
             <div class="card-header">
                 <div class="fw-5">
@@ -194,7 +194,7 @@
     </div>
 
     {{-- Recent Posts --}}
-    <div class="col-lg-12 mb-4">
+    <div class="col-lg-12 mb-3">
         <div class="card border-0 shadow-sm px-0">
             <div class="card-header">
                 <h5 class="fs-5 fs-16">{{ __('Recently Posted: Success & Failed') }}</h5>

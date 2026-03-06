@@ -2,10 +2,10 @@
     $aiModelChart = Credit::getCreditUsageByModel(-1, null, null, 'ai_%');
     $aiUsageData = Credit::getCreditUsageChartData(-1, null, null, 'ai_%');
 @endphp
-<div class="fw-bold fs-20 pb-4 pt-5">{{ __("AI Stats") }}</div>
+<h3 class="title-md sec-label">{{ __("AI Stats") }}</h3>
 
 <div class="row">
-    <div class="col-md-12 mb-4">
+    <div class="col-md-12 mb-3">
         <div class="card">
             <div class="card-header">
                 <div class="fw-5">{{ __('Daily AI Credit Usage') }}</div>
@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div class="col-md-12 mb-4">
+    <div class="col-md-12 mb-3">
         <div class="card">
             <div class="card-header">
                 <div class="fw-5">{{ __('Credit Usage by AI Model') }}</div>

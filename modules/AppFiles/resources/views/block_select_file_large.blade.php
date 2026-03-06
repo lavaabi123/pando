@@ -13,9 +13,9 @@
     @endif
 </label>
 @endif
-<div class="p-3 border-1 b-r-6">
+<div class="b-r-15">
     <div class="form-file">
-        <a class="w-100 mb-1 form-img ratio ratio-{{ $ratio }} d-block actionItem bg-cover {{ $id_custom }}" style="{{ $value!=""?"background: url( ". Media::url($value) ." )":"" }}" href="{{ route("app.files.popup_files") }}" data-id="{{ $id_custom }}" data-filter="{{ serialize([ "type" => "image", "multi" => false ]) }}" data-popup="filesModal">
+        <a class="w-100 mb-1 form-img border-2 b-r-15 ratio ratio-{{ $ratio }} d-block actionItem bg-cover {{ $id_custom }}" style="{{ $value!=""?"background: url( ". Media::url($value) ." )":"" }}" href="{{ route("app.files.popup_files") }}" data-id="{{ $id_custom }}" data-filter="{{ serialize([ "type" => "image", "multi" => false ]) }}" data-popup="filesModal">
         </a>
         <input class="form-control d-none" id="{{ $id_custom }}" name="{{ $id }}" placeholder="{{ __("Select file") }}" type="text" value="{{  Media::url($value)  }}">
         <a class="btn btn-input actionItem pointer w-100" href="{{ route("app.files.popup_files") }}" data-id="{{ $id_custom }}" data-filter="{{ serialize([ "type" => "image", "multi" => false ]) }}" data-popup="filesModal">

@@ -23,31 +23,32 @@
 
 <div class="container pb-5">
     <input class="d-none" name="id" type="text" value="{{ data($result, "id_secure") }}">
-    <div class="row">
+    <div class="row inputField">
         <div class="col-md-8">
-            <div class="card b-r-6 border-gray-300 mb-3">
+            <div class="card border-gray-300 mb-3 position-sticky top-0">
                 <div class="card-body">
                     <div class="msg-errors"></div>
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="title" class="form-label">{{ __('Title') }}</label>
                                 <input placeholder="{{ __('') }}" class="form-control" name="title" id="title" type="text" value="{{ $result->title ?? '' }}">
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="code" class="form-label">{{ __('Description') }}</label>
                                 <textarea class="form-control" name="desc">{{ $result->desc ?? '' }}</textarea>
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="content" class="form-label">{{ __('Content') }} (<span class="text-danger">*</span>)</label>
-                                <textarea class="textarea_editor border-gray-300 border-1 min-h-1200" name="content" placeholder="{{ __("Enter content") }}">{!! data($result, "content") !!}</textarea>
+                                <textarea class="textarea_editor border-gray-300 border-2 b-r-25 min-h-600" name="content" placeholder="{{ __("Enter content") }}">{!! data($result, "content") !!}</textarea>
                             </div>
                         </div>
                     </div>
+					<button type="submit" class="btn btn-dark w-100">{{ __("Save changes") }}</button>
 
                 </div>
 
@@ -56,7 +57,7 @@
         </div>
         <div class="col-md-4">
 
-            <div class="card b-r-6 border-gray-300 mb-4">
+            <div class="card b-r-6 border-gray-300 mb-3">
                 <div class="card-header">
                     <div class="fw-5 fs-14">
                         {{ __('Category') }}
@@ -76,7 +77,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card b-r-6 border-gray-300 mb-4">
+            <div class="card b-r-6 border-gray-300 mb-3">
                 <div class="card-header">
                     <div class="fw-5 fs-14">
                         {{ __("Thumbnail") }}
@@ -91,7 +92,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card b-r-6 border-gray-300 mb-4">
+            <div class="card b-r-6 border-gray-300 mb-3">
                 <div class="card-header">
                     <div class="fw-5 fs-14">
                         {{ __('Tags') }}
@@ -106,7 +107,7 @@
                         }
                         @endphp
 
-                        <select class="form-select h-auto " name="tags[]" id="tags" data-control="select2" multiple="true" data-placeholder="{{ __("Add Tags") }}">
+                        <select class="form-select h-auto" name="tags[]" id="tags" data-control="select2" multiple="true" data-placeholder="{{ __("Add Tags") }}">
                             @if($tags)
                                     @foreach($tags as $value)
                                         <option
@@ -122,7 +123,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card b-r-6 border-gray-300 mb-4">
+            <div class="card b-r-6 border-gray-300 mb-3">
                 <div class="card-header">
                     <div class="fw-5 fs-14">
                         {{ __('Status') }}
@@ -147,7 +148,7 @@
                     </div>
                 </div>
             </div>
-            <div class="card b-r-6 border-gray-300 mb-4">
+            <div class="card b-r-6 border-gray-300 mb-3">
                 <div class="card-header">
                     <div class="fw-5 fs-14">
                        {{ __('Featured') }}
@@ -174,13 +175,6 @@
             </div>
         </div>
 
-    </div>
-
-
-    <div class="row">
-        <div class="col-md-8">
-            <button type="submit" class="btn btn-dark w-100">{{ __("Save changes") }}</button>
-        </div>
     </div>
 </div>
 @endsection

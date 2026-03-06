@@ -11,7 +11,7 @@ class AdminMailTemplatesController extends Controller
     public function index()
     {
         $allTemplates = \MailSender::getTemplates();
-		foreach ($allTemplates as $module => &$templates) {
+        foreach ($allTemplates as $module => &$templates) {
 			$moduleObj = \Module::find($module);
 			if (!$moduleObj) continue;
 

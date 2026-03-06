@@ -4,29 +4,9 @@
 
 <div class="container max-w-800 pb-5">
 
-    <div class="mt-4 mb-4">
-        <div class="d-flex flex-column flex-lg-row flex-md-column align-items-md-start align-items-lg-center justify-content-between">
-            <div class="my-3 d-flex flex-column gap-8">
-                <h1 class="fs-20 font-medium lh-1 fw-6 text-gray-900">
-                    {{ __('New ticket') }}
-                </h1>
-                <div class="d-flex align-items-center gap-20 fw-5 fs-14">
-                    <div class="d-flex gap-8">
-                        <span class="text-gray-600">{{ __('Submit new support requests quickly and easily') }}</span>
-                    </div>
-                </div>
-            </div>
-            <div class="d-flex gap-8">
-                <a class="btn btn-light btn-sm " href="{{ module_url() }}">
-                    <span><i class="fa-light fa-chevron-left"></i></span>
-                    <span>{{ __('Back') }}</span>
-                </a>
-            </div>
-        </div>
-    </div>
 
     <form class="actionForm" action="{{ module_url("save") }}" method="POST">
-        <div class="card shadow-none border-gray-300 mb-4">
+        <div class="card shadow-none border-gray-300 mb-4 inputField">
             <div class="card-body">
                 <div class="row">
                 	<div class="col-md-6">

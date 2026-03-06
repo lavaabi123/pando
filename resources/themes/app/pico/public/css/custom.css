@@ -30,7 +30,37 @@ a {
     text-decoration: none;
     transition: all 0.4s;
 }
-
+.row {
+    --bs-gutter-x: 1rem;
+}
+.g-4, .gy-4 {
+    --bs-gutter-y: 1rem;
+}
+h1, h2, h3, h4, h5, h6 {
+	font-weight: 600;
+    font-family: 'Inter';
+}
+.fs-13.lh-1 {
+    line-height: normal !important;
+}
+.title-md {
+    font-size: 16px;
+   
+}
+.sec-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(0, 200, 83, 0.2);
+}
+.sec-label {
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
 /** Color Picker Start **/
 [type='color'] {
     -moz-appearance: none;
@@ -58,6 +88,9 @@ a {
 }
 .colors .form-check-label {
     white-space: nowrap;
+}
+.btn {
+	font-family: 'Inter';
 }
 .btn.btn-primary, .btn.btn-secondary,
 .btn.btn-sm, .btn-group-sm > .btn {
@@ -112,8 +145,12 @@ a {
 .card .card-body {
     padding: 1.25rem 1.25rem;
 }
+.card .card-header {
+	min-height: auto;
+}
 .card .card-header, .card .card-header * {
     font-weight: 600;
+	font-family: 'Inter';
 }
 /** Color Picker End **/
 
@@ -942,6 +979,7 @@ span.svg-icons svg {
 
 .modal-content {
  border-radius: 1.5rem;
+ border: 2px solid var(--bs-gray-300);
 }
 .modal-content .rounded {
 	border-radius: var(--bs-border-radius-xl) !important;
@@ -1036,7 +1074,8 @@ span.svg-icons svg {
 	border: none;
 }
 /** AI-publishing **/
-.inputField input, .inputField select, .inputField .form-control, .inputField .form-select {
+.inputField input, .inputField select, .inputField .form-control, .inputField .form-select,
+form.modal-content input, form.modal-content select, form.modal-content .form-control {
     border-width: 2px !important;
     border-radius: 30px;
 }
@@ -1044,18 +1083,22 @@ span.svg-icons svg {
 	border-width: 2px !important;
 	border-radius: 25px;
 }
-.inputField .account_manager .am-choice-box .am-selected-box {
+.inputField .account_manager .am-choice-box .am-selected-box, .select2-selection--multiple {
     border-radius: 20px !important;
     border-width: 2px !important;
 }
 .inputField .account_manager .am-choice-box .am-selected-box .am-selected-list .am-selected-item {
 	margin-bottom: 0 !important;
 }
-.inputField .option-network .form-control {
+.inputField .option-network .form-control, form.modal-content .emojionearea.form-control {
     border-radius: 15px !important;
 }
-.inputField textarea.form-control {
-    border-radius: 20px;
+.inputField textarea.form-control, .tox.tox-tinymce.textarea_editor {
+    border-radius: 20px !important;
+}
+.select2-selection.select2-selection--multiple {
+    padding: 4px 10px 10px;
+    border-color: #ced4da !important;
 }
 #strategyTabContent label {
     margin-bottom: 8px;
@@ -1071,6 +1114,30 @@ span.svg-icons svg {
 .select2-dropdown {
     border-width: 2px;
     border: 2px solid #000000 !important;
+}
+form.modal-content h1.modal-title {
+    text-align: center;
+    width: 100%;
+    text-transform: capitalize;
+    font-weight: 700;
+    font-family: 'Inter';
+    letter-spacing: 0.4px;
+    font-size: 20px !important;
+}
+form.modal-content .modal-footer .btn {
+	margin: 0 0 0 15px;
+    padding: 8px 16px !important;
+    text-transform: uppercase;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    min-width: 150px;
+}
+
+/** Admin **/
+.badge.badge.badge-outline {
+    border-radius: 20px;
+    font-weight: 700;
+    padding: 4px 10px;
 }
 @media (min-width: 768px) {
     .pricing .border-end-md {

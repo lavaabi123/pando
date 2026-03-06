@@ -18,7 +18,7 @@
 @endsection
 
 @section('script')
-    @component('components.datatable_script', [ "Datatable" => $Datatable , "column_actions" => true, "column_status" => true]) @endcomponent
+    @component('components.datatable_script', [ "Datatable" => $Datatable, "edit_popup" => "sendNotificationModal" , "column_actions" => true, "column_status" => true]) @endcomponent
 
     <script type="text/javascript">
         columnDefs  = columnDefs.concat([

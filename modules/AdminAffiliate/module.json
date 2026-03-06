@@ -9,7 +9,7 @@
     ],
 
     "files": [],
-    "permission": false,
+    "dis_permission": true,
     "dis_menu": {
         "uri": "admin/affiliate/report",
         "role": "admin",

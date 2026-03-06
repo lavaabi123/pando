@@ -2,12 +2,14 @@
 
 <p>{{ __('Hello, :name!', ['name' => $fullname ?? 'User']) }}</p>
 
-<p>{{ __('We’re excited to have you on board. You can now explore your dashboard and start using all features.') }}</p>
+<p>{{ __('We’re excited to have you on board. You can now explore your dashboard and start using all features. use below login,') }}</p>
+<p>{{ __('Username - :username', ['username' => $username ?? 'Username']) }}</p>
+<p>{{ __('Password - :password', ['password' => $password ?? 'Password']) }}</p>
 
 <div style="margin: 28px 0;">
     <a href="{{ $login_url ?? url('/') }}" class="btn"
        style="background:#00b894; color:#fff; padding:12px 32px; border-radius:5px; text-decoration:none;">
-        {{ __('Go to Dashboard') }}
+        {{ __('Login') }}
     </a>
 </div>
 

@@ -26,7 +26,7 @@
         </div>
 
         <form class="actionMulti">
-            <div class="card mt-5">
+            <div class="card mt-4">
                 <div class="card-header">
                     <div class="d-flex flex-wrap justify-content-between align-items-center w-100 gap-8">
                         <div class="table-info"></div>

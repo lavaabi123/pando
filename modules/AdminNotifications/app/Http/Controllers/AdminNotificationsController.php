@@ -109,10 +109,9 @@ class AdminNotificationsController extends Controller
     }
 
     public function update(Request $request, $id = null){
-		$id = $request->input("id");
+        $id = $request->input("id");
         $result = NotificationManual::where("id_secure", $id)->first();
         $users = User::all();
-
         return response()->json([
             "status" => 1,
             "data" => view(module("key").'::update', [

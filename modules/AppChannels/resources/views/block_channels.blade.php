@@ -67,7 +67,7 @@ $groups = DB::table('groups')->get();
                                 @endforeach
                             @else
                                 <li>
-                                    <a href="{{ url_app("groups") }}" class="btn btn-dark btn-sm wp-100">{{ __("Add new") }}</a>
+                                    <a href="{{ url_app("groups") }}" class="btn btn-dark btn-sm wp-100">{{ __("Add") }}</a>
                                 </li>
                             @endif
                         </ul>

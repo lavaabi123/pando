@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="border-bottom mb-1 py-4 bg-polygon">
+    <div class="border-bottom mb-1 py-4 bg-polygon subHeader">
         <div class="container">
             <div class="d-flex justify-content-between align-self-center">
                 <div class="mb-0">
@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    <div class="container py-5">
+    <div class="container py-4">
 	
         <div class="ajax-pages" data-url="{{ route('admin.dashboard.statistics') }}" data-resp=".ajax-pages">
 			

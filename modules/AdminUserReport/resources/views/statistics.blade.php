@@ -20,7 +20,7 @@
 	<div class="col-md-4">
 		
 		<div class="row">
-			<div class="col-6 mb-4">
+			<div class="col-6 mb-3">
 				<div class="card bg-squared">
 					<div class="card-body">
 						<div class="d-flex flex-column gap-35">
@@ -43,7 +43,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-6 mb-4">
+			<div class="col-6 mb-3">
 				<div class="card bg-squared">
 					<div class="card-body">
 						<div class="d-flex flex-column gap-35">
@@ -66,7 +66,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-6 mb-4">
+			<div class="col-6 mb-3">
 				<div class="card bg-squared">
 					<div class="card-body">
 						<div class="d-flex flex-column gap-35">
@@ -89,7 +89,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="col-6 mb-4">
+			<div class="col-6 mb-3">
 				<div class="card bg-squared">
 					<div class="card-body">
 						<div class="d-flex flex-column gap-35">
@@ -115,19 +115,19 @@
 		</div>
 
 	</div>
-	<div class="col-md-8 mb-4">
+	<div class="col-md-8 mb-3">
 		<div class="card hp-100">
 			<div class="card-header">
 				<div class="fw-5">{{  __("Daily User Registrations") }}</div>
 			</div>
 
 			<div class="card-body py-2 px-2">
-				<div class="export-chart h-290" id="daily-registrations-chart"></div>
+				<div class="export-chart h-280" id="daily-registrations-chart"></div>
 			</div>
 		</div>
 	</div>
 
-	<div class="col-md-6 mb-4">
+	<div class="col-md-6 mb-3">
 		<div class="card hp-100">
 			<div class="card-header">
 				<div class="fw-5">{{  __("Latest Users") }}</div>
@@ -138,13 +138,13 @@
 				@foreach($latestUsers as $user)
 			    	<tr>
 						<td class="w-40 max-w-45">
-							<div class="size-45 size-child border border-primary-200 pf-2 b-r-100">
+							<div class="size-40 size-child border border-primary-200 pf-2 b-r-100">
 								<img src="{{ Media::url($user->avatar) }}" class="b-r-100">
 							</div>
 						</td>
 						<td class="w-220 text-truncate">
 							<div class="d-flex flex-column max-w-250">
-								<div class="fs-12 fw-5 lh-1.1 text-truncate">{{ $user->fullname }}</div>
+								<div class="fs-13 fw-6 lh-1 text-truncate">{{ $user->fullname }}</div>
 								<div class="fs-12 text-gray-600 text-truncate">{{ $user->email }}</div>
 							</div>
 						</td>
@@ -173,7 +173,7 @@
 			</div>
 		</div>
 	</div>
-	<div class="col-md-6 mb-4">
+	<div class="col-md-6 mb-3">
 		<div class="card hp-100">
 			<div class="card-header">
 				<div class="fw-5">{{  __("Login Method Breakdown") }}</div>

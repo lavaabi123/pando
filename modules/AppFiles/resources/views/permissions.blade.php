@@ -10,8 +10,7 @@
     </div>
     <div class="card-body">
         <div class="row">
-		<!--
-            <div class="col-md-12 file_picker">
+            <!--<div class="col-md-12 file_picker">
                 <div class="mb-2">
                     <div class="d-flex gap-4 justify-content-between">
                         <div class="fw-5 text-gray-800 fs-14 mb-2">{{ __('File picker') }}</div>
@@ -46,10 +45,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            
-			-->
-			<div class="col-md-12">
+            </div>-->
+            <div class="col-md-12">
                 <div class="mb-4">
                     <label class="form-label">{{ __('Image Editor') }}</label>
                     <div class="d-flex gap-8 flex-column flex-lg-row flex-md-column">

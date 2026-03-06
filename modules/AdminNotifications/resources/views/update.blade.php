@@ -21,9 +21,9 @@
                     <label class="form-label">{{ __("Send To Users") }}</label>
                     <select name="user_ids[]" class="form-select h-auto" data-control="select2" data-select2-tags="true" multiple required>
                         @foreach($users as $user)
-						@if($user->role != 2)
+                        @if($user->role != 2)
                             <option value="{{ $user->id }}">{{ $user->fullname }} ({{ $user->email }})</option>
-						@endif
+                        @endif
                         @endforeach
                     </select>
                     <div class="form-text">{{ __('You can select multiple users') }}</div>
