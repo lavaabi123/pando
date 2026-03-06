@@ -162,12 +162,7 @@ class Authentication
                 $effectiveExpiration = $owner->expiration_date;    
                 $effectiveOwner = 0;            
             }
-
-            // Attach effective plan dynamically (no DB update)
-            /*$user->effective_plan_id = $effectivePlanId;
-            $user->effective_expiration_date = $effectiveExpiration;
-            $user->effective_owner = $effectiveOwner;*/
-
+            
             // Make available everywhere
             $request->attributes->set('effective_plan_id', $effectivePlanId);
             $request->attributes->set('effective_expiration_date', $effectiveExpiration);
