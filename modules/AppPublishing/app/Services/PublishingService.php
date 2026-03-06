@@ -449,7 +449,7 @@ class PublishingService
         if ($countError == 0) {
             return [
                 "status" => 1,
-                "message" => sprintf(__("Your video is being uploaded to TikTok. It may take a few minutes for your content to process and be visible on your profile."), $countSuccess)
+                "message" => sprintf(__("Content is being published on %d profiles"), $countSuccess)
             ];
         } elseif ($countError == 1 && $countSuccess == 0) {
             return [

@@ -713,7 +713,7 @@ if($post){
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('No, Cancel') }}</button>
-                <a href="{{ url_app("publishing/save?confirm=true") }}" class="btn btn-dark actionMultiItem" data-form=".compose-editor" data-call-before="Main.closeModal('confirmPostModal');" >{{ __("Yes, I'm sure") }}</a>
+                <a href="{{ url_app("publishing/save?confirm=true") }}" class="btn btn-dark actionMultiItem" data-form=".compose-editor" data-call-before="Main.closeModal('confirmPostModal');" data-redirect="{{ module_url('calendar') }}" >{{ __("Yes, I'm sure") }}</a>
             </div>
         </div>
     </div>

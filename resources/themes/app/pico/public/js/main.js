@@ -1667,7 +1667,18 @@ var Main = new (function ()
 
                     //Redirect
                     Main.redirect(rediect, result.status);
-					if(result.status == 1 && result.tiktok_processing === true) {
+					
+					if (result.status == 2) {
+						Main.overplay(true);
+						that.removeClass("disabled");
+						$("#confirmPostModal .data-post-confirm").html(result.message || result.errors);
+						bootstrap.Modal.getOrCreateInstance(
+							document.getElementById('confirmPostModal')
+						).show();
+						return;
+					}
+
+					/*if(result.status == 1 && result.tiktok_processing === true) {
 						if (typeof showTikTokProcessingNotification === 'function') {
 							showTikTokProcessingNotification();
 						} else {
@@ -1678,7 +1689,7 @@ var Main = new (function ()
 							);
 						}
 						return; // Important: stops regular message from showing
-					}
+					} */
                     //Message
                     if(result.status != undefined){
 
