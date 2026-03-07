@@ -249,7 +249,7 @@
                         }
                     }
                 },
-		        color: '#675dff',
+		        color: '#000000',
 		        fillColor: {
 		            linearGradient: [0, 0, 0, 200],
 		            stops: [

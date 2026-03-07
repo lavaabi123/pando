@@ -626,6 +626,7 @@ a.menu-link.active {
 	background: #f5f5f5;
 	overflow-y: auto;
 }
+
 .card {
     border-color: #dedede !important;
     box-shadow: none !important;
@@ -634,6 +635,30 @@ a.menu-link.active {
 }
 .d-alert .card h5 {
 	font-size:14px;
+}
+.card.event-noti {
+    border-width: 2px;
+    border-radius: 15px !important;
+    box-shadow: -2px 0px 0px 0px var(--d-primary) !important;
+    border-left: 0;
+	margin-bottom:5px;
+}
+.card.event-noti.border-warning-200 {
+	box-shadow: -2px 0px 0px 0px var(--bs-orange) !important;
+}
+.card.event-noti.border-danger-200 {
+	box-shadow: -2px 0px 0px 0px var(--bs-red) !important;
+}
+#calendar .fc .fc-event {
+	box-shadow:none;
+}
+#calendar .fc-more-link {
+    background: var(--black);
+    border-radius: 15px;
+    font-size: 12px;
+    color: var(--white);
+    font-weight: 600;
+    padding: 3px 8px;
 }
 .count {
     font-size: 40px;
@@ -895,7 +920,11 @@ form .calendar-header .btn.dropdown-toggle {
 .calendar-scroll .add-button {
     padding: 5px !important;
     font-size: 12px !important;
-    text-transform: capitalize;
+    text-transform: uppercase;
+    font-weight: 700;
+    border-radius: 30px;
+    width: auto !important;
+    margin: 10px;
 }
 
 .calendar-scroll .fc-highlight-day {

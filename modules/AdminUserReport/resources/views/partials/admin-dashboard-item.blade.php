@@ -188,7 +188,28 @@
 
 <script type="text/javascript">
 	
-
+	// Get CSS variables at runtime
+	const dPrimary    = getComputedStyle(document.documentElement).getPropertyValue('--d-primary').trim();
+	const dSecondary  = getComputedStyle(document.documentElement).getPropertyValue('--d-secondary').trim();
+	const spPrimary   = getComputedStyle(document.documentElement).getPropertyValue('--sp-primary').trim();
+	const spSecondary = getComputedStyle(document.documentElement).getPropertyValue('--sp-secondary').trim();
+	
+	// Helper: hex to rgba
+	function hexToRgba(hex, alpha) {
+		const r = parseInt(hex.slice(1, 3), 16);
+		const g = parseInt(hex.slice(3, 5), 16);
+		const b = parseInt(hex.slice(5, 7), 16);
+		return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+	}
+	
+	// Helper: mix two hex colors (like color-mix in JS)
+	function mixColors(hex1, hex2, weight = 0.5) {
+		const r = Math.round(parseInt(hex1.slice(1,3),16) * weight + parseInt(hex2.slice(1,3),16) * (1 - weight));
+		const g = Math.round(parseInt(hex1.slice(3,5),16) * weight + parseInt(hex2.slice(3,5),16) * (1 - weight));
+		const b = Math.round(parseInt(hex1.slice(5,7),16) * weight + parseInt(hex2.slice(5,7),16) * (1 - weight));
+		return `rgb(${r}, ${g}, ${b})`;
+	}
+	
 	var chartData = {
         categories: {!! json_encode($dailyRegistrations['categories']) !!},
         series: {!! json_encode($dailyRegistrations['series']) !!}
@@ -249,13 +270,13 @@
                         }
                     }
                 },
-		        color: '#675dff',
+		        color: dPrimary,
 		        fillColor: {
-		            linearGradient: [0, 0, 0, 200],
-		            stops: [
-		                [0, 'rgba(103, 93, 255, 0.4)'],
-		                [1, 'rgba(255, 255, 255, 0)']
-		            ]
+					linearGradient: [0, 0, 0, 200],
+					stops: [
+						[0, hexToRgba(dPrimary, 0.4)],    // ← was 'rgba(103, 93, 255, 0.4)'
+						[1, hexToRgba(dPrimary, 0)]        // ← was 'rgba(255, 255, 255, 0)'
+					]
 		        }
 		    }
         },
@@ -265,6 +286,15 @@
 
     Main.Chart('pie', {!! json_encode($loginTypeChart) !!}, 'login-type-chart', {
 	    title: ' ',
+		colors: [
+        dPrimary,                           // --d-primary base
+        dSecondary,                         // --d-secondary base
+        mixColors(dPrimary, '#ffffff', 0.6),  // --d-primary lightened 40%
+        mixColors(dPrimary, '#000000', 0.7),  // --d-primary darkened 30%
+        mixColors(dPrimary, dSecondary, 0.7), // 70% primary + 30% secondary
+        mixColors(dPrimary, dSecondary, 0.3), // 30% primary + 70% secondary
+        hexToRgba(dPrimary, 0.6),             // --d-primary at 60% opacity
+    ],
         plotOptions: {
             pie: {
                 showInLegend: true  // Ensure the pie chart slices are displayed in the legend

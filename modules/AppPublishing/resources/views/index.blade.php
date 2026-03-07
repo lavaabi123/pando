@@ -138,23 +138,23 @@
 
             <div class="calendar-add-button d-none">
                 <a class="add-button wp-100 bg-dark text-white l-0 b-0 px-3 py-2 fs-14 fw-6 text-center" href="{{ url_app("publishing/composer") }}?date=[[date]]" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose();">
-                    <i class="fa-light fa-plus"></i> {{ __("Add post") }}
+                    <i class="fa-light fa-plus fw-7"></i> {{ __("Add post") }}
                 </a>
             </div>
 
             <div class="calendar-event-item d-none">
-                <div class="card text-wrap border-2 mb-1 shadow-none [[border_color]] event-item wp-100" data-id="[[id]]" data-url="{{ module_url("changePostDate") }}" data-loading="0">
+                <div class="card event-noti [[border_color]] event-item wp-100" data-id="[[id]]" data-url="{{ module_url("changePostDate") }}" data-loading="0">
                     <div class="card-body px-2 py-2">
                         <div class="d-flex flex-grow-1 align-items-top gap-8 w-100 mb-2 fs-11">
                             <div class="flex-grow-1 text-truncate">
-                                <div class="d-flex fw-5 gap-6 align-items-center">
-                                    <i class="[[icon]] fs-12" style="color: [[color]]"></i>
-                                    <span class="text-truncate">[[account_name]]</span>
+                                <div class="d-flex fw-7 gap-6 align-items-center">
+                                    <i class="[[icon]]" style="color: [[color]]"></i>
+                                    <span class="text-truncate lh-1">[[account_name]]</span>
                                 </div>
                                 
                             </div>
                             <div>
-                                <div class="text-gray-900 fw-5">[[time_post]]</div>
+                                <div class="text-gray-500 fw-4 lh-1">[[time_post]]</div>
                                 
                             </div>
                         </div>
@@ -162,18 +162,18 @@
                             <div class="flex-grow-1 fs-10 text-truncate-2">
                                 <div class="text-gray-600 text-truncate-2">[[caption]]</div>
                             </div>
-                            <div class="size-40 min-w-40 b-r-6 border-1 fs-18 text-primary bg-gray-100 d-flex align-items-center justify-content-center bg-cover video">
+                            <div class="size-35 b-r-6 border-1 fs-18 text-primary bg-gray-100 d-flex align-items-center justify-content-center bg-cover video">
                                 [[media]]
                             </div>
                         </div>
                         <div class="d-flex justify-content-between fs-11 gap-8">
                             [[status]]
-                            <div class="d-flex gap-8">
+                            <div class="d-flex gap-8 fw-6">
                                 <a href="{{ url_app("publishing/preview") }}" class="text-gray-900 actionItem" data-popup="pubishingPreviewModal" data-id="[[grouping_data]]" data-call-success="AppPubishing.closePopoverCalendar();"><i class="fa-light fa-eye"></i></a>
-                                <a href="{{ url_app("publishing/composer?id=[[id]]") }}" class="text-gray-900" data-append-content="composer-scheduling" data-id="[[id]]" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();"><i class="fa-light fa-pen-to-square"></i></a>
+                                <a href="{{ url_app("publishing/composer?id=[[id]]") }}" class="text-gray-900" data-append-content="composer-scheduling" data-id="[[id]]" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();"><i class="fa-light fa-pencil"></i></a>
                                 <div class="btn-group position-static">
                                     <div class="dropdown-toggle dropdown-arrow-hide text-gray-900 fs-11" data-bs-toggle="dropdown" aria-expanded="true">
-                                        <i class="fa-light fa-grid-2"></i>
+                                        <i class="fa-light fa-solid fa-ellipsis-vertical"></i>
                                     </div>
                                     <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-2 w-100 max-w-125">
                                         <li>
@@ -192,7 +192,7 @@
 
             <div class="calendar-status d-none" data-status="1">
                 <div class="text-dark text-truncate">
-                    <i class="fa-light fa-pen-to-square"></i>
+                    <i class="fa-light fa-pencil"></i>
                     <span>{{ __("Draft") }}</span>
                 </div>
             </div>
@@ -212,7 +212,7 @@
             </div>
 
             <div class="calendar-status d-none" data-status="4">
-                <div class="d-flex gap-8">
+                <div class="d-flex gap-8 fw-6">
                     <div class="text-success text-truncate">
                         <i class="fa-light fa-circle-check"></i>
                         <span>{{ __("Published") }}</span>
@@ -222,7 +222,7 @@
             </div>
 
             <div class="calendar-status d-none" data-status="5">
-                <div class="d-flex gap-8">
+                <div class="d-flex gap-8 fw-6">
                     <div class="text-danger text-truncate">
                         <i class="fa-light fa-circle-check"></i>
                         <span>{{ __("Unpublished") }}</span>

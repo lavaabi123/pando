@@ -5,7 +5,7 @@
 <h3 class="title-md sec-label">{{ __("AI Stats") }}</h3>
 
 <div class="row">
-    <div class="col-md-12 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card">
             <div class="card-header">
                 <div class="fw-5">{{ __('Daily AI Credit Usage') }}</div>
@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div class="col-md-12 mb-3">
+    <div class="col-md-6 mb-3">
         <div class="card">
             <div class="card-header">
                 <div class="fw-5">{{ __('Credit Usage by AI Model') }}</div>
@@ -33,6 +33,15 @@
 
     Main.Chart('column', aiModelChart.series, 'ai-credit-model-chart', {
         title: '{{ __("Credit Usage by AI Model") }}',
+		colors: [
+			dPrimary,                               // bar 1 — base --d-primary
+			dSecondary,                             // bar 2 — base --d-secondary
+			hexToRgba(dPrimary, 0.8),              // bar 3 — primary 80% opacity
+			mixColors(dPrimary, '#000000', 0.7),   // bar 4 — primary darkened 30%
+			mixColors(dPrimary, '#ffffff', 0.6),   // bar 5 — primary lightened 40%
+			mixColors(dPrimary, dSecondary, 0.7),  // bar 6 — 70% primary + 30% secondary
+			mixColors(dPrimary, dSecondary, 0.3),  // bar 7 — 30% primary + 70% secondary
+		],
         xAxis: {
             type: 'category',
             labels: {
@@ -136,13 +145,13 @@
                         }
                     }
                 },
-                color: '#675dff',
-                fillColor: {
-                    linearGradient: [0, 0, 0, 200],
-                    stops: [
-                        [0, 'rgba(103, 93, 255, 0.4)'],
-                        [1, 'rgba(255, 255, 255, 0)']
-                    ]
+                color: dPrimary,                            // ← was '#675dff'
+				fillColor: {
+					linearGradient: [0, 0, 0, 200],
+					stops: [
+						[0, hexToRgba(dPrimary, 0.4)],      // ← was 'rgba(103, 93, 255, 0.4)'
+						[1, hexToRgba(dPrimary, 0)]          // ← was 'rgba(255, 255, 255, 0)'
+					]
                 }
             }
         }

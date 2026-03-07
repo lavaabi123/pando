@@ -42,7 +42,7 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-pink-100 border border-pink-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-pink-500">
+                    <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-pink-500">
                         <i class="fa-light fa-rectangle-list text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ __('Total') }}</span>
@@ -60,7 +60,7 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-primary-100 border border-primary-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-primary-500">
+                    <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-primary-500">
                         <i class="fa-light fa-badge-check text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ __('Success Rate') }}</span>
@@ -76,7 +76,7 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-success-100 border border-success-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-success-500">
+                    <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-success-500">
                         <i class="fa-light fa-circle-check text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $statusMap[4]['label'] ?? __('Success') }}</span>
@@ -94,7 +94,7 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-danger-100 border border-danger-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-danger-500">
+                    <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-danger-500">
                         <i class="fa-light fa-circle-xmark text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $statusMap[5]['label'] ?? __('Failed') }}</span>
@@ -112,7 +112,7 @@
         <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-teal-100 border border-teal-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle size-44 bg-teal-500">
+                    <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-teal-500">
                         <i class="fa-light fa-arrows-rotate text-white fs-22"></i>
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $processingLabel }}</span>
@@ -228,9 +228,9 @@
                                     };
                                 @endphp
                                 <tr>
-                                    <td class="text-center w-60">
+                                    <td class="text-center w-40">
                                         @if (!empty($thumbnail))
-                                            <img src="{{ Media::url($thumbnail) }}" class="rounded size-48" style="object-fit: cover;">
+                                            <img src="{{ Media::url($thumbnail) }}" class="rounded size-40" style="object-fit: cover;">
                                         @elseif($post->type == "link")
                                             <div class="d-flex align-items-center justify-content-center bg-light border rounded size-48">
                                                 <i class="fa-light fa-link text-gray-600 fs-4"></i>
@@ -241,13 +241,13 @@
                                             </div>
                                         @endif
                                     </td>
-                                    <td class="fs-14">{{ \Str::limit($caption, 80) }}</td>
-                                    <td class="text-start">
+                                    <td class="fs-13">{{ \Str::limit($caption, 80) }}</td>
+                                    <td class="text-center">
                                         <div class="d-flex align-items-center gap-2 justify-content-start gap-10">
                                             @if(!empty($post->account->avatar))
                                                 <img src="{{ Media::url($post->account->avatar) }}" class="rounded-circle size-22" style="object-fit:cover;">
                                             @endif
-                                            <span class="fs-14">{{ $post->account->name ?? '-' }}</span>
+                                            <span class="fs-13">{{ $post->account->name ?? '-' }}</span>
                                         </div>
                                     </td>
                                     <td class="text-center">
@@ -262,7 +262,7 @@
                                         @endif
                                         
                                     </td>
-                                    <td class="text-nowrap text-gray-700 fs-14">
+                                    <td class="text-nowrap text-center text-gray-700 fs-13">
                                         {{ datetime_show($post->time_post) }}
                                     </td>
                                     <td class="text-center">
@@ -287,10 +287,12 @@
 </div>
 
 <script>
+
+
     // Chart: Success vs Failed Over Time
     var errorSuccessChart = {!! json_encode($errorSuccessChart) !!};
-    errorSuccessChart.series[0].color = '#675dff';
-    errorSuccessChart.series[1].color = '#f5222d';
+    errorSuccessChart.series[0].color = dPrimary;       // ← was '#675dff'
+errorSuccessChart.series[1].color = dSecondary;     // ← was '#f5222d'
     Main.Chart('areaspline', errorSuccessChart.series, 'posts-error-success-chart', {
         title: '{{ __('Daily AI Credit Usage') }}',
         legend: {
@@ -358,13 +360,13 @@
                         }
                     }
                 },
-                color: '#675dff',
-                fillColor: {
-                    linearGradient: [0, 0, 0, 200],
-                    stops: [
-                        [0, 'rgba(103, 93, 255, 0.4)'],
-                        [1, 'rgba(255, 255, 255, 0)']
-                    ]
+                color: dPrimary,                            // ← was '#675dff'
+				fillColor: {
+					linearGradient: [0, 0, 0, 200],
+					stops: [
+						[0, hexToRgba(dPrimary, 0.4)],      // ← was 'rgba(103, 93, 255, 0.4)'
+						[1, hexToRgba(dPrimary, 0)]          // ← was 'rgba(255, 255, 255, 0)'
+					]
                 }
             }
         }
@@ -373,17 +375,44 @@
     // Chart: Posts by Team
     Main.Chart('column', {!! json_encode($postsByTeamChart['series']) !!}, 'posts-by-team-chart', {
         title: '{{ __("Posts by Team") }}',
+		colors: [
+			dPrimary,                               // bar 1 — base --d-primary
+			dSecondary,                             // bar 2 — base --d-secondary
+			hexToRgba(dPrimary, 0.8),              // bar 3 — primary 80% opacity
+			mixColors(dPrimary, '#000000', 0.7),   // bar 4 — primary darkened 30%
+			mixColors(dPrimary, '#ffffff', 0.6),   // bar 5 — primary lightened 40%
+			mixColors(dPrimary, dSecondary, 0.7),  // bar 6 — 70% primary + 30% secondary
+			mixColors(dPrimary, dSecondary, 0.3),  // bar 7 — 30% primary + 70% secondary
+		],
         xAxis: { categories: {!! json_encode($postsByTeamChart['categories']) !!} }
     });
 
     // Chart: Posts by Social Network
     Main.Chart('pie', {!! json_encode($postsBySocialChart['series'][0]['data']) !!}, 'posts-by-social-chart', {
-        title: '{{ __("Posts by Social Network") }}'
+        title: '{{ __("Posts by Social Network") }}',
+		colors: [
+			dPrimary,                               // bar 1 — base --d-primary
+			dSecondary,                             // bar 2 — base --d-secondary
+			hexToRgba(dPrimary, 0.8),              // bar 3 — primary 80% opacity
+			mixColors(dPrimary, '#000000', 0.7),   // bar 4 — primary darkened 30%
+			mixColors(dPrimary, '#ffffff', 0.6),   // bar 5 — primary lightened 40%
+			mixColors(dPrimary, dSecondary, 0.7),  // bar 6 — 70% primary + 30% secondary
+			mixColors(dPrimary, dSecondary, 0.3),  // bar 7 — 30% primary + 70% secondary
+		]
     });
 
     // Chart: Posts by Status
     Main.Chart('column', {!! json_encode($postsByStatusChart['series']) !!}, 'posts-by-status-chart', {
         title: '{{ __("Posts by Status") }}',
+		colors: [
+			dPrimary,                               // bar 1 — base --d-primary
+			dSecondary,                             // bar 2 — base --d-secondary
+			hexToRgba(dPrimary, 0.8),              // bar 3 — primary 80% opacity
+			mixColors(dPrimary, '#000000', 0.7),   // bar 4 — primary darkened 30%
+			mixColors(dPrimary, '#ffffff', 0.6),   // bar 5 — primary lightened 40%
+			mixColors(dPrimary, dSecondary, 0.7),  // bar 6 — 70% primary + 30% secondary
+			mixColors(dPrimary, dSecondary, 0.3),  // bar 7 — 30% primary + 70% secondary
+		],
         xAxis: { categories: {!! json_encode($postsByStatusChart['categories']) !!} }
     });
 </script>
