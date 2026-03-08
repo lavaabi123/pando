@@ -84,6 +84,7 @@
                         $maxPosts = $getPermValue('apppublishing.max_post');
                         $aiWordCredits = $getPermValue('ai_word_credits');
                         $maxStorage = $getPermValue('appfiles.max_storage');
+                        $team_members_limit = $getPermValue('team_members') ?? 0;
                     @endphp
 
                     <div class="relative">
@@ -290,7 +291,7 @@
 													</svg>
 												@endif
                                                 <span class="text-base text-gray-900">
-                                                    {{ __($feature['label']) }}
+                                                    {{ __($feature['label']) }}@if($feature['key'] === 'appteams'): ({{ $team_members_limit === -1 ? __('Unlimited') : $team_members_limit }})@endif
                                                 </span>
                                                 
                                                 {{-- Info Icon for Subfeatures --}}

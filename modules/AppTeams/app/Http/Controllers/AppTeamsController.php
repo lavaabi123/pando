@@ -125,8 +125,53 @@ class AppTeamsController extends Controller
         $teamId = $request->team_id;
         $team = Teams::where('id', $teamId)->firstOrFail();
 		$userId = session('user_id');
-		// Get role once (role=2 => Super Admin)
-		$role = DB::table('users')->where('id', $userId)->value('role');
+        // Team member limit check - Start
+        // Get role once (role=2 => Super Admin)
+        $role = DB::table('users')->where('id', $userId)->value('role');
+
+        // ── Team Member Limit Check (skip for Super Admin) ──────────────────
+        if ((int)$role !== 2) {
+
+            // Get team owner's plan permissions via users.plan_id
+            $planPermissions = DB::table('teams')
+                ->join('users', 'users.id', '=', 'teams.owner')
+                ->join('plans', 'plans.id', '=', 'users.plan_id')
+                ->where('teams.id', $teamId)
+                ->value('plans.permissions');
+
+            $memberLimit = 0;
+
+            if ($planPermissions) {
+                $perms = json_decode($planPermissions, true) ?? [];
+                foreach ($perms as $perm) {
+                    if (($perm['key'] ?? '') === 'team_members') {
+                        $memberLimit = (int)($perm['value'] ?? 0);
+                        break;
+                    }
+                }
+            }
+
+            // Count existing members for this team
+            $currentMemberCount = DB::table('team_members')
+                ->where('team_id', $teamId)
+                ->count();
+
+            if ($memberLimit === 0) {
+                return response()->json([
+                    "status"  => 0,
+                    "message" => "Your current plan does not support team members. Please upgrade to add team member.",
+                ]);
+            }
+
+            if ($memberLimit !== -1 && $currentMemberCount >= $memberLimit) {
+                return response()->json([
+                    "status"  => 0,
+                    "message" => "You have reached your team member limit ({$memberLimit}). Please upgrade your plan to add more members.",
+                ]);
+            }
+        }
+        
+        // Team member limit check - End		
 		if ((int)$role === 2) {
 			// SUPER ADMIN: see every brand
 			$brands = DB::table('brands')

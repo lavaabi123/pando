@@ -63,6 +63,11 @@ class AppTeamsServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        \Plan::addPermissions($this->name, [
+            "sort" => 5000,
+            "view" => "permissions",
+        ]);
     }
 
     /**

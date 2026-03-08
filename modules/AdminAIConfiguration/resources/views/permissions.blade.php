@@ -1,4 +1,4 @@
-<div class="card b-r-6 border-gray-300 mb-3">
+<div class="card b-r-6 border-gray-300 mb-3 d-none">
     <div class="card-header">
         <label class="fw-6 fs-14 text-gray-700">
             {{ __("AI Credits") }}

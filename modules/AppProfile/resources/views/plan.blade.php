@@ -121,6 +121,7 @@
                 $maxStorage = $getPermValue('appfiles.max_storage');
                 $hasAnalytics = $getPermValue('appanalytics');
                 $hasAIPublishing = $getPermValue('appaipublishing');
+                $team_members_limit = $getPermValue('team_members') ?? 0;
             @endphp
 
             <ul class="list-unstyled with-mark fw-6">
@@ -154,7 +155,7 @@
 
                 {{-- AI Word Credits --}}
                 @if($aiWordCredits)
-                    <li class="mb-2 d-flex align-items-center gap-1">
+                    <li class="mb-2 d-flex align-items-center gap-1 d-none">
                         <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                             <i class="fa-regular fa-check"></i>
                         </span>
@@ -215,15 +216,20 @@
                 @endif
 
                 {{-- Show other boolean features --}}
-                @foreach($plan_detail['features']??[] as $feature)
+               @php
+                    /*echo $team_members_limit;
+                    echo "<pre>";
+                    print_r($plan_detail['features']);
+                    echo "</pre>";*/
+                @endphp
+
+                @foreach($plan_detail['features']??[] as $feature)                
                     @if($feature['key'] !== 'access_feature')
                         <li class="mb-2 d-flex align-items-center gap-1">
                             <span class="d-flex align-items-center justify-content-center fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-danger' }}">
                                 <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
-                            </span>
-
-                            {{ __($feature['label']) }}
-                            
+                            </span>                            
+                            {{ __($feature['label']) }}@if($feature['key'] === 'appteams'): ({{ $team_members_limit === -1 ? __('Unlimited') : $team_members_limit }})@endif
                             {{-- Popup info icon for subfeatures --}}
                             @if(!empty($feature['subfeature']))
                                 <div class="feature-popup-wrapper position-relative ms-1 d-inline-block">
@@ -233,12 +239,12 @@
                                     <div class="features-popup shadow-lg">
                                         @foreach($feature['subfeature'] as $group)
                                             <div class="fw-bold mb-1 small px-3 pt-2">
-                                                {{ __($group['tab_name'] ?? '') }}
+                                               test1 {{ __($group['tab_name'] ?? '') }}
                                             </div>
                                             <ul class="list-unstyled with-mark mb-2 px-3">
                                                 @foreach($group['items'] as $item)
                                                     <li class="d-flex align-items-center">
-                                                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
+                                                       test2 <span class="d-flex align-items-center justify-content-center fs-13 me-2 {{ $feature['check'] ? 'text-success' : 'text-gray-600' }}">
                                                             <i class="fa-regular fa-{{$feature['check'] ? 'check' : 'xmark' }}"></i>
                                                         </span>
                                                         {{ __($item['label']) }}
@@ -326,6 +332,7 @@
                         $maxStorage = $getPermValue('appfiles.max_storage');
                         $hasAnalytics = $getPermValue('appanalytics');
                         $hasAIPublishing = $getPermValue('appaipublishing');
+                        $team_members_limit = $getPermValue('team_members') ?? 0;
                     @endphp
 
                     <div class="col-md-3">
@@ -461,7 +468,9 @@
                                                     <i class="fa-regular fa-{{ $feature['check'] ? 'check' : 'xmark' }}"></i>
                                                 </span>
 
-                                                <span class="fs-14">{{ __($feature['label']) }}</span>
+                                                <span class="fs-14">                                                
+                                                {{ __($feature['label']) }}@if($feature['key'] === 'appteams'): ({{ $team_members_limit === -1 ? __('Unlimited') : $team_members_limit }})@endif
+                                                </span>
                                                 
                                                 {{-- Popup info icon --}}
                                                 @if(!empty($feature['subfeature']))

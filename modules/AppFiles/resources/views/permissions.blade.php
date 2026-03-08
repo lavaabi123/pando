@@ -1,7 +1,8 @@
-<div class="card b-r-6 border-gray-300 mb-3">
+<div class="card b-r-6 border-gray-300 mb-3 d-none">
     <div class="card-header">
         <div class="form-check">
-            <input class="form-check-input prevent-toggle" type="checkbox" value="1" id="permissions[]" name="permissions[appfiles]" @checked( array_key_exists("appfiles", $permissions ) )>
+            <input class="form-check-input prevent-toggle" type="checkbox" value="1" id="permissions[]" name="permissions[appfiles]"             
+            @checked(empty($permissions) || array_key_exists('appfiles', $permissions))>
             <label class="fw-6 fs-14 text-gray-700 ms-2" for="permissions[appfiles]">
                 {{ __("Files") }}
             </label>
