@@ -43,18 +43,20 @@
                     <span class="size-18 me-1 text-center"><i class="fa-light fa-user"></i></span>
                     <span><?php echo e(__("Profile")); ?></span>
                 </a>
-                <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="<?php echo e(url_app('profile/plan')); ?>">
-                    <span class="size-18 me-1 text-center"><i class="fa-light fa-box-open"></i></span>
-                    <span><?php echo e(__("Plan")); ?></span>
-                </a>
-                <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="<?php echo e(url_app('profile/billing')); ?>">
-                    <span class="size-18 me-1 text-center"><i class="fa-light fa-ballot-check"></i></span>
-                    <span><?php echo e(__("Billing")); ?></span>
-                </a>
-                <a class="dropdown-item py-2 px-2 rounded d-flex gap-6  d-none" href="<?php echo e(url_app('profile/settings')); ?>">
-                    <span class="size-18 me-1 text-center"><i class="fa-light fa-gear"></i></span>
-                    <span><?php echo e(__("Settings")); ?></span>
-                </a>
+                <?php if(session('effective_owner') == 1): ?>
+                    <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="<?php echo e(url_app('profile/plan')); ?>">
+                        <span class="size-18 me-1 text-center"><i class="fa-light fa-box-open"></i></span>
+                        <span><?php echo e(__("Plan")); ?></span>
+                    </a>
+                    <a class="dropdown-item py-2 px-2 rounded d-flex gap-6" href="<?php echo e(url_app('profile/billing')); ?>">
+                        <span class="size-18 me-1 text-center"><i class="fa-light fa-ballot-check"></i></span>
+                        <span><?php echo e(__("Billing")); ?></span>
+                    </a>
+                    <a class="dropdown-item py-2 px-2 rounded d-flex gap-6 d-none" href="<?php echo e(url_app('profile/settings')); ?>">
+                        <span class="size-18 me-1 text-center"><i class="fa-light fa-gear"></i></span>
+                        <span><?php echo e(__("Settings")); ?></span>
+                    </a>
+                 <?php endif; ?>
             </div>
             <div><hr class="dropdown-divider"></div>
             <div class="px-3 d-flex flex-column gap-2">
@@ -85,9 +87,11 @@
                             <?php endif; ?>
                         </div>
                     </div>
+                    <?php if(session('effective_owner') == 1): ?>
                     <div>
                         <a href="<?php echo e(route('app.profile', 'plan')); ?>" class="btn btn-primary btn-sm fs-12 w-100"><?php echo e(__("Upgrade")); ?></a>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="mt-2 mb-2 border-top pt-2 px-3">

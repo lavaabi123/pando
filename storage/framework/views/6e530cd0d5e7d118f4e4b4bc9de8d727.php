@@ -63,10 +63,12 @@
                         style="width: <?php echo e($progressValue); ?>%;">
                     </div>
                 </div>
-                <a href="<?php echo e(route('app.profile', 'plan')); ?>" class="btn btn-sm btn-dark wp-100 mt-2">
-                    <?php echo e(__('Upgrade / Details')); ?>
+                <?php if(session('effective_owner') == 1): ?>
+                    <a href="<?php echo e(route('app.profile', 'plan')); ?>" class="btn btn-sm btn-dark wp-100 mt-2">
+                        <?php echo e(__('Upgrade / Details')); ?>
 
-                </a>
+                    </a>
+                 <?php endif; ?>
             </div>
         </div>
     </div>

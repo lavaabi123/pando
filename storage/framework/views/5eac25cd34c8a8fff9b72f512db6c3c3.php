@@ -62,7 +62,7 @@
                     	<?php if(is_null($item->read_at)): ?>
                             <span class="badge badge-dark text-white h-20"><?php echo e(__('New')); ?></span>
                         <?php endif; ?>
-                        d
+                        
                     	<span><?php echo nl2br(e($message)); ?></span>
                 	</div>
                     <?php if($item->url): ?>

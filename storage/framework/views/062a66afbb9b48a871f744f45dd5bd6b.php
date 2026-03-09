@@ -10,9 +10,9 @@
 <?php if(Auth::user()->role == 2): ?>
 	<div class="menu-item mb-2">
 		<?php if(session("login_as") == "client"): ?>
-			<a href="<?php echo e(url("auth/login-as-admin")); ?>" class="btn btn-outline btn-primary btn-sm wp-100"><i class="fa-light fa-right-from-bracket"></i> <?php echo e(__("Admin Dashboard")); ?></a>
+			<a href="<?php echo e(url("auth/login-as-admin")); ?>" class="btn btn-primary btn-sm wp-100"><i class="fa-light fa-right-from-bracket"></i> <?php echo e(__("Admin Dashboard")); ?></a>
 		<?php else: ?>
-			<a href="<?php echo e(url("auth/login-as-user")); ?>" class="btn btn-outline btn-primary btn-sm wp-100"><i class="fa-light fa-right-from-bracket"></i> <?php echo e(__("User Dashboard")); ?></a>
+			<a href="<?php echo e(url("auth/login-as-user")); ?>" class="btn btn-primary btn-sm wp-100"><i class="fa-light fa-right-from-bracket"></i> <?php echo e(__("User Dashboard")); ?></a>
 		<?php endif; ?>
 	</div>
 <?php endif; ?><?php /**PATH C:\xampp82\htdocs\pando-laravel\modules/Auth\resources/views/sidebar-block.blade.php ENDPATH**/ ?>
