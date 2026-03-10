@@ -26,7 +26,7 @@
         </div>
 
         <form class="actionMulti">
-            <div class="card mt-5">
+            <div class="card mt-4">
                 <div class="card-header">
                     <div class="d-flex flex-wrap justify-content-between align-items-center w-100 gap-8">
                         <div class="table-info"></div>
@@ -34,7 +34,7 @@
                             <div class="d-flex">
                                 <div class="form-control form-control-sm">
                                     <button class="btn btn-icon">
-                                        <i class="fa-duotone fa-solid fa-magnifying-glass"></i>
+                                        <i class="fa fa-solid fa-magnifying-glass"></i>
                                     </button>
                                     <input name="datatable_filter[search]" placeholder="{{ __('Search') }}" type="text"/>
                                 </div>
@@ -48,7 +48,7 @@
                             </div>
                             <div class="d-flex">
                                 <div class="btn-group">
-                                    <button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
+                                    <button class="btn btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
                                         <i class="fa-light fa-grid-2"></i> {{ __('Actions') }}
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-2 w-100 max-w-125">

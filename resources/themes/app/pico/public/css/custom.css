@@ -152,6 +152,9 @@ h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
 	font-family: 'Inter';
 }
+.card .card-header i[class*="fa"] {
+    font-family: 'Font Awesome 5 Pro';
+}
 /** Color Picker End **/
 
 /** Input Fields Start **/
@@ -1103,10 +1106,11 @@ span.svg-icons svg {
 	border: none;
 }
 /** AI-publishing **/
+input, select, textarea,
 .inputField input, .inputField select, .inputField .form-control, .inputField .form-select,
 form.modal-content input, form.modal-content select, form.modal-content .form-control {
     border-width: 2px !important;
-    border-radius: 30px;
+    border-radius: 30px !important;
 }
 .inputField .btn-input {
 	border-width: 2px !important;
@@ -1125,20 +1129,34 @@ form.modal-content input, form.modal-content select, form.modal-content .form-co
 .inputField textarea.form-control, .tox.tox-tinymce.textarea_editor {
     border-radius: 20px !important;
 }
+.tox-editor-header {
+    padding: 3px 10px !important;
+}
+.tox .tox-toolbar__group {
+	padding:0 !important;
+}
 .select2-selection.select2-selection--multiple {
-    padding: 4px 10px 10px;
+    padding: 7px 10px 7px;
     border-color: #ced4da !important;
+}
+.card-header .form-control.form-control-sm {
+	border-width:2px !important;
 }
 #strategyTabContent label {
     margin-bottom: 8px;
     font-size: 13px;
 }
-#strategyTabContent.inputField input, #strategyTabContent.inputField select, #strategyTabContent.inputField .form-control, #strategyTabContent.inputField .form-select {
+#strategyTabContent.inputField input, #strategyTabContent.inputField select, 
+#strategyTabContent.inputField .form-control, #strategyTabContent.inputField .form-select {
 	margin-bottom: 10px;
 }
 #strategyTabContent h5 {
     font-weight: 600;
     margin-bottom: 20px;
+}
+span.select2-selection.select2-selection--single.form-select {
+    border-width: 2px;
+    border-radius: 25px;
 }
 .select2-dropdown {
     border-width: 2px;
@@ -1167,6 +1185,9 @@ form.modal-content .modal-footer .btn {
     border-radius: 20px;
     font-weight: 700;
     padding: 4px 10px;
+}
+.swal2-container {
+    background: rgb(0 0 0 / 70%) !important;
 }
 @media (min-width: 768px) {
     .pricing .border-end-md {

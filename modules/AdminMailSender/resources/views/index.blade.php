@@ -17,16 +17,16 @@
 
 @section('content')
 
-<div class="container pb-5 mt-5">
+<div class="container pb-5 mt-4">
     <input class="d-none" name="id" type="text" value="">
     <div class="row">
         <div class="col-md-8">
-            <div class="card b-r-6 border-gray-300 mb-3">
+            <div class="card b-r-6 border-gray-300 mb-3 position-sticky top-0">
                 <div class="card-body">
                     <div class="msg-errors"></div>
                     <div class="row">
                         <div class="col-md-12">
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="to" class="form-label">{{ __('Recipient(s)') }}</label>
                                 <select name="user_ids[]" class="form-select h-auto" data-control="select2" data-select2-tags="true" multiple required>
                                     @foreach($users as $user)
@@ -36,17 +36,20 @@
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="subject" class="form-label">{{ __('Subject') }}</label>
                                 <input placeholder="{{ __('') }}" class="form-control" name="subject" id="subject" type="text" value="">
                             </div>
                         </div>
                         <div class="col-md-12">
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="content" class="form-label">{{ __('Message') }} (<span class="text-danger">*</span>)</label>
-                                <textarea class="textarea_editor border-gray-300 border-1 min-h-100" name="content" placeholder="{{ __("Enter content") }}"></textarea>
+                                <textarea class="textarea_editor border-gray-300 w-100 min-h-100" name="content" placeholder="{{ __("Enter content") }}"></textarea>
                             </div>
                         </div>
+						<div class="col-md-12">
+							<button type="submit" class="btn btn-dark w-100">{{ __("Send") }}</button>
+						</div>
                     </div>
 
                 </div>
@@ -55,7 +58,7 @@
 
         </div>
         <div class="col-md-4">
-            <div class="card b-r-6 border-gray-300 mb-3">
+            <div class="card b-r-6 border-gray-300 mb-3 overflow-hidden">
                 <div class="card-header bg-gray-100 fw-5 fs-14">
                   {{ __('Available Variables') }}
                 </div>
@@ -74,11 +77,6 @@
                 </div>
             </div>
 
-        </div>
-    </div>
-    <div class="row">
-        <div class="col-md-8">
-            <button type="submit" class="btn btn-dark w-100">{{ __("Send") }}</button>
         </div>
     </div>
 

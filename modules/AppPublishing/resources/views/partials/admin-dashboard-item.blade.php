@@ -39,7 +39,7 @@
 <div class="row row-cols-1 row-cols-md-4 g-4 mb-4">
 
     <div class="col-md-6">
-        <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-pink-100 border border-pink-200">
+        <div class="card shadow-sm rounded-4 hp-100 min-h-140 border border-pink-200">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
                     <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-pink-500">
@@ -47,10 +47,13 @@
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ __('Total') }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($totalPosts) }}</div>
-                <div class="fs-14 text-muted">
-                    {{ $totalGrowth == 0 ? '0%' : ($totalGrowth > 0 ? '+' : '-') . abs($totalGrowth) . '%' }}
-                </div>
+                <div class="fw-9 fs-48 mb-1 text-dark">{{ number_format($totalPosts) }}</div>
+				<div class="d-flex align-items-center gap-10">
+					<div class="badge badge-outline badge-sm badge-success">
+						{{ $totalGrowth == 0 ? '0%' : ($totalGrowth > 0 ? '+' : '-') . abs($totalGrowth) . '%' }}
+					</div>
+					<p class="mb-0 fs-12">from last period</p>
+				</div>
             </div>
         </div>
     </div>
@@ -65,7 +68,7 @@
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ __('Success Rate') }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-primary">{{ $successRate }}%</div>
+                <div class="fw-9 fs-48 mb-1 text-primary">{{ $successRate }}%</div>
                 <div class="fs-14 text-muted">{{ __('of processed posts') }}</div>
             </div>
         </div>
@@ -73,7 +76,7 @@
 
     {{-- Success --}}
     <div class="col-md-4">
-        <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-success-100 border border-success-200">
+        <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-success-100">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
                     <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-success-500">
@@ -81,8 +84,8 @@
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $statusMap[4]['label'] ?? __('Success') }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($successTotal) }}</div>
-                <div class="fs-14 text-muted">
+                <div class="fw-9 fs-48 mb-1 text-dark">{{ number_format($successTotal) }}</div>
+                <div class="badge badge-outline badge-sm badge-success">
                     {{ ($statusGrowth[4] ?? 0) == 0 ? '0%' : (($statusGrowth[4] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[4] ?? 0) . '%' }}
                 </div>
             </div>
@@ -91,7 +94,7 @@
 
     {{-- Failed --}}
     <div class="col-md-4">
-        <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-danger-100 border border-danger-200">
+        <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-danger-100">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
                     <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-danger-500">
@@ -99,8 +102,8 @@
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $statusMap[5]['label'] ?? __('Failed') }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($failedTotal) }}</div>
-                <div class="fs-14 text-muted">
+                <div class="fw-9 fs-48 mb-1 text-dark">{{ number_format($failedTotal) }}</div>
+                <div class="badge badge-outline badge-sm badge-danger">
                     {{ ($statusGrowth[5] ?? 0) == 0 ? '0%' : (($statusGrowth[5] ?? 0) > 0 ? '+' : '-') . abs($statusGrowth[5] ?? 0) . '%' }}
                 </div>
             </div>
@@ -109,7 +112,7 @@
 
     {{-- Processing --}}
     <div class="col-md-4">
-        <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-teal-100 border border-teal-200">
+        <div class="card shadow-sm rounded-4 hp-100 min-h-140 bg-teal-100">
             <div class="card-body d-flex flex-column justify-content-center align-items-start p-4">
                 <div class="d-flex align-items-center mb-2 gap-12">
                     <span class="d-inline-flex align-items-center justify-content-center size-40 b-r-10 bg-teal-500">
@@ -117,8 +120,8 @@
                     </span>
                     <span class="fw-6 fs-14 text-muted">{{ $processingLabel }}</span>
                 </div>
-                <div class="fw-bold fs-2 mb-1 text-dark">{{ number_format($processingTotal) }}</div>
-                <div class="fs-14 text-muted">
+                <div class="fw-9 fs-48 mb-1 text-dark">{{ number_format($processingTotal) }}</div>
+                <div class="badge badge-outline badge-sm badge-warning">
                     {{ $processingGrowth == 0 ? '0%' : ($processingGrowth > 0 ? '+' : '-') . abs($processingGrowth) . '%' }}
                 </div>
             </div>

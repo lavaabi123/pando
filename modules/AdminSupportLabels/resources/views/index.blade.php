@@ -27,19 +27,17 @@
                 <div class="d-flex">
                     <div class="form-control form-control-sm">
                         <span class="btn btn-icon">
-                            <i class="fa-duotone fa-solid fa-magnifying-glass"></i>
+                            <i class="fa fa-solid fa-magnifying-glass"></i>
                         </span>
                         <input class="ajax-scroll-filter" name="keyword" placeholder="{{ __('Search') }}" type="text">
-                        <button class="btn btn-icon">
-                            <div class="form-check form-check-sm mb-0">
-                                <input class="form-check-input checkbox-all" id="select_all" type="checkbox">
-                            </div>
-                        </button>
                     </div> 
-                </div>                           
+                </div>   
+				<div class="form-check p-0">
+					<input class="form-check-input checkbox-all ml-0" id="select_all" type="checkbox">
+				</div>				
                 <div class="d-flex">
                     <div class="btn-group position-static">
-                        <button class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
+                        <button class="btn btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
                             <i class="fa-light fa-filter"></i> {{ __("Filters") }}
                         </button>
                         <div class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-full max-w-250" data-popper-placement="bottom-end">
@@ -61,7 +59,7 @@
                     </div>
                 </div> 
                 <div class="btn-group position-static">
-                    <button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
+                    <button class="btn btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" aria-expanded="true">
                         <i class="fa-light fa-grid-2"></i> {{ __("Actions") }}
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-2 w-100 max-w-125" data-popper-placement="bottom-end">

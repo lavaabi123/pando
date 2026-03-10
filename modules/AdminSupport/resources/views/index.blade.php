@@ -25,14 +25,14 @@
                             <div class="d-flex">
                                 <div class="form-control form-control-sm">
                                     <button class="btn btn-icon">
-                                        <i class="fa-duotone fa-solid fa-magnifying-glass"></i>
+                                        <i class="fa fa-solid fa-magnifying-glass"></i>
                                     </button>
                                     <input name="datatable_filter[search]" placeholder="{{ __('Search') }}" type="text"/>
                                 </div>
                             </div>
                             <div class="d-flex">
                                 <div class="btn-group position-static">
-                                    <button class="btn btn-outline btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="true">
+                                    <button class="btn btn-light btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="true">
                                         <i class="fa-light fa-filter"></i> {{ __("Filters") }}
                                     </button>
                                     <div class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-full max-w-250" data-popper-placement="bottom-end">
@@ -83,7 +83,7 @@
                             </div>
                             <div class="d-flex">
                                 <div class="btn-group">
-                                    <button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
+                                    <button class="btn btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
                                         <i class="fa-light fa-grid-2"></i> {{ __('Actions') }}
                                     </button>
 

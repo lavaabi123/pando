@@ -1,7 +1,7 @@
 @if(!empty($actions))
 <div class="d-flex">
     <div class="btn-group">
-        <button class="btn btn-outline btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
+        <button class="btn btn-primary btn-sm dropdown-toggle dropdown-arrow-hide" data-bs-toggle="dropdown">
             <i class="fa-light fa-grid-2"></i> {{ __('Actions') }}
         </button>
         <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-auto max-w-300">

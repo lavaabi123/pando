@@ -89,7 +89,7 @@
                     <div class="col-md-12">
                         <div class="mb-4">
                             <label for="name" class="form-label">{{ __('Content') }} (<span class="text-danger">*</span>)</label>
-                            <textarea class="textarea_editor border-gray-300 border-1" name="content" placeholder="{{ __("Describe your issue or request in detail") }}">{!! data($ticket, "content") !!}</textarea>
+                            <textarea class="textarea_editor border-gray-300 w-100" name="content" placeholder="{{ __("Describe your issue or request in detail") }}">{!! data($ticket, "content") !!}</textarea>
                         </div>
                     </div>
 
@@ -102,8 +102,8 @@
                     @endphp
                     <div class="col-md-12">
                         <div class="mb-4">
-                            <label for="labels" class="form-label">{{ __('Labels') }}</label>
-                            <div class="text-gray-600 fs-12 mb-2">{{ __("Organize and manage your support tickets easily.") }}</div>
+                            <label for="labels" class="form-label mb-1">{{ __('Labels') }}</label>
+                            <div class="text-gray-600 fs-12 mb-0">{{ __("Organize and manage your support tickets easily.") }}</div>
 	                        <select class="form-select h-auto" data-control="select2" name="labels[]" multiple="true" data-placeholder="{{ __("Add labels") }}">
 	                            @if(!empty( $labels )) 
 	                                @foreach($labels as $value)
@@ -113,14 +113,16 @@
 	                        </select>
                         </div>
                     </div>
-                </div>
+					<div class="mt-0">
+						<button type="submit" class="btn btn-dark w-100">
+							{{ __('Save changes') }}
+						</button>
+					</div>
+				</div>
             </div>
+			
         </div>
-        <div class="mt-4">
-            <button type="submit" class="btn btn-dark b-r-10 w-100">
-                {{ __('Save changes') }}
-            </button>
-        </div>
+        
 
     </form>
 
