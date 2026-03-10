@@ -41,7 +41,12 @@ class AppFilesController extends Controller
             ]);
         }
 
-        switch ($request->segment(3)) {
+        // Use the last URL segment instead of segment(3) so this works
+        // whether the app runs at root (/app/files/mini_list) or in a
+        // subfolder (/pando-laravel/app/files/mini_list).
+        $lastSegment = basename($request->path());
+
+        switch ($lastSegment) {
             case 'popup_list':
                 $view = 'appfiles::popup_list';
                 break;
@@ -349,4 +354,34 @@ class AppFilesController extends Controller
     {   
         return view('appfiles::settings');
     }
+	public function get_thumbnails(Request $request)
+{
+    $id_secure = $request->id_secure;
+
+    if (!$id_secure) {
+        return response()->json(['status' => 0, 'message' => 'Missing id_secure']);
+    }
+
+    $file = Files::where('id_secure', $id_secure)
+        ->where('team_id', $request->team_id)
+        ->first();
+
+    if (!$file) {
+        return response()->json(['status' => 0, 'message' => 'File not found']);
+    }
+
+    if ($file->detect !== 'video') {
+        return response()->json(['status' => 0, 'message' => 'Not a video file']);
+    }
+
+    $thumbs = $file->thumbnails ? json_decode($file->thumbnails, true) : [];
+
+    if (empty($thumbs)) {
+        return response()->json(['status' => 2, 'message' => 'pending', 'thumbnails' => []]);
+    }
+
+    $resolvedThumbs = array_map(fn($t) => \Media::url($t), $thumbs);
+
+    return response()->json(['status' => 1, 'thumbnails' => $resolvedThumbs]);
+}
 }

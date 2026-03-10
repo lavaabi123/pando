@@ -19,7 +19,7 @@ $stats = UploadFile::getFileStorageStats();
             </a>
 
             @if(get_option('file_google_drive_status') && Gate::allows('appfiles.google_drive'))
-                <a class="text-gray-700 text-hover-primary" id="google-drive-chooser" href="javascript:void(0);"  data-call-success="Main.ajaxScroll(true)"><i class="fa-brands fa-google-drive"></i></a>
+                <a class="text-gray-700 text-hover-primary" id="google-drive-chooser" href="javascript:void(0);" data-call-success="Main.ajaxScroll(true)"><i class="fa-brands fa-google-drive"></i></a>
             @endif
             @if(get_option('file_dropbox_status') && Gate::allows('appfiles.dropbox'))
                 <a class="text-gray-700 text-hover-primary" id="dropbox-chooser" href="javascript:void(0);" data-call-success="Main.ajaxScroll(true)"><i class="fa-brands fa-dropbox"></i></a>
@@ -40,7 +40,7 @@ $stats = UploadFile::getFileStorageStats();
                     <li>
                         <a class="dropdown-item p-2 rounded d-flex gap-8 fw-5 fs-14 actionMultiItem" href="{{ url_app("files/update_folder") }}" data-popup="updateFolderModal">
                             <span class="size-16 me-1 text-center"><i class="fa-light fa-folder-plus"></i></span>
-                            <span >{{ __('New folder') }}</span>
+                            <span>{{ __('New folder') }}</span>
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>
@@ -51,12 +51,46 @@ $stats = UploadFile::getFileStorageStats();
                         </a>
                     </li>
                 </ul>
-                <div class="d-block d-sm-block d-md-none ">
+                <div class="d-block d-sm-block d-md-none">
                     <div class="btn btn-icon btn-sm btn-light btn-hover-danger b-r-50 a-rotate showCompose">
                         <i class="fa-light fa-xmark"></i>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
+
+    {{-- ── Upload circular progress overlay (hidden by default) ──────────────── --}}
+    <div id="pando-upload-progress-wrap"
+         style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.72); align-items:center; justify-content:center;">
+        <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
+            {{-- SVG circular ring --}}
+            <div style="position:relative; width:100px; height:100px;">
+                <svg width="100" height="100" style="transform:rotate(-90deg);">
+                    {{-- Track --}}
+                    <circle cx="50" cy="50" r="42"
+                            fill="none" stroke="#444" stroke-width="6"/>
+                    {{-- Progress arc --}}
+                    <circle id="pando-upload-ring" cx="50" cy="50" r="42"
+                            fill="none" stroke="#38bdf8" stroke-width="6"
+                            stroke-linecap="round"
+                            stroke-dasharray="263.9"
+                            stroke-dashoffset="263.9"
+                            style="transition: stroke-dashoffset 0.2s ease;"/>
+                </svg>
+                {{-- Percentage text centred inside ring --}}
+                <span id="pando-upload-pct"
+                      style="position:absolute; inset:0; display:flex; align-items:center;
+                             justify-content:center; color:#fff; font-size:16px; font-weight:700;">
+                    0%
+                </span>
+            </div>
+            {{-- File label --}}
+            <span id="pando-upload-label"
+                  style="color:#ccc; font-size:12px; max-width:200px;
+                         text-align:center; word-break:break-all;">
+                {{ __('Uploading…') }}
+            </span>
         </div>
     </div>
 

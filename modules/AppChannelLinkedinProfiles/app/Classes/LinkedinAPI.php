@@ -246,7 +246,8 @@ class LinkedinAPI
         $video_path,
         $video_title,
         $video_description,
-        $visibility = "PUBLIC"
+        $visibility = "PUBLIC",
+		$customThumb = null
     ) {
         // Register upload request using video recipe.
         $prepareUrl = "https://api.linkedin.com/v2/assets?action=registerUpload&oauth2_access_token=" . $accessToken;
@@ -306,10 +307,13 @@ class LinkedinAPI
                         "com.linkedin.ugc.ShareContent" => [
                             "shareCommentary"   => [ "text" => $message ],
                             "shareMediaCategory"=> "VIDEO",
-                            "media"             => [[
-                                "status"      => "READY",
-                                "media"       => $asset_id,
-                            ]]
+                            "media" => [array_filter([
+								"status"      => "READY",
+								"media"       => $asset_id,
+								"title"       => ["text" => $video_title],
+								"description" => ["text" => $video_description],
+								"thumbnails"  => $customThumb ? [["resolvedUrl" => $customThumb]] : null,
+							])]
                         ]
                     ],
                     "visibility" => [

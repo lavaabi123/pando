@@ -1,4 +1,5 @@
 <?php
+
 namespace Modules\AppChannelInstagramProfiles\Facades;
 
 use Illuminate\Support\Facades\Facade;
@@ -9,42 +10,38 @@ class Post extends Facade
 {
     private static $fb;
 
-    // Initialize the Facebook object using a static method
     public static function initFacebook()
     {
         if (!self::$fb) {
             self::$fb = new Facebook([
-                'app_id' => get_option("instagram_app_id", ""),
-                'app_secret' => get_option("instagram_app_secret", ""),
+                'app_id'                => get_option("instagram_app_id", ""),
+                'app_secret'            => get_option("instagram_app_secret", ""),
                 'default_graph_version' => get_option("instagram_graph_version", "v21.0"),
             ]);
         }
     }
 
     protected static function getFacadeAccessor()
-    { 
+    {
         return ex_str(__NAMESPACE__);
     }
 
     protected static function validator($post)
-    { 
+    {
         $errors = [];
-        $data = json_decode($post->data, false);
+        $data   = json_decode($post->data, false);
         $medias = $data->medias ?? [];
 
-        // Validate post type
         if (!in_array($post->type, ['media', 'link'])) {
-             $errors[] = __("The Instagram API currently supports posts with the 'Photo' type only.");
-        }else{
-            if (empty($medias) || (!Media::isImg($medias[0]) && !Media::isVideo($medias[0])) ) {
+            $errors[] = __("The Instagram API currently supports posts with the 'Photo' type only.");
+        } else {
+            if (empty($medias) || (!Media::isImg($medias[0]) && !Media::isVideo($medias[0]))) {
                 $errors[] = __("The Instagram API currently supports posts with the 'Photo' type only.");
             }
         }
 
-        // Validate advanced options (e.g., reels, stories)
         if (isset($data->options->ig_type)) {
             $postType = $data->options->ig_type;
-
             switch ($postType) {
                 case 'reels':
                     if (empty($medias) || !Media::isVideo($medias[0])) {
@@ -57,17 +54,15 @@ class Post extends Facade
         return $errors;
     }
 
-    // The static method to handle post publishing
     protected static function post($post)
     {
-        self::initFacebook(); // Ensure Facebook SDK is initialized
-        $data = json_decode($post->data, false);
-        $medias = $data->medias;
-
-        $caption = spintax($data->caption);
+        self::initFacebook();
+        $data      = json_decode($post->data, false);
+        $medias    = $data->medias;
+        $caption   = spintax($data->caption);
         $post_type = $data->options->ig_type ?? 'media';
-        $comment = $data->options->ig_comment ?? '';
-        $endpoint = "/" . $post->account->pid . "/media_publish";
+        $comment   = $data->options->ig_comment ?? '';
+        $endpoint        = "/" . $post->account->pid . "/media_publish";
         $upload_endpoint = "/" . $post->account->pid . "/media";
 
         try {
@@ -83,9 +78,9 @@ class Post extends Facade
         } catch (\Exception $e) {
             unlink_watermark($medias);
             return [
-                "status" => "error",
+                "status"  => "error",
                 "message" => __($e->getMessage()),
-                "type" => $post->type
+                "type"    => $post->type,
             ];
         }
     }
@@ -94,61 +89,62 @@ class Post extends Facade
     {
         $media = Media::url($media);
         switch ($media_type) {
-            case 'stories':
-                $media_type = "STORIES";
-                break;
-
-             case 'reels':
-                $media_type = "REELS";
-                break;
-            
-            default:
-                $media_type = Media::isImg($media)?"IMAGE":"REELS";
-                break;
+            case 'stories': $media_type = "STORIES"; break;
+            case 'reels':   $media_type = "REELS";   break;
+            default:        $media_type = Media::isImg($media) ? "IMAGE" : "REELS"; break;
         }
 
-        $upload_params = self::getMediaUploadParams($media, $caption, $media_type, $post);
+        $upload_params   = self::getMediaUploadParams($media, $caption, $media_type, $post);
         $upload_response = self::$fb->post($upload_endpoint, $upload_params, $post->account->token)->getDecodedBody();
-        return self::publishPost($upload_response, $endpoint, $comment, $post, $media_type === "stories" ? "stories" : "p");
+        return self::publishPost($upload_response, $endpoint, $comment, $post, $media_type === "STORIES" ? "stories" : "p");
     }
 
     protected static function handleCarouselPost($medias, $upload_endpoint, $endpoint, $caption, $comment, $post)
     {
         $media_ids = [];
-        foreach ($medias as $key => $media) {
-            $upload_params = self::getMediaUploadParams($media, $caption, Media::isImg($media) ? "IMAGE" : "VIDEO", $post, true);
+        foreach ($medias as $media) {
+            // Carousel items do not support custom thumbnails — ignore $customThumb here
+            $upload_params   = self::getMediaUploadParams($media, $caption, Media::isImg($media) ? "IMAGE" : "VIDEO", $post, true);
             $upload_response = self::$fb->post($upload_endpoint, $upload_params, $post->account->token)->getDecodedBody();
-            $media_ids[] = $upload_response['id'];
+            $media_ids[]     = $upload_response['id'];
         }
 
         $upload_params = [
             'media_type' => 'CAROUSEL',
-            'children' => $media_ids,
-            'caption' => $caption
+            'children'   => $media_ids,
+            'caption'    => $caption,
         ];
         $upload_response = self::$fb->post($upload_endpoint, $upload_params, $post->account->token)->getDecodedBody();
-
         return self::publishPost($upload_response, $endpoint, $comment, $post, "p");
     }
 
     protected static function getMediaUploadParams($media, $caption, $media_type, $post, $is_carousel_item = false)
     {
-       
-        if (!Media::isImg($media) && !Media::isVideo($media) ) {
-            throw new \Exception( __("Currently, Instagram only supports posting with videos or images.") );
+        if (!Media::isImg($media) && !Media::isVideo($media)) {
+            throw new \Exception(__("Currently, Instagram only supports posting with videos or images."));
         }
 
-        $params = Media::isImg($media) 
-            ? [
+        if (Media::isImg($media)) {
+            $params = [
                 'media_type' => $media_type,
-                'image_url' => Media::url(watermark($media, $post->account->team_id, $post->account->id)),
-                'caption' => $caption
-              ]
-            : [
+                'image_url'  => Media::url(watermark($media, $post->account->team_id, $post->account->id)),
+                'caption'    => $caption,
+            ];
+        } else {
+            $params = [
                 'media_type' => $media_type,
-                'video_url' => Media::url($media),
-                'caption' => $caption
-              ];
+                'video_url'  => Media::url($media),
+                'caption'    => $caption,
+            ];
+
+            // ─── ADD custom thumbnail for video / reels ───────────────────────
+            $data        = json_decode($post->data, false);
+            $customThumb = $data->custom_thumbnail ?? null;
+            if ($customThumb && !$is_carousel_item) {
+                $params['cover_url'] = $customThumb; // publicly accessible image URL
+            }
+            // ──────────────────────────────────────────────────────────────────
+        }
 
         if ($is_carousel_item) {
             $params['is_carousel_item'] = true;
@@ -164,20 +160,18 @@ class Post extends Facade
             $attempts++;
             sleep(2);
             try {
-
-                $params = ['creation_id' => $upload_response['id']];
+                $params   = ['creation_id' => $upload_response['id']];
                 $response = self::$fb->post($endpoint, $params, $post->account->token)->getDecodedBody();
 
                 if (isset($response["id"])) {
                     self::postComment($response["id"], $comment, $post);
                     $media_response = self::$fb->get("/" . $response["id"] . "?fields=shortcode", $post->account->token)->getDecodedBody();
-
                     return [
-                        "status" => 1,
+                        "status"  => 1,
                         "message" => __('Succesed'),
-                        "id" => $response["id"],
-                        "url" => "https://www.instagram.com/{$url_type}/" . $media_response['shortcode'],
-                        "type" => $post->type
+                        "id"      => $response["id"],
+                        "url"     => "https://www.instagram.com/{$url_type}/" . $media_response['shortcode'],
+                        "type"    => $post->type,
                     ];
                 }
             } catch (\Exception $e) {
@@ -186,7 +180,7 @@ class Post extends Facade
         } while ($attempts <= 30);
 
         return [
-            "status" => 0,
+            "status"  => 0,
             "message" => __('The media is not ready for publishing, please wait for a moment'),
         ];
     }
@@ -196,14 +190,11 @@ class Post extends Facade
         if ($comment) {
             try {
                 self::$fb->post("/" . $post_id . "/comments", [
-                    "message" => $comment
+                    "message" => $comment,
                 ], $post->account->token)->getDecodedBody();
             } catch (\Exception $e) {
-                // Silently ignore comment errors
+                // Silently ignore
             }
         }
     }
-
 }
-
-

@@ -8,6 +8,7 @@ use Nwidart\Modules\Traits\PathNamespace;
 use Illuminate\Http\UploadedFile;
 use Validator;
 use Core;
+use Modules\AppFiles\Console\GenerateVideoThumbnailsCommand;
 
 class AppFilesServiceProvider extends ServiceProvider
 {
@@ -68,7 +69,7 @@ class AppFilesServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([GenerateVideoThumbnailsCommand::class]);
     }
 
     /**

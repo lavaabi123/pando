@@ -41,7 +41,6 @@
                             <span>{{ sprintf("%d Folder", $value->folder_count) }}</span>
                         </div>
                     </div>
-
                     <div>
                         <div class="btn-group position-static">
                             <div class="dropdown-toggle dropdown-arrow-hide text-gray-900 fs-12" data-bs-toggle="dropdown" aria-expanded="true">
@@ -49,15 +48,8 @@
                             </div>
                             <ul class="dropdown-menu dropdown-menu-end border-1 border-gray-300 px-1 w-100 max-w-180 min-w-120">
                                 <li>
-                                    <a class="dropdown-item px-2 p-t-2 p-b-2 rounded d-flex gap-8 fw-5 fs-13 actionMultiItem" href="{{ url_admin("users/status/active") }}" data-call-success="">
-                                        <span class="size-16 me-1 text-center"><i class="fa-light fa-edit"></i></span>
-                                        <span >{{ __('Edit Image') }}</span>
-                                    </a>
-                                </li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <a class="dropdown-item px-2 p-t-2 p-b-2 rounded d-flex gap-8 fw-5 fs-13 actionMultiItem" href="{{ url_admin("users/destroy") }}" data-call-success="">
-                                        <span class="size-16 me-1 text-center"><i class="fa-light fa-trash-can"></i></span>
+                                    <a class="dropdown-item px-2 p-t-4 p-b-4 rounded d-flex gap-8 fw-5 fs-13 actionItem" href="{{ url_app("files/destroy") }}" data-id="{{ $value->id_secure }}" data-call-success="Main.ajaxScroll(true)">
+                                        <span class="size-16 me-0 text-center"><i class="fa-light fa-trash-can"></i></span>
                                         <span>{{ __('Delete') }}</span>
                                     </a>
                                 </li>
@@ -65,23 +57,40 @@
                         </div>
                     </div>
                 </div>
-
             </label>
         </div>
-        
     </div>
     @endforeach
 @endif
 
-@if($files->Total() > 0)
-    @foreach($files as $key => $value)
+@if($files->isEmpty() && (!$folders || $folders->isEmpty()))
+<div class="col-12 text-center text-gray-400 py-5">
+    <i class="fa-light fa-photo-film fs-40 mb-2"></i>
+    <div class="fs-13">{{ __('No files yet') }}</div>
+</div>
+@endif
 
+@foreach($files as $value)
     @php
-    $detectType = Media::detectFileIcon($value->detect);
+    $detectType  = Media::detectFileIcon($value->detect);
+    $thumbsJson  = $value->thumbnails ?? '[]';
+    $thumbsArr   = json_decode($thumbsJson, true) ?? [];
     @endphp
 
     <div class="col-4 px-2">
-        <div class="file-item w-100 ratio ratio-1x1 min-h-80 mb-3 border b-r-6" data-id="file_{{ $value->id_secure }}" data-name="medias" data-file="{{ Media::url($value->file)  }}" data-type="{{ $value->detect }}">
+        {{-- 
+            data-id-secure  → used by composer to fetch thumbnails
+            data-thumbnails → pre-built comma-list of resolved thumb URLs (may be empty if still generating)
+            data-type       → 'video' | 'image' | etc. (used by composer JS)
+        --}}
+        <div class="file-item w-100 ratio ratio-1x1 min-h-80 mb-3 border b-r-6"
+             data-id="{{ 'file_' . $value->id_secure }}"
+             data-name="medias"
+             data-file="{{ Media::url($value->file) }}"
+             data-type="{{ $value->detect }}"
+             data-id-secure="{{ $value->id_secure }}"
+             data-thumbnails="{{ implode(',', array_map(fn($t) => Media::url($t), $thumbsArr)) }}"
+        >
             <label class="d-flex flex-column flex-fill" for="{{ $value->id_secure }}">
                 <div class="position-absolute r-6 t-6 zIndex-3">
                     <div class="form-check form-check-sm">
@@ -96,10 +105,20 @@
                     @endif
                 >
                     @if($value->detect == "video")
-                        <video class="position-absolute top-0 start-0 w-100 h-100 object-cover" muted loop playsinline>
-                            <source src="{{ Media::url($value->file) }}" type="video/mp4">
-                            {{ __('Your browser does not support the video tag.') }}
-                        </video>
+                        {{-- Show first generated thumbnail as poster if available --}}
+                        @if(!empty($thumbsArr))
+                            <img src="{{ Media::url($thumbsArr[0]) }}" class="position-absolute top-0 start-0 w-100 h-100 object-cover" alt="">
+                            <div class="position-absolute d-flex align-items-center justify-content-center w-100 h-100" style="background:rgba(0,0,0,0.25);">
+                                <i class="fa-solid fa-circle-play fs-24 text-white"></i>
+                            </div>
+                        @else
+                            <video class="position-absolute top-0 start-0 w-100 h-100 object-cover" muted playsinline preload="metadata">
+                                <source src="{{ Media::url($value->file) }}#t=1" type="video/mp4">
+                            </video>
+                            <div class="position-absolute d-flex align-items-center justify-content-center w-100 h-100" style="background:rgba(0,0,0,0.25);">
+                                <i class="fa-solid fa-circle-play fs-24 text-white"></i>
+                            </div>
+                        @endif
                     @elseif($value->detect != "image")
                         <div class="fs-30">
                             <i class="{{ $detectType['icon'] }}"></i>
@@ -109,7 +128,7 @@
                 <div class="d-flex justify-content-between align-items-center mt-auto p-1 gap-8 position-relative zIndex-4 file-info border-top">
                     <div class="text-truncate">
                         <div class="fs-9 text-gray-800 fw-5 lh-sm text-truncate">{{ $value->name }}</div>
-                        <div class="fs-8 text-gray-600 lh-sm text-truncate">{{ Number::fileSize($value->size); }}</div>
+                        <div class="fs-8 text-gray-600 lh-sm text-truncate">{{ Number::fileSize($value->size) }}</div>
                     </div>
 
                     <div>
@@ -123,7 +142,7 @@
                                     <li>
                                         <button type="button" class="dropdown-item px-2 p-t-4 p-b-4 rounded d-flex gap-8 fw-5 fs-13 editImage" data-file="{{ Media::url($value->file) }}" data-id="{{ $value->id_secure }}">
                                             <span class="size-16 me-0 text-center"><i class="fa-light fa-edit"></i></span>
-                                            <span >{{ __('Edit Image') }}</span>
+                                            <span>{{ __('Edit Image') }}</span>
                                         </button>
                                     </li>
                                     <li><hr class="dropdown-divider"></li>
@@ -142,8 +161,4 @@
             </label>
         </div>
     </div>
-    @endforeach
-@else
-	<div class="empty mt-100 mb-100"></div>
-@endif
-
+@endforeach

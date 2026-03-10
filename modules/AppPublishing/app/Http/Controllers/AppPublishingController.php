@@ -729,6 +729,10 @@ class AppPublishingController extends Controller
             "link"    => $link,
             "medias"  => $medias,
             "options" => $options,
+			"custom_thumbnail" => (string) $request->custom_thumbnail ?: null,
+			"custom_thumbnail_index" => (int) $request->custom_thumbnail_index !== 0
+                                        ? (int) $request->custom_thumbnail_index
+                                        : ($request->custom_thumbnail ? 0 : -1),
         ];
         
         // Add TikTok settings if provided

@@ -121,7 +121,10 @@ class Post extends Facade
         $title = spintax($options->youtube_title);
         $description = spintax($data->caption);
         $categoryId = $options->youtube_category;
-        $thumbnail = $options->youtube_thumbnail;
+        $thumbnail = $options->youtube_thumbnail ?? null;
+		if (empty($thumbnail)) {
+			$thumbnail = $data->custom_thumbnail ?? null;
+		}
         $tags = $options->youtube_tags ?? "";
         $privary_status = false;
 

@@ -765,7 +765,7 @@ if($post){
         </div>
     </div>
 </div>
-@endsection
+
 @include('apppublishing::partials.tiktok-processing-notice')
 <style>
 .fc .fc-daygrid-body-unbalanced .fc-daygrid-day-events{
@@ -910,6 +910,63 @@ if($post){
     background-color: transparent !important;
 }
 </style>
+<style>
+/* Character Count Indicators */
+.count-word-x,
+.count-word-facebook,
+.count-word-linkedin,
+.count-word-instagram,
+.count-word-pinterest,
+.count-word-hashtag {
+    transition: all 0.3s ease;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.count-word-x i,
+.count-word-facebook i,
+.count-word-linkedin i,
+.count-word-instagram i,
+.count-word-pinterest i,
+.count-word-hashtag i {
+    font-size: 14px;
+}
+
+.count-word-x.text-danger,
+.count-word-facebook.text-danger,
+.count-word-linkedin.text-danger,
+.count-word-instagram.text-danger,
+.count-word-pinterest.text-danger {
+    color: #dc3545 !important;
+}
+
+.count-word-x.text-warning,
+.count-word-facebook.text-warning,
+.count-word-linkedin.text-warning,
+.count-word-instagram.text-warning,
+.count-word-pinterest.text-warning {
+    color: #ffc107 !important;
+}
+
+.count-word-hashtag.text-danger {
+    color: #dc3545 !important;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.text-danger.count-word-x,
+.text-danger.count-word-facebook,
+.text-danger.count-word-linkedin,
+.text-danger.count-word-instagram,
+.text-danger.count-word-pinterest,
+.text-danger.count-word-hashtag {
+    animation: pulse 1s infinite;
+}
+</style>
+@endsection
 @push('scripts')
 <script>
 // Character count functionality
@@ -969,59 +1026,6 @@ $(document).ready(function() {
 });
 </script>
 @endpush
-<style>
-/* Character Count Indicators */
-.count-word-x,
-.count-word-facebook,
-.count-word-linkedin,
-.count-word-instagram,
-.count-word-pinterest,
-.count-word-hashtag {
-    transition: all 0.3s ease;
-    font-weight: 600;
-    white-space: nowrap;
-}
-
-.count-word-x i,
-.count-word-facebook i,
-.count-word-linkedin i,
-.count-word-instagram i,
-.count-word-pinterest i,
-.count-word-hashtag i {
-    font-size: 14px;
-}
-
-.count-word-x.text-danger,
-.count-word-facebook.text-danger,
-.count-word-linkedin.text-danger,
-.count-word-instagram.text-danger,
-.count-word-pinterest.text-danger {
-    color: #dc3545 !important;
-}
-
-.count-word-x.text-warning,
-.count-word-facebook.text-warning,
-.count-word-linkedin.text-warning,
-.count-word-instagram.text-warning,
-.count-word-pinterest.text-warning {
-    color: #ffc107 !important;
-}
-
-.count-word-hashtag.text-danger {
-    color: #dc3545 !important;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-.text-danger.count-word-x,
-.text-danger.count-word-facebook,
-.text-danger.count-word-linkedin,
-.text-danger.count-word-instagram,
-.text-danger.count-word-pinterest,
-.text-danger.count-word-hashtag {
-    animation: pulse 1s infinite;
-}
-</style>
+@push('scripts')
+<script src="{{ Module::asset('AppPublishing:resources/assets/js/composer-thumbnail.js?v=1') }}"></script>
+@endpush
