@@ -109,8 +109,18 @@ class Post extends Facade
             $link = $pinterest_link;   
         }
 
+        // Thumbnail for video pins.
+        // New composer stores it as 'custom_thumbnail' (same key Facebook uses).
+        // Fall back to 'pinterest_thumbnail' for any legacy saved posts.
+        $coverImageUrl = null;
+        if (!empty($data->custom_thumbnail)) {
+            $coverImageUrl = Media::url($data->custom_thumbnail);
+        } elseif (!empty($data->pinterest_thumbnail)) {
+            $coverImageUrl = Media::url($data->pinterest_thumbnail);
+        }
+
         // Call the sharePin method.
-        $response = $pinterest->sharePin($accessToken, $boardId, $title, $caption, $link, $medias);
+        $response = $pinterest->sharePin($accessToken, $boardId, $title, $caption, $link, $medias, $coverImageUrl);
 
         // The Pinterest API should return a result. If an error is detected, process it.
         if (isset($response['message'])) {

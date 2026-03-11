@@ -90,11 +90,23 @@ class Post extends Facade
         self::initXApi($tokenInfo->access_token);
         if (isset($tokenInfo->refresh_token) && !empty($tokenInfo->refresh_token)) {
             $refreshed = self::$xapi->refreshToken($tokenInfo->refresh_token);
-            if (is_array($refreshed) && isset($refreshed["status"]) && $refreshed["status"] === "0") {
+
+            // refreshToken() returns array on failure, object on success
+            if (is_array($refreshed)) {
                 Accounts::where("id", $post->account->id)->update(["status" => 0]);
                 return [
                     "status"  => "error",
-                    "message" => __($refreshed["message"]),
+                    "message" => __($refreshed["message"] ?? "Token refresh failed"),
+                    "type"    => $post->type,
+                ];
+            }
+
+            // Guard: no access_token in refreshed object
+            if (!isset($refreshed->access_token) || empty($refreshed->access_token)) {
+                Accounts::where("id", $post->account->id)->update(["status" => 0]);
+                return [
+                    "status"  => "error",
+                    "message" => __("X token refresh returned no access token. Please reconnect your X account."),
                     "type"    => $post->type,
                 ];
             }
@@ -144,8 +156,34 @@ class Post extends Facade
                 ];
         }
 
-        if (isset($response->status) && $response->status != 200) {
-            return self::errorResponse( __($response->detail) , $post->type);
+        // If handleSingleMediaPost / handleMultiMediaPost returned an error array, pass it through
+        if (is_array($response)) {
+            return $response;
+        }
+
+        // Null response = curl failed entirely (network/SSL issue or empty body)
+        if ($response === null) {
+            return self::errorResponse(__('X API returned no response. Check server connectivity and SSL settings.'), $post->type);
+        }
+
+        // X returned an HTTP-level error object: { "title": "...", "detail": "...", "status": 4xx }
+        if (isset($response->status) && $response->status >= 400) {
+            $errMsg = $response->detail ?? $response->title ?? ('X API error ' . $response->status);
+            return self::errorResponse($errMsg, $post->type);
+        }
+
+        // X returned errors array: { "errors": [{ "message": "..." }] }
+        if (isset($response->errors) && !isset($response->data)) {
+            $errMsg = $response->errors[0]->message ?? $response->errors[0]->detail ?? 'X API error';
+            return self::errorResponse($errMsg, $post->type);
+        }
+
+        // No data->id means the tweet was not created
+        if (!isset($response->data->id)) {
+            $errMsg = $response->detail
+                ?? (isset($response->errors[0]) ? ($response->errors[0]->message ?? $response->errors[0]->detail ?? 'Unknown error') : null)
+                ?? json_encode($response);
+            return self::errorResponse($errMsg, $post->type);
         }
 
         return [
@@ -169,12 +207,27 @@ class Post extends Facade
      */
     protected static function handleSingleMediaPost($media, $mediaType, $caption, $comment, $post)
     {
-        $mediaUrl = Media::url($media);
+        // Pass local storage path first so XApi can skip HTTP download.
+        // Media::localPath() returns the absolute local path if available.
+        // Fall back to Media::url() so XApi can curl-download it.
+        $mediaInput = method_exists('Media', 'localPath')
+            ? (Media::localPath($media) ?: Media::url($media))
+            : Media::url($media);
 
-        // Upload the media using XApi and obtain a media ID.
-        $mediaId = self::$xapi->uploadMedia($mediaUrl);
+        $mediaId = self::$xapi->uploadMedia($mediaInput);
 
-        $response = self::$xapi->postTweet($caption, $mediaId ? [$mediaId] : []);
+        if (!$mediaId) {
+            return self::errorResponse(
+                __('Media upload to X failed. Ensure the video is MP4 (H.264/AAC), under 512 MB, and under 140 seconds.'),
+                $post->type
+            );
+        }
+
+        $response = self::$xapi->postTweet($caption, [$mediaId]);
+
+        if ($comment && isset($response->data->id)) {
+            self::postComment($response->data->id, $comment, $post);
+        }
 
         return $response;
     }
@@ -192,13 +245,20 @@ class Post extends Facade
     {
         $mediaIds = [];
         foreach ($medias as $media) {
-            $mediaUrl = Media::url($media);
-            $mediaId = self::$xapi->uploadMedia($mediaUrl);
+            $mediaInput = method_exists('Media', 'localPath')
+                ? (Media::localPath($media) ?: Media::url($media))
+                : Media::url($media);
+            $mediaId = self::$xapi->uploadMedia($mediaInput);
             if ($mediaId) {
                 $mediaIds[] = $mediaId;
             }
         }
-        
+
+        // If no media uploaded at all, return an error — do NOT post caption-only.
+        if (empty($mediaIds)) {
+            return self::errorResponse(__('All media uploads to X failed. Ensure files are supported formats under 512 MB.'), $post->type);
+        }
+
         $response = self::$xapi->postTweet($caption, $mediaIds);
         
         if ($comment && isset($response->data->id)) {

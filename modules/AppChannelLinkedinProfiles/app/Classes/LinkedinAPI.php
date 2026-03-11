@@ -247,7 +247,7 @@ class LinkedinAPI
         $video_title,
         $video_description,
         $visibility = "PUBLIC",
-		$customThumb = null
+        $thumbnailUrl = null
     ) {
         // Register upload request using video recipe.
         $prepareUrl = "https://api.linkedin.com/v2/assets?action=registerUpload&oauth2_access_token=" . $accessToken;
@@ -291,29 +291,51 @@ class LinkedinAPI
                 ]);
             }
 
-            $parse_id = explode(":", "urn:li:digitalmediaAsset:D5605AQG6_pTRbNXiOg");
-            $id = end( $parse_id );
+            // Fix: parse asset_id from the actual $asset_id, not a hardcoded string
+            $parse_id = explode(":", $asset_id);
+            $id = end($parse_id);
 
-            $checkUpload = $this->sendRequest('GET', "https://api.linkedin.com/v2/assets/".$id."?oauth2_access_token=" . $accessToken);
-            $checkUpload = json_decode($checkUpload);
-            if($checkUpload->status == "ALLOWED"){
+            // Poll until the asset is ALLOWED (video processing can take up to 60s)
+            $maxPoll = 15; $pollTry = 0; $checkUpload = null;
+            do {
+                if ($pollTry > 0) sleep(4);
+                $checkRaw  = $this->sendRequest('GET', "https://api.linkedin.com/v2/assets/" . $id . "?oauth2_access_token=" . $accessToken);
+                $checkUpload = json_decode($checkRaw);
+                $pollTry++;
+            } while (
+                isset($checkUpload->status) &&
+                $checkUpload->status !== "ALLOWED" &&
+                $checkUpload->status !== "PROCESSING_FAILED" &&
+                $pollTry < $maxPoll
+            );
+
+            if (!isset($checkUpload->status) || $checkUpload->status === "PROCESSING_FAILED") {
+                return json_encode(["error" => "Video processing failed on LinkedIn."]);
+            }
+
+            if ($checkUpload->status == "ALLOWED") {
+
+                // Build the media entry
+                $mediaEntry = [
+                    "status" => "READY",
+                    "media"  => $asset_id,
+                ];
+
+                // Attach custom thumbnail if provided
+                if ($thumbnailUrl) {
+                    $mediaEntry["thumbnailUrl"] = $thumbnailUrl;
+                }
 
                 // Assemble the post request including the video asset.
                 $url = "https://api.linkedin.com/v2/ugcPosts?oauth2_access_token=" . $accessToken;
                 $request = [
-                    "author"         => $this->type . $person_id,
-                    "lifecycleState" => "PUBLISHED",
+                    "author"          => $this->type . $person_id,
+                    "lifecycleState"  => "PUBLISHED",
                     "specificContent" => [
                         "com.linkedin.ugc.ShareContent" => [
-                            "shareCommentary"   => [ "text" => $message ],
-                            "shareMediaCategory"=> "VIDEO",
-                            "media" => [array_filter([
-								"status"      => "READY",
-								"media"       => $asset_id,
-								"title"       => ["text" => $video_title],
-								"description" => ["text" => $video_description],
-								"thumbnails"  => $customThumb ? [["resolvedUrl" => $customThumb]] : null,
-							])]
+                            "shareCommentary"    => ["text" => $message],
+                            "shareMediaCategory" => "VIDEO",
+                            "media"              => [$mediaEntry],
                         ]
                     ],
                     "visibility" => [
@@ -329,7 +351,7 @@ class LinkedinAPI
 
             return json_encode([
                 "error"   => "Video upload failed.",
-                "details" => "Video upload failed."
+                "details" => "Asset not in ALLOWED state after upload."
             ]);
         } else {
             return $prepareResponse;

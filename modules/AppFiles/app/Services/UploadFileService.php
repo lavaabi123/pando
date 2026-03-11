@@ -227,7 +227,7 @@ class UploadFileService
                     escapeshellarg($localVideoPath),
                     escapeshellarg($thumbFile)
                 );
-                exec($cmd, $out, $code);
+                $code = self::runCommand($cmd, $out);
 
                 if (file_exists($thumbFile) && filesize($thumbFile) > 0) {
                     $storedRelPath = Storage::disk($disk)->putFileAs(
@@ -264,14 +264,50 @@ class UploadFileService
      */
     protected function getVideoDuration(string $path): float
     {
-        $null   = PHP_OS_FAMILY === 'Windows' ? 'NUL' : '/dev/null';
         $cmd    = sprintf(
-            'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 %s 2>%s',
-            escapeshellarg($path),
-            $null
+            'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 %s',
+            escapeshellarg($path)
         );
-        $output = trim(shell_exec($cmd) ?? '');
+        $output = trim(self::runCommand($cmd) ?? '');
         return is_numeric($output) ? (float) $output : 0;
+    }
+
+    /**
+     * Run a shell command using proc_open (works even when exec/shell_exec are disabled).
+     * Returns stdout string (when $outLines is null) or exit code (when $outLines is array ref).
+     */
+    protected static function runCommand(string $cmd, array &$outLines = null): int|string
+    {
+        $descriptors = [
+            0 => ['pipe', 'r'],  // stdin
+            1 => ['pipe', 'w'],  // stdout
+            2 => ['pipe', 'w'],  // stderr
+        ];
+
+        $process = @proc_open($cmd, $descriptors, $pipes);
+
+        if (!is_resource($process)) {
+            \Log::warning("[FFmpeg] proc_open failed for: $cmd");
+            if ($outLines !== null) { $outLines = []; return 1; }
+            return '';
+        }
+
+        fclose($pipes[0]);
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($process);
+
+        if ($outLines !== null) {
+            $outLines = array_filter(array_merge(
+                explode("\n", $stdout),
+                explode("\n", $stderr)
+            ));
+            return $exitCode;
+        }
+
+        return $stdout ?: $stderr;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
