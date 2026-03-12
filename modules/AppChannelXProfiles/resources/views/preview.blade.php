@@ -68,82 +68,99 @@
         </div>
     </div>
 </div>
-
 <script>
-function renderXMediaGrid(elements) {
-    var x_total = elements.length;
-    var x_visible = elements.slice(0, 4);
-    var x_more = x_total - 4;
 
-    let x_html = '';
+function xprofile_renderItem(el) {
+    var type   = el.getAttribute('data-type')   || 'image';
+    var file   = el.getAttribute('data-file')   || el.getAttribute('src') || '';
+    var poster = el.getAttribute('data-poster') || '';
 
-    if (x_total === 1) {
-        x_html += `
-            <div class="cpv-grid" style="grid-template-columns: 1fr;">
-                <div class="img-wrap b-r-10" style="aspect-ratio: 16 / 9;">
-                    ${elements[0].outerHTML}
-                </div>
-            </div>
-        `;
-    } else if (x_total === 2) {
-        x_html += `
-            <div class="cpv-grid" style="grid-template-columns: repeat(2, 1fr);">
-                <div class="img-wrap btl-r-10 bbl-r-10">${elements[0].outerHTML}</div>
-                <div class="img-wrap btr-r-10 bbr-r-10">${elements[1].outerHTML}</div>
-            </div>
-        `;
-    } else if (x_total === 3) {
-        x_html += `
-            <div class="cpv-grid" style="grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr);">
-                <div class="img-wrap btl-r-10 bbl-r-10" style="grid-row: span 2;">${elements[0].outerHTML}</div>
-                <div class="img-wrap btr-r-10">${elements[1].outerHTML}</div>
-                <div class="img-wrap bbr-r-10">${elements[2].outerHTML}</div>
-            </div>
-        `;
+    if (type === 'video') {
+        if (poster) {
+            return '<div class="img-wrap position-relative">'
+                + '<img src="' + poster + '" style="width:100%;height:100%;object-fit:cover;display:block;">'
+                + '<div class="cpv-play-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);color:#fff;font-size:1.6rem;pointer-events:none;">'
+                + '<i class="fa-solid fa-circle-play"></i></div>'
+                + '</div>';
+        } else {
+            return '<div class="img-wrap position-relative" style="background:#1a1a1a;">'
+                + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;gap:8px;">'
+                + '<i class="fa-solid fa-film" style="font-size:2rem;"></i>'
+                + '<span style="font-size:11px;">Video</span>'
+                + '</div></div>';
+        }
     } else {
-        x_html += `<div class="cpv-grid" style="grid-template-columns: repeat(2, 1fr);">`;
-
-        x_visible.forEach((el, idx) => {
-            var isLast = idx === 3 && x_more > 0;
-            var overlay = isLast ? `<div class="overlay">+${x_more}</div>` : '';
-
-            let radiusClass = '';
-            if (idx === 0) radiusClass = 'btl-r-10';
-            else if (idx === 1) radiusClass = 'btr-r-10';
-            else if (idx === 2) radiusClass = 'bbl-r-10';
-            else if (idx === 3) radiusClass = 'bbr-r-10';
-
-            x_html += `<div class="img-wrap ${radiusClass}">${el.outerHTML}${overlay}</div>`;
+        return '<div class="img-wrap"><img src="' + file + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+    }
+}
+function xprofile_renderGrid(elements) {
+    var total   = elements.length;
+    var visible = elements.slice(0, 4);
+    var more    = total - 4;
+    if (total === 1) {
+        return '<div class="cpv-grid" style="grid-template-columns:1fr;">' + xprofile_renderItem(elements[0]) + '</div>';
+    } else if (total === 2) {
+        return '<div class="cpv-grid" style="grid-template-columns:repeat(2,1fr);">'
+             + visible.map(function(el){ return xprofile_renderItem(el); }).join('') + '</div>';
+    } else if (total === 3) {
+        return '<div class="cpv-grid" style="grid-template-columns:2fr 1fr;grid-template-rows:repeat(2,1fr);">'
+             + '<div class="img-wrap" style="grid-row:span 2;">' + xprofile_renderItem(elements[0]) + '</div>'
+             + xprofile_renderItem(elements[1]) + xprofile_renderItem(elements[2]) + '</div>';
+    } else {
+        var html = '<div class="cpv-grid" style="grid-template-columns:repeat(2,1fr);">';
+        visible.forEach(function(el, idx) {
+            var item = xprofile_renderItem(el);
+            if (idx === 3 && more > 0) {
+                item = item.replace('</div>', '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);color:#fff;font-size:1.4rem;font-weight:700;">+'+(more+1)+'</div></div>');
+            }
+            html += item;
         });
-
-        x_html += `</div>`;
-    }
-
-    return x_html;
-}
-
-function onXMediaItemsChange() {
-    var x_elements = document.querySelectorAll('.cpv-x-img > img, .cpv-x-img > div');
-    if (x_elements.length > 0) {
-        var x_mediaList = Array.from(x_elements).filter(el =>
-            el.tagName.toLowerCase() === 'img' || el.tagName.toLowerCase() === 'div'
-        );
-
-        var x_rendered = renderXMediaGrid(x_mediaList);
-        document.querySelector('.cpv-x-img-view').innerHTML = x_rendered;
+        return html + '</div>';
     }
 }
 
-var x_container = document.querySelector('.cpv-x-img');
-if (x_container) {
-    var x_observer = new MutationObserver(onXMediaItemsChange);
-    x_observer.observe(x_container, {
-        childList: true,
-        subtree: false,
-        attributes: true,
-        attributeFilter: ['src'],
+document.querySelectorAll('.cpv-x-img').forEach(function(container) {
+    var pane = container.closest('.tab-pane') || container.parentElement;
+    var view = pane ? pane.querySelector('.cpv-x-img-view') : document.querySelector('.cpv-x-img-view');
+    if (!view) return;
+
+    function xprofile_getElements() {
+        // Primary: cpv-img staging (written by onMediaItemsChange)
+        var els = Array.from(container.querySelectorAll('img[data-file]'))
+                      .filter(function(el) { return el.getAttribute('data-file'); });
+        // Fallback: read directly from preview-list-medias (calendar preview modal on first load)
+        if (els.length === 0) {
+            var staging = pane ? pane.querySelector('.preview-list-medias') : null;
+            if (staging) {
+                els = Array.from(staging.querySelectorAll('img[data-file]'))
+                          .filter(function(el) { return el.getAttribute('data-file'); });
+            }
+        }
+        return els;
+    }
+
+    function xprofile_update() {
+        var els = xprofile_getElements();
+        if (els.length === 0) return;
+        view.innerHTML = xprofile_renderGrid(els);
+    }
+
+    // Watch the cpv-img staging div (written by onMediaItemsChange)
+    new MutationObserver(xprofile_update).observe(container, {
+        childList: true, subtree: false,
+        attributes: true, attributeFilter: ['src', 'data-type', 'data-file', 'data-poster']
     });
 
-    onXMediaItemsChange();
-}
+    // Also watch preview-list-medias directly for attribute changes
+    // (covers the case where server sets data-poster after page load)
+    var stagingList = pane ? pane.querySelector('.preview-list-medias') : null;
+    if (stagingList) {
+        new MutationObserver(xprofile_update).observe(stagingList, {
+            childList: true, subtree: true,
+            attributes: true, attributeFilter: ['data-file', 'data-type', 'data-poster', 'src']
+        });
+    }
+
+    xprofile_update();
+});
 </script>

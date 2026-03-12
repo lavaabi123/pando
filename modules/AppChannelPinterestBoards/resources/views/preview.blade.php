@@ -75,71 +75,99 @@
     </div>
 
 </div>
-
 <script>
-function pinterest_renderMediaGrid(elements) {
-    var pinterest_total = elements.length;
-    var pinterest_visible = elements.slice(0, 4);
-    var pinterest_moreCount = pinterest_total - 4;
 
-    let pinterest_html = '';
+function pinterest_renderItem(el) {
+    var type   = el.getAttribute('data-type')   || 'image';
+    var file   = el.getAttribute('data-file')   || el.getAttribute('src') || '';
+    var poster = el.getAttribute('data-poster') || '';
 
-    if (pinterest_total === 1) {
-        pinterest_html += `
-            <div class="cpv-grid" style="grid-template-columns: 1fr;">
-                <div class="img-wrap">${elements[0].outerHTML}</div>
-            </div>
-        `;
-    } else if (pinterest_total === 2) {
-        pinterest_html += `
-            <div class="cpv-grid" style="grid-template-columns: repeat(2, 1fr);">
-                ${pinterest_visible.map(el => `<div class="img-wrap">${el.outerHTML}</div>`).join('')}
-            </div>
-        `;
-    } else if (pinterest_total === 3) {
-        pinterest_html += `
-            <div class="cpv-grid" style="grid-template-columns: 2fr 1fr; grid-template-rows: repeat(2, 1fr);">
-                <div class="img-wrap" style="grid-row: span 2;">${elements[0].outerHTML}</div>
-                <div class="img-wrap">${elements[1].outerHTML}</div>
-                <div class="img-wrap">${elements[2].outerHTML}</div>
-            </div>
-        `;
+    if (type === 'video') {
+        if (poster) {
+            return '<div class="img-wrap position-relative">'
+                + '<img src="' + poster + '" style="width:100%;height:100%;object-fit:cover;display:block;">'
+                + '<div class="cpv-play-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);color:#fff;font-size:1.6rem;pointer-events:none;">'
+                + '<i class="fa-solid fa-circle-play"></i></div>'
+                + '</div>';
+        } else {
+            return '<div class="img-wrap position-relative" style="background:#1a1a1a;">'
+                + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;gap:8px;">'
+                + '<i class="fa-solid fa-film" style="font-size:2rem;"></i>'
+                + '<span style="font-size:11px;">Video</span>'
+                + '</div></div>';
+        }
     } else {
-        pinterest_html += `<div class="cpv-grid" style="grid-template-columns: repeat(2, 1fr);">`;
-        pinterest_visible.forEach((el, idx) => {
-            var pinterest_isLast = idx === 3 && pinterest_moreCount > 0;
-            var pinterest_overlay = pinterest_isLast ? `<div class="overlay">+${pinterest_moreCount}</div>` : '';
-            pinterest_html += `<div class="img-wrap">${el.outerHTML}${pinterest_overlay}</div>`;
+        return '<div class="img-wrap"><img src="' + file + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+    }
+}
+function pinterest_renderGrid(elements) {
+    var total   = elements.length;
+    var visible = elements.slice(0, 4);
+    var more    = total - 4;
+    if (total === 1) {
+        return '<div class="cpv-grid" style="grid-template-columns:1fr;">' + pinterest_renderItem(elements[0]) + '</div>';
+    } else if (total === 2) {
+        return '<div class="cpv-grid" style="grid-template-columns:repeat(2,1fr);">'
+             + visible.map(function(el){ return pinterest_renderItem(el); }).join('') + '</div>';
+    } else if (total === 3) {
+        return '<div class="cpv-grid" style="grid-template-columns:2fr 1fr;grid-template-rows:repeat(2,1fr);">'
+             + '<div class="img-wrap" style="grid-row:span 2;">' + pinterest_renderItem(elements[0]) + '</div>'
+             + pinterest_renderItem(elements[1]) + pinterest_renderItem(elements[2]) + '</div>';
+    } else {
+        var html = '<div class="cpv-grid" style="grid-template-columns:repeat(2,1fr);">';
+        visible.forEach(function(el, idx) {
+            var item = pinterest_renderItem(el);
+            if (idx === 3 && more > 0) {
+                item = item.replace('</div>', '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.55);color:#fff;font-size:1.4rem;font-weight:700;">+'+(more+1)+'</div></div>');
+            }
+            html += item;
         });
-        pinterest_html += `</div>`;
-    }
-
-    return pinterest_html;
-}
-
-function pinterest_onMediaItemsChange() {
-    var pinterest_elements = document.querySelectorAll('.cpv-pinterest-img > img, .cpv-pinterest-img > div');
-    if (pinterest_elements.length > 0) {
-        var pinterest_mediaList = Array.from(pinterest_elements).filter(el =>
-            el.tagName.toLowerCase() === 'img' || el.tagName.toLowerCase() === 'div'
-        );
-
-        var pinterest_rendered = pinterest_renderMediaGrid(pinterest_mediaList);
-        document.querySelector('.cpv-pinterest-img-view').innerHTML = pinterest_rendered;
+        return html + '</div>';
     }
 }
 
-// Setup MutationObserver
-var pinterest_container = document.querySelector('.cpv-pinterest-img');
-if (pinterest_container) {
-    var pinterest_observer = new MutationObserver(pinterest_onMediaItemsChange);
-    pinterest_observer.observe(pinterest_container, {
-        childList: true,
-        subtree: false,
-        attributes: true,
-        attributeFilter: ['src'],
+document.querySelectorAll('.cpv-pinterest-img').forEach(function(container) {
+    var pane = container.closest('.tab-pane') || container.parentElement;
+    var view = pane ? pane.querySelector('.cpv-pinterest-img-view') : document.querySelector('.cpv-pinterest-img-view');
+    if (!view) return;
+
+    function pinterest_getElements() {
+        // Primary: cpv-img staging (written by onMediaItemsChange)
+        var els = Array.from(container.querySelectorAll('img[data-file]'))
+                      .filter(function(el) { return el.getAttribute('data-file'); });
+        // Fallback: read directly from preview-list-medias (calendar preview modal on first load)
+        if (els.length === 0) {
+            var staging = pane ? pane.querySelector('.preview-list-medias') : null;
+            if (staging) {
+                els = Array.from(staging.querySelectorAll('img[data-file]'))
+                          .filter(function(el) { return el.getAttribute('data-file'); });
+            }
+        }
+        return els;
+    }
+
+    function pinterest_update() {
+        var els = pinterest_getElements();
+        if (els.length === 0) return;
+        view.innerHTML = pinterest_renderGrid(els);
+    }
+
+    // Watch the cpv-img staging div (written by onMediaItemsChange)
+    new MutationObserver(pinterest_update).observe(container, {
+        childList: true, subtree: false,
+        attributes: true, attributeFilter: ['src', 'data-type', 'data-file', 'data-poster']
     });
 
-    pinterest_onMediaItemsChange();
-}
+    // Also watch preview-list-medias directly for attribute changes
+    // (covers the case where server sets data-poster after page load)
+    var stagingList = pane ? pane.querySelector('.preview-list-medias') : null;
+    if (stagingList) {
+        new MutationObserver(pinterest_update).observe(stagingList, {
+            childList: true, subtree: true,
+            attributes: true, attributeFilter: ['data-file', 'data-type', 'data-poster', 'src']
+        });
+    }
+
+    pinterest_update();
+});
 </script>

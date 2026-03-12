@@ -98,7 +98,24 @@
 
 										<div class="preview-list-medias">
 											@foreach ($medias as $media)
-												<img src="{{ Media::url($media) }}">
+												@php
+													$mediaUrl = Media::url($media);
+													$ext = strtolower(pathinfo($media, PATHINFO_EXTENSION));
+													$isVideo = in_array($ext, ['mp4','mov','avi','mkv','webm','ogg','flv','wmv','m4v']);
+													$videoPoster = '';
+													if ($isVideo) {
+														$videoPoster = $postData->custom_thumbnail ?? '';
+														if (!$videoPoster && !empty($postData->thumbnails)) {
+															$thumbArr = is_array($postData->thumbnails) ? $postData->thumbnails : (array)$postData->thumbnails;
+															$videoPoster = !empty($thumbArr[0]) ? Media::url($thumbArr[0]) : '';
+														}
+													}
+												@endphp
+												<img
+													src="{{ $isVideo ? '' : $mediaUrl }}"
+													data-type="{{ $isVideo ? 'video' : 'image' }}"
+													data-file="{{ $mediaUrl }}"
+													data-poster="{{ $videoPoster }}">
 											@endforeach
 										</div>
 
@@ -137,4 +154,12 @@
     Main.init(false);
     AppPubishing.init(false);
     Files.init(false);
+    // In calendar preview mode, AppPubishing.init does NOT call preview()
+    // because .composer-scheduling doesn't exist. We must call it explicitly
+    // so that onMediaItemsChange() populates the .cpv-img staging divs,
+    // which triggers each channel's MutationObserver to render the media grid.
+    if (typeof AppPubishing !== 'undefined' && AppPubishing.preview) {
+        // Small delay to ensure all channel scripts (inline in each tab pane) have executed
+        setTimeout(function() { AppPubishing.preview(); }, 50);
+    }
 </script>
