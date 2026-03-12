@@ -30,6 +30,7 @@ Route::middleware(['web', 'auth'])->group(function () {
             Route::post('update_folder', [AppFilesController::class, 'update_folder'])->name('app.files.update_folder');
             Route::post('save_folder', [AppFilesController::class, 'save_folder'])->name('app.files.save_folder');
             Route::post('popup_search_media', [AppFilesController::class, 'popup_search_media'])->name('app.files.popup_search_media');
+			Route::post('get_thumbnails', [AppFilesController::class, 'get_thumbnails'])->name('app.files.get_thumbnails');
         });
     });
 

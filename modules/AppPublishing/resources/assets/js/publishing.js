@@ -297,34 +297,59 @@ var AppPubishing = new (function ()
         }
 
         function onMediaItemsChange() {
-            var images = document.querySelectorAll('.file-selected-media .items .file-item');
-            let allMedias;
-            if (images.length > 0) {
-                allMedias = Array.from(images);
+            var fileItems = document.querySelectorAll('.file-selected-media .items .file-item');
+            var allMedias;
+            var isPreviewModal = fileItems.length === 0;
+
+            if (!isPreviewModal) {
+                // ── Composer mode: use selected file items ──────────────────
+                allMedias = Array.from(fileItems);
             } else {
-                var previewMedias = document.querySelectorAll('.preview-list-medias img');
+                // ── Preview modal mode ──────────────────────────────────────
+                // CRITICAL: Each tab pane has its own .preview-list-medias.
+                // querySelectorAll('.preview-list-medias img') would return
+                // N imgs (one per tab = one per social account), making a
+                // single uploaded file appear as N items in the grid.
+                // FIX: read ONLY from the first tab pane — all posts in a
+                // group share the same medias[] array.
+                var sourcePane = document.querySelector('.tab-pane.active .preview-list-medias')
+                              || document.querySelector('.tab-pane .preview-list-medias');
+                var previewMedias = sourcePane ? sourcePane.querySelectorAll('img') : [];
                 allMedias = Array.from(previewMedias);
             }
-            const previewHtml = allMedias.map(media => {
-                var type = media.dataset?.type || 'image';
-                var file = media.dataset?.file || media.src;
-                if (type == "image") {
-                    return `<img src="${file}"/>`;
-                } else if (type == "video") {
-                    return `<div class="bg-gray-400 hp-100 d-flex align-items-center justify-content-center fs-60 text-white"><i class="fa-solid fa-play"></i></div>`;
+
+            $(".cpv-img").html('');
+            $(".cpv-link .cpv-link-img").html('');
+
+            if (allMedias.length === 0) return;
+
+            // Build staging HTML: one <img data-type data-file data-poster> per media.
+            // Channel MutationObservers pick these up and render the real grid.
+            var stagingHtml = allMedias.map(function(media) {
+                var type = (media.dataset && media.dataset.type) ? media.dataset.type : 'image';
+                var file = (media.dataset && (media.dataset.file || media.src)) ? (media.dataset.file || media.src) : media.src;
+                // data-poster: explicit poster > first generated thumbnail > none
+                var poster = '';
+                if (type === 'video') {
+                    poster = (media.dataset && media.dataset.poster) ? media.dataset.poster : '';
+                    if (!poster && media.dataset && media.dataset.thumbnails) {
+                        // Composer mode: grab first thumbnail from generated frames
+                        poster = media.dataset.thumbnails.split(',').filter(Boolean)[0] || '';
+                    }
                 }
+                return '<img src="" data-type="' + type + '" data-file="' + file + '" data-poster="' + poster + '">';
             }).join('');
-            if (allMedias.length === 0) {
-                $(".cpv-img").html('');
-                $(".cpv-link .cpv-link-img").html('');
-                return;
-            }
+
+            // Write to ALL .cpv-img staging divs (all tabs get same content
+            // — they all share the same medias[] array for a given group).
+            $(".cpv-img").html(stagingHtml);
+
+            // Update link preview thumbnail
             var firstMedia = allMedias[0];
-            var firstFileType = firstMedia.dataset?.type || 'image';
-            var firstFile = firstMedia.dataset?.file || firstMedia.src;
-            $(".cpv-img").html(previewHtml);
-            if (firstFileType == "image") {
-                $(".cpv-link .cpv-link-img").html(`<img src="${firstFile}"/>`);
+            var firstType = (firstMedia.dataset && firstMedia.dataset.type) ? firstMedia.dataset.type : 'image';
+            var firstFile = (firstMedia.dataset && (firstMedia.dataset.file || firstMedia.src)) ? (firstMedia.dataset.file || firstMedia.src) : firstMedia.src;
+            if (firstType === 'image') {
+                $(".cpv-link .cpv-link-img").html('<img src="' + firstFile + '"/>');
             }
         }
 
@@ -343,6 +368,11 @@ var AppPubishing = new (function ()
         } else {
             onMediaItemsChange();
         }
+
+        // Re-populate preview when user switches platform tab
+        $(document).on('shown.bs.tab', '[data-bs-toggle="pill"]', function() {
+            onMediaItemsChange();
+        });
     },
 
     AppPubishing.previewLink = function(result){

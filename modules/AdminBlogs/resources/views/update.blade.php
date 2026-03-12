@@ -44,7 +44,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label for="content" class="form-label">{{ __('Content') }} (<span class="text-danger">*</span>)</label>
-                                <textarea class="textarea_editor border-gray-300 border-2 b-r-25 min-h-600" name="content" placeholder="{{ __("Enter content") }}">{!! data($result, "content") !!}</textarea>
+                                <textarea class="textarea_editor border-gray-300 border-2 b-r-25 min-h-500 w-100" name="content" placeholder="{{ __("Enter content") }}">{!! data($result, "content") !!}</textarea>
                             </div>
                         </div>
                     </div>

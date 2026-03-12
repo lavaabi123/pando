@@ -56,97 +56,86 @@
         </div>
     </div>
 </div>
-@push('scripts')
 <script>
-$(document).on('change', 'input[name="type"]', function () {
-    var isLink = $(this).val() === 'link';
-    $('.instagram-preview .cpv-link').toggleClass('d-none', !isLink);
-    $('.instagram-preview .cpv-media').removeClass('d-none');
-});
 
-$(document).on('change', 'input[name="options[ig_type]"]', function () {
-    var isStory = $(this).val() === 'stories';
-    $('.instagram-preview .instagram-post').toggleClass('d-none', isStory);
-    $('.instagram-preview .instagram-stories').toggleClass('d-none', !isStory);
-});
+function ig_renderItem(el) {
+    var type   = el.getAttribute('data-type')   || 'image';
+    var file   = el.getAttribute('data-file')   || el.getAttribute('src') || '';
+    var poster = el.getAttribute('data-poster') || '';
 
-$(document).ready(function () {
-    $('input[name="options[ig_type]"]:checked').trigger('change');
-});
-
-
-function instagram_renderMediaCarousel(elements) {
+    if (type === 'video') {
+        if (poster) {
+            return '<div class="img-wrap position-relative">'
+                + '<img src="' + poster + '" style="width:100%;height:100%;object-fit:cover;display:block;">'
+                + '<div class="cpv-play-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);color:#fff;font-size:1.6rem;pointer-events:none;">'
+                + '<i class="fa-solid fa-circle-play"></i></div>'
+                + '</div>';
+        } else {
+            return '<div class="img-wrap position-relative" style="background:#1a1a1a;">'
+                + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;gap:8px;">'
+                + '<i class="fa-solid fa-film" style="font-size:2rem;"></i>'
+                + '<span style="font-size:11px;">Video</span>'
+                + '</div></div>';
+        }
+    } else {
+        return '<div class="img-wrap"><img src="' + file + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
+    }
+}
+function ig_renderGrid(elements) {
     if (elements.length === 0) return '';
-
-    var id = 'instagram-carousel-' + Math.random().toString(36).substr(2, 8);
-
-    let items = '';
-    elements.forEach((el, idx) => {
-        var isActive = idx === 0 ? 'active' : '';
-        items += `
-            <div class="carousel-item ${isActive}">
-                <div class="img-wrap">${el.outerHTML}</div>
-            </div>
-        `;
-    });
-
-    return `
-        <div id="${id}" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">${items}</div>
-            ${elements.length > 1 ? `
-                <button class="carousel-control-prev" type="button" data-bs-target="#${id}" data-bs-slide="prev">
-                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Previous</span>
-                </button>
-                <button class="carousel-control-next" type="button" data-bs-target="#${id}" data-bs-slide="next">
-                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                    <span class="visually-hidden">Next</span>
-                </button>` : ''}
-        </div>
-    `;
+    var id = 'ig-car-' + Math.random().toString(36).substr(2, 6);
+    var items = elements.map(function(el, i) {
+        return '<div class="carousel-item ' + (i===0?'active':'') + '">' + ig_renderItem(el) + '</div>';
+    }).join('');
+    var ctrls = elements.length > 1
+        ? '<button class="carousel-control-prev" type="button" data-bs-target="#'+id+'" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>'
+          + '<button class="carousel-control-next" type="button" data-bs-target="#'+id+'" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>'
+        : '';
+    return '<div id="'+id+'" class="carousel slide" data-bs-ride="carousel"><div class="carousel-inner">'+items+'</div>'+ctrls+'</div>';
 }
 
-function instagram_renderStoryImage(elements) {
-    if (elements.length === 0) return '';
-    var first = elements[0];
-    return `<div class="img-wrap hp-100 wp-100">${first.outerHTML}</div>`;
-}
+document.querySelectorAll('.cpv-instagram-img').forEach(function(container) {
+    var pane = container.closest('.tab-pane') || container.parentElement;
+    var view = pane ? pane.querySelector('.cpv-instagram-img-view') : document.querySelector('.cpv-instagram-img-view');
+    if (!view) return;
 
-function updateInstagramPreviews() {
-    var elements = document.querySelectorAll('.cpv-instagram-img > img, .cpv-instagram-img > div');
-    var mediaList = Array.from(elements).filter(el =>
-        el.tagName.toLowerCase() === 'img' || el.tagName.toLowerCase() === 'div'
-    );
-
-    if (mediaList.length > 0) {
-        // Render carousel for post
-        var postView = document.querySelector('.cpv-instagram-img-view');
-        if (postView) {
-            postView.innerHTML = instagram_renderMediaCarousel(mediaList);
+    function ig_getElements() {
+        // Primary: cpv-img staging (written by onMediaItemsChange)
+        var els = Array.from(container.querySelectorAll('img[data-file]'))
+                      .filter(function(el) { return el.getAttribute('data-file'); });
+        // Fallback: read directly from preview-list-medias (calendar preview modal on first load)
+        if (els.length === 0) {
+            var staging = pane ? pane.querySelector('.preview-list-medias') : null;
+            if (staging) {
+                els = Array.from(staging.querySelectorAll('img[data-file]'))
+                          .filter(function(el) { return el.getAttribute('data-file'); });
+            }
         }
-
-        // Render 1 image for story
-        var storyView = document.querySelector('.cpv-instagram-stories-img-view');
-        if (storyView) {
-            storyView.innerHTML = instagram_renderStoryImage(mediaList);
-        }
+        return els;
     }
 
-}
+    function ig_update() {
+        var els = ig_getElements();
+        if (els.length === 0) return;
+        view.innerHTML = ig_renderGrid(els);
+    }
 
-// MutationObserver
-var container = document.querySelector('.cpv-instagram-img');
-if (container) {
-    var observer = new MutationObserver(updateInstagramPreviews);
-    observer.observe(container, {
-        childList: true,
-        subtree: false,
-        attributes: true,
-        attributeFilter: ['src']
+    // Watch the cpv-img staging div (written by onMediaItemsChange)
+    new MutationObserver(ig_update).observe(container, {
+        childList: true, subtree: false,
+        attributes: true, attributeFilter: ['src', 'data-type', 'data-file', 'data-poster']
     });
 
-    document.addEventListener('DOMContentLoaded', updateInstagramPreviews);
-    updateInstagramPreviews(); // also trigger on load
-}
+    // Also watch preview-list-medias directly for attribute changes
+    // (covers the case where server sets data-poster after page load)
+    var stagingList = pane ? pane.querySelector('.preview-list-medias') : null;
+    if (stagingList) {
+        new MutationObserver(ig_update).observe(stagingList, {
+            childList: true, subtree: true,
+            attributes: true, attributeFilter: ['data-file', 'data-type', 'data-poster', 'src']
+        });
+    }
+
+    ig_update();
+});
 </script>
-@endpush

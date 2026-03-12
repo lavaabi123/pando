@@ -175,20 +175,20 @@ class PinterestAPI
      * @param string $imageUrl    The URL of the image to pin.
      * @return array The API response.
      */
-    public function sharePin($accessToken, $boardId, $title, $description, $link, $medias)
+    public function sharePin($accessToken, $boardId, $title, $description, $link, $medias, $coverImageUrl = null)
     {
         $endpoint = $this->baseApiUrl . "/pins";
         $countImg = 0;
         $imgItems = [];
         $checkType = "";
-        $firstMedia = Media::url($medias[0]);
+        $firstMedia = $this->resolveMediaUrl((string)($medias[0] ?? ''));
 
-        if(Media::isVideo($firstMedia)){
-            return $this->sharePinVideo($accessToken, $boardId, $title, $description, $link, $firstMedia);
+        if($this->mediaIsVideo($firstMedia)){
+            return $this->sharePinVideo($accessToken, $boardId, $title, $description, $link, $firstMedia, $coverImageUrl);
         }else{
             foreach ($medias as $key => $media) {
-                $media = Media::url($media);
-                if (Media::isImg($media)) {
+                $media = $this->resolveMediaUrl((string)$media);
+                if ($this->mediaIsImage($media)) {
                     $countImg++;
 
                     $imgItem = [
@@ -256,90 +256,142 @@ class PinterestAPI
      * @param string $videoMedia The media identifier (or local identifier) for the video.
      * @return array API response.
      */
-    public function sharePinVideo($accessToken, $boardId, $title, $description, $link, $videoMedia)
+    /**
+     * Post a video pin to Pinterest using the correct v5 API flow:
+     *   1. POST /v5/media           — register upload intent → media_id + upload_url + upload_parameters
+     *   2. POST {upload_url}        — upload file bytes to S3 (multipart with upload_parameters)
+     *   3. Poll GET /v5/media/{id}  — wait for status = "succeeded"
+     *   4. POST /v5/pins            — create pin with media_source.source_type = "video_id"
+     */
+    public function sharePinVideo($accessToken, $boardId, $title, $description, $link, $videoMedia, $coverImageUrl = null)
     {
-        // Get the video URL from your Media helper.
-        $videoUrl = Media::url($videoMedia);
-        if(!$videoUrl) {
+        // $videoMedia is already a resolved public URL (passed from sharePin via Media::url())
+        $videoUrl = $this->resolveMediaUrl((string)$videoMedia);
+
+        if (!$videoUrl) {
             return $this->errorResponse("No media provided for video pin.", "media");
         }
-        if(!\Media::isVideo($videoUrl)) {
-            return $this->errorResponse("Provided media is not a video.", "media");
+
+        // Download to a local temp file for the S3 multipart upload
+        $localPath  = null;
+        $tmpCreated = false;
+        // Use curl stream-download to avoid loading large videos into memory
+        $ext = strtolower(pathinfo(parse_url($videoUrl, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'mp4';
+        $localPath = $this->downloadToTemp($videoUrl, $ext);
+        if (!$localPath) {
+            return $this->errorResponse("Could not download video file from: $videoUrl", "media");
+        }
+        $tmpCreated = true;
+
+        // ── Step 1: Register media upload ────────────────────────────────────
+        // NOTE: sendRequest() sends JSON. Pinterest /media returns upload_parameters
+        // as an object with x-amz-* keys that S3 requires as form fields.
+        // The file must NOT be deleted before we upload it — keep $localPath alive.
+        $registerEndpoint = $this->baseApiUrl . "/media";
+        $registerResponse = $this->sendRequest("POST", $registerEndpoint, [
+            "media_type" => "video",
+        ], $accessToken);
+
+        if (!isset($registerResponse["media_id"])) {
+            if ($tmpCreated) @unlink($localPath);
+            $msg = $registerResponse["message"] ?? json_encode($registerResponse);
+            return $this->errorResponse("Pinterest register failed: $msg", "media");
         }
 
-        // -----------------------------------------------------------------
-        // Step 1: Register Media Upload
-        // -----------------------------------------------------------------
-        // This endpoint registers your intent to upload video content.
-        $registerEndpoint = "https://pinterest-media-upload.s3-accelerate.amazonaws.com/media";
-        $registerParams = [
-            // Include any required registration parameters.
-            // "media_type" is assumed to be used by Pinterest to distinguish videos.
-            "media_type" => "video"
-        ];
-        $registerResponse = $this->sendRequest("POST", $registerEndpoint, $registerParams, $accessToken);
+        $mediaId      = $registerResponse["media_id"];
+        $uploadUrl    = $registerResponse["upload_url"] ?? null;
+        $uploadParams = $registerResponse["upload_parameters"] ?? [];
 
-        if (!isset($registerResponse["upload_url"])) {
-            return $this->errorResponse("Failed to register media upload.", "media");
+        if (!$uploadUrl) {
+            if ($tmpCreated) @unlink($localPath);
+            return $this->errorResponse("Pinterest did not return an upload URL.", "media");
         }
-        $uploadUrl = $registerResponse["upload_url"];
-        $uploadParameters = isset($registerResponse["upload_parameters"]) ? $registerResponse["upload_parameters"] : [];
 
-        // -----------------------------------------------------------------
-        // Step 2: Upload Video to Pinterest
-        // -----------------------------------------------------------------
-        // Prepare multipart form data to upload the file.
+        // ── Step 2: Upload file to S3 ─────────────────────────────────────────
+        // S3 pre-signed POST requires ALL upload_parameters fields to come BEFORE
+        // the file field, in exact order returned by Pinterest. The Content-Type
+        // field inside upload_parameters must be used — do NOT let Guzzle set its
+        // own Content-Type header (it will conflict with the policy signature).
+        //
+        // BUG FIXED: Previously the file was deleted (tmpCreated unlink) before
+        // this step, and the field order was wrong (file before params).
+
         $multipart = [];
-        // Include all returned upload parameters.
-        foreach ($uploadParameters as $key => $value) {
-            $multipart[] = [
-                'name'     => $key,
-                'contents' => $value
-            ];
+        foreach ($uploadParams as $key => $value) {
+            $multipart[] = ['name' => $key, 'contents' => (string)$value];
         }
-        // Add the video file (using the "file" field).
+        // File field MUST be last
         $multipart[] = [
             'name'     => 'file',
-            'contents' => fopen($videoUrl, 'r'),
-            'filename' => basename($videoUrl)
+            'contents' => fopen($localPath, 'r'),
+            'filename' => 'video.mp4',
         ];
-        $guzzleClient = new Client(['verify' => false]);
+
         try {
-            $uploadResponse = $guzzleClient->request("POST", $uploadUrl, [
+            $guzzle = new Client(['verify' => false]);
+            $s3Resp = $guzzle->request("POST", $uploadUrl, [
                 'multipart' => $multipart,
+                // Do NOT pass 'headers' => ['Content-Type' => ...] here —
+                // Guzzle sets multipart/form-data automatically with correct boundary.
             ]);
-            $uploadResponseData = json_decode($uploadResponse->getBody()->getContents(), true);
+            // S3 returns 204 on success; anything else is a failure
+            $s3Status = $s3Resp->getStatusCode();
+            if ($s3Status !== 204 && $s3Status !== 200 && $s3Status !== 201) {
+                if ($tmpCreated) @unlink($localPath);
+                return $this->errorResponse("S3 upload returned unexpected status: $s3Status", "media");
+            }
         } catch (RequestException $e) {
-            return $this->errorResponse("Video upload failed: " . $e->getMessage(), "media");
+            if ($tmpCreated) @unlink($localPath);
+            $errBody = $e->hasResponse() ? (string)$e->getResponse()->getBody() : $e->getMessage();
+            return $this->errorResponse("Video upload to S3 failed: $errBody", "media");
         }
 
-        // Assume the upload response returns a media id for the uploaded video.
-        if (!isset($uploadResponseData["id"])) {
-            return $this->errorResponse("Failed to upload video media.", "media");
-        }
-        $videoMediaId = $uploadResponseData["id"];
+        if ($tmpCreated) @unlink($localPath);
 
-        // -----------------------------------------------------------------
-        // Step 3: Create the Video Pin
-        // -----------------------------------------------------------------
-        $pinEndpoint = $this->baseApiUrl . "/pins";
+        // ── Step 3: Poll for processing ───────────────────────────────────────
+        // Pinterest processes the video asynchronously after S3 upload.
+        // Poll GET /v5/media/{media_id} until status = "succeeded".
+        $pollEndpoint = $this->baseApiUrl . "/media/" . rawurlencode($mediaId);
+        $maxAttempts  = 15; // 15 x 5s = 75s max
+        $ready        = false;
+        for ($i = 0; $i < $maxAttempts; $i++) {
+            if ($i > 0) sleep(5);
+            $statusResp = $this->sendRequest("GET", $pollEndpoint, [], $accessToken);
+            $status     = $statusResp["status"] ?? null;
+            if ($status === "succeeded") { $ready = true; break; }
+            if ($status === "failed")    { return $this->errorResponse("Pinterest video processing failed.", "media"); }
+        }
+        if (!$ready) {
+            return $this->errorResponse("Pinterest video took too long to process.", "media");
+        }
+
+        // ── Step 4: Create pin ────────────────────────────────────────────────
+        // media_id must be passed as a string.
+        // Pinterest REQUIRES cover_image_url or cover_image_key_frame_time for video pins.
+        // If no custom thumbnail provided, we default to key_frame_time=0 (first frame).
         $pinParams = [
             "board_id"    => $boardId,
             "description" => $description,
-            "alt_text"    => $description, // Using description as alt_text, adjust as necessary.
+            "alt_text"    => $description,
             "media_source" => [
-                "source_type" => "video_id", // Specifies that the media is a video.
-                "media_id"    => $videoMediaId
-            ]
+                "source_type" => "video_id",
+                "media_id"    => (string)$mediaId,
+            ],
         ];
-        if($title != ""){
-            $pinParams['title'] = $title;
-        }
-        if($link != "" && filter_var($link, FILTER_VALIDATE_URL)){
-            $pinParams['link'] = $link;
+
+        // cover_image_url / cover_image_key_frame_time go INSIDE media_source
+        if (!empty($coverImageUrl) && filter_var($coverImageUrl, FILTER_VALIDATE_URL)) {
+            $pinParams["media_source"]["cover_image_url"] = $coverImageUrl;
+        } else {
+            $pinParams["media_source"]["cover_image_key_frame_time"] = 0;
         }
 
-        return $this->sendRequest("POST", $pinEndpoint, $pinParams, $accessToken);
+        if ($title !== "")                                           $pinParams["title"] = $title;
+        if ($link !== "" && filter_var($link, FILTER_VALIDATE_URL)) $pinParams["link"]  = $link;
+
+        \Log::error('Pinterest createPin payload', ['params' => json_encode($pinParams)]);
+
+        return $this->sendRequest("POST", $this->baseApiUrl . "/pins", $pinParams, $accessToken);
     }
 
     /**
@@ -401,4 +453,46 @@ class PinterestAPI
             "type"    => $type,
         ];
     }
+    // ── Media URL helpers (same logic as Post facades) ─────────────────────
+    protected function resolveMediaUrl(string $media): string
+    {
+        $media = trim($media);
+        if ($media === '') return '';
+        if (filter_var($media, FILTER_VALIDATE_URL)) return $media;
+        return \Media::url($media);
+    }
+    protected function mediaIsImage(string $media): bool
+    {
+        $p = parse_url($media, PHP_URL_PATH) ?: $media;
+        return (bool) preg_match('/\.(jpe?g|png|gif|webp|bmp|svg|heic|heif)$/i', $p);
+    }
+    protected function mediaIsVideo(string $media): bool
+    {
+        $p = parse_url($media, PHP_URL_PATH) ?: $media;
+        return (bool) preg_match('/\.(mp4|mov|avi|mkv|webm|flv|wmv|m4v|3gp|ogv)$/i', $p);
+    }
+    /**
+     * Stream-download a URL to temp file via curl (memory-safe for large videos).
+     */
+    protected function downloadToTemp(string $url, string $ext = 'mp4'): ?string
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'pin_dl_') . ".$ext";
+        $fh  = fopen($tmp, 'wb');
+        if (!$fh) return null;
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_FILE           => $fh,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 600,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => 0,
+        ]);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch); fclose($fh);
+        if ($code === 200 && file_exists($tmp) && filesize($tmp) > 0) return $tmp;
+        @unlink($tmp); return null;
+    }
+
+
 }

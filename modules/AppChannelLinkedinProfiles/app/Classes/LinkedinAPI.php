@@ -246,7 +246,8 @@ class LinkedinAPI
         $video_path,
         $video_title,
         $video_description,
-        $visibility = "PUBLIC"
+        $visibility = "PUBLIC",
+        $thumbnailUrl = null
     ) {
         // Register upload request using video recipe.
         $prepareUrl = "https://api.linkedin.com/v2/assets?action=registerUpload&oauth2_access_token=" . $accessToken;
@@ -278,11 +279,14 @@ class LinkedinAPI
 
             // Upload the video via a PUT request.
             try {
-                $fileStream = fopen($video_path, 'r');
+                $_liVidTmp  = null;
+                $fileStream = $this->openMediaStream($video_path, $_liVidTmp);
+                if (!$fileStream) throw new \RuntimeException("Could not open video for upload: $video_path");
                 $this->client->request('PUT', $uploadURL, [
                     'headers' => [ 'Authorization' => 'Bearer ' . $accessToken ],
                     'body'    => $fileStream
                 ]);
+                if ($_liVidTmp) @unlink($_liVidTmp);
             } catch (RequestException $e) {
                 return json_encode([
                     "error"   => "Video upload failed.",
@@ -290,26 +294,51 @@ class LinkedinAPI
                 ]);
             }
 
-            $parse_id = explode(":", "urn:li:digitalmediaAsset:D5605AQG6_pTRbNXiOg");
-            $id = end( $parse_id );
+            // Fix: parse asset_id from the actual $asset_id, not a hardcoded string
+            $parse_id = explode(":", $asset_id);
+            $id = end($parse_id);
 
-            $checkUpload = $this->sendRequest('GET', "https://api.linkedin.com/v2/assets/".$id."?oauth2_access_token=" . $accessToken);
-            $checkUpload = json_decode($checkUpload);
-            if($checkUpload->status == "ALLOWED"){
+            // Poll until the asset is ALLOWED (video processing can take up to 60s)
+            $maxPoll = 15; $pollTry = 0; $checkUpload = null;
+            do {
+                if ($pollTry > 0) sleep(4);
+                $checkRaw  = $this->sendRequest('GET', "https://api.linkedin.com/v2/assets/" . $id . "?oauth2_access_token=" . $accessToken);
+                $checkUpload = json_decode($checkRaw);
+                $pollTry++;
+            } while (
+                isset($checkUpload->status) &&
+                $checkUpload->status !== "ALLOWED" &&
+                $checkUpload->status !== "PROCESSING_FAILED" &&
+                $pollTry < $maxPoll
+            );
+
+            if (!isset($checkUpload->status) || $checkUpload->status === "PROCESSING_FAILED") {
+                return json_encode(["error" => "Video processing failed on LinkedIn."]);
+            }
+
+            if ($checkUpload->status == "ALLOWED") {
+
+                // Build the media entry
+                $mediaEntry = [
+                    "status" => "READY",
+                    "media"  => $asset_id,
+                ];
+
+                // Attach custom thumbnail if provided
+                if ($thumbnailUrl) {
+                    $mediaEntry["thumbnailUrl"] = $thumbnailUrl;
+                }
 
                 // Assemble the post request including the video asset.
                 $url = "https://api.linkedin.com/v2/ugcPosts?oauth2_access_token=" . $accessToken;
                 $request = [
-                    "author"         => $this->type . $person_id,
-                    "lifecycleState" => "PUBLISHED",
+                    "author"          => $this->type . $person_id,
+                    "lifecycleState"  => "PUBLISHED",
                     "specificContent" => [
                         "com.linkedin.ugc.ShareContent" => [
-                            "shareCommentary"   => [ "text" => $message ],
-                            "shareMediaCategory"=> "VIDEO",
-                            "media"             => [[
-                                "status"      => "READY",
-                                "media"       => $asset_id,
-                            ]]
+                            "shareCommentary"    => ["text" => $message],
+                            "shareMediaCategory" => "VIDEO",
+                            "media"              => [$mediaEntry],
                         ]
                     ],
                     "visibility" => [
@@ -325,7 +354,7 @@ class LinkedinAPI
 
             return json_encode([
                 "error"   => "Video upload failed.",
-                "details" => "Video upload failed."
+                "details" => "Asset not in ALLOWED state after upload."
             ]);
         } else {
             return $prepareResponse;
@@ -377,12 +406,14 @@ class LinkedinAPI
 
             // Use Guzzle client to upload the file via PUT.
             try {
-                // Open the file stream.
-                $fileStream = fopen($image_path, 'r');
+                $_liImgTmp  = null;
+                $fileStream = $this->openMediaStream($image_path, $_liImgTmp);
+                if (!$fileStream) throw new \RuntimeException("Could not open image for upload: $image_path");
                 $this->client->request('PUT', $uploadURL, [
                     'headers' => [ 'Authorization' => 'Bearer ' . $accessToken ],
                     'body'    => $fileStream
                 ]);
+                if ($_liImgTmp) @unlink($_liImgTmp);
             } catch (RequestException $e) {
                 return json_encode(["error" => "Image upload failed.", "details" => $e->getMessage()]);
             }
@@ -463,11 +494,14 @@ class LinkedinAPI
                 $images[$key]['asset_id'] = $asset_id;
                 // Upload the file via PUT.
                 try {
-                    $fileStream = fopen($image['image_path'], 'r');
+                    $_liMulTmp  = null;
+                    $fileStream = $this->openMediaStream($image['image_path'], $_liMulTmp);
+                    if (!$fileStream) throw new \RuntimeException("Could not open image for upload: {$image['image_path']}");
                     $this->client->request('PUT', $uploadURL, [
                         'headers' => [ 'Authorization' => 'Bearer ' . $accessToken ],
                         'body'    => $fileStream
                     ]);
+                    if ($_liMulTmp) @unlink($_liMulTmp);
                 } catch (RequestException $e) {
                     return json_encode(["error" => "Image upload failed.", "details" => $e->getMessage()]);
                 }
@@ -610,6 +644,79 @@ public function linkedInPostDetailGet($accessToken, $postUrn)
     
     return $this->sendRequest('GET', $url, $options);
 }
+
+
+    /**
+     * Resolve a media path/URL to a readable PHP stream.
+     *
+     * Callers pass whatever the Post facade passes — which after our fixes is
+     * always a full public URL.  fopen(URL, 'r') is unreliable (requires
+     * allow_url_fopen, streams headers, fails on large files).
+     *
+     * Strategy:
+     *   1. If it is a local absolute path → fopen directly.
+     *   2. If it is a URL → try to map to local storage path (zero-copy).
+     *   3. Otherwise  → download to a temp file via curl and open that.
+     *
+     * @param  string  $pathOrUrl
+     * @param  ?string &$tmpFile   Set to temp file path if one was created (caller must unlink)
+     * @return resource|false
+     */
+    private function openMediaStream(string $pathOrUrl, ?string &$tmpFile = null)
+    {
+        $tmpFile = null;
+
+        // Already a local absolute path
+        if (!filter_var($pathOrUrl, FILTER_VALIDATE_URL)) {
+            return file_exists($pathOrUrl) ? fopen($pathOrUrl, 'r') : false;
+        }
+
+        // Try to map URL → local filesystem path
+        $urlPath  = parse_url($pathOrUrl, PHP_URL_PATH) ?: '';
+        $prefixes = ['/storage/app/public/', '/storage/'];
+        foreach ($prefixes as $pfx) {
+            if (str_starts_with($urlPath, $pfx)) {
+                $rel = substr($urlPath, strlen($pfx));
+                $candidates = [
+                    storage_path('app/public/' . $rel),
+                    public_path('storage/' . $rel),
+                    storage_path('app/' . $rel),
+                    base_path('storage/app/public/' . $rel),
+                ];
+                foreach ($candidates as $c) {
+                    if (file_exists($c) && filesize($c) > 0) {
+                        return fopen($c, 'r');
+                    }
+                }
+            }
+        }
+
+        // Fall back: stream-download via curl to a temp file
+        $ext  = strtolower(pathinfo($urlPath, PATHINFO_EXTENSION)) ?: 'bin';
+        $tmp  = tempnam(sys_get_temp_dir(), 'li_media_') . ".$ext";
+        $fh   = fopen($tmp, 'wb');
+        if (!$fh) return false;
+
+        $ch = curl_init($pathOrUrl);
+        curl_setopt_array($ch, [
+            CURLOPT_FILE           => $fh,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 600,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => 0,
+        ]);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        fclose($fh);
+
+        if ($code === 200 && file_exists($tmp) && filesize($tmp) > 0) {
+            $tmpFile = $tmp;
+            return fopen($tmp, 'r');
+        }
+        @unlink($tmp);
+        return false;
+    }
 
 
 }

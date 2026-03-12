@@ -56,74 +56,86 @@
     </div>
 
 </div>
-
 <script>
-function vk_renderMediaCarousel(elements) {
-    if (elements.length === 0) return '';
 
-    const id = 'gmb-carousel-' + Math.random().toString(36).substr(2, 8); // unique ID
+function gmb_renderItem(el) {
+    var type   = el.getAttribute('data-type')   || 'image';
+    var file   = el.getAttribute('data-file')   || el.getAttribute('src') || '';
+    var poster = el.getAttribute('data-poster') || '';
 
-    let indicators = '';
-    let items = '';
-
-    elements.forEach((el, idx) => {
-        const isActive = idx === 0 ? 'active' : '';
-
-        indicators += `
-            <button type="button" data-bs-target="#${id}" data-bs-slide-to="${idx}" class="${isActive}" aria-current="${isActive ? 'true' : 'false'}" aria-label="Slide ${idx + 1}"></button>
-        `;
-
-        items += `
-            <div class="carousel-item ${isActive}">
-                <div class="img-wrap">${el.outerHTML}</div>
-            </div>
-        `;
-    });
-
-    return `
-        <div id="${id}" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-                ${items}
-            </div>
-            ${elements.length > 1 ? `
-            <button class="carousel-control-prev" type="button" data-bs-target="#${id}" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#${id}" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>` : ''}
-        </div>
-    `;
-}
-
-function vk_onMediaItemsChange() {
-    const vk_elements = document.querySelectorAll('.cpv-gmb-img > img, .cpv-gmb-img > div');
-    if (vk_elements.length > 0) {
-        const vk_mediaList = Array.from(vk_elements).filter(el =>
-            el.tagName.toLowerCase() === 'img' || el.tagName.toLowerCase() === 'div'
-        );
-
-        const vk_rendered = vk_renderMediaCarousel(vk_mediaList);
-        const viewContainer = document.querySelector('.cpv-gmb-img-view');
-        if (viewContainer) {
-            viewContainer.innerHTML = vk_rendered;
+    if (type === 'video') {
+        if (poster) {
+            return '<div class="img-wrap position-relative">'
+                + '<img src="' + poster + '" style="width:100%;height:100%;object-fit:cover;display:block;">'
+                + '<div class="cpv-play-overlay" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.35);color:#fff;font-size:1.6rem;pointer-events:none;">'
+                + '<i class="fa-solid fa-circle-play"></i></div>'
+                + '</div>';
+        } else {
+            return '<div class="img-wrap position-relative" style="background:#1a1a1a;">'
+                + '<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#999;gap:8px;">'
+                + '<i class="fa-solid fa-film" style="font-size:2rem;"></i>'
+                + '<span style="font-size:11px;">Video</span>'
+                + '</div></div>';
         }
+    } else {
+        return '<div class="img-wrap"><img src="' + file + '" style="width:100%;height:100%;object-fit:cover;display:block;"></div>';
     }
 }
+function gmb_renderGrid(elements) {
+    if (elements.length === 0) return '';
+    var id = 'gmb-car-' + Math.random().toString(36).substr(2, 6);
+    var items = elements.map(function(el, i) {
+        return '<div class="carousel-item ' + (i===0?'active':'') + '">' + gmb_renderItem(el) + '</div>';
+    }).join('');
+    var ctrls = elements.length > 1
+        ? '<button class="carousel-control-prev" type="button" data-bs-target="#'+id+'" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>'
+          + '<button class="carousel-control-next" type="button" data-bs-target="#'+id+'" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>'
+        : '';
+    return '<div id="'+id+'" class="carousel slide" data-bs-ride="carousel"><div class="carousel-inner">'+items+'</div>'+ctrls+'</div>';
+}
 
-// Setup MutationObserver
-var vk_container = document.querySelector('.cpv-gmb-img');
-if (vk_container) {
-    var vk_observer = new MutationObserver(vk_onMediaItemsChange);
-    vk_observer.observe(vk_container, {
-        childList: true,
-        subtree: false,
-        attributes: true,
-        attributeFilter: ['src'],
+document.querySelectorAll('.cpv-gmb-img').forEach(function(container) {
+    var pane = container.closest('.tab-pane') || container.parentElement;
+    var view = pane ? pane.querySelector('.cpv-gmb-img-view') : document.querySelector('.cpv-gmb-img-view');
+    if (!view) return;
+
+    function gmb_getElements() {
+        // Primary: cpv-img staging (written by onMediaItemsChange)
+        var els = Array.from(container.querySelectorAll('img[data-file]'))
+                      .filter(function(el) { return el.getAttribute('data-file'); });
+        // Fallback: read directly from preview-list-medias (calendar preview modal on first load)
+        if (els.length === 0) {
+            var staging = pane ? pane.querySelector('.preview-list-medias') : null;
+            if (staging) {
+                els = Array.from(staging.querySelectorAll('img[data-file]'))
+                          .filter(function(el) { return el.getAttribute('data-file'); });
+            }
+        }
+        return els;
+    }
+
+    function gmb_update() {
+        var els = gmb_getElements();
+        if (els.length === 0) return;
+        view.innerHTML = gmb_renderGrid(els);
+    }
+
+    // Watch the cpv-img staging div (written by onMediaItemsChange)
+    new MutationObserver(gmb_update).observe(container, {
+        childList: true, subtree: false,
+        attributes: true, attributeFilter: ['src', 'data-type', 'data-file', 'data-poster']
     });
 
-    vk_onMediaItemsChange();
-}
+    // Also watch preview-list-medias directly for attribute changes
+    // (covers the case where server sets data-poster after page load)
+    var stagingList = pane ? pane.querySelector('.preview-list-medias') : null;
+    if (stagingList) {
+        new MutationObserver(gmb_update).observe(stagingList, {
+            childList: true, subtree: true,
+            attributes: true, attributeFilter: ['data-file', 'data-type', 'data-poster', 'src']
+        });
+    }
+
+    gmb_update();
+});
 </script>

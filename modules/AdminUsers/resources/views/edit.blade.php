@@ -22,7 +22,7 @@
         <div class="col-md-12">
             <form class="actionForm" action="{{ url_admin("users/update_info") }}" data-redirect="{{ url_admin("users") }}">
                 <input name="id_secure" type="hidden" value="{{ $result->id_secure }}">
-                <div class="card mt-5">
+                <div class="card mt-4">
                     <div class="card-header">
                         <h3 class="card-title">
                             {{ __('User information') }}

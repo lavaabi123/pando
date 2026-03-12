@@ -21,7 +21,7 @@
     <form class="actionForm" action="{{ url_admin("users/save") }}" data-redirect="{{ url_admin("users") }}">
     	
     	<div class="mb-5">
-    		<div class="card mt-5">
+    		<div class="card mt-4">
              	<div class="card-header">
               		<h3 class="card-title">
                			{{ __('User information') }}
