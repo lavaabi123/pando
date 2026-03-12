@@ -36,30 +36,30 @@
 							<input type="password" id="password" name="password" class="form-control" placeholder="{{ __('Enter your password') }}" required>
 						</div>
 						<!-- Confirm Password -->
-						<div class="mb-4">
+						<div class="mb-2">
 							<label for="password_confirmation" class="form-label">{{ __("Confirm Password") }}</label>
 							<input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="{{ __('Re-enter your password') }}" required>
 						</div>
-		                <div class="mb-4 per-all">
-							<label for="name" class="form-label">{{ __('Select permissions') }}</label>
+		                <div class="mb-2 per-all">
+							<label for="name" class="form-label">{{ __('Select Permissions') }}</label>
 							<div class="mb-3">
-					            <div class="input-group">
+					            <div class="input-group gap-10">
 					                <div class="form-control">
 				                     	<i class="fa-light fa-magnifying-glass"></i>
-				                     	<input placeholder="{{ __("Search") }}" type="text" data-search="search-per" class="search-input" value="">
+				                     	<input placeholder="{{ __("Search") }}" type="text" data-search="search-per" class="search-input b-r-0 border-0" value="">
 					                </div>
-					                <span class="btn btn-icon btn-input min-w-55">
+					                <span class="btn btn-icon border-0 bg-white p-0">
 					                    <input class="form-check-input checkbox-all" data-checkbox-parent=".per-all" type="checkbox" value="">
 					                </span>
 					            </div>
 							</div>
-	 						<div class="mb-4 pf-0 b-r-4">
+	 						<div class="mb-4 pf-0 b-r-15 border-2 overflow-hidden">
 	 							@if($permissions)
 	 							@php
 	 								$selected_permissions = [];
 	 							@endphp
 
-			                  	<ul class="list-group border overflow-y-scroll max-h-350">
+			                  	<ul class="list-group overflow-y-scroll max-h-350">
 			                  		@foreach($permissions as $value)
 
 			                  			@if(Module::find($value['key']) && $value['key'] != 'appteams')
@@ -68,7 +68,7 @@
 				                  				<input type="hidden" name="team_permissions[]" value="{{ $value['key'] }}">
 						                        <div class="list-group-item border-start-0 border-end-0 border-top-0 d-flex justify-content-between align-items-center gap-8">
 											  		<label  class="mt-1 fs-14 d-flex align-items-center gap-8 text-truncate" for="id_{{ $value['key'] }}">
-											  			<div class="size-26 min-w-26 border b-r-6 d-flex justify-content-between align-items-center text-center bg-gray-100 text-success fs-14 border-success-200">
+											  			<div class="size-26 min-w-26 border b-r-30 d-flex justify-content-between align-items-center text-center bg-primary text-white fs-14 border-primary">
 											  				<i class="fa-light fa-key wp-100"></i>
 											  			</div>
 											  			<div class="text-truncate">
@@ -88,9 +88,9 @@
 					                  				@if((int)$children['value'] == 1)
 						                  				<li class=" search-list">
 					                  						<input type="hidden" name="team_permissions[]" value="{{ $children['key'] }}">
-									                        <div class="list-group-item border-end-0 border-top-0 d-flex justify-content-between align-items-center gap-8  border-start-2 ps-5">
+									                        <div class="list-group-item border-end-0 border-top-0 d-flex justify-content-between align-items-center gap-8 ps-4">
 														  		<label  class="mt-1 fs-14 d-flex align-items-center gap-8 text-truncate" for="id_{{ $children['key'] }}">
-														  			<div class="size-26 min-w-26 border b-r-6 d-flex justify-content-between align-items-center text-center bg-primary-100 text-primary fs-14 border-primary-200">
+														  			<div class="size-26 min-w-26 border b-r-30 d-flex justify-content-between align-items-center text-center text-primary fs-14 border-primary-200">
 														  				<i class="fa-light fa-key wp-100"></i>
 														  			</div>
 														  			<div class="text-truncate">
@@ -119,32 +119,32 @@
 
  					</div>
 					
-                        <div class="mb-4 brand-all">
+                        <div class="brand-all">
                             <label for="name" class="form-label">{{ __('Assign Brands') }}</label>
                             <div class="mb-3">
-                                <div class="input-group">
+                                <div class="input-group gap-10">
                                     <div class="form-control">
                                         <i class="fa-light fa-magnifying-glass"></i>
                                         <input placeholder="{{ __("Search") }}" type="text" data-search="search-brand" class="search-input" value="">
                                     </div>
-                                    <span class="btn btn-icon btn-input min-w-55">
+                                    <span class="btn btn-icon border-0 bg-white p-0">
                                         <input class="form-check-input checkbox-all" data-checkbox-parent=".brand-all" type="checkbox" value="">
                                     </span>
                                 </div>
                             </div>
-                            <div class="mb-4 pf-0 b-r-4">
+                            <div class="mb-0 pf-0 b-r-15 border-2 overflow-hidden">
                                 @if($brands)
 								@php
                                     $selected_brands =  [];
                                 @endphp
-                                <ul class="list-group border overflow-y-scroll max-h-350">
+                                <ul class="list-group overflow-y-scroll max-h-350">
                                     @foreach($brands as $value)
 
                                             <li class="search-brand border-start-2 border-primary">
                                                 <input type="hidden" name="brand_permissions[]" value="{{ $value->id }}">
                                                 <div class="list-group-item border-start-0 border-end-0 border-top-0 d-flex justify-content-between align-items-center gap-8">
                                                     <label  class="mt-1 fs-14 d-flex align-items-center gap-8 text-truncate" for="id_{{ $value->id }}">
-                                                        <div class="size-26 min-w-26 border b-r-6 d-flex justify-content-between align-items-center text-center bg-gray-100 text-success fs-14 border-success-200">
+                                                        <div class="size-26 min-w-26 border b-r-30 d-flex justify-content-between align-items-center text-center bg-gray-100 text-success fs-14 border-success-200">
                                                             <i class="fa-light fa-key wp-100"></i>
                                                         </div>
                                                         <div class="text-truncate">
