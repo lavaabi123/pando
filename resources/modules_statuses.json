@@ -117,16 +117,8 @@
     "AppAIContents.zip": true,
     "AdminAIConfiguration.zip": true,
     "AdminAddons.zip": true,
-    "AppAnalyticsFacebook.zip": true,
     "AppChannelTiktokProfiles.zip": true,
     "AppChannelTiktokProfilesOld.zip": true,
-    "AdminSupport.zip": true,
-    "AppSupport.zip": true,
-    "AppApprovals.zip": true,
-    "AppPublishingApproval.zip": true,
-    "AdminAIReport.zip": true,
-    "AppFiles.zip": true,
-    "AppFiles_old.zip": true,
-    "AppPublishing_old.zip": true,
-    "AppChannelXUnofficial.zip": true
+    "AppAIPublishing.zip": true,
+    "AdminAIReport.zip": true
 }

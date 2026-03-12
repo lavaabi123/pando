@@ -670,6 +670,32 @@ private function generateSampleTimeSeries($overview)
     
     return $chartData;
 }
+	public function reportnew()
+    {
+    	return view('appanalytics::show');
+    }
 
+    public function exportnewPdf(Request $request)
+	{		
+				
+		$chartsJson = $request->input('charts', []);
+
+	    $charts = is_string($chartsJson) ? json_decode($chartsJson, true) : $chartsJson;
+
+	    if (!is_array($charts)) {
+	        $charts = [];
+	    }
+
+	    $pdf = Pdf::loadView(strtolower("appanalytics::exportnew_pdf"), [
+	        'charts' => $charts,
+	    ])
+	    ->setPaper([0, 0, 794, 1123], 'portrait') // px: matches @page size:794px 1123px in CSS
+	    ->setOption('isRemoteEnabled', true)
+	    ->setOption('dpi', 96);
+	    $social = "testing";
+	    $filename = ucfirst($social) . '_Report_' . now()->format('Ymd_His') . '.pdf';
+
+	    return $pdf->download($filename);
+	}
 
 }
