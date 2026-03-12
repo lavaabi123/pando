@@ -58,7 +58,7 @@ class Post extends Facade
             $postType = $data['advance_options']['linkedin_post_type'];
             switch ($postType) {
                 case 'video':
-                    if (!empty($medias) && Media::isImg($medias[0])) {
+                    if (!empty($medias) && self::mediaIsImage(self::resolveMediaUrl((string)($medias[0] ?? '')))) {
                         $errors[] = __("LinkedIn requires a video for the 'video' post type; images are not supported.");
                     }
                     break;
@@ -92,15 +92,22 @@ class Post extends Facade
         self::initLinkedin($accessToken);
         $linkedin = self::$linkedin;
 
-        // Check if posting to a company page; if so override the author type.
+        // Determine author URN.
+        //
+        // Pages:   pid is stored as a full URN ("urn:li:organization:12345678")
+        //          or as a bare numeric ID ("12345678").
+        //          Either way, we build a clean numeric ID and tell LinkedinAPI
+        //          to use the organization prefix.
+        // Profiles: fetch the person sub from the /userinfo endpoint.
         if (isset($post->account->category) && $post->account->category === "page") {
-            // For company page posting, set the type to organization.
             $linkedin->setType("urn:li:organization:");
-            // For company pages, we assume the company id is stored in $post->account->pid.
-            $authorId = $post->account->pid; 
+            // Strip any full URN prefix so we always pass a bare numeric ID.
+            // pid may arrive as "urn:li:organization:12345678" or just "12345678".
+            $rawPid  = (string)($post->account->pid ?? '');
+            $authorId = preg_replace('/^urn:li:[^:]+:/i', '', $rawPid);
         } else {
-            // For personal posts, use the person's id from LinkedIn.
-            $authorId = $linkedin->getPersonID($accessToken); 
+            $linkedin->setType("urn:li:person:");
+            $authorId = $linkedin->getPersonID($accessToken);
         }
 
         $data    = json_decode($post->data, false);
@@ -109,14 +116,13 @@ class Post extends Facade
         $visibility = "PUBLIC";  // Default visibility.
         // For link posts.
         $link       = $data->link ?? '';
-        $link_title = $data->advance_options->link_title ?? '';
-        $link_desc  = $data->advance_options->link_description ?? '';
-        // Optionally, get a first comment (not implemented in this snippet).
-        $comment = $data->advance_options->linkedin_first_comment ?? '';
-        // LinkedIn thumbnail is stored at top-level of postData as 'linkedin_thumbnail'
-        $custom_thumbnail = !empty($data->linkedin_thumbnail)
-            ? Media::url($data->linkedin_thumbnail)
-            : null;
+        // Guard: advance_options can be null when no advanced settings were saved
+        $link_title = self::getAdvanceOption($data, 'link_title', '');
+        $link_desc  = self::getAdvanceOption($data, 'link_description', '');
+        $comment    = self::getAdvanceOption($data, 'linkedin_first_comment', '');
+        // Thumbnail: prefer linkedin_thumbnail, fall back to custom_thumbnail
+        $_thumbRaw = $data->linkedin_thumbnail ?? $data->custom_thumbnail ?? null;
+        $custom_thumbnail = !empty($_thumbRaw) ? self::resolveMediaUrl((string)$_thumbRaw) : null;
 
         switch ($post->type) {
             case 'text':
@@ -132,7 +138,7 @@ class Post extends Facade
                     // Multi-image post.
                     $images = [];
                     foreach ($medias as $media) {
-                        $img_arr['image_path'] = Media::url($media);
+                        $img_arr['image_path'] = self::resolveMediaUrl((string)$media);
                         $img_arr['desc']       = $caption;
                         $img_arr['title']      = substr($caption, 0, 200);
                         $images[] = $img_arr;
@@ -140,15 +146,15 @@ class Post extends Facade
                     $response = $linkedin->linkedInMultiplePhotosPost($accessToken, $authorId, $caption, $images, $visibility);
                 } else {
                     // Single media post.
-                    $media_url = Media::url($medias[0] ?? '');
+                    $media_url = self::resolveMediaUrl((string)($medias[0] ?? ''));
                     if (!$media_url) {
                         return self::errorResponse(__("No media provided for single media post."), $post->type);
                     }
-                    if (Media::isVideo($media_url)) {
+                    if (self::mediaIsVideo($media_url)) {
                         //return self::errorResponse(__("For video posts, please use the 'video' type."), $post->type);
                         $response   = $linkedin->linkedInVideoPost($accessToken, $authorId, $caption, $media_url, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $custom_thumbnail);
                         // Alternatively, you could call linkedInVideoPost() if supported.
-                    } elseif (Media::isImg($media_url)) {
+                    } elseif (self::mediaIsImage($media_url)) {
                         $image_path = $media_url;
                         $response   = $linkedin->linkedInPhotoPost($accessToken, $authorId, $caption, $image_path, substr($caption, 0, 200), substr($caption, 0, 200), $visibility);
                     } else {
@@ -158,11 +164,11 @@ class Post extends Facade
                 break;
 
             case 'video':
-                $media_url = Media::url($medias[0] ?? '');
+                $media_url = self::resolveMediaUrl((string)($medias[0] ?? ''));
                 if (!$media_url) {
                     return self::errorResponse(__("No media provided for video post."), $post->type);
                 }
-                if (!Media::isVideo($media_url)) {
+                if (!self::mediaIsVideo($media_url)) {
                     return self::errorResponse(__("Provided media is not a video."), $post->type);
                 }
                 $video_path = $media_url;
@@ -202,4 +208,136 @@ class Post extends Facade
             "type"    => $type,
         ];
     }
+    // ─────────────────────────────────────────────────────────────────────────
+    // Media URL helpers — safe against double-URL bug
+    //
+    // medias[] can store either a relative path ("files/img.jpg") or a full
+    // public URL ("https://pando.../storage/files/img.jpg").
+    // Media::url() prepends the storage base to relative paths — calling it on
+    // an already-full URL produces a broken double-URL that every external API
+    // rejects.  resolveMediaUrl() detects which case we have and acts accordingly.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Return a full public URL for any stored media identifier.
+     * Safe to call on both relative paths and already-full URLs.
+     */
+    protected static function resolveMediaUrl(string $media): string
+    {
+        $media = trim($media);
+        if ($media === '') return '';
+        if (filter_var($media, FILTER_VALIDATE_URL)) return $media;
+        return \Media::url($media);
+    }
+
+    /** True when the media (URL or path) has an image extension. */
+    protected static function mediaIsImage(string $media): bool
+    {
+        $p = parse_url($media, PHP_URL_PATH) ?: $media;
+        return (bool) preg_match('/\.(jpe?g|png|gif|webp|bmp|svg|heic|heif|tiff?)$/i', $p);
+    }
+
+    /** True when the media (URL or path) has a video extension. */
+    protected static function mediaIsVideo(string $media): bool
+    {
+        $p = parse_url($media, PHP_URL_PATH) ?: $media;
+        return (bool) preg_match('/\.(mp4|mov|avi|mkv|webm|flv|wmv|m4v|3gp|ogv|ts|mts|mpeg|mpg)$/i', $p);
+    }
+
+    /**
+     * Convert a full public URL to a local absolute filesystem path.
+     * Handles both /storage/app/public/… and /storage/… URL shapes.
+     * Returns null if the file cannot be found locally (caller should fall
+     * back to downloading the URL with curl).
+     */
+    protected static function urlToLocalPath(string $url): ?string
+    {
+        $urlPath = parse_url($url, PHP_URL_PATH) ?: '';
+        $prefixes = ['/storage/app/public/', '/storage/'];
+        foreach ($prefixes as $pfx) {
+            if (str_starts_with($urlPath, $pfx)) {
+                $rel = substr($urlPath, strlen($pfx));
+                $candidates = [
+                    storage_path('app/public/' . $rel),
+                    storage_path('app/' . $rel),
+                    public_path('storage/' . $rel),
+                    base_path('storage/app/public/' . $rel),
+                ];
+                foreach ($candidates as $c) {
+                    if (file_exists($c) && filesize($c) > 0) return $c;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Stream-download a URL to a local temp file using curl.
+     * Much safer than file_get_contents() for large videos.
+     * Returns the temp file path, or null on failure.
+     */
+    protected static function downloadToTemp(string $url, string $prefix = 'media_', string $ext = ''): ?string
+    {
+        $tmp = tempnam(sys_get_temp_dir(), $prefix) . ($ext ? ".$ext" : '');
+        $fh  = fopen($tmp, 'wb');
+        if (!$fh) return null;
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_FILE           => $fh,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 600,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => 0,
+            CURLOPT_USERAGENT      => 'Mozilla/5.0',
+        ]);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        fclose($fh);
+        if ($code === 200 && file_exists($tmp) && filesize($tmp) > 0) return $tmp;
+        @unlink($tmp);
+        return null;
+    }
+
+    /**
+     * Resolve a media identifier (URL or relative path) to a local file path.
+     * For local storage: maps URL → real filesystem path.
+     * For S3/Contabo or when local path not found: downloads to temp file.
+     * Caller is responsible for deleting temp files (check $wasTempCreated).
+     *
+     * @param  string $identifier   Full URL or relative path
+     * @param  bool   &$wasTempFile Set to true if a temp file was created
+     * @return string|null          Absolute local path, or null on failure
+     */
+    protected static function resolveToLocalFile(string $identifier, bool &$wasTempFile = false): ?string
+    {
+        $wasTempFile = false;
+        $url = self::resolveMediaUrl($identifier);
+
+        // 1. Try to map URL → local storage path (zero-copy, fastest)
+        $local = self::urlToLocalPath($url);
+        if ($local) return $local;
+
+        // 2. Fall back: download via curl
+        $ext  = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'bin';
+        $tmp  = self::downloadToTemp($url, 'media_dl_', $ext);
+        if ($tmp) { $wasTempFile = true; return $tmp; }
+
+        return null;
+    }
+
+    /**
+     * Safely access a property chain on advance_options.
+     * Guards against PHP 8 TypeError when advance_options is null.
+     */
+    protected static function getAdvanceOption($data, string $key, $default = '')
+    {
+        $ao = $data->advance_options ?? null;
+        if ($ao === null) return $default;
+        if (is_array($ao))  return $ao[$key]  ?? $default;
+        if (is_object($ao)) return $ao->$key  ?? $default;
+        return $default;
+    }
+
+
 }

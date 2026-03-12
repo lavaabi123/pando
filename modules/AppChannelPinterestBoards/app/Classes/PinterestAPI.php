@@ -181,14 +181,14 @@ class PinterestAPI
         $countImg = 0;
         $imgItems = [];
         $checkType = "";
-        $firstMedia = Media::url($medias[0]);
+        $firstMedia = $this->resolveMediaUrl((string)($medias[0] ?? ''));
 
-        if(Media::isVideo($firstMedia)){
+        if($this->mediaIsVideo($firstMedia)){
             return $this->sharePinVideo($accessToken, $boardId, $title, $description, $link, $firstMedia, $coverImageUrl);
         }else{
             foreach ($medias as $key => $media) {
-                $media = Media::url($media);
-                if (Media::isImg($media)) {
+                $media = $this->resolveMediaUrl((string)$media);
+                if ($this->mediaIsImage($media)) {
                     $countImg++;
 
                     $imgItem = [
@@ -266,9 +266,7 @@ class PinterestAPI
     public function sharePinVideo($accessToken, $boardId, $title, $description, $link, $videoMedia, $coverImageUrl = null)
     {
         // $videoMedia is already a resolved public URL (passed from sharePin via Media::url())
-        $videoUrl = filter_var($videoMedia, FILTER_VALIDATE_URL)
-            ? $videoMedia
-            : Media::url($videoMedia);
+        $videoUrl = $this->resolveMediaUrl((string)$videoMedia);
 
         if (!$videoUrl) {
             return $this->errorResponse("No media provided for video pin.", "media");
@@ -277,18 +275,13 @@ class PinterestAPI
         // Download to a local temp file for the S3 multipart upload
         $localPath  = null;
         $tmpCreated = false;
-        $bytes = @file_get_contents($videoUrl);
-        if (!$bytes) {
+        // Use curl stream-download to avoid loading large videos into memory
+        $ext = strtolower(pathinfo(parse_url($videoUrl, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'mp4';
+        $localPath = $this->downloadToTemp($videoUrl, $ext);
+        if (!$localPath) {
             return $this->errorResponse("Could not download video file from: $videoUrl", "media");
         }
-        $ext       = strtolower(pathinfo(parse_url($videoUrl, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'mp4';
-        $localPath  = tempnam(sys_get_temp_dir(), 'pin_vid_') . '.' . $ext;
-        file_put_contents($localPath, $bytes);
         $tmpCreated = true;
-
-        if (!file_exists($localPath)) {
-            return $this->errorResponse("Video file not found.", "media");
-        }
 
         // ── Step 1: Register media upload ────────────────────────────────────
         // NOTE: sendRequest() sends JSON. Pinterest /media returns upload_parameters
@@ -460,4 +453,46 @@ class PinterestAPI
             "type"    => $type,
         ];
     }
+    // ── Media URL helpers (same logic as Post facades) ─────────────────────
+    protected function resolveMediaUrl(string $media): string
+    {
+        $media = trim($media);
+        if ($media === '') return '';
+        if (filter_var($media, FILTER_VALIDATE_URL)) return $media;
+        return \Media::url($media);
+    }
+    protected function mediaIsImage(string $media): bool
+    {
+        $p = parse_url($media, PHP_URL_PATH) ?: $media;
+        return (bool) preg_match('/\.(jpe?g|png|gif|webp|bmp|svg|heic|heif)$/i', $p);
+    }
+    protected function mediaIsVideo(string $media): bool
+    {
+        $p = parse_url($media, PHP_URL_PATH) ?: $media;
+        return (bool) preg_match('/\.(mp4|mov|avi|mkv|webm|flv|wmv|m4v|3gp|ogv)$/i', $p);
+    }
+    /**
+     * Stream-download a URL to temp file via curl (memory-safe for large videos).
+     */
+    protected function downloadToTemp(string $url, string $ext = 'mp4'): ?string
+    {
+        $tmp = tempnam(sys_get_temp_dir(), 'pin_dl_') . ".$ext";
+        $fh  = fopen($tmp, 'wb');
+        if (!$fh) return null;
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_FILE           => $fh,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT        => 600,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_SSL_VERIFYHOST => 0,
+        ]);
+        curl_exec($ch);
+        $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch); fclose($fh);
+        if ($code === 200 && file_exists($tmp) && filesize($tmp) > 0) return $tmp;
+        @unlink($tmp); return null;
+    }
+
+
 }
