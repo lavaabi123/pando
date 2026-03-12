@@ -120,17 +120,19 @@ class Post extends Facade
         $link_title = self::getAdvanceOption($data, 'link_title', '');
         $link_desc  = self::getAdvanceOption($data, 'link_description', '');
         $comment    = self::getAdvanceOption($data, 'linkedin_first_comment', '');
+        $comment = empty(trim($comment)) ? $data->options->linkedin_first_comment : '';
+
         // Thumbnail: prefer linkedin_thumbnail, fall back to custom_thumbnail
         $_thumbRaw = $data->linkedin_thumbnail ?? $data->custom_thumbnail ?? null;
         $custom_thumbnail = !empty($_thumbRaw) ? self::resolveMediaUrl((string)$_thumbRaw) : null;
 
         switch ($post->type) {
             case 'text':
-                $response = $linkedin->linkedInTextPost($accessToken, $authorId, $caption, $visibility);
+                $response = $linkedin->linkedInTextPost($accessToken, $authorId, $caption, $visibility, $comment);
                 break;
 
             case 'link':
-                $response = $linkedin->linkedInLinkPost($accessToken, $authorId, $caption, $link_title, $link_desc, $link, $visibility);
+                $response = $linkedin->linkedInLinkPost($accessToken, $authorId, $caption, $link_title, $link_desc, $link, $visibility, $comment);
                 break;
 
             case 'media':
@@ -143,7 +145,7 @@ class Post extends Facade
                         $img_arr['title']      = substr($caption, 0, 200);
                         $images[] = $img_arr;
                     }
-                    $response = $linkedin->linkedInMultiplePhotosPost($accessToken, $authorId, $caption, $images, $visibility);
+                    $response = $linkedin->linkedInMultiplePhotosPost($accessToken, $authorId, $caption, $images, $visibility, $comment);
                 } else {
                     // Single media post.
                     $media_url = self::resolveMediaUrl((string)($medias[0] ?? ''));
@@ -152,11 +154,11 @@ class Post extends Facade
                     }
                     if (self::mediaIsVideo($media_url)) {
                         //return self::errorResponse(__("For video posts, please use the 'video' type."), $post->type);
-                        $response   = $linkedin->linkedInVideoPost($accessToken, $authorId, $caption, $media_url, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $custom_thumbnail);
+                        $response   = $linkedin->linkedInVideoPost($accessToken, $authorId, $caption, $media_url, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $custom_thumbnail, $comment);
                         // Alternatively, you could call linkedInVideoPost() if supported.
                     } elseif (self::mediaIsImage($media_url)) {
                         $image_path = $media_url;
-                        $response   = $linkedin->linkedInPhotoPost($accessToken, $authorId, $caption, $image_path, substr($caption, 0, 200), substr($caption, 0, 200), $visibility);
+                        $response   = $linkedin->linkedInPhotoPost($accessToken, $authorId, $caption, $image_path, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $comment);
                     } else {
                         return self::errorResponse(__("Unsupported media type."), $post->type);
                     }
@@ -172,7 +174,7 @@ class Post extends Facade
                     return self::errorResponse(__("Provided media is not a video."), $post->type);
                 }
                 $video_path = $media_url;
-                $response   = $linkedin->linkedInVideoPost($accessToken, $authorId, $caption, $video_path, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $custom_thumbnail);
+                $response   = $linkedin->linkedInVideoPost($accessToken, $authorId, $caption, $video_path, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $custom_thumbnail, $comment);
                 break;
 
             default:

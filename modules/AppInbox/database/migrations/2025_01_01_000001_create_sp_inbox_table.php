@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->integer('user_id');
             $table->integer('account_id');
-            $table->string('post_id', 200)->default('');
+            $table->string('post_id', 200)->nullable();
             $table->string('conversation_id', 50);
             $table->string('media_type', 100);
             $table->string('inbox_type', 200);
@@ -37,9 +37,9 @@ return new class extends Migration
             $table->integer('is_favourite')->default(0);
             $table->integer('last_reviewed_user_id')->default(0);
             $table->timestamp('last_reviewed_date')->useCurrent()->useCurrentOnUpdate();
-            $table->text('story')->default('');
-            $table->text('attachments')->default('');
-            $table->text('shares')->default('');
+            $table->text('story')->nullable();
+            $table->text('attachments')->nullable();
+            $table->text('shares')->nullable();
             $table->timestamps();
             
             $table->index('user_id');

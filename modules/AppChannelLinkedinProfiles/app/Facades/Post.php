@@ -95,11 +95,13 @@ class Post extends Facade
         $person_id = $linkedin->getPersonID($accessToken);
 
         $data    = json_decode($post->data, false);
+
         $medias  = $data->medias ?? [];
         $caption = spintax($data->caption);
         // Optionally, get a first comment from advanced options.
         // Guard: advance_options can be null when no advanced settings were saved
         $comment    = self::getAdvanceOption($data, 'linkedin_first_comment', '');
+        $comment = empty(trim($comment)) ? $data->options->linkedin_first_comment : '';
         // For link posts.
         $link       = $data->link ?? '';
         $link_title = self::getAdvanceOption($data, 'link_title', '');
@@ -114,12 +116,12 @@ class Post extends Facade
         switch ($post->type) {
             case 'text':
                 // Text-only post.
-                $response = $linkedin->linkedInTextPost($accessToken, $person_id, $caption, $visibility);
+                $response = $linkedin->linkedInTextPost($accessToken, $person_id, $caption, $visibility, $comment);
                 break;
 
             case 'link':
                 // Post with a link.
-                $response = $linkedin->linkedInLinkPost($accessToken, $person_id, $caption, $link_title, $link_desc, $link, $visibility);
+                $response = $linkedin->linkedInLinkPost($accessToken, $person_id, $caption, $link_title, $link_desc, $link, $visibility, $comment);
                 break;
 
             case 'media':
@@ -133,7 +135,15 @@ class Post extends Facade
                         $img_arr['title']      = substr($caption, 0, 200);
                         $images[] = $img_arr;
                     }
-                    $response = $linkedin->linkedInMultiplePhotosPost($accessToken, $person_id, $caption, $images, $visibility);
+                    
+                    $response = $linkedin->linkedInMultiplePhotosPost(
+                        $accessToken,
+                        $person_id,
+                        $caption,
+                        $images,
+                        $visibility,
+                        $comment 
+                    );
                 } else {
                     // Single media post (image or video).
                     $media = self::resolveMediaUrl((string)($medias[0] ?? ''));
@@ -142,11 +152,11 @@ class Post extends Facade
                     }
                     if (self::mediaIsVideo($media)) {
                         //return self::errorResponse(__("LinkedIn video posts are not supported."), $post->type);
-                        $response   = $linkedin->linkedInVideoPost($accessToken, $person_id, $caption, $media, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $custom_thumbnail);
+                        $response   = $linkedin->linkedInVideoPost($accessToken, $person_id, $caption, $media, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $custom_thumbnail, $comment);
                     } elseif (self::mediaIsImage($media)) {
                         // For a single image, apply watermark and post.
                         $image_path = self::resolveMediaUrl((string)watermark($media, $post->account->team_id, $post->account->id));
-                        $response   = $linkedin->linkedInPhotoPost($accessToken, $person_id, $caption, $image_path, substr($caption, 0, 200), substr($caption, 0, 200), $visibility);
+                        $response   = $linkedin->linkedInPhotoPost($accessToken, $person_id, $caption, $image_path, substr($caption, 0, 200), substr($caption, 0, 200), $visibility, $comment);
                     } else {
                         return self::errorResponse(__("Unsupported media type."), $post->type);
                     }

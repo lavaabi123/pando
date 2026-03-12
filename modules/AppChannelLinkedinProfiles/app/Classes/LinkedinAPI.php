@@ -4,6 +4,7 @@ namespace Modules\AppChannelLinkedinProfiles\Classes;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Modules\AppChannelLinkedinProfiles\Jobs\LinkedInFirstCommentJob;
 
 class LinkedinAPI  
 {
@@ -159,7 +160,7 @@ class LinkedinAPI
      * @param string $visibility  Post visibility ("PUBLIC" or other).
      * @return mixed The response from LinkedIn.
      */
-    public function linkedInTextPost($accessToken, $person_id, $message, $visibility = "PUBLIC")
+    public function linkedInTextPost($accessToken, $person_id, $message, $visibility = "PUBLIC", $first_comment = "")
     {
         $url = "https://api.linkedin.com/v2/ugcPosts?oauth2_access_token=" . $accessToken;
         $request = [
@@ -167,7 +168,7 @@ class LinkedinAPI
             "lifecycleState" => "PUBLISHED",
             "specificContent" => [
                 "com.linkedin.ugc.ShareContent" => [
-                    "shareCommentary"   => [ "text" => $message ],
+                    "shareCommentary"    => [ "text" => $message ],
                     "shareMediaCategory" => "NONE",
                 ]
             ],
@@ -175,12 +176,17 @@ class LinkedinAPI
                 "com.linkedin.ugc.MemberNetworkVisibility" => $visibility,
             ]
         ];
-
         $options = [
             'headers' => ['Content-Type' => 'application/json'],
-            'body' => json_encode($request)
+            'body'    => json_encode($request)
         ];
-        return $this->sendRequest('POST', $url, $options);
+
+        $response = $this->sendRequest('POST', $url, $options);
+
+        $responseData = is_string($response) ? json_decode($response, true) : (array)$response;
+        $this->postLinkedInFirstComment($accessToken, $person_id, $responseData['id'] ?? null, $first_comment);
+
+        return $response;
     }
 
     /**
@@ -195,7 +201,7 @@ class LinkedinAPI
      * @param string $visibility  Post visibility (default: "PUBLIC").
      * @return mixed The response from LinkedIn.
      */
-    public function linkedInLinkPost($accessToken, $person_id, $message, $link_title, $link_desc, $link_url, $visibility = "PUBLIC")
+    public function linkedInLinkPost($accessToken, $person_id, $message, $link_title, $link_desc, $link_url, $visibility = "PUBLIC", $first_comment = "")
     {
         $url = "https://api.linkedin.com/v2/ugcPosts?oauth2_access_token=" . $accessToken;
         $request = [
@@ -203,7 +209,7 @@ class LinkedinAPI
             "lifecycleState" => "PUBLISHED",
             "specificContent" => [
                 "com.linkedin.ugc.ShareContent" => [
-                    "shareCommentary"   => [ "text" => $message ],
+                    "shareCommentary"    => [ "text" => $message ],
                     "shareMediaCategory" => "ARTICLE",
                     "media" => [[
                         "status"      => "READY",
@@ -221,7 +227,14 @@ class LinkedinAPI
             'headers' => ['Content-Type' => 'application/json'],
             'body'    => json_encode($request)
         ];
-        return $this->sendRequest('POST', $url, $options);
+
+        $response = $this->sendRequest('POST', $url, $options);
+
+        $responseData = is_string($response) ? json_decode($response, true) : (array)$response;
+        $this->postLinkedInFirstComment($accessToken, $person_id, $responseData['id'] ?? null, $first_comment);
+
+
+        return $response;
     }
 
     /**
@@ -247,9 +260,9 @@ class LinkedinAPI
         $video_title,
         $video_description,
         $visibility = "PUBLIC",
-        $thumbnailUrl = null
+        $thumbnailUrl = null,
+        $first_comment = ""   
     ) {
-        // Register upload request using video recipe.
         $prepareUrl = "https://api.linkedin.com/v2/assets?action=registerUpload&oauth2_access_token=" . $accessToken;
         $prepareRequest = [
             "registerUploadRequest" => [
@@ -270,14 +283,12 @@ class LinkedinAPI
         $prepareResponse = $this->sendRequest('POST', $prepareUrl, $options);
         $prepareData = json_decode($prepareResponse);
 
-        // If no error returned from registration, proceed with the upload.
         if (!isset($prepareData->message)) {
             $uploadURL = $prepareData->value->uploadMechanism
                 ->{"com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"}
                 ->uploadUrl;
             $asset_id = $prepareData->value->asset;
 
-            // Upload the video via a PUT request.
             try {
                 $_liVidTmp  = null;
                 $fileStream = $this->openMediaStream($video_path, $_liVidTmp);
@@ -294,15 +305,13 @@ class LinkedinAPI
                 ]);
             }
 
-            // Fix: parse asset_id from the actual $asset_id, not a hardcoded string
             $parse_id = explode(":", $asset_id);
             $id = end($parse_id);
 
-            // Poll until the asset is ALLOWED (video processing can take up to 60s)
             $maxPoll = 15; $pollTry = 0; $checkUpload = null;
             do {
                 if ($pollTry > 0) sleep(4);
-                $checkRaw  = $this->sendRequest('GET', "https://api.linkedin.com/v2/assets/" . $id . "?oauth2_access_token=" . $accessToken);
+                $checkRaw    = $this->sendRequest('GET', "https://api.linkedin.com/v2/assets/" . $id . "?oauth2_access_token=" . $accessToken);
                 $checkUpload = json_decode($checkRaw);
                 $pollTry++;
             } while (
@@ -318,18 +327,11 @@ class LinkedinAPI
 
             if ($checkUpload->status == "ALLOWED") {
 
-                // Build the media entry
-                $mediaEntry = [
-                    "status" => "READY",
-                    "media"  => $asset_id,
-                ];
-
-                // Attach custom thumbnail if provided
+                $mediaEntry = ["status" => "READY", "media" => $asset_id];
                 if ($thumbnailUrl) {
                     $mediaEntry["thumbnailUrl"] = $thumbnailUrl;
                 }
 
-                // Assemble the post request including the video asset.
                 $url = "https://api.linkedin.com/v2/ugcPosts?oauth2_access_token=" . $accessToken;
                 $request = [
                     "author"          => $this->type . $person_id,
@@ -349,7 +351,14 @@ class LinkedinAPI
                     'headers' => ['Content-Type' => 'application/json'],
                     'body'    => json_encode($request)
                 ];
-                return $this->sendRequest('POST', $url, $options);
+
+                // CAPTURE response instead of returning directly
+                $response = $this->sendRequest('POST', $url, $options);                
+
+                // Post first comment if provided
+                $responseData = is_string($response) ? json_decode($response, true) : (array)$response;
+                $this->postLinkedInFirstComment($accessToken, $person_id, $responseData['id'] ?? null, $first_comment);
+                return $response;
             }
 
             return json_encode([
@@ -373,9 +382,8 @@ class LinkedinAPI
      * @param string $visibility        Post visibility (default: "PUBLIC").
      * @return mixed The response from LinkedIn.
      */
-    public function linkedInPhotoPost($accessToken, $person_id, $message, $image_path, $image_title, $image_description, $visibility = "PUBLIC")
+    public function linkedInPhotoPost($accessToken, $person_id, $message, $image_path, $image_title, $image_description, $visibility = "PUBLIC", $first_comment = "")
     {
-        // Register upload request.
         $prepareUrl = "https://api.linkedin.com/v2/assets?action=registerUpload&oauth2_access_token=" . $accessToken;
         $prepareRequest = [
             "registerUploadRequest" => [
@@ -389,7 +397,6 @@ class LinkedinAPI
                 ]
             ]
         ];
-
         $options = [
             'headers' => ['Content-Type' => 'application/json'],
             'body'    => json_encode($prepareRequest)
@@ -397,14 +404,12 @@ class LinkedinAPI
         $prepareResponse = $this->sendRequest('POST', $prepareUrl, $options);
         $prepareData = json_decode($prepareResponse);
 
-        // If no error, then upload.
         if (!isset($prepareData->message)) {
             $uploadURL = $prepareData->value->uploadMechanism
                 ->{"com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"}
                 ->uploadUrl;
             $asset_id = $prepareData->value->asset;
 
-            // Use Guzzle client to upload the file via PUT.
             try {
                 $_liImgTmp  = null;
                 $fileStream = $this->openMediaStream($image_path, $_liImgTmp);
@@ -418,14 +423,13 @@ class LinkedinAPI
                 return json_encode(["error" => "Image upload failed.", "details" => $e->getMessage()]);
             }
 
-            // Prepare post request.
             $url = "https://api.linkedin.com/v2/ugcPosts?oauth2_access_token=" . $accessToken;
             $request = [
                 "author"         => $this->type . $person_id,
                 "lifecycleState" => "PUBLISHED",
                 "specificContent" => [
                     "com.linkedin.ugc.ShareContent" => [
-                        "shareCommentary"   => [ "text" => $message ],
+                        "shareCommentary"    => [ "text" => $message ],
                         "shareMediaCategory" => "IMAGE",
                         "media" => [[
                             "status"      => "READY",
@@ -443,7 +447,14 @@ class LinkedinAPI
                 'headers' => ['Content-Type' => 'application/json'],
                 'body'    => json_encode($request)
             ];
-            return $this->sendRequest('POST', $url, $options);
+
+            $response = $this->sendRequest('POST', $url, $options);
+
+            $responseData = is_string($response) ? json_decode($response, true) : (array)$response;
+            $this->postLinkedInFirstComment($accessToken, $person_id, $responseData['id'] ?? null, $first_comment);
+
+            return $response;
+
         } else {
             return $prepareResponse;
         }
@@ -459,11 +470,10 @@ class LinkedinAPI
      * @param string $visibility  Post visibility (default: "PUBLIC").
      * @return mixed The response from LinkedIn.
      */
-    public function linkedInMultiplePhotosPost($accessToken, $person_id, $message, array $images, $visibility = "PUBLIC")
+    public function linkedInMultiplePhotosPost($accessToken, $person_id, $message, array $images, $visibility = "PUBLIC", $first_comment = "")
     {
         $media = [];
         foreach ($images as $key => $image) {
-            // Register upload for each image.
             $prepareUrl = "https://api.linkedin.com/v2/assets?action=registerUpload&oauth2_access_token=" . $accessToken;
             $prepareRequest = [
                 "registerUploadRequest" => [
@@ -483,16 +493,12 @@ class LinkedinAPI
             ];
             $prepareResponse  = $this->sendRequest('POST', $prepareUrl, $options);
             $prepareData = json_decode($prepareResponse);
-
             if (!isset($prepareData->message)) {
                 $uploadURL = $prepareData->value->uploadMechanism
                     ->{"com.linkedin.digitalmedia.uploading.MediaUploadHttpRequest"}
                     ->uploadUrl;
                 $asset_id = $prepareData->value->asset;
-
-                // Save asset_id in image array for debugging if needed.
                 $images[$key]['asset_id'] = $asset_id;
-                // Upload the file via PUT.
                 try {
                     $_liMulTmp  = null;
                     $fileStream = $this->openMediaStream($image['image_path'], $_liMulTmp);
@@ -505,7 +511,6 @@ class LinkedinAPI
                 } catch (RequestException $e) {
                     return json_encode(["error" => "Image upload failed.", "details" => $e->getMessage()]);
                 }
-                // Prepare media data.
                 $media[$key]["status"] = "READY";
                 $media[$key]["description"]["text"] = substr($image["desc"], 0, 200);
                 $media[$key]["media"] = $asset_id;
@@ -514,16 +519,17 @@ class LinkedinAPI
                 return $prepareResponse;
             }
         }
-        // Finalize post with all image media.
+
+        // Publish the post
         $url = "https://api.linkedin.com/v2/ugcPosts?oauth2_access_token=" . $accessToken;
         $request = [
             "author"         => $this->type . $person_id,
             "lifecycleState" => "PUBLISHED",
             "specificContent" => [
                 "com.linkedin.ugc.ShareContent" => [
-                    "shareCommentary"   => [ "text" => $message ],
+                    "shareCommentary"    => [ "text" => $message ],
                     "shareMediaCategory" => "IMAGE",
-                    "media"             => array_values($media)
+                    "media"              => array_values($media)
                 ]
             ],
             "visibility" => [
@@ -534,7 +540,12 @@ class LinkedinAPI
             'headers' => ['Content-Type' => 'application/json'],
             'body'    => json_encode($request)
         ];
-        return $this->sendRequest('POST', $url, $options);
+        $response = $this->sendRequest('POST', $url, $options);
+        // Post first comment if provided
+        $responseData = is_string($response) ? json_decode($response, true) : (array)$response;
+        $this->postLinkedInFirstComment($accessToken, $person_id, $responseData['id'] ?? null, $first_comment);
+
+        return $response;
     }
 
     /**
@@ -718,5 +729,17 @@ public function linkedInPostDetailGet($accessToken, $postUrn)
         return false;
     }
 
+    private function postLinkedInFirstComment($accessToken, $person_id, $postUrn, $first_comment)
+    {
+        if (empty($first_comment) || empty($postUrn)) return;
+
+        LinkedInFirstCommentJob::dispatch(
+            $accessToken,
+            $person_id,
+            $this->type,
+            $postUrn,
+            $first_comment
+        )->delay(now()->addSeconds(5)); // small delay before job starts
+    }
 
 }
