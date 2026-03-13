@@ -40,7 +40,7 @@ if($post){
         </div>
         @endcan
 
-        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-500 mb-0" action="{{ url_app("publishing/save") }}" id="compose-editor" data-redirect="{{ module_url("calendar") }}" data-call-success="AppPubishing.showMediaLimitAlert(result);">
+        <form class="compose-editor d-flex flex-column flex-fill border-start border-end actionForm bg-white max-w-600 min-w-500 mb-0" action="{{ url_app("publishing/save") }}" id="compose-editor" data-redirect="{{ module_url("calendar") }}">
 
             <div class="d-flex flex-column flex-column-fluid overflow-y-auto py-2">
                 <div class="max-w-750 wp-100 mx-auto p-3">
@@ -713,7 +713,7 @@ if($post){
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('No, Cancel') }}</button>
-                <a href="{{ url_app("publishing/save?confirm=true") }}" class="btn btn-dark actionMultiItem" data-form=".compose-editor" data-call-before="Main.closeModal('confirmPostModal');" data-call-success="AppPubishing.showMediaLimitAlert(result);" data-redirect="{{ module_url('calendar') }}" >{{ __("Yes, I'm sure") }}</a>
+                <a href="{{ url_app("publishing/save?confirm=true") }}" class="btn btn-dark actionMultiItem" data-form=".compose-editor" data-call-before="Main.closeModal('confirmPostModal');"  data-redirect="{{ module_url('calendar') }}" >{{ __("Yes, I'm sure") }}</a>
             </div>
         </div>
     </div>

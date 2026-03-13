@@ -177,52 +177,36 @@ class PinterestAPI
      */
     public function sharePin($accessToken, $boardId, $title, $description, $link, $medias, $coverImageUrl = null)
     {
-        $endpoint = $this->baseApiUrl . "/pins";
-        $countImg = 0;
-        $imgItems = [];
-        $checkType = "";
+        $endpoint   = $this->baseApiUrl . "/pins";
         $firstMedia = $this->resolveMediaUrl((string)($medias[0] ?? ''));
 
-        if($this->mediaIsVideo($firstMedia)){
+        if ($this->mediaIsVideo($firstMedia)) {
             return $this->sharePinVideo($accessToken, $boardId, $title, $description, $link, $firstMedia, $coverImageUrl);
-        }else{
-            foreach ($medias as $key => $media) {
-                $media = $this->resolveMediaUrl((string)$media);
-                if ($this->mediaIsImage($media)) {
-                    $countImg++;
+        }
 
-                    $imgItem = [
-                        "description" => $description,
-                        "url" => $media,
-                    ];
+        // Pinterest multiple_image_urls: max 5 items.
+        // Send ALL images as-is using their original stored URLs — Pinterest fetches
+        // them directly from the internet. Do NOT generate padded/temp URLs.
+        // Pinterest handles mixed ratios by cropping to the first image's ratio.
+        $medias = array_slice((array)$medias, 0, 5);
 
-                    if($title != ""){
-                        $imgItem['title'] = $title;
-                    }
+        $imgItems = [];
+        foreach ($medias as $media) {
+            $media = $this->resolveMediaUrl((string)$media);
+            if (!$this->mediaIsImage($media)) continue;
 
-                    if($link != "" && filter_var($link, FILTER_VALIDATE_URL)){
-                        $imgItem['link'] = $link;
-                    }
+            $imgItem = ['description' => $description, 'url' => $media];
+            if ($title !== '')                                            $imgItem['title'] = $title;
+            if ($link !== '' && filter_var($link, FILTER_VALIDATE_URL))  $imgItem['link']  = $link;
+            $imgItems[] = $imgItem;
+        }
 
-                    $imgItems[] = $imgItem;
-                }
-            }
+        $countImg = count($imgItems);
 
-            if($countImg > 2){
-                $params = [
-                    "media_source" => [
-                        "source_type" => "multiple_image_urls",
-                        "items"         => $imgItems
-                    ]
-                ];
-            }else{
-                $params = [
-                    "media_source" => [
-                        "source_type" => "image_url",
-                        "url"         => $firstMedia
-                    ]
-                ];
-            }
+        if ($countImg > 2) {
+            $params = ['media_source' => ['source_type' => 'multiple_image_urls', 'items' => $imgItems]];
+        } else {
+            $params = ['media_source' => ['source_type' => 'image_url', 'url' => $firstMedia]];
         }
 
         $params['board_id'] = $boardId;

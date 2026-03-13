@@ -244,6 +244,9 @@ class Post extends Facade
      */
     protected static function handleMultiMediaPost($medias, $caption, $comment, $post)
     {
+        // X API hard limit: maximum 4 media_ids per tweet.
+        $medias = array_slice((array)$medias, 0, 4);
+
         $mediaIds = [];
         foreach ($medias as $media) {
             $mediaInput = self::resolveMediaUrl((string)$media);

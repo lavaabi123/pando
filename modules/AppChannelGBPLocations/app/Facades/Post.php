@@ -120,6 +120,8 @@ class Post extends Facade
         $mediaPath = '';
 
         if(!empty($medias)){
+            // Google Business Profile localPosts API supports exactly 1 photo per post.
+            // Only the first image is used — GBP does not support multi-image posts.
             $media = self::resolveMediaUrl((string)($medias[0] ?? ''));
             if (self::mediaIsImage($media)) {
                 $mediaPath = $media;

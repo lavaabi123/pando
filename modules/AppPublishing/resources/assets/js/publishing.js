@@ -598,8 +598,12 @@ var AppPubishing = new (function ()
             var origError   = options.error;
             var origComplete = options.complete;
 
+            // Flag to track whether we've handled this response ourselves
+            var _pandoHandled = false;
+
             // Replace success with our interceptor
             options.success = function(data, textStatus, jqXHR) {
+                _pandoHandled = true;
                 AppPubishing._handlePublishResponse(data, origSuccess, origError, origComplete, options);
             };
 
@@ -622,8 +626,18 @@ var AppPubishing = new (function ()
                 // Do NOT call origError — we don't want Main.js to also show a toast
             };
 
-            // Suppress complete callback to prevent any redirect/toast in Main.js
-            options.complete = null;
+            // Wrap complete: when we've handled the response ourselves, only allow
+            // Main.js cleanup to run (button re-enable, spinner hide).
+            // We block it entirely for non-publishing requests (origComplete = null there).
+            if (origComplete) {
+                options.complete = function(jqXHR, textStatus) {
+                    if (_pandoHandled) {
+                        // Suppress Main.js complete — cleanup already done in _handlePublishResponse
+                    } else {
+                        origComplete(jqXHR, textStatus);
+                    }
+                };
+            }
         });
     },
 
@@ -637,33 +651,75 @@ var AppPubishing = new (function ()
         var $form = $('#compose-editor');
         var redirectUrl = $form.attr('data-redirect') || null;
 
-        // ── status:2 → validation errors, show confirm modal (let Main.js handle) ──
-        if (data && data.status == 2) {
+        // Replicate what Main.js does in its success callback:
+        //   Main.overplay(true)  → $('.loading').hide()
+        //   that.removeClass('disabled')  → the form loses disabled class
+        // We must do this ourselves since we suppress origSuccess.
+        $('.loading').hide();
+        $form.removeClass('disabled');
+
+        // Normalise data — Main.js may not set dataType:'json' so data could arrive
+        // as a raw JSON string instead of a parsed object. Parse it if needed.
+        if (typeof data === 'string') {
+            try { data = JSON.parse(data); } catch(e) { data = null; }
+        }
+
+        var status  = data ? parseInt(data.status, 10) : -1;
+        var message = (data && data.message) ? data.message : '';
+
+        // ── status:2 → pre-flight validation, show confirm modal (let Main.js handle) ──
+        if (status === 2) {
             if (origSuccess) origSuccess(data);
             return;
         }
 
-        // ── status:0 → publishing error ───────────────────────────────────────
-        if (!data || data.status == 0 || data.status === 0) {
-            var errMsg = (data && data.message) ? data.message : 'An unknown error occurred.';
+        // ── status:0 / unknown → validation or publish error ──────────────────
+        // Covers: validator failures ("Please select at least one media" etc.)
+        // AND real publish errors. Neither redirects — user stays to fix the issue
+        // UNLESS it's a publish error (accounts selected etc.) where redirect makes sense.
+        // We distinguish: if message is a short form-validation message (no '--' separator)
+        // → stay on page. If it contains '--' (platform--error) → redirect after close.
+        if (status !== 1) {
+            var isFormValidation = message && message.indexOf('--') === -1
+                                   && message.indexOf('profiles') === -1;
+
+            // Hide loader and re-enable submit buttons — Main.js normally does this
+            // inside its success callback which we suppress, so we do it manually.
+            $('.loading').hide();
+            $('.btnPostNow, .btnSchedulePost, .btnSaveDraft, .btnSaveApproval').prop('disabled', false).removeClass('disabled loading');
+            $('.compose-editor').removeData('submitted').removeData('loading');
+
             Swal.fire({
                 icon: 'error',
-                title: 'Publishing failed',
-                html: '<p class="mb-0 fs-14 text-start">' + errMsg + '</p>',
+                title: isFormValidation ? 'Please check your post' : 'Publishing failed',
+                html: '<p class="mb-0 fs-14 text-start">' + (message || 'An unknown error occurred.') + '</p>',
                 confirmButtonText: 'Close',
                 confirmButtonColor: '#dc3545',
                 allowOutsideClick: false,
+            }).then(function(){
+                // Only redirect for real publish errors, not form validation errors
+                if (!isFormValidation && redirectUrl) {
+                    window.location.href = redirectUrl;
+                }
             });
-            // Do NOT call origSuccess — suppress Main.js toast + redirect
             return;
         }
 
         // ── status:1 → success ────────────────────────────────────────────────
-        var limits = (data && Array.isArray(data.media_limits)) ? data.media_limits : [];
+        var limits = Array.isArray(data.media_limits) ? data.media_limits : [];
 
         if (limits.length === 0) {
-            // No limits to report — let Main.js handle normally (toast + redirect)
-            if (origSuccess) origSuccess(data);
+            // No limits — show simple success Swal then redirect
+            Swal.fire({
+                icon: 'success',
+                title: 'Published!',
+                html: '<p class="mb-0">' + message + '</p>',
+                confirmButtonText: 'OK, got it',
+                confirmButtonColor: '#198754',
+                allowOutsideClick: false,
+            }).then(function(){
+                if (redirectUrl) window.location.href = redirectUrl;
+            });
             return;
         }
 
@@ -678,7 +734,7 @@ var AppPubishing = new (function ()
         Swal.fire({
             icon: 'success',
             title: 'Published!',
-            html: '<p class="mb-2">' + (data.message || '') + '</p>' +
+            html: '<p class="mb-2">' + message + '</p>' +
                   '<div class="alert alert-warning border-warning-300 text-start p-3 mt-2 mb-0">' +
                       '<p class="fw-600 mb-1 fs-13">' +
                           '<i class="fa-solid fa-triangle-exclamation me-1"></i>' +

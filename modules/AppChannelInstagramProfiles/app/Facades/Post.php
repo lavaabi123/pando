@@ -99,22 +99,90 @@ class Post extends Facade
         return self::publishPost($upload_response, $endpoint, $comment, $post, $media_type === "STORIES" ? "stories" : "p");
     }
 
+
+
     protected static function handleCarouselPost($medias, $upload_endpoint, $endpoint, $caption, $comment, $post)
     {
-        $media_ids = [];
+        // Instagram carousel rules (Graph API):
+        //   - Max 10 items
+        //   - Valid item ratio range: 0.8 (4:5) to 1.91:1
+        //   - Items CAN have different ratios — Instagram crops each item to match
+        //     the first item's ratio automatically. Do NOT filter by matching ratio.
+        //   - Carousel item upload params: image_url + is_carousel_item=true ONLY
+        //     (no media_type, no caption on items — caption goes on container only)
+        $medias = array_slice((array)$medias, 0, 10);
+
+        // ── Filter: only skip images with ratio completely outside allowed range ──
+        // 0.75–1.95 gives a small tolerance around Instagram's 0.8–1.91 limit.
+        // Images within this range are uploaded as-is; Instagram handles any
+        // ratio differences between items automatically.
+        $IG_MIN = 0.75;
+        $IG_MAX = 1.95;
+
+        $validMedias = [];
         foreach ($medias as $media) {
-            // Carousel items do not support custom thumbnails — ignore $customThumb here
-            $upload_params   = self::getMediaUploadParams(self::resolveMediaUrl((string)$media), $caption, self::mediaIsImage(self::resolveMediaUrl((string)$media)) ? "IMAGE" : "VIDEO", $post, true);
-            $upload_response = self::$fb->post($upload_endpoint, $upload_params, $post->account->token)->getDecodedBody();
-            $media_ids[]     = $upload_response['id'];
+            $url = self::resolveMediaUrl((string)$media);
+
+            if (self::mediaIsVideo($url)) {
+                $validMedias[] = $url;
+                continue;
+            }
+
+            // Check ratio only to catch truly unusable images (banners, panoramas etc.)
+            $local = self::urlToLocalPath($url);
+            $info  = ($local && file_exists($local)) ? @getimagesize($local) : null;
+            $w = $info[0] ?? 0;
+            $h = $info[1] ?? 0;
+
+            if ($w > 0 && $h > 0) {
+                $ratio = $w / $h;
+                if ($ratio < $IG_MIN || $ratio > $IG_MAX) {
+                    \Log::warning("Instagram carousel: skipping image outside allowed ratio range", [
+                        "url" => $url, "w" => $w, "h" => $h, "ratio" => round($ratio, 3),
+                    ]);
+                    continue; // truly out-of-range (e.g. panoramic banner 6:1)
+                }
+            }
+            // If dimensions unreadable → include anyway, let Instagram decide
+
+            $validMedias[] = $url;
         }
 
-        $upload_params = [
-            'media_type' => 'CAROUSEL',
-            'children'   => $media_ids,
-            'caption'    => $caption,
+        if (empty($validMedias)) {
+            throw new \Exception(__("Instagram: none of your images have a supported aspect ratio (0.8–1.91). Please use images with standard dimensions."));
+        }
+
+        // If only 1 valid item remains, post as single
+        if (count($validMedias) === 1) {
+            $single     = reset($validMedias);
+            $mediaType  = self::mediaIsImage($single) ? "IMAGE" : "REELS";
+            $uploadParams   = self::getMediaUploadParams($single, $caption, $mediaType, $post, false);
+            $uploadResponse = self::$fb->post($upload_endpoint, $uploadParams, $post->account->token)->getDecodedBody();
+            return self::publishPost($uploadResponse, $endpoint, $comment, $post, "p");
+        }
+
+        // ── Upload each carousel item (image_url + is_carousel_item only) ──────
+        $media_ids = [];
+        foreach ($validMedias as $mediaUrl) {
+            $mediaType       = self::mediaIsImage($mediaUrl) ? "IMAGE" : "VIDEO";
+            $upload_params   = self::getMediaUploadParams($mediaUrl, $caption, $mediaType, $post, true);
+            $upload_response = self::$fb->post($upload_endpoint, $upload_params, $post->account->token)->getDecodedBody();
+            if (!empty($upload_response["id"])) {
+                $media_ids[] = $upload_response["id"];
+            }
+        }
+
+        if (empty($media_ids)) {
+            throw new \Exception(__("Instagram carousel: all media uploads failed."));
+        }
+
+        // ── Create carousel container + publish ───────────────────────────────
+        $container_params = [
+            "media_type" => "CAROUSEL",
+            "children"   => $media_ids,
+            "caption"    => $caption,
         ];
-        $upload_response = self::$fb->post($upload_endpoint, $upload_params, $post->account->token)->getDecodedBody();
+        $upload_response = self::$fb->post($upload_endpoint, $container_params, $post->account->token)->getDecodedBody();
         return self::publishPost($upload_response, $endpoint, $comment, $post, "p");
     }
 
@@ -126,25 +194,33 @@ class Post extends Facade
         }
 
         if (self::mediaIsImage($media)) {
+            // Instagram carousel item rules (Graph API):
+            //   - image_url:        REQUIRED
+            //   - is_carousel_item: REQUIRED (true)
+            //   - media_type:       MUST NOT be sent for image items
+            //   - caption:          MUST NOT be sent on items (only on the container)
             $params = [
-                'media_type' => $media_type,
-                'image_url'  => self::resolveMediaUrl((string)watermark($media, $post->account->team_id, $post->account->id)),
-                'caption'    => $caption,
+                'image_url' => self::resolveMediaUrl((string)watermark($media, $post->account->team_id, $post->account->id)),
             ];
+            if (!$is_carousel_item) {
+                $params['media_type'] = $media_type;
+                $params['caption']    = $caption;
+            }
         } else {
+            // Video: always needs media_type; caption only on non-carousel
             $params = [
                 'media_type' => $media_type,
-                'video_url'  => $media,  // already a full URL from resolveMediaUrl()
-                'caption'    => $caption,
+                'video_url'  => $media,
             ];
+            if (!$is_carousel_item) {
+                $params['caption'] = $caption;
+            }
 
-            // ─── ADD custom thumbnail for video / reels ───────────────────────
             $data        = json_decode($post->data, false);
             $customThumb = $data->custom_thumbnail ?? null;
             if ($customThumb && !$is_carousel_item) {
-                $params['cover_url'] = self::resolveMediaUrl((string)$customThumb); // must be full public URL
+                $params['cover_url'] = self::resolveMediaUrl((string)$customThumb);
             }
-            // ──────────────────────────────────────────────────────────────────
         }
 
         if ($is_carousel_item) {

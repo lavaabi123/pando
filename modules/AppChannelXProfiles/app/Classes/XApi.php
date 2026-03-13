@@ -539,8 +539,8 @@ class XApi
                 CURLOPT_SSL_VERIFYHOST => 0,
                 CURLOPT_SSL_VERIFYPEER => 0,
             ]);
+            $raw       = curl_exec($curl);
             $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-            $raw    = curl_exec($curl);
             curl_close($curl);
             \Log::error('X STATUS poll', ['http_code' => $http_code, 'response' => $raw]);
             $result = json_decode($raw);

@@ -20,29 +20,7 @@
                 
                 <div class="card item overflow-hidden border-bottom-0">
 
-                    {{-- Status Ribbon --}}
-                    @if($post->status == 1)
-                        <div class="ribbon ribbon-triangle ribbon-top-start border-primary rounded">
-                            <div class="ribbon-icon mn-t-22 mn-l-22">
-                                <i class="fs-20 fas fa-circle-notch fa-spin fs-2 text-white"></i>
-                            </div>
-                        </div>
-                        <div class="border-primary border-top-dashed border-1"></div>
-                    @elseif($post->status == 3)
-                        <div class="ribbon ribbon-triangle ribbon-top-start border-success rounded">
-                            <div class="ribbon-icon mn-t-22 mn-l-22">
-                                <i class="fs-20 fad fa-check-double fs-2 text-white"></i>
-                            </div>
-                        </div>
-                        <div class="border-success border-top-dashed border-1"></div>
-                    @elseif($post->status == 4)
-                        <div class="ribbon ribbon-triangle ribbon-top-start border-danger rounded">
-                            <div class="ribbon-icon mn-t-22 mn-l-22">
-                                <i class="fs-20 fad fa-exclamation-circle fs-2 text-white"></i>
-                            </div>
-                        </div>
-                        <div class="border-danger border-top-dashed border-1"></div>
-                    @endif
+                    
                     
                     <div class="card-header p-3 border-0">
                         
@@ -83,7 +61,7 @@
                                 {!! file_get_contents(public_path('img/delete.svg')) !!}
                             </a>
                             
-                            @if($post->status == 3)
+                            @if($post->status == 4)
                                 <div class="ml-auto ms-3">
                                     <div class="sp-menu-dropdown dropdown dropdown-hide-arrow" data-dropdown-spacing="0">
                                         <a class="dropdown-toggle text-gray-800" style="font-size:25px;" href="javascript:void(0);" data-bs-toggle="dropdown">
@@ -215,12 +193,17 @@
 
                     </div>
 
-                    @if($post->status == 3)
+					@if($post->status == 1)
                         @php
                             $resultData = json_decode($post->result);
                         @endphp
-                        <div class="card-footer bg-light-success text-success py-2 px-3 d-flex justify-content-between">
-                            <span class="me-2 fs-12">{{ __("Post Published") }}</span>
+                        <div class="card-footer bg-light-warning text-warning py-2 px-3 d-flex justify-content-between">
+							<div class="ribbon ribbon-triangle ribbon-top-start border-warning rounded">
+								<div class="ribbon-icon mn-t-22 mn-l-22">
+									<i class="fs-20 fad fa-exclamation-circle fs-2 text-white"></i>
+								</div>
+							</div>
+                            <span class="me-2 fs-12">{{ __("Draft") }}</span>
                         </div>
                     @endif
 					
@@ -229,15 +212,54 @@
                             $resultData = json_decode($post->result);
                         @endphp
                         <div class="card-footer bg-light-warning text-warning py-2 px-3 d-flex justify-content-between">
+							<div class="ribbon ribbon-triangle ribbon-top-start border-warning rounded">
+								<div class="ribbon-icon mn-t-22 mn-l-22">
+									<i class="fs-20 fad fa-exclamation-circle fs-2 text-white"></i>
+								</div>
+							</div>
                             <span class="me-2 fs-12">{{ __("Waiting for Approval") }}</span>
                         </div>
                     @endif
-
+					
+					@if($post->status == 3)
+                        @php
+                            $resultData = json_decode($post->result);
+                        @endphp
+                        <div class="card-footer bg-light-warning text-warning py-2 px-3 d-flex justify-content-between">
+							<div class="ribbon ribbon-triangle ribbon-top-start border-primary rounded">
+								<div class="ribbon-icon mn-t-22 mn-l-22">
+									<i class="fs-20 fas fa-circle-notch fa-spin fs-2 text-white"></i>
+								</div>
+							</div>
+                            <span class="me-2 fs-12">{{ __("Processing") }}</span>
+                        </div>
+                    @endif
+					
                     @if($post->status == 4)
+                        @php
+                            $resultData = json_decode($post->result);
+                        @endphp
+                        <div class="card-footer bg-light-success text-success py-2 px-3 d-flex justify-content-between">
+							<div class="ribbon ribbon-triangle ribbon-top-start border-success rounded">
+								<div class="ribbon-icon mn-t-22 mn-l-22">
+									<i class="fs-20 fad fa-check-double fs-2 text-white"></i>
+								</div>
+							</div>
+                            <span class="me-2 fs-12">{{ __("Post Published") }}</span>
+                        </div>
+                    @endif
+					
+
+                    @if($post->status == 5)
                         @php
                             $error = json_decode($post->result);
                         @endphp
                         <div class="card-footer bg-light-danger text-danger py-2 px-3 fs-13">
+							<div class="ribbon ribbon-triangle ribbon-top-start border-danger rounded">
+								<div class="ribbon-icon mn-t-22 mn-l-22">
+									<i class="fs-20 fad fa-exclamation-circle fs-2 text-white"></i>
+								</div>
+							</div>
                             {{ $error->message ?? 'Error occurred' }}
                         </div>
                     @endif
