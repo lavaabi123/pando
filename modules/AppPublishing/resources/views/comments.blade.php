@@ -1,4 +1,3 @@
-
 <!-- Comment Modal -->
 <div class="modal fade" id="commentModal" tabindex="-1" aria-labelledby="commentModalLabel" aria-hidden="true">
 <div class="modal-dialog modal-dialog-centered modal-md">
@@ -61,7 +60,8 @@ function delete_note_approval(id){
 		},
 		success: function(res) {
 			$(".loading").hide();
-			$('#commentModal').modal('hide');	
+			$('#commentModal').modal('hide');
+				if(typeof Main !== 'undefined') Main.ajaxScroll(true);	
 			iziToast.success({
 				icon: 'fad fa-bells',
 				title: '',
@@ -93,7 +93,8 @@ function edit_note_approval(){
 			},
 			success: function(res) {
 				$(".loading").hide();
-				$('#commentModal').modal('hide');				
+				$('#commentModal').modal('hide');
+				if(typeof Main !== 'undefined') Main.ajaxScroll(true);				
 				$("#approval_note_text").text('');
 				$("#approval_note_text").val('');
 				iziToast.success({
@@ -128,6 +129,7 @@ function add_note_approval(){
 			success: function(res) {
 				$(".loading").hide();
 				$('#commentModal').modal('hide');
+				if(typeof Main !== 'undefined') Main.ajaxScroll(true);
 				iziToast.success({
 					icon: 'fad fa-bells',
 					title: '',

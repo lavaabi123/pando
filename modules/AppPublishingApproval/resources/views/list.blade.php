@@ -70,7 +70,7 @@
             </div>
             <div class="card-body p-3 pt-2">
                 <div class="card-content">
-                    <p class="lastEdit text-primary fs-12 mb-0">Last Edited: {{ $value->updated_at ? $value->updated_at->format('M d, Y h:i A') : 'N/A' }}</p>
+                    <p class="lastEdit text-primary fs-12 mb-0">Last Edited: {{ $value->updated_at ? \Carbon\Carbon::parse($value->updated_at)->format('M d, Y h:i A') : 'N/A' }}</p>
                     <div class="d-flex mt-3">
                         <div class="flex-grow-1">
                             <p class="card-text mb-3 fs-13">{{ $caption ?: 'No caption.' }}</p>
@@ -145,18 +145,18 @@
                     </div>
                     <div class="d-flex align-items-center gap-8">
                         <div class="text-primary">{!! file_get_contents(public_path('img/account.svg')) !!}</div>
-                        <a href="#" class="btn btn-secondary btn-sm">Assign to</a>
-                        <p class="assign_name mb-0 fw-6 text-gray-500 fs-12">{{ $value->assigned_user_name ?? 'N/A' }}</p>
+                        <a href="#" class="btn btn-secondary btn-sm">Created by</a>
+                        <p class="assign_name mb-0 fw-6 text-gray-500 fs-12">{{ $value->creator_name ?? 'N/A' }}</p>
                     </div>
                     <div class="d-flex align-items-center gap-8">
                         <div class="text-primary">{!! file_get_contents(public_path('img/msg.svg')) !!}</div>
-                        <a href="javascript:void(0);" class="btn btn-secondary btn-sm open-comment-modal" data-post-id="{{ $value->id_secure }}">
+                        <a href="{{ url_app('publishing/comments') }}" class="btn btn-secondary btn-sm actionItem" data-id="{{ $value->grouping_data }}" data-popup="commentModal">
                             Comment @if($commentCount > 0)<span class="badge bg-primary ms-1">{{ $commentCount }}</span>@endif
                         </a>
                         @if($commentCount > 0)
                             @php $lastComment = $comments->last(); @endphp
                             <p class="s_comment mb-0 fw-6 text-gray-500 fs-12">
-                                {{ $lastComment->user_name ?? 'User' }} - {{ Str::limit($lastComment->comment, 30) }} ({{ $lastComment->created_at ? $lastComment->created_at->format('M d, Y h:i A') : '' }})
+                                {{ $lastComment->user_name ?? 'User' }} - {{ Str::limit($lastComment->comment, 30) }} ({{ $lastComment->created_at ? \Carbon\Carbon::parse($lastComment->created_at)->format('M d, Y h:i A') : '' }})
                             </p>
                         @else
                             <p class="s_comment mb-0 fw-6 text-gray-500 fs-12">No comments yet</p>

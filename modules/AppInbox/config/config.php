@@ -51,7 +51,7 @@ return [
     // Social network colors
     'network_colors' => [
         'facebook' => '#0074fa',
-        'instagram' => 'radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%)',
+        'instagram' => '#E4405F',
         'twitter' => '#000',
         'linkedin' => '#0077b5',
         'pinterest' => '#cd2029',

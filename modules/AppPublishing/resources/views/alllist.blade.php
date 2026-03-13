@@ -62,9 +62,9 @@
                             </a>
                             
                             @if($post->status == 4)
-                                <div class="ml-auto ms-3">
+                                <div class="ml-auto ms-2">
                                     <div class="sp-menu-dropdown dropdown dropdown-hide-arrow" data-dropdown-spacing="0">
-                                        <a class="dropdown-toggle text-gray-800" style="font-size:25px;" href="javascript:void(0);" data-bs-toggle="dropdown">
+                                        <a class="dropdown-toggle text-gray-500" style="font-size:20px;" href="javascript:void(0);" data-bs-toggle="dropdown">
                                             <i class="fal fa-ellipsis-v"></i>
                                         </a>
                                         <ul class="dropdown-menu py-2" data-dropdown-spacing="0">
@@ -103,15 +103,15 @@
 
                     <div class="card-body p-3 pt-0">
                         
-                        <div class="d-flex align-items-start gap-2">
+                        <div class="d-flex align-items-center gap-2">
                         
                             <div class="symbol symbol-40px me-1 flex-shrink-0">
                                 <input type="checkbox" value="{{ $post->id }}" name="approval_post_ids[]"/>
                             </div>
 
-                            <div class="d-flex align-items-start gap-3 w-100">
+                            <div class="d-flex align-items-center gap-3 w-100">
                             
-                                <div class="post-media-thumb flex-shrink-0">
+                                <div class="post-media-thumb border-2 flex-shrink-0 me-2">
 
 									@if($post->type == "media")
 										@if(!empty($data->medias))
@@ -165,7 +165,7 @@
                                     <p class="fs-13 mb-2">
                                         {!! nl2br(e($data->caption ?? '')) !!}
                                     </p>
-                                    <span class="text-muted fw-semibold d-block fs-13">
+                                    <span class="text-gray-500 fw-semibold d-block fs-13">
                                         <i class="fal fa-calendar-alt"></i> {{ date("h:i A", $post->time_post) }}
                                     </span>
                                 </div>
@@ -237,11 +237,11 @@
 
                     @if($post->status == 4)
                         <div class="card-footer p-0 overflow-hidden pando-footer-success">
-                            <div class="pando-footer-row pando-footer-row--success">
+                            <div class="pando-footer-row pando-footer-row--success w-100">
                                 <span class="pando-footer-icon pando-footer-icon--success">
                                     <i class="fad fa-check-double"></i>
                                 </span>
-                                <span class="pando-footer-text">
+                                <span class="pando-footer-text text-break">
                                     {{ __("Post Published") }}
                                     @if($_successCount > 0)
                                         <span class="pando-footer-badge pando-footer-badge--success">{{ $_successCount }} {{ $_successCount == 1 ? __('platform') : __('platforms') }}</span>
@@ -252,13 +252,13 @@
                     @endif
 
                     @if($post->status == 5)
-                        <div class="card-footer p-0 overflow-hidden pando-footer-partial">
+                        <div class="card-footer p-0 overflow-hidden pando-footer-partial flex-column">
                             @if($_successCount > 0)
-                                <div class="pando-footer-row pando-footer-row--success">
+                                <div class="pando-footer-row pando-footer-row--success w-100 align-items-center">
                                     <span class="pando-footer-icon pando-footer-icon--success">
                                         <i class="fad fa-check-double"></i>
                                     </span>
-                                    <span class="pando-footer-text">
+                                    <span class="pando-footer-text text-break">
                                         <strong>{{ $_successCount }} {{ $_successCount == 1 ? __('platform') : __('platforms') }}</strong> {{ __('published successfully') }}
                                     </span>
                                 </div>
@@ -266,21 +266,21 @@
                             @if($_failCount > 0)
                                 @foreach($_failMsgs as $_fm)
                                     @php [$_plat, $_rsn] = array_pad(explode('--', $_fm, 2), 2, 'Unknown error'); @endphp
-                                    <div class="pando-footer-row pando-footer-row--danger {{ !$loop->first ? 'pando-footer-row--border-top' : '' }}">
+                                    <div class="pando-footer-row pando-footer-row--danger w-100 align-items-center {{ !$loop->first ? 'pando-footer-row--border-top' : '' }}">
                                         <span class="pando-footer-icon pando-footer-icon--danger">
                                             <i class="fad fa-exclamation-circle"></i>
                                         </span>
-                                        <span class="pando-footer-text">
+                                        <span class="pando-footer-text text-break">
                                             <strong>{{ $_cleanPlatform($_plat) }}:</strong> {{ trim($_rsn) }}
                                         </span>
                                     </div>
                                 @endforeach
                             @else
-                                <div class="pando-footer-row pando-footer-row--danger">
+                                <div class="pando-footer-row pando-footer-row--danger w-100 align-items-center">
                                     <span class="pando-footer-icon pando-footer-icon--danger">
                                         <i class="fad fa-exclamation-circle"></i>
                                     </span>
-                                    <span class="pando-footer-text">{{ __('Publishing failed') }}</span>
+                                    <span class="pando-footer-text text-break">{{ __('Publishing failed') }}</span>
                                 </div>
                             @endif
                         </div>
@@ -538,6 +538,8 @@ function prepHrefzoom1(_this) {
 </div>
 <script>
 (function() {
+    // Move lightbox to <body> so position:fixed isn't trapped by overflow:auto ancestors
+    $('body').append($('#al-lightbox').detach());
     var $lb    = $('#al-lightbox');
     var $close = $('#al-lightbox-close');
 

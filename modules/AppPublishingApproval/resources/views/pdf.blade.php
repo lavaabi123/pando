@@ -2,6 +2,74 @@
 ini_set('memory_limit', '1024M');
 set_time_limit(300);
 
+// ── Emoji → <img> helper ─────────────────────────────────────────────────────
+if (!defined('EMOJI_CACHE_DIR')) {
+    define('EMOJI_CACHE_DIR', storage_path('app/public/emojis') . '/');
+}
+if (!function_exists('mb_ord')) {
+    function mb_ord($ch, $enc = 'UTF-8') {
+        $u = mb_convert_encoding($ch, 'UCS-4BE', $enc);
+        $b = unpack('N', $u); return $b ? $b[1] : null;
+    }
+}
+function hex_pad_e(string $hex): string {
+    return (strlen($hex) < 4) ? str_pad($hex, 4, '0', STR_PAD_LEFT) : $hex;
+}
+function http_fetch_emoji(string $url, int $timeout = 6): ?string {
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER=>true,CURLOPT_FOLLOWLOCATION=>true,
+            CURLOPT_CONNECTTIMEOUT=>$timeout,CURLOPT_TIMEOUT=>$timeout,
+            CURLOPT_SSL_VERIFYPEER=>false,CURLOPT_USERAGENT=>'EmojiFetcher/1.2']);
+        $data = curl_exec($ch);
+        $ok = ($data !== false) && (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE) < 300;
+        curl_close($ch);
+        if ($ok && strlen($data) > 100) return $data;
+    }
+    $ctx = stream_context_create(['http'=>['timeout'=>$timeout,'header'=>"User-Agent: EmojiFetcher/1.2\r\n"],'ssl'=>['verify_peer'=>false]]);
+    $data = @file_get_contents($url, false, $ctx);
+    return ($data !== false && strlen($data) > 100) ? $data : null;
+}
+function codepoint_png_data_uri_e(string $hex): ?string {
+    @mkdir(EMOJI_CACHE_DIR, 0755, true);
+    $cache = EMOJI_CACHE_DIR . strtolower($hex) . '.png';
+    if (is_file($cache)) { $b = @file_get_contents($cache); if ($b && strlen($b)>100) return 'data:image/png;base64,'.base64_encode($b); }
+    $parts = array_map('hex_pad_e', explode('-', strtolower($hex)));
+    $noto  = 'emoji_u'.implode('_',$parts);
+    $notoNv= preg_replace('/_+/','_',trim(preg_replace('/(^|_)fe0f(?=_|$)/','',$noto),'_'));
+    $tw    = preg_replace('/-+/','-',trim(preg_replace('/(^|-)?fe0f(?=-|$)/','',strtolower($hex)),'-'));
+    foreach ([
+        "https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/png/128/{$noto}.png",
+        "https://cdn.jsdelivr.net/gh/googlefonts/noto-emoji@main/png/128/{$notoNv}.png",
+        "https://cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/{$tw}.png",
+        "https://cdn.jsdelivr.net/gh/twitter/twemoji@latest/assets/72x72/{$tw}.png",
+    ] as $url) {
+        $bytes = http_fetch_emoji($url);
+        if ($bytes) { @file_put_contents($cache,$bytes); return 'data:image/png;base64,'.base64_encode($bytes); }
+    }
+    return null;
+}
+function is_emoji_cp(int $cp): bool {
+    return ($cp>=0x1F300&&$cp<=0x1FAFF)||($cp>=0x2600&&$cp<=0x27BF)
+        ||($cp>=0x1F000&&$cp<=0x1F02F)||($cp>=0x2300&&$cp<=0x23FF)
+        ||($cp>=0x1F1E6&&$cp<=0x1F1FF);
+}
+function emoji_to_img_l(string $text): string {
+    $out=''; $len=mb_strlen($text,'UTF-8');
+    for($i=0;$i<$len;$i++){
+        $ch=mb_substr($text,$i,1,'UTF-8'); $cp=mb_ord($ch);
+        if($cp===0xFE0F||$cp===0x200D){$out.=$ch;continue;}
+        if($cp!==null&&is_emoji_cp($cp)){
+            $hex=hex_pad_e(strtolower(dechex($cp)));
+            $src=codepoint_png_data_uri_e($hex)??($cp<0x10000?codepoint_png_data_uri_e($hex.'-fe0f'):null);
+            if($src){$out.='<img src="'.$src.'" alt="'.htmlspecialchars($ch,ENT_QUOTES,'UTF-8').'" style="width:14px;height:14px;vertical-align:middle;">';continue;}
+        }
+        $out.=$ch;
+    }
+    return $out;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
 function getResizedBase64Image($url, $maxWidth = 300, &$cache = []) {
     if (isset($cache[$url])) return $cache[$url];
     $data = @file_get_contents($url);
@@ -156,37 +224,53 @@ foreach ($result as $key => $value):
             </td>
             <td style="width:35%;vertical-align:middle;text-align:right;">
                 <?php
-$avatarPath = null;
-
+// Only render avatar if it exists and loads — try local path first, HTTP fallback
 if (!empty($value->avatar)) {
-    $path = str_starts_with($value->avatar, 'http') 
-        ? $value->avatar 
-        : url('storage/' . ltrim($value->avatar, '/'));
-    $avatarData = @file_get_contents($path);
-} else {
     $avatarData = false;
-}
-
-// Fallback to default image
-if (!$avatarData) {
-    $defaultPath = public_path('img/default.png');
-    if (!file_exists($defaultPath)) {
-        $defaultPath = public_path('assets/img/default.jpg');
+    $avatarExt  = 'jpeg';
+    if (str_starts_with($value->avatar, 'http')) {
+        // Already a full URL
+        $avatarData = @file_get_contents($value->avatar);
+        $avatarExt  = pathinfo($value->avatar, PATHINFO_EXTENSION) ?: 'jpeg';
+    } else {
+        // Try local storage path first (avoids HTTP fetch being blocked)
+        $localAvatar = storage_path('app/public/' . ltrim($value->avatar, '/'));
+        if (file_exists($localAvatar)) {
+            $avatarData = file_get_contents($localAvatar);
+            $avatarExt  = pathinfo($localAvatar, PATHINFO_EXTENSION) ?: 'jpeg';
+        } else {
+            // Fallback to HTTP URL
+            $httpPath   = url('storage/' . ltrim($value->avatar, '/'));
+            $avatarData = @file_get_contents($httpPath);
+            $avatarExt  = pathinfo($httpPath, PATHINFO_EXTENSION) ?: 'jpeg';
+        }
     }
-    $avatarData = file_exists($defaultPath) ? file_get_contents($defaultPath) : null;
-    $type = 'png';
-} else {
-    $type = pathinfo($path, PATHINFO_EXTENSION) ?: 'jpeg';
-}
-if ($avatarData) {
-    $base64 = 'data:image/' . $type . ';base64,' . base64_encode($avatarData);
-    echo '<img src="' . roundedBase64Image($base64, 40) . '" width="20" height="20" style="vertical-align:middle;" />';
+    if ($avatarData) {
+        $base64 = 'data:image/' . $avatarExt . ';base64,' . base64_encode($avatarData);
+        $avatarImg = '<img src="' . roundedBase64Image($base64, 40) . '" width="20" height="20" style="vertical-align:middle;" />';
+    } else {
+        $avatarImg = '';
+    }
 }
 
-$network = strtolower(str_replace('_', '', $value->social_network ?? ''));
-if (isset($socialIcons[$network])) {
-    echo '<img src="' . $socialIcons[$network] . '" style="width:10px;height:10px;position:absolute;"/>';
+$network    = strtolower($value->social_network ?? '');
+$networkKey = $network;
+if (strpos($networkKey, 'google_business') !== false) $networkKey = 'google_business';
+if ($networkKey === 'x') $networkKey = 'twitter';
+$socialIconImg = isset($socialIcons[$networkKey])
+    ? '<img src="' . $socialIcons[$networkKey] . '" width="10" height="10" style="position:absolute;bottom:0;right:0;"/>'
+    : '';
+
+// Wrap avatar + social badge in a relative-positioned span so badge sits at bottom-right of avatar
+if (!empty($avatarImg)) {
+    echo '<span style="position:relative;display:inline-block;width:20px;height:20px;vertical-align:middle;">'
+        . $avatarImg
+        . $socialIconImg
+        . '</span>';
+} elseif (!empty($socialIconImg)) {
+    echo $socialIconImg;
 }
+
 if (($value->social_networks_count ?? 0) > 1) {
     echo '<span style="vertical-align:middle;">&nbsp;and ' . ($value->social_networks_count - 1) . ' more</span>';
 }
@@ -208,7 +292,7 @@ if (($value->social_networks_count ?? 0) > 1) {
                 if (!empty(trim($caption))):
                 ?>
                 <p style="padding:8px;font-size:11px;word-break:break-all;overflow-wrap:break-word;margin-top:10px">
-                    <?php echo forceBreakWords(nl2br(htmlspecialchars($caption)), 15); ?>
+                    <?php echo forceBreakWords(emoji_to_img_l(nl2br(htmlspecialchars($caption, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false))), 15); ?>
                 </p>
                 <?php endif; ?>
 
@@ -287,15 +371,45 @@ if (count($pics) === 0 && !empty($value->link_icon)) {
 	if (!empty($pics)) {
     $totalPics  = count($pics);
     $cellWidth  = 220;
-    $imgsPerRow = min($totalPics, 3);
-    $imgPx      = floor(($cellWidth - ($imgsPerRow * 8)) / $imgsPerRow);
 
-    // Dompdf works better with table layout than float
-    echo '<table width="100%" cellpadding="2" cellspacing="2"><tr>';
+    // Layout based on count:
+    // 1       → 1/row, cap height at 150px (portrait images)
+    // 2       → 2/row
+    // 3       → 3/row
+    // 4       → 2/row (2×2 grid)
+    // 5       → 3/row (2+3)
+    // 6+      → 3/row
+    if ($totalPics === 1) {
+        $imgsPerRow = 1;
+    } elseif ($totalPics === 4) {
+        $imgsPerRow = 2;
+    } else {
+        $imgsPerRow = min($totalPics, 3);
+    }
+
+    $imgPx = (int) floor(($cellWidth - ($imgsPerRow * 6)) / $imgsPerRow);
+
+    echo '<table width="100%" cellpadding="1" cellspacing="1"><tr>';
     foreach ($pics as $idx => $base64) {
         if ($idx > 0 && $idx % $imgsPerRow === 0) echo '</tr><tr>';
-        echo '<td style="text-align:center;">
-                <img src="' . $base64 . '" style="width:' . $imgPx . 'px; height:auto;">
+
+        // For single image only: cap height so tall portraits don't dominate
+        if ($totalPics === 1) {
+            $parts2 = explode(',', $base64, 2);
+            $imgRes = isset($parts2[1]) ? @imagecreatefromstring(base64_decode($parts2[1])) : false;
+            $imgH   = $imgRes ? imagesy($imgRes) : 0;
+            $imgW   = $imgRes ? imagesx($imgRes) : 0;
+            if ($imgRes) imagedestroy($imgRes);
+            // If portrait and taller than wide, cap at 150px height
+            $imgStyle = ($imgH > 150 && $imgH > $imgW)
+                ? 'height:150px;width:auto;'
+                : 'width:' . $imgPx . 'px;height:auto;';
+        } else {
+            $imgStyle = 'width:' . $imgPx . 'px;height:auto;';
+        }
+
+        echo '<td style="text-align:center;vertical-align:top;">
+                <img src="' . $base64 . '" style="' . $imgStyle . '">
               </td>';
     }
     echo '</tr></table>';
@@ -305,13 +419,9 @@ if (count($pics) === 0 && !empty($value->link_icon)) {
 ?>
             </td>
         </tr>
-        <tr>
-            <td style="font-size:11px;padding:6px 0 4px;">
-                <p style="font-weight:bold;font-size:10pt;margin:4px 0;">Post Schedule:</p>
-            </td>
-        </tr>
     </table>
 
+    <p style="font-weight:bold;font-size:10pt;margin:8px 0 4px;">Post Schedule:</p>
     <table style="border-spacing:0;background:#fff;font-size:9pt;border-collapse:collapse;width:100%;border:1pt solid #ccc;">
         <tr>
             <td style="text-align:center;padding:4pt 10pt;">

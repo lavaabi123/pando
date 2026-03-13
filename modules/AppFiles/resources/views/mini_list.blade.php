@@ -92,7 +92,7 @@
              data-thumbnails="{{ implode(',', array_map(fn($t) => Media::url($t), $thumbsArr)) }}"
         >
             <label class="d-flex flex-column flex-fill" for="{{ $value->id_secure }}">
-                <div class="position-absolute r-6 t-6 zIndex-3">
+                <div class="position-absolute r--1 t--1 zIndex-3">
                     <div class="form-check form-check-sm">
                         <input class="form-check-input" name="id[]" type="checkbox" value="{{ $value->file }}" id="file_{{ $value->id_secure }}">
                     </div>
@@ -109,14 +109,14 @@
                         @if(!empty($thumbsArr))
                             <img src="{{ Media::url($thumbsArr[0]) }}" class="position-absolute top-0 start-0 w-100 h-100 object-cover" alt="">
                             <div class="position-absolute d-flex align-items-center justify-content-center w-100 h-100" style="background:rgba(0,0,0,0.25);">
-                                <i class="fa-solid fa-circle-play fs-24 text-white"></i>
+                                <i class="fa-solid fa-circle-play fs-16 text-white"></i>
                             </div>
                         @else
                             <video class="position-absolute top-0 start-0 w-100 h-100 object-cover" muted playsinline preload="metadata">
                                 <source src="{{ Media::url($value->file) }}#t=1" type="video/mp4">
                             </video>
                             <div class="position-absolute d-flex align-items-center justify-content-center w-100 h-100" style="background:rgba(0,0,0,0.25);">
-                                <i class="fa-solid fa-circle-play fs-24 text-white"></i>
+                                <i class="fa-solid fa-circle-play fs-16 text-white"></i>
                             </div>
                         @endif
                     @elseif($value->detect != "image")
