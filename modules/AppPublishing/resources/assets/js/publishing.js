@@ -617,7 +617,7 @@ var AppPubishing = new (function ()
 
                 Swal.fire({
                     icon: 'error',
-                    title: 'Publishing failed',
+                    title: 'Failed',
                     html: '<p class="mb-0 fs-14 text-start">' + msg + '</p>',
                     confirmButtonText: 'Close',
                     confirmButtonColor: '#dc3545',
@@ -691,7 +691,7 @@ var AppPubishing = new (function ()
 
             Swal.fire({
                 icon: 'error',
-                title: isFormValidation ? 'Please check your post' : 'Publishing failed',
+                title: isFormValidation ? 'Please check your post' : 'Failed',
                 html: '<p class="mb-0 fs-14 text-start">' + (message || 'An unknown error occurred.') + '</p>',
                 confirmButtonText: 'Close',
                 confirmButtonColor: '#dc3545',
@@ -712,7 +712,7 @@ var AppPubishing = new (function ()
             // No limits — show simple success Swal then redirect
             Swal.fire({
                 icon: 'success',
-                title: 'Published!',
+                title: 'Success!',
                 html: '<p class="mb-0">' + message + '</p>',
                 confirmButtonText: 'OK, got it',
                 confirmButtonColor: '#198754',
@@ -733,7 +733,7 @@ var AppPubishing = new (function ()
 
         Swal.fire({
             icon: 'success',
-            title: 'Published!',
+            title: 'Success!',
             html: '<p class="mb-2">' + message + '</p>' +
                   '<div class="alert alert-warning border-warning-300 text-start p-3 mt-2 mb-0">' +
                       '<p class="fw-600 mb-1 fs-13">' +
@@ -750,6 +750,32 @@ var AppPubishing = new (function ()
                 window.location.href = redirectUrl;
             }
         });
+    },
+
+    /**
+     * Initialize owl carousel on .owl-carousel elements inside .schedule-list.
+     */
+    AppPubishing.initOwlCarousels = function() {
+        setTimeout(function() {
+            if (typeof $.fn.owlCarousel !== 'function') return;
+            $('.post-media-thumb .owl-carousel').each(function() {
+                var $owl = $(this);
+                if ($owl.hasClass('owl-loaded')) {
+                    $owl.trigger('destroy.owl.carousel');
+                    $owl.find('.owl-stage-outer').children().unwrap();
+                    $owl.removeClass('owl-center owl-loaded owl-text-select-on');
+                }
+                var itemCount = $owl.find('.item').length;
+                if (itemCount === 0) return;
+                $owl.owlCarousel({
+                    loop:  itemCount > 1,
+                    nav:   itemCount > 1,
+                    dots:  itemCount > 1,
+                    items: 1,
+                    responsive: { 0: {items:1}, 600: {items:1}, 1000: {items:1} }
+                });
+            });
+        }, 150);
     },
 
     AppPubishing.reloadCalendar = function(){
@@ -1254,24 +1280,8 @@ var AppPubishing = new (function ()
 					success: function(res) {
 						$('.schedule-list').html(res);
 						
-						// Initialize owl carousel if needed
-						if ($('.owl-carousel').length > 0) {
-							if ($('.owl-carousel').hasClass('owl-theme')) {
-								$('.owl-carousel').trigger('destroy.owl.carousel');
-								$('.owl-carousel').find('.owl-stage-outer').children().unwrap();
-								$('.owl-carousel').removeClass("owl-center owl-loaded owl-text-select-on");
-							}
-							
-							$(".owl-carousel").owlCarousel({
-								loop: true,
-								nav: true,
-								responsive: {
-									0: { items: 1 },
-									600: { items: 1 },
-									1000: { items: 1 }
-								}
-							});
-						}
+						// Initialize owl carousel — load library dynamically if not present
+						AppPubishing.initOwlCarousels();
 					},
 					error: function(xhr) {
 						$('.schedule-list').html('<div class="alert alert-danger">Error loading posts</div>');

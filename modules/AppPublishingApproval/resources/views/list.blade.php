@@ -77,20 +77,59 @@
                             <div class="d-flex gap-2 flex-wrap">
                             </div>
                         </div>
-                        <div class="size-80 ms-3 overflow-hidden b-r-10 d-flex justify-content-center align-items-center fs-30 text-primary bg-primary-100 border border-primary-200 img-wrap">
-                            @switch($type)
-                                @case('media')
-                                    <img src="{{ Media::url($img) }}" class="img-fluid rounded-3 shadow-sm"/>
-                                    @break
+                        @php
+                            $_isVideo = fn($f) => preg_match('/\.(mp4|mov|webm|avi|mkv)$/i', $f ?? '');
+                            $_total   = count($medias);
+                        @endphp
 
-                                @case('link')
-                                    <a href="{{ $link }}" target="_blank"><i class="fa-light fa-link"></i></a>
-                                    @break
-
-                                @default
-                                    <i class="fa-light fa-align-center"></i>
-                            @endswitch
-                        </div>
+                        @if($type === 'media' && $_total > 0)
+                            {{-- ── Media thumbnail: single or carousel ── --}}
+                            <div class="apm-wrap ms-3" style="width:80px;height:80px;flex-shrink:0;">
+                                @if($_total === 1)
+                                    @if($_isVideo($medias[0]))
+                                        <div class="apm-media-click" data-type="video" data-src="{{ Media::url($medias[0]) }}">
+                                            <video class="apm-media" muted playsinline preload="metadata">
+                                                <source src="{{ Media::url($medias[0]) }}" type="video/mp4">
+                                            </video>
+                                            <span class="apm-badge apm-badge--play-center"><i class="fa fa-play"></i></span>
+                                        </div>
+                                    @else
+                                        <div class="apm-media-click" data-type="image" data-src="{{ Media::url($medias[0]) }}">
+                                            <img class="apm-media" src="{{ Media::url($medias[0]) }}" alt="">
+                                        </div>
+                                    @endif
+                                @else
+                                    {{-- Multiple media — owl carousel --}}
+                                    <div class="owl-carousel apm-owl" data-total="{{ $_total }}">
+                                        @foreach($medias as $_file)
+                                            <div class="apm-slide">
+                                                @if($_isVideo($_file))
+                                                    <div class="apm-media-click" data-type="video" data-src="{{ Media::url($_file) }}">
+                                                        <video class="apm-media" muted playsinline preload="metadata">
+                                                            <source src="{{ Media::url($_file) }}" type="video/mp4">
+                                                        </video>
+                                                        <span class="apm-badge apm-badge--play-center"><i class="fa fa-play"></i></span>
+                                                    </div>
+                                                @else
+                                                    <div class="apm-media-click" data-type="image" data-src="{{ Media::url($_file) }}">
+                                                        <img class="apm-media" src="{{ Media::url($_file) }}" alt="">
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                    {{-- count badge removed --}}
+                                @endif
+                            </div>
+                        @elseif($type === 'link')
+                            <div class="apm-wrap ms-3 d-flex align-items-center justify-content-center fs-30 text-primary" style="width:80px;height:80px;flex-shrink:0;">
+                                <a href="{{ $link }}" target="_blank"><i class="fa-light fa-link"></i></a>
+                            </div>
+                        @else
+                            <div class="apm-wrap ms-3 d-flex align-items-center justify-content-center fs-30 text-primary" style="width:80px;height:80px;flex-shrink:0;">
+                                <i class="fa-light fa-align-center"></i>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -186,4 +225,219 @@
 .icon-with-circle {
     position: relative;
 }
+
+/* ── Approval Post Media (apm) ─────────────────────────── */
+.apm-wrap {
+    position: relative;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+}
+.apm-media {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    display: block;
+}
+/* Carousel */
+.apm-wrap .owl-carousel,
+.apm-wrap .owl-stage-outer,
+.apm-wrap .owl-stage,
+.apm-wrap .owl-item,
+.apm-wrap .apm-slide {
+    height: 80px !important;
+}
+.apm-wrap .owl-prev,
+.apm-wrap .owl-next {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    width: 18px !important;
+    height: 18px !important;
+    border-radius: 50% !important;
+    background: rgba(0,0,0,0.55) !important;
+    color: #fff !important;
+    font-size: 8px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+    z-index: 10 !important;
+    line-height: 1 !important;
+}
+.apm-wrap .owl-prev { left: 2px !important; }
+.apm-wrap .owl-next { right: 2px !important; }
+.apm-wrap .owl-prev span,
+.apm-wrap .owl-next span { font-size: 14px; line-height: 1; }
+.apm-wrap .owl-dots {
+    position: absolute !important;
+    bottom: 3px !important;
+    width: 100% !important;
+    text-align: center !important;
+    margin: 0 !important;
+}
+.apm-wrap .owl-dot span {
+    width: 4px !important;
+    height: 4px !important;
+    background: rgba(255,255,255,0.6) !important;
+    margin: 0 2px !important;
+}
+.apm-wrap .owl-dot.active span { background: #fff !important; }
+/* Badges */
+.apm-badge {
+    position: absolute;
+    z-index: 5;
+    pointer-events: none;
+    line-height: 1;
+}
+.apm-media-click {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    display: block;
+}
+.apm-media-click:hover .apm-badge--play-center {
+    transform: translate(-50%, -50%) scale(1.12);
+}
+.apm-badge--play-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.58);
+    color: #fff;
+    font-size: 11px;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-left: 2px;
+    transition: transform 0.15s ease;
+    pointer-events: none;
+    z-index: 6;
+}
+/* Lightbox overlay */
+#apm-lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.88);
+    z-index: 99999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+#apm-lightbox.active { display: flex; }
+#apm-lightbox-media {
+    max-width: 90vw;
+    max-height: 85vh;
+    border-radius: 10px;
+    object-fit: contain;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+}
+#apm-lightbox-close {
+    position: absolute;
+    top: 18px;
+    right: 24px;
+    color: #fff;
+    font-size: 32px;
+    cursor: pointer;
+    line-height: 1;
+    opacity: 0.85;
+    background: none;
+    border: none;
+    padding: 0;
+    z-index: 100000;
+}
+#apm-lightbox-close:hover { opacity: 1; }
+
 </style>
+
+<!-- Lightbox HTML (injected once) -->
+<div id="apm-lightbox">
+    <button id="apm-lightbox-close">&times;</button>
+    <!-- swapped dynamically by JS -->
+</div>
+
+<script>
+(function() {
+    /* ── Owl Carousel init ────────────────────────── */
+    function initApmCarousels() {
+        if (typeof $.fn.owlCarousel !== 'function') return;
+        $('.apm-owl:not(.owl-loaded)').each(function () {
+            var count = parseInt($(this).data('total')) || 2;
+            $(this).owlCarousel({
+                items       : 1,
+                loop        : count > 1,
+                nav         : true,
+                dots        : count > 1,
+                navText     : ['<span>&#8249;</span>', '<span>&#8250;</span>'],
+                mouseDrag   : count > 1,
+                touchDrag   : count > 1,
+                autoHeight  : false,
+                margin      : 0,
+                stagePadding: 0,
+            });
+        });
+    }
+
+    /* ── Lightbox ─────────────────────────────────── */
+    var $lb      = $('#apm-lightbox');
+    var $lbClose = $('#apm-lightbox-close');
+
+    function openLightbox(type, src) {
+        // Remove previous media
+        $lb.find('#apm-lightbox-media').remove();
+
+        var $media;
+        if (type === 'video') {
+            $media = $('<video>', {
+                id       : 'apm-lightbox-media',
+                controls : true,
+                autoplay : true,
+                playsinline: true,
+            }).append($('<source>', { src: src, type: 'video/mp4' }));
+        } else {
+            $media = $('<img>', {
+                id  : 'apm-lightbox-media',
+                src : src,
+            });
+        }
+        $lb.append($media).addClass('active');
+        $('body').css('overflow', 'hidden');
+    }
+
+    function closeLightbox() {
+        // Stop video if playing
+        var vid = document.getElementById('apm-lightbox-media');
+        if (vid && vid.tagName === 'VIDEO') { vid.pause(); }
+        $lb.removeClass('active').find('#apm-lightbox-media').remove();
+        $('body').css('overflow', '');
+    }
+
+    // Close on button / overlay click
+    $lbClose.on('click', closeLightbox);
+    $lb.on('click', function(e) {
+        if ($(e.target).is('#apm-lightbox')) closeLightbox();
+    });
+    // Close on Escape
+    $(document).on('keydown.apm', function(e) {
+        if (e.key === 'Escape') closeLightbox();
+    });
+
+    // Delegate click on .apm-media-click (works for AJAX-loaded content too)
+    $(document).on('click', '.apm-media-click', function(e) {
+        e.stopPropagation();
+        openLightbox($(this).data('type'), $(this).data('src'));
+    });
+
+    /* ── Init ─────────────────────────────────────── */
+    $(document).ready(function() { setTimeout(initApmCarousels, 150); });
+    $(document).on('ajaxSuccess', function() { setTimeout(initApmCarousels, 200); });
+    window.initApmCarousels = initApmCarousels;
+})();
+</script>

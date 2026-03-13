@@ -31,7 +31,9 @@
     @yield('css')
     {!! Script::renderCss() !!}
     {!! Script::globals() !!}
-    <link rel="stylesheet" href="{{ theme_public_asset('css/main.css') }}?version=9.0.3">	
+    <link rel="stylesheet" href="{{ theme_public_asset('css/main.css') }}?version=9.0.3">
+    <link rel="stylesheet" href="{{ theme_public_asset('plugins/owlcarousel/assets/owl.carousel.min.css') }}">
+    <link rel="stylesheet" href="{{ theme_public_asset('plugins/owlcarousel/assets/owl.theme.default.min.css') }}">	
 	<link rel="stylesheet" href="{{ theme_public_asset('css/custom.css') }}?version=1.0.3">
 
     @yield('head_embed_code')
@@ -151,6 +153,7 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/lazysizes/lazysizes.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
+    <script type="text/javascript" src="{{ theme_public_asset('plugins/owlcarousel/owl.carousel.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=10.19"></script>	
     <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.28') }}"></script>
 	@stack('scripts')
