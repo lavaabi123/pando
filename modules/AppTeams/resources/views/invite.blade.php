@@ -40,7 +40,7 @@
 							<label for="password_confirmation" class="form-label">{{ __("Confirm Password") }}</label>
 							<input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="{{ __('Re-enter your password') }}" required>
 						</div>
-		                <div class="mb-2 per-all">
+		                <div class="mb-2 per-all d-none">
 							<label for="name" class="form-label">{{ __('Select Permissions') }}</label>
 							<div class="mb-3">
 					            <div class="input-group gap-10">
@@ -49,7 +49,7 @@
 				                     	<input placeholder="{{ __("Search") }}" type="text" data-search="search-per" class="search-input b-r-0 border-0" value="">
 					                </div>
 					                <span class="btn btn-icon border-0 bg-white p-0">
-					                    <input class="form-check-input checkbox-all" data-checkbox-parent=".per-all" type="checkbox" value="">
+					                    <input class="form-check-input checkbox-all" data-checkbox-parent=".per-all" type="checkbox" value="" checked="checked">
 					                </span>
 					            </div>
 							</div>
@@ -76,7 +76,7 @@
 											  			</div>
 											  		</label>
 											  		<span>
-											  			<input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $value['key'] }}" id="id_{{ $value['key'] }}" {{ __( in_array($value['key'], $selected_permissions)?"checked":"" ) }} >
+											  			<input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $value['key'] }}" id="id_{{ $value['key'] }}" checked="checked">
 											  		</span>
 											  	</div>
 				                  			</li>
@@ -98,7 +98,7 @@
 														  			</div>
 														  		</label>
 														  		<span>
-														  			<input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $children['key'] }}" id="id_{{ $children['key'] }}" {{ __( in_array($children['key'], $selected_permissions)?"checked":"" ) }} >
+														  			<input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $children['key'] }}" id="id_{{ $children['key'] }}" checked="checked" >
 														  		</span>
 														  	</div>
 							                  			</li>

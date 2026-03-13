@@ -8,7 +8,7 @@
         <div class="card-body px-3">
         	<div class="mb-3">
                 <div class="col-md-12">
-                    <div class="mb-3 max-w-300">
+                    <div class="mb-3 max-w-300 d-none">
                         @include('appfiles::block_select_file_large', [
                             "id" => "options[youtube_thumbnail]",
                             "name" => __("Thumbnail"),
@@ -50,7 +50,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="mb-0">
+                    <div class="mb-0 d-none">
                         <label class="form-label">{{ __('Tags') }}</label>
                         <input type="text" class="form-control input-tags" name="options[youtube_tags]" value="">
                     </div>

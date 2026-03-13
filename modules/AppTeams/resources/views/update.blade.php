@@ -43,7 +43,7 @@
 							<input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="{{ __('Re-enter your password') }}">
 						</div>
 						
-                        <div class="mb-4 per-all">
+                        <div class="mb-4 per-all d-none">
                             <label for="name" class="form-label">{{ __('Select permissions') }}</label>
                             <div class="mb-3">
                                 <div class="input-group">
@@ -52,7 +52,7 @@
                                         <input placeholder="{{ __("Search") }}" type="text" class="search-input" value="">
                                     </div>
                                     <span class="btn btn-icon btn-input min-w-55">
-                                        <input class="form-check-input checkbox-all" data-checkbox-parent=".per-all" type="checkbox" value="">
+                                        <input class="form-check-input checkbox-all" data-checkbox-parent=".per-all" type="checkbox" value="" checked="checked">
                                     </span>
                                 </div>
                             </div>
@@ -79,7 +79,7 @@
                                                         </div>
                                                     </label>
                                                     <span>
-                                                        <input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $value['key'] }}" id="id_{{ $value['key'] }}" {{ __( in_array($value['key'], $selected_permissions)?"checked":"" ) }} >
+                                                        <input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $value['key'] }}" id="id_{{ $value['key'] }}" checked="checked">
                                                     </span>
                                                 </div>
                                             </li>
@@ -101,7 +101,7 @@
                                                                     </div>
                                                                 </label>
                                                                 <span>
-                                                                    <input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $children['key'] }}" id="id_{{ $children['key'] }}" {{ __( in_array($children['key'], $selected_permissions)?"checked":"" ) }} >
+                                                                    <input class="form-check-input checkbox-item" type="checkbox" name="permissions[]" value="{{ $children['key'] }}" id="id_{{ $children['key'] }}" checked="checked" >
                                                                 </span>
                                                             </div>
                                                         </li>
