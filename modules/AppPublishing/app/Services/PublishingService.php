@@ -444,12 +444,22 @@ class PublishingService
     // Cleanup uploaded files
     $this->cleanupFiles();
 
+    // Count media files the user originally uploaded (from first post's data field)
+    $mediaCount = 0;
+    foreach ($posts as $_p) {
+        $_d = is_string($_p->data ?? null) ? json_decode($_p->data, true) : (array)($_p->data ?? []);
+        $mediaCount = count($_d['medias'] ?? []);
+        break;
+    }
+    $mediaLimits = $this->getMediaLimitNotes($posts, $mediaCount);
+
     // Return appropriate response based on post_by value
     if ($postBy == 1 || isset($post->id)) {
         if ($countError == 0) {
             return [
-                "status" => 1,
-                "message" => sprintf(__("Content is being published on %d profiles"), $countSuccess)
+                "status"       => 1,
+                "message"      => sprintf(__("Content is being published on %d profiles"), $countSuccess),
+                "media_limits" => $mediaLimits,
             ];
         } elseif ($countError == 1 && $countSuccess == 0) {
             return [
@@ -458,13 +468,14 @@ class PublishingService
             ];
         } else {
             return [
-                "status" => 0,
-                "message" => sprintf(
-                    __("Content is being published on %d profiles and %d profiles unpublished(%s)"), 
-                    $countSuccess, 
-                    $countError, 
+                "status"       => 0,
+                "message"      => sprintf(
+                    __("Content is being published on %d profiles and %d profiles unpublished(%s)"),
+                    $countSuccess,
+                    $countError,
                     implode(', ', $errMessages)
-                )
+                ),
+                "media_limits" => $mediaLimits,
             ];
         }
     } elseif ($postBy == 4) {
@@ -479,8 +490,9 @@ class PublishingService
         ];
     } else {
         return [
-            "status" => 1,
-            "message" => __("Content successfully scheduled")
+            "status"       => 1,
+            "message"      => __("Content successfully scheduled"),
+            "media_limits" => $mediaLimits,
         ];
     }
 }
@@ -577,6 +589,39 @@ protected function updateTeamStats($teamId, $socialNetwork, $type, $postType = n
             $post->data = json_encode($data, JSON_UNESCAPED_UNICODE);
         }
         return $post;
+    }
+
+    /**
+     * Build per-platform media limit notes to include in the publish response.
+     * These are shown to the user so they understand why fewer images appear
+     * on some platforms than they uploaded.
+     *
+     * @param  array  $posts   The list of post objects passed to post()
+     * @param  int    $mediaCount  Number of media files the user uploaded
+     * @return array  Plain-English notes, one per affected platform
+     */
+    protected function getMediaLimitNotes(array $posts, int $mediaCount): array
+    {
+        if ($mediaCount <= 1) return [];
+
+        // Collect module names that are actually being posted to
+        $modules = array_map(fn($p) => strtolower($p->module ?? ''), $posts);
+
+        $limits = [
+            // module (lowercase)           => [platform label, max images]
+            'appchannelxprofiles'           => ['X (Twitter)',             4],
+            'appchannelpinterestboards'      => ['Pinterest',               5],
+            'appchannelgbplocations'         => ['Google Business Profile', 1],
+        ];
+
+        $notes = [];
+        foreach ($limits as $module => [$label, $max]) {
+            if ($mediaCount > $max && in_array($module, $modules, true)) {
+                $notes[] = "{$label}: only first {$max} of {$mediaCount} media files posted (platform limit: {$max})";
+            }
+        }
+
+        return $notes;
     }
 
     protected function cleanupFiles()

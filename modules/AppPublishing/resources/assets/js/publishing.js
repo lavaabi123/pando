@@ -23,6 +23,15 @@ var AppPubishing = new (function ()
             }
         });
 
+        // Install the publish response interceptor once on init.
+        // This intercepts the publishing/save AJAX call before Main.js processes
+        // the response — giving us full control over the success/error display and redirect.
+        // Guard against double-install on page re-init.
+        if (!window._pandoPublishInterceptorInstalled) {
+            window._pandoPublishInterceptorInstalled = true;
+            AppPubishing.installPublishInterceptor();
+        }
+
         if(reload || reload == undefined){
             
             AppPubishing.Calendar();
@@ -57,6 +66,15 @@ var AppPubishing = new (function ()
                 'X-CSRF-TOKEN': VARIABLES.csrf
             }
         });
+
+        // Install the publish response interceptor once on init.
+        // This intercepts the publishing/save AJAX call before Main.js processes
+        // the response — giving us full control over the success/error display and redirect.
+        // Guard against double-install on page re-init.
+        if (!window._pandoPublishInterceptorInstalled) {
+            window._pandoPublishInterceptorInstalled = true;
+            AppPubishing.installPublishInterceptor();
+        }
 
         if(reload || reload == undefined){
             
@@ -559,6 +577,123 @@ var AppPubishing = new (function ()
             $('.data-post-confirm').html(result.errors);
             $('#confirmPostModal').modal('show');
         }
+    },
+
+    /**
+     * Install a $.ajaxPrefilter on the publishing/save endpoint.
+     * This fires BEFORE the request is sent, letting us wrap the success/error
+     * callbacks so we can show our own SweetAlert and control the redirect —
+     * before Main.js ever sees the response.
+     *
+     * Called once from AppPubishing.init().
+     */
+    AppPubishing.installPublishInterceptor = function(){
+        $.ajaxPrefilter(function(options, originalOptions, jqXHR) {
+
+            // Only intercept requests to the publishing/save endpoint
+            if (!options.url || options.url.indexOf('publishing/save') === -1) return;
+
+            // Wrap the success callback that Main.js registered
+            var origSuccess = options.success;
+            var origError   = options.error;
+            var origComplete = options.complete;
+
+            // Replace success with our interceptor
+            options.success = function(data, textStatus, jqXHR) {
+                AppPubishing._handlePublishResponse(data, origSuccess, origError, origComplete, options);
+            };
+
+            // Replace error too (network/server 5xx errors)
+            options.error = function(jqXHR, textStatus, errorThrown) {
+                var msg = errorThrown || textStatus || 'An unexpected server error occurred.';
+                try {
+                    var body = JSON.parse(jqXHR.responseText || '{}');
+                    if (body.message) msg = body.message;
+                } catch(e){}
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Publishing failed',
+                    html: '<p class="mb-0 fs-14 text-start">' + msg + '</p>',
+                    confirmButtonText: 'Close',
+                    confirmButtonColor: '#dc3545',
+                    allowOutsideClick: false,
+                });
+                // Do NOT call origError — we don't want Main.js to also show a toast
+            };
+
+            // Suppress complete callback to prevent any redirect/toast in Main.js
+            options.complete = null;
+        });
+    },
+
+    /**
+     * Central handler for the publishing/save response.
+     * Decides what to show based on status and media_limits.
+     */
+    AppPubishing._handlePublishResponse = function(data, origSuccess, origError, origComplete, options) {
+
+        // Read redirect URL from the form's data-redirect attribute
+        var $form = $('#compose-editor');
+        var redirectUrl = $form.attr('data-redirect') || null;
+
+        // ── status:2 → validation errors, show confirm modal (let Main.js handle) ──
+        if (data && data.status == 2) {
+            if (origSuccess) origSuccess(data);
+            return;
+        }
+
+        // ── status:0 → publishing error ───────────────────────────────────────
+        if (!data || data.status == 0 || data.status === 0) {
+            var errMsg = (data && data.message) ? data.message : 'An unknown error occurred.';
+            Swal.fire({
+                icon: 'error',
+                title: 'Publishing failed',
+                html: '<p class="mb-0 fs-14 text-start">' + errMsg + '</p>',
+                confirmButtonText: 'Close',
+                confirmButtonColor: '#dc3545',
+                allowOutsideClick: false,
+            });
+            // Do NOT call origSuccess — suppress Main.js toast + redirect
+            return;
+        }
+
+        // ── status:1 → success ────────────────────────────────────────────────
+        var limits = (data && Array.isArray(data.media_limits)) ? data.media_limits : [];
+
+        if (limits.length === 0) {
+            // No limits to report — let Main.js handle normally (toast + redirect)
+            if (origSuccess) origSuccess(data);
+            return;
+        }
+
+        // Success WITH media limit notes — show our Swal, then redirect after OK
+        // Do NOT call origSuccess so Main.js never redirects
+        var listHtml = limits.map(function(note){
+            return '<li class="text-start py-1">' +
+                       '<i class="fa-solid fa-circle-info text-warning me-2"></i>' + note +
+                   '</li>';
+        }).join('');
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Published!',
+            html: '<p class="mb-2">' + (data.message || '') + '</p>' +
+                  '<div class="alert alert-warning border-warning-300 text-start p-3 mt-2 mb-0">' +
+                      '<p class="fw-600 mb-1 fs-13">' +
+                          '<i class="fa-solid fa-triangle-exclamation me-1"></i>' +
+                          'Some platforms cap the number of media files per post:' +
+                      '</p>' +
+                      '<ul class="list-unstyled mb-0 fs-13">' + listHtml + '</ul>' +
+                  '</div>',
+            confirmButtonText: 'OK, got it',
+            confirmButtonColor: '#198754',
+            allowOutsideClick: false,
+        }).then(function(){
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            }
+        });
     },
 
     AppPubishing.reloadCalendar = function(){
