@@ -56,7 +56,7 @@
                 </div>
             </div>
         </div>
-        <!--<div class="card shadow-none border-gray-300 mb-4">
+        <div class="card shadow-none border-gray-300 mb-4">
             <div class="card-header">
                 <div class="fw-6">{{ __("Amazon S3") }}</div>
             </div>
@@ -100,7 +100,7 @@
             </div>
         </div>
 
-        <div class="card shadow-none border-gray-300 mb-4">
+        <!--<div class="card shadow-none border-gray-300 mb-4">
             <div class="card-header">
                 <div class="fw-6">{{ __("Contabo S3") }}</div>
             </div>

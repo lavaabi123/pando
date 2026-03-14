@@ -22,7 +22,7 @@ class Media extends Facade
     { 
         return [
             'aws'      => __("AmazonS3"),
-            'contabo'  => __("Contabo S3"),
+            //'contabo'  => __("Contabo S3"),
             'local'    => __("Public"),
         ];
     }
