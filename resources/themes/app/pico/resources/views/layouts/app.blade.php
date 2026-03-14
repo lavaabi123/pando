@@ -222,5 +222,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 300000); // 5 minutes
 });
 </script>
+@stack('overlay')
 </body>
 </html>

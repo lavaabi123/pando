@@ -59,10 +59,10 @@ $stats = UploadFile::getFileStorageStats();
             </div>
         </div>
     </div>
-
+    @push('overlay')
     {{-- ── Upload circular progress overlay (hidden by default) ──────────────── --}}
     <div id="pando-upload-progress-wrap"
-         style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.72); align-items:center; justify-content:center;">
+         style="display: none;position: fixed;inset: 0; background: rgba(0,0,0,0.72); z-index: 10004; align-items:center;justify-content:center;">
         <div style="display:flex; flex-direction:column; align-items:center; gap:12px;">
             {{-- SVG circular ring --}}
             <div style="position:relative; width:100px; height:100px;">
@@ -93,7 +93,7 @@ $stats = UploadFile::getFileStorageStats();
             </span>
         </div>
     </div>
-
+    @endpush
     <div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 fs-12 hp-100 ajax-scroll files file-widget position-relative" data-select-multi="1" data-url="{{ url_app("files/mini_list") }}" data-resp=".file-list" data-scroll=".ajax-scroll">
         <div class="row file-list"></div>
     </div>
