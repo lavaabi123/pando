@@ -154,7 +154,7 @@
     <script type="text/javascript" src="{{ theme_public_asset('plugins/datatables/datatables.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/fullcalendar/index.global.min.js') }}"></script>
     <script type="text/javascript" src="{{ theme_public_asset('plugins/owlcarousel/owl.carousel.min.js') }}"></script>
-    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=10.19"></script>	
+    <script type="text/javascript" src="{{ theme_public_asset('js/main.js') }}?version=10.20"></script>	
     <script type="text/javascript" src="{{ theme_public_asset('js/custom.js?v=1.28') }}"></script>
 	@stack('scripts')
     @yield('script')

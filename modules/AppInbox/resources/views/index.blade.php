@@ -17,7 +17,7 @@
                 <form id="filter_form">
                     <input type="hidden" id="pagenos" name="page" value="1" />
 
-                    <div class="px-3 pb-3 border-bottom filtered-list" style="display:none;">
+                    <div class="px-3 pb-3 border-bottom filtered-list mb-3" style="display:none;">
                         <ul class="list-unstyled one-column scrollable mh-100 load-filter-text mb-0">
                         </ul>
                     </div>

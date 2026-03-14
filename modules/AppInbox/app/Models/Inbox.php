@@ -659,56 +659,32 @@ class Inbox extends Model
                     }
                     
                     $pageId = $account->pid;
-                    logger()->info("[Inbox] Fetching mentions for Facebook page: {$pageId}");
-                    
-                    $response = $FB->get(
-                        "/{$pageId}/feed?fields=from,id,message,story,full_picture,created_time,permalink_url,message_tags,to&limit=100",
-                        $account->token
-                    )->getDecodedBody();
-                    
-                    if (empty($response['data'])) {
-                        logger()->info("[Inbox] No feed posts found for account {$account->id}");
-                        continue;
-                    }
-                    
-                    $mentionCount = 0;
-                    foreach ($response['data'] as $message) {
-                        $isTagged = false;
-                        
-                        // Check message_tags
-                        if (!empty($message['message_tags'])) {
-                            foreach ($message['message_tags'] as $tag) {
-                                if (is_array($tag)) {
-                                    foreach ($tag as $t) {
-                                        if (($t['id'] ?? '') == $pageId) {
-                                            $isTagged = true;
-                                            break 2;
-                                        }
-                                    }
-                                } elseif (($tag['id'] ?? '') == $pageId) {
-                                    $isTagged = true;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        // Check 'to' field
-                        if (!empty($message['to']['data'])) {
-                            foreach ($message['to']['data'] as $taggedEntity) {
-                                if (($taggedEntity['id'] ?? '') == $pageId) {
-                                    $isTagged = true;
-                                    break;
-                                }
-                            }
-                        }
-                        
-                        if ($isTagged && ($message['from']['id'] ?? '') != $pageId) {
-                            self::processFacebookMention($account, $message);
-                            $mentionCount++;
-                        }
-                    }
-                    
-                    logger()->info("[Inbox] Processed {$mentionCount} mentions for account {$account->id}");
+					logger()->info("[Inbox] Fetching mentions for Facebook page: {$pageId}");
+
+					// ✅ Use /tagged instead of /feed
+					$response = $FB->get(
+						"/{$pageId}/tagged?fields=from,id,message,story,full_picture,created_time,permalink_url,message_tags,to&limit=100",
+						$account->token
+					)->getDecodedBody();
+
+					if (empty($response['data'])) {
+						logger()->info("[Inbox] No mentions found for account {$account->id}");
+						continue;
+					}
+
+					$mentionCount = 0;
+					foreach ($response['data'] as $message) {
+						// Every post from /tagged IS a mention — no need to filter
+						// But skip page's own posts just in case
+						if (($message['from']['id'] ?? '') == $pageId) {
+							continue;
+						}
+
+						self::processFacebookMention($account, $message);
+						$mentionCount++;
+					}
+
+					logger()->info("[Inbox] Processed {$mentionCount} mentions for account {$account->id}");
                     
                 } else {
                     // Instagram tags (works for both profile and business accounts)
@@ -974,70 +950,107 @@ protected static function handleFacebookError($exception, $account, $syncType)
     /**
      * Process Facebook mention
      */
-    protected static function processFacebookMention($account, $message)
-    {
-        // Set default if from is empty
-        if (empty($message['from'])) {
-            $message['from']['name'] = 'Facebook User';
-            $message['from']['id'] = '1';
-        }
+   protected static function processFacebookMention($account, $message)
+	{
+		// Set default if from is empty
+		if (empty($message['from'])) {
+			$message['from']['name'] = 'Facebook User';
+			$message['from']['id'] = '1';
+		}
 
-        // Skip if message is from the account itself
-        if (($message['from']['id'] ?? '') == $account->pid) {
-            return;
-        }
+		// Skip if message is from the account itself
+		if (($message['from']['id'] ?? '') == $account->pid) {
+			logger()->info("[Inbox] Skipping mention from self: {$account->pid}");
+			return;
+		}
 
-        $fromUserId = $message['from']['id'] ?? '';
-        $toType = ((!empty($message['from']) && $message['from']['id'] != $account->pid) || empty($message['from'])) ? 'me' : '';
-        $fromName = $message['from']['name'] ?? '';
-        $createdTime = $message['created_time'] ?? null;
+		$fromUserId = $message['from']['id'] ?? '';
+		$fromName   = $message['from']['name'] ?? '';
+		$toType     = ($fromUserId != $account->pid) ? 'me' : '';
 
-        // Set images
-        if ($fromUserId == $account->pid) {
-            $fromImage = $account->avatar;
-            $toImage = theme_public_asset('img/default.png');
-        } else {
-            $fromImage = theme_public_asset('img/default.png');
-            $toImage = $account->avatar;
-        }
+		// Set images
+		$fromImage = theme_public_asset('img/default.png');
+		$toImage   = $account->avatar;
 
-        $data = [
-            'user_id' => 1,
-            'account_id' => $account->id,
-            'brand_id' => $account->brand_id,
-            'team_id' => $account->team_id,
-            'conversation_id' => '',
-            'media_type' => 'facebook',
-            'inbox_type' => 'Mentions',
-            'post_id' => $message['id'],
-            'post_url' => $message['permalink_url'] ?? '',
-            'message' => $message['message'] ?? '',
-            'from_name' => $fromName,
-            'from_user_id' => $fromUserId,
-            'message_id' => $message['id'],
-            'to_type' => $toType,
-            'to_name' => $account->name,
-            'from_image' => $fromImage,
-            'to_image' => $toImage,
-            'to_user_id' => $account->pid,
-            'created_time' => $createdTime,
-        ];
+		// ✅ Fix: Convert Facebook ISO 8601 time to MySQL datetime
+		$createdTime = null;
+		if (!empty($message['created_time'])) {
+			try {
+				$createdTime = (new \DateTime($message['created_time']))
+					->setTimezone(new \DateTimeZone('UTC'))
+					->format('Y-m-d H:i:s');
+			} catch (\Exception $e) {
+				logger()->warning("[Inbox] Invalid created_time format: " . $message['created_time']);
+				$createdTime = date('Y-m-d H:i:s');
+			}
+		}
 
-        // Use raw SQL with ON DUPLICATE KEY UPDATE
-        DB::statement("
-            INSERT INTO inbox_comments 
-            (user_id, account_id, post_id, post_url, brand_id, team_id, conversation_id, media_type, inbox_type, message, from_name, from_user_id, to_name, to_type, to_user_id, from_image, to_image, message_id, created_time,media_url)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ON DUPLICATE KEY UPDATE message = VALUES(message), post_url = VALUES(post_url)",
-            [
-                $data['user_id'], $data['account_id'], $data['post_id'], $data['post_url'], $data['brand_id'], $data['team_id'], $data['conversation_id'],
-                $data['media_type'], $data['inbox_type'], $data['message'], $data['from_name'], $data['from_user_id'],
-                $data['to_name'], $data['to_type'], $data['to_user_id'], $data['from_image'], $data['to_image'], $data['message_id'],
-                $data['created_time'], ''
-            ]
-        );
-    }
+		$data = [
+			'user_id'         => 1,
+			'account_id'      => $account->id,
+			'brand_id'        => $account->brand_id,
+			'team_id'         => $account->team_id,
+			'conversation_id' => '',
+			'media_type'      => 'facebook',
+			'inbox_type'      => 'Mentions',
+			'post_id'         => $message['id'],
+			'post_url'        => $message['permalink_url'] ?? '',
+			'message'         => $message['message'] ?? $message['story'] ?? '',
+			'from_name'       => $fromName,
+			'from_user_id'    => $fromUserId,
+			'message_id'      => $message['id'],
+			'to_type'         => $toType,
+			'to_name'         => $account->name,
+			'from_image'      => $fromImage,
+			'to_image'        => $toImage,
+			'to_user_id'      => $account->pid,
+			'created_time'    => $createdTime,
+		];
 
+		// ✅ Fix: Wrap in try-catch to log DB errors
+		try {
+			$result = DB::statement("
+				INSERT INTO inbox_comments 
+				(user_id, account_id, post_id, post_url, brand_id, team_id, conversation_id, 
+				 media_type, inbox_type, message, from_name, from_user_id, to_name, to_type, 
+				 to_user_id, from_image, to_image, message_id, created_time, media_url)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+				ON DUPLICATE KEY UPDATE 
+					message   = VALUES(message), 
+					post_url  = VALUES(post_url),
+					from_name = VALUES(from_name),
+					to_image  = VALUES(to_image)",
+				[
+					$data['user_id'],
+					$data['account_id'],
+					$data['post_id'],
+					$data['post_url'],
+					$data['brand_id'],
+					$data['team_id'],
+					$data['conversation_id'],
+					$data['media_type'],
+					$data['inbox_type'],
+					$data['message'],
+					$data['from_name'],
+					$data['from_user_id'],
+					$data['to_name'],
+					$data['to_type'],
+					$data['to_user_id'],
+					$data['from_image'],
+					$data['to_image'],
+					$data['message_id'],
+					$data['created_time'],
+					'' // media_url
+				]
+			);
+
+			logger()->info("[Inbox] Mention saved — post_id: {$data['post_id']}, from: {$data['from_name']}, time: {$data['created_time']}");
+
+		} catch (\Exception $e) {
+			logger()->error("[Inbox] Failed to save mention post_id {$data['post_id']}: " . $e->getMessage());
+			logger()->error("[Inbox] Data dump: " . json_encode($data));
+		}
+	}
     /**
      * Process Instagram tag
      */
