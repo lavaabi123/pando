@@ -57,160 +57,163 @@ class InboxController extends Controller
         ]);
     }
 
-    /**
-     * Get inbox list via AJAX
-     */
     public function ajaxList(Request $request)
-    {
-        $wheres = [];
-        $whereIn = [];
-        $filterText = '';
+{
+    $wheres = [];
+    $whereIn = [];
+    $filterText = '';
 
-        // Base conditions
-        $wheres['to_type'] = 'me';
-        $wheres['is_deleted'] = 0;
+    $wheres['to_type'] = 'me';
+    $wheres['is_deleted'] = 0;
 
-        // Item Filter (Inbox, Completed, Pending)
-        $itemFilter = $request->input('itemFilter');
-        if (!empty($itemFilter)) {
-            if ($itemFilter == 'Inbox') {
-                $whereIn['is_completed'] = [0, 1];
-                $whereIn['is_sent'] = [0, 1];
-            } elseif ($itemFilter == 'Completed') {
-                $wheres['is_completed'] = 1;
-            } elseif ($itemFilter == 'Pending') {
-                $wheres['is_completed'] = 0;
-                $wheres['is_sent'] = 0;
-            }
-        } else {
+    $itemFilter = $request->input('itemFilter');
+    if (!empty($itemFilter)) {
+        if ($itemFilter == 'Inbox') {
+            $whereIn['is_completed'] = [0, 1];
+            $whereIn['is_sent'] = [0, 1];
+        } elseif ($itemFilter == 'Completed') {
+            $wheres['is_completed'] = 1;
+        } elseif ($itemFilter == 'Pending') {
             $wheres['is_completed'] = 0;
             $wheres['is_sent'] = 0;
         }
-
-        // Brand filter
-        if ($request->has('brand') && !empty($request->brand)) {
-            $whereIn['brand_id'] = $request->brand;
-            foreach ($request->brand as $brand) {
-                $brandName = $this->getBrandName($brand);
-                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $brandName . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Brand:</span><span class="text-truncate me-3">' . $brandName . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'brand[]\',' . $brand . ')">x</span></div></li>';
-            }
-        } else {
-            $wheres['brand_id'] = session('brand_id');
-        }
-
-        // Users filter
-        if ($request->has('users') && !empty($request->users)) {
-            $whereIn['u2.id'] = $request->users;
-            foreach ($request->users as $userId) {
-                $userName = $this->getUserName($userId);
-                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $userName . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">User:</span><span class="text-truncate me-3">' . $userName . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'users[]\',' . $userId . ')">x</span></div></li>';
-            }
-        }
-
-        // Tags filter
-        if ($request->has('tags') && !empty($request->tags)) {
-            if (in_array(0, $request->tags)) {
-                $wheres['t.tag_ids'] = null;
-            } else {
-                $whereIn['t2.id'] = $request->tags;
-            }
-
-            foreach ($request->tags as $tag) {
-                if ($tag == 0) {
-                    $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="Untag items"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Tag:</span><span class="text-truncate me-3">Untag items</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'tags[]\',0)">x</span></div></li>';
-                } else {
-                    $tagName = $this->getTagName($tag);
-                    $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $tagName . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Tag:</span><span class="text-truncate me-3">' . $tagName . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'tags[]\',' . $tag . ')">x</span></div></li>';
-                }
-            }
-        }
-
-        // Accounts filter
-        if ($request->has('accounts') && !empty($request->accounts)) {
-            $whereIn['account_id'] = $request->accounts;
-            foreach ($request->accounts as $account) {
-                $profile = $this->getProfileName($account);
-                $icon = get_social_media_icon($profile->social_network);
-                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $profile->name . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Profile:</span><span class="text-truncate me-3"><div class="symbol symbol-35px px-1 py-2" style="padding-left: 0 !important;">
-					<img src="'.asset('storage/app/public/' . $profile->avatar).'" style="width:20px; height:20px" class="rounded-circle align-self-center" alt="">' . $icon . '</div><span class="text-truncate">' . $profile->name . '</span></span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'accounts[]\',' . $account . ')">x</span></div></li>';
-            }
-        }
-
-        // Event Type filter
-        if ($request->has('eventType') && !empty($request->eventType)) {
-            $events = [];
-            $networkType = [];
-            foreach ($request->eventType as $et) {
-                $parts = explode('_', $et);
-                $events[] = $parts[1] ?? '';
-                $networkType[] = $parts[0] ?? '';
-                
-                $icon = get_social_media_icon($parts[0] ?? '');
-                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . ($parts[1] ?? '') . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Type:</span><span class="text-truncate me-3"><div class="symbol symbol-35px px-1 py-2" style="padding-left: 0 !important;">' . $icon . '</div><span class="text-truncate">' . ($parts[1] ?? '') . '</span></span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'eventType[]\',\'' . $et . '\')">x</span></div></li>';
-            }
-            $whereIn['media_type'] = $networkType;
-            $whereIn['inbox_type'] = $events;
-        }
-
-        // Date range filter
-        if ($request->has('dateRange') && !empty($request->dateRange)) {
-            $dateRange = explode(',', $request->dateRange);
-            if (count($dateRange) == 2) {
-                // CORRECT - Use simple keys
-				$wheres['date_start'] = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
-				$wheres['date_end'] = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
-                $filterText .= '<li class="" data-toggle="tooltip" data-placement="top" title="' . $request->dateRange . '"><div class="badge bg-primary pl-2 pr-1 me-2"><span class="me-1 text-nowrap">Date:</span><span class="text-truncate me-3">' . $request->dateRange . '</span><span class="flex-shrink-1 ml-2 pointer" onclick="close_filter(\'dateRange\',\'' . $request->dateRange . '\')">x</span></div></li>';
-            }
-        }
-
-        // Favourite filter
-        if ($request->has('itemFav') && !empty($request->itemFav)) {
-            if ($request->itemFav == 'Favourite') {
-                $wheres['is_favourite'] = 1;
-            }
-        }
-
-        // Get inbox data
-        $inboxData = $this->getInboxData($wheres, $whereIn);		
-        $inboxComments = $this->getInboxCommentsData($wheres, $whereIn);
-
-        // Convert collections to arrays (stdClass objects need to be cast to array)
-        $inboxArray = json_decode(json_encode($inboxData), true);
-        $commentsArray = json_decode(json_encode($inboxComments), true);
-
-        // Merge and sort
-        $inboxList = array_merge($inboxArray, $commentsArray);
-        usort($inboxList, function ($a, $b) {
-            return strtotime($b['created_time']) - strtotime($a['created_time']);
-        });
-
-        // Pagination
-        $page = $request->input('page', 1);
-        $totalRecords = count($inboxList);
-        $totalPages = ceil($totalRecords / $this->perPage);
-        $offset = ($page - 1) * $this->perPage;
-        $inboxList = array_slice($inboxList, $offset, $this->perPage);
-
-        // Generate pagination
-        $pagerContainer = $this->generatePagination($page, $totalPages);
-
-        // Get detail view for first item
-        $detailView = '';
-        if (!empty($inboxList)) {
-            $detailView = $this->getDetailView($inboxList[0], $wheres, $whereIn);
-        }
-
-        return response()->json([
-            'filter_text' => $filterText,
-            'list' => view('appinbox::ajax_list', [
-                'inbox_list' => $inboxList,
-                'page' => $page,
-                'pagerContainer' => $pagerContainer
-            ])->render(),
-            'list_detail' => $detailView
-        ]);
+    } else {
+        $wheres['is_completed'] = 0;
+        $wheres['is_sent'] = 0;
     }
-	
+
+    if ($request->has('brand') && !empty($request->brand)) {
+        $whereIn['brand_id'] = $request->brand;
+        foreach ($request->brand as $brand) {
+            $brandName = $this->getBrandName($brand);
+            $filterText .= $this->makeChip('Brand', '<i class="fa-light fa-tag"></i>', null, $brandName, "close_filter('brand[]',$brand)");
+        }
+    } else {
+        $wheres['brand_id'] = session('brand_id');
+    }
+
+    if ($request->has('users') && !empty($request->users)) {
+        $whereIn['u2.id'] = $request->users;
+        foreach ($request->users as $userId) {
+            $userName = $this->getUserName($userId);
+            $filterText .= $this->makeChip('User', '<i class="fa-light fa-user"></i>', null, $userName, "close_filter('users[]',$userId)");
+        }
+    }
+
+    if ($request->has('tags') && !empty($request->tags)) {
+        if (in_array(0, $request->tags)) {
+            $wheres['t.tag_ids'] = null;
+        } else {
+            $whereIn['t2.id'] = $request->tags;
+        }
+        foreach ($request->tags as $tag) {
+            if ($tag == 0) {
+                $filterText .= $this->makeChip('Tag', '<i class="fa-light fa-hashtag"></i>', null, 'Untag items', "close_filter('tags[]',0)");
+            } else {
+                $tagName = $this->getTagName($tag);
+                $filterText .= $this->makeChip('Tag', '<i class="fa-light fa-hashtag"></i>', null, $tagName, "close_filter('tags[]',$tag)");
+            }
+        }
+    }
+
+    if ($request->has('accounts') && !empty($request->accounts)) {
+        $whereIn['account_id'] = $request->accounts;
+        foreach ($request->accounts as $account) {
+            $profile = $this->getProfileName($account);
+            $icon    = get_social_media_icon($profile->social_network);
+            $avatar  = '<img src="' . asset('storage/app/public/' . $profile->avatar) . '" style="width:16px;height:16px;border-radius:50%;object-fit:cover;border:1px solid #e0e0e0;flex-shrink:0;" alt="">';
+            $filterText .= $this->makeChip('Profile', $icon, $avatar, $profile->name, "close_filter('accounts[]',$account)");
+        }
+    }
+
+    if ($request->has('eventType') && !empty($request->eventType)) {
+        $events = [];
+        $networkType = [];
+        foreach ($request->eventType as $et) {
+            $parts = explode('_', $et);
+            $events[]      = $parts[1] ?? '';
+            $networkType[] = $parts[0] ?? '';
+            $icon = get_social_media_icon($parts[0] ?? '');
+            $filterText .= $this->makeChip('Type', $icon, null, $parts[1] ?? '', "close_filter('eventType[]','$et')");
+        }
+        $whereIn['media_type'] = $networkType;
+        $whereIn['inbox_type'] = $events;
+    }
+
+    if ($request->has('dateRange') && !empty($request->dateRange)) {
+        $dateRange = explode(',', $request->dateRange);
+        if (count($dateRange) == 2) {
+            $wheres['date_start'] = date('Y-m-d 00:00:00', strtotime($dateRange[0]));
+            $wheres['date_end']   = date('Y-m-d 23:59:59', strtotime($dateRange[1]));
+            $filterText .= $this->makeChip('Date', '<i class="fa-light fa-calendar"></i>', null, $request->dateRange, "close_filter('dateRange','" . $request->dateRange . "')");
+        }
+    }
+
+    if ($request->has('itemFav') && !empty($request->itemFav)) {
+        if ($request->itemFav == 'Favourite') {
+            $wheres['is_favourite'] = 1;
+        }
+    }
+
+    // Get inbox data
+    $inboxData      = $this->getInboxData($wheres, $whereIn);
+    $inboxComments  = $this->getInboxCommentsData($wheres, $whereIn);
+
+    $inboxArray     = json_decode(json_encode($inboxData), true);
+    $commentsArray  = json_decode(json_encode($inboxComments), true);
+
+    $inboxList = array_merge($inboxArray, $commentsArray);
+    usort($inboxList, function ($a, $b) {
+        return strtotime($b['created_time']) - strtotime($a['created_time']);
+    });
+
+    $page         = $request->input('page', 1);
+    $totalRecords = count($inboxList);
+    $totalPages   = ceil($totalRecords / $this->perPage);
+    $offset       = ($page - 1) * $this->perPage;
+    $inboxList    = array_slice($inboxList, $offset, $this->perPage);
+
+    $pagerContainer = $this->generatePagination($page, $totalPages);
+
+    $detailView = '';
+    if (!empty($inboxList)) {
+        $detailView = $this->getDetailView($inboxList[0], $wheres, $whereIn);
+    }
+
+    return response()->json([
+        'filter_text' => $filterText,
+        'list' => view('appinbox::ajax_list', [
+            'inbox_list'     => $inboxList,
+            'page'           => $page,
+            'pagerContainer' => $pagerContainer
+        ])->render(),
+        'list_detail' => $detailView
+    ]);
+}
+
+private function makeChip(string $type, string $icon, ?string $avatar, string $label, string $onclose): string
+{
+    $avatarHtml = $avatar
+        ? '<span style="display:inline-flex;align-items:center;margin-right:2px;">' . $avatar . '</span>'
+        : '';
+
+    return '
+    <li style="list-style:none;display:inline-block;margin:3px 4px 3px 0;">
+        <div style="display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #c8e6d6;border-radius:20px;padding:4px 7px 4px 10px;font-size:12px;box-shadow:0 1px 3px rgba(0,0,0,0.06);max-width:220px;">
+            <span style="display:inline-flex;align-items:center;font-size:13px;flex-shrink:0;">' . $icon . '</span>
+            <span style="font-size:10px;font-weight:700;color:#2e7d52;text-transform:uppercase;letter-spacing:0.4px;white-space:nowrap;">' . $type . '</span>
+            <span style="width:1px;height:12px;background:#d1e8db;display:inline-block;flex-shrink:0;"></span>
+            ' . $avatarHtml . '
+            <span style="font-size:12px;font-weight:500;color:#333;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px;" title="' . htmlspecialchars($label) . '">' . htmlspecialchars($label) . '</span>
+            <span onclick="' . $onclose . '"
+                  style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e8f5ee;color:#666;cursor:pointer;font-size:8px;padding:0;margin-left:2px;flex-shrink:0;"
+                  onmouseover="this.style.background=\'#fde8e8\';this.style.color=\'#e53935\';"
+                  onmouseout="this.style.background=\'#e8f5ee\';this.style.color=\'#666\';">
+                <i class="fa fa-times"></i>
+            </span>
+        </div>
+    </li>';
+}
 	/**
      * Get detail view for AJAX
      */
@@ -1087,7 +1090,7 @@ public function getTagsList()
 		$reviews = Inbox::get_reviews();
 		$ad_comments = Inbox::get_ad_comments();
 		$linkedin_comment = Inbox::get_linkedin_comments();
-		$tiktok_messages = Inbox::get_tiktok_message_conversation();
+		//$tiktok_messages = Inbox::get_tiktok_message_conversation();
 	}
 	
 	public function verify(Request $request)

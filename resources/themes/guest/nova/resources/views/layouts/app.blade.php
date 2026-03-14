@@ -66,6 +66,6 @@
     </div>
 
     <script type="text/javascript" src="{{ theme_public_asset('js/jquery.min.js') }}"></script>
-    <script type="text/javascript" src="{{ theme_public_asset('js/main.js?v=1.3') }}"></script>
+    <script type="text/javascript" src="{{ theme_public_asset('js/main.js?v=1.4') }}"></script>
 </body>
 </html>

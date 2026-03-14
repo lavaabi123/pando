@@ -2437,18 +2437,21 @@ var Main = new (function ()
         if(_message != undefined && _message != ""){
             switch(_type){
                 case 1:
+				case 'success':
                     var backgroundColor = "#d3f3df";
                     var messageColor = "#22c55e";
                     var addClass = "border-success-subtle";
                     break;
 
                 case 2:
+				case 'warning':
                     var backgroundColor = "#fdefcc";
                     var messageColor = "#f6b100";
                     var addClass = "border-warning-subtle";
                     break;
 
                 default:
+				case 'error':
                     var backgroundColor = "#fcdada";
                     var messageColor = "#ef4444";
                     var addClass = "border-danger-subtle";
