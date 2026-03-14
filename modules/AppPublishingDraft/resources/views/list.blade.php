@@ -59,7 +59,7 @@
                     <a href="{{ module_url("update") }}" class="icon-with-circle actionItem" data-id="{{ $value->id_secure }}" data-popup="groupModal" data-call-success="" data-bs-title="Duplicate Post" data-bs-toggle="tooltip" data-bs-placement="top">
                         {!! file_get_contents(public_path('img/duplicate.svg')) !!}
                     </a>
-                    <a href="{{ url_app("publishing/composer") }}" class="icon-with-circle actionItem" data-id="{{ $value->id_secure }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();" data-bs-title="Edit" data-bs-toggle="tooltip" data-bs-placement="top">
+                    <a href="{{ url_app('publishing/composer?id=' . $value->id_secure) }}" class="icon-with-circle" data-id="{{ $value->id_secure }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();" data-bs-title="Edit" data-bs-toggle="tooltip" data-bs-placement="top">
                         {!! file_get_contents(public_path('img/post.svg')) !!}
                     </a>
                     <a href="{{ url_app("publishing/destroy") }}" class="icon-with-circle actionItem" data-id="{{ $value->grouping_data }}" data-call-success="location.reload();" data-bs-title="Delete Post" data-bs-toggle="tooltip" data-bs-placement="top" data-confirm="{{ __('Are you sure to delete this post?') }}">

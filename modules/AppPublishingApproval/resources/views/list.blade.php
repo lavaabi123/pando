@@ -57,7 +57,7 @@
                     <a href="{{ module_url("update") }}" class="icon-with-circle actionItem" data-id="{{ $value->id_secure }}" data-popup="groupModal" data-call-success="" data-bs-title="Duplicate Post" data-bs-toggle="tooltip" data-bs-placement="top">
                         {!! file_get_contents(public_path('img/duplicate.svg')) !!}
                     </a>
-                    <a href="{{ url_app("publishing/composer") }}" class="icon-with-circle actionItem" data-id="{{ $value->id_secure }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();" data-bs-title="Edit" data-bs-toggle="tooltip" data-bs-placement="top">
+                    <a href="{{ url_app('publishing/composer?id=' . $value->id_secure) }}" class="icon-with-circle" data-id="{{ $value->id_secure }}" data-append-content="composer-scheduling" data-call-success="AppPubishing.openCompose(); AppPubishing.closePopoverCalendar();" data-bs-title="Edit" data-bs-toggle="tooltip" data-bs-placement="top">
                         {!! file_get_contents(public_path('img/post.svg')) !!}
                     </a>
                     <a href="{{ url_app("publishing/comments") }}" class="icon-with-circle actionItem open-comment-modal" data-id="{{ $value->grouping_data }}" data-popup="commentModal" data-bs-title="Comment" data-bs-toggle="tooltip" data-bs-placement="top">

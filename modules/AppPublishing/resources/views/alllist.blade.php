@@ -51,7 +51,7 @@
                         </div>
 
                         <div class="card-toolbar d-flex gap-6">
-                            <a href="{{ url_app('post?post_id=' . $post->ids) }}" class="icon-with-circle">
+                            <a href="{{ url_app('publishing/composer?id=' . $post->id_secure) }}" class="icon-with-circle">
                                 {!! file_get_contents(public_path('img/post.svg')) !!}
                             </a>
                             <a href="{{ url_app('post?type=duplicate&post_id=' . $post->ids) }}" class="icon-with-circle" title="{{ __('Duplicate Post') }}" data-toggle="tooltip" data-placement="top">
