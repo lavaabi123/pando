@@ -1107,6 +1107,10 @@ span.svg-icons svg {
     color: var(--d-primary);
     border-bottom-color: var(--d-primary);
 }
+.notif-list .nav.nav-tabs .nav-link {
+	padding:0.5rem 0;
+	font-family: 'Inter';
+}
 .cViews button.btn {
     border-radius: 100% !important;
     aspect-ratio: 1 / 1;
@@ -1121,7 +1125,7 @@ span.svg-icons svg {
 	border: none;
 }
 /** AI-publishing **/
-input, select, textarea,
+input, select,
 .inputField input, .inputField select, .inputField .form-control, .inputField .form-select,
 form.modal-content input, form.modal-content select, form.modal-content .form-control {
     border-width: 2px !important;
@@ -1131,7 +1135,7 @@ form.modal-content input, form.modal-content select, form.modal-content .form-co
 	border-width: 2px !important;
 	border-radius: 25px;
 }
-.inputField .account_manager .am-choice-box .am-selected-box, .select2-selection--multiple {
+.inputField .account_manager .am-choice-box .am-selected-box, .select2-selection--multiple, form.modal-content textarea.form-control {
     border-radius: 20px !important;
     border-width: 2px !important;
 }
@@ -1156,6 +1160,17 @@ form.modal-content input, form.modal-content select, form.modal-content .form-co
 }
 .card-header .form-control.form-control-sm {
 	border-width:2px !important;
+}
+input#image {
+    opacity: 0;
+    display: none;
+}
+img#brand-logo-preview {
+    width: 62px !important;
+    height: 62px;
+    border: 2px dashed #a1a1a1 !important;
+    padding: 4px;
+    border-radius: 10px !important;
 }
 #strategyTabContent label {
     margin-bottom: 8px;
@@ -1244,6 +1259,7 @@ div:where(.swal2-icon).swal2-error {
 button.swal2-confirm.btn-sm, button.swal2-cancel.btn-sm {
     padding: 15px !important;
 }
+
 @media (min-width: 768px) {
     .pricing .border-end-md {
         border-right: 2px solid #dee2e6 !important;

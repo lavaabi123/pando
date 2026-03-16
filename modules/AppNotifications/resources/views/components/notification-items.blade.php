@@ -5,7 +5,7 @@
 
 <div>
     <!-- Tabs -->
-    <nav class="d-flex align-items-center justify-content-between border-bottom px-3">
+    <nav class="d-flex align-items-center justify-content-between border-bottom-2 border-gray-200 px-3">
         <div class="nav nav-tabs border-bottom-0" id="nav-tab" role="tablist">
             <button class="nav-link active" id="nav-unread-tab" data-bs-toggle="tab" data-bs-target="#notif-unread" type="button" role="tab">
                 {{ __('Unread') }}
