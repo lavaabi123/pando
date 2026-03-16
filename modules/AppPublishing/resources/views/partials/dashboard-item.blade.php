@@ -707,7 +707,7 @@
 </div>
 </div>
 <div class="footer pt-50 mt-50">
-	<div class="container">
+	<div class="container d-none">
 		<div class="row">
 			<div class="col-md-2 mb-4">
 				<div class="fw-7 fs-18 mb-4">Publishing</div>
