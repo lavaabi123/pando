@@ -22,3 +22,7 @@ Route::middleware(['web'])->group(function () {
     Route::post('/payment/success/{gateway}', [PaymentController::class, 'success'])->withoutMiddleware([VerifyCsrfToken::class])->name('payment.success');
     Route::post('/payment/cancel/{gateway}', [PaymentController::class, 'cancel'])->withoutMiddleware([VerifyCsrfToken::class])->name('payment.cancel');
 });
+
+Route::group(["prefix" => "app"], function () {
+	Route::get('/payment/cron', [PaymentController::class, 'cron'])->name('payment.cron');
+});

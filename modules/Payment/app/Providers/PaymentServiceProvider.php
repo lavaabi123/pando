@@ -72,6 +72,36 @@ class PaymentServiceProvider extends ServiceProvider
                     'order_currency',
                     'support_email',
                 ],
+            ],
+            [   
+                'id' => 'subscription_expiration_notification',
+                'name' => __('Subscription Expiration Notification'),
+                'view' => 'mail/subscription_expiration_notification',
+                'module' => $this->name,
+                'description' => __('Email sent to user when their subscription is about to expire.'),
+                'variables' => [
+                    'fullname',
+                    'order_id',
+                    'plan_name',
+                    'order_amount',
+                    'order_currency',
+                    'support_email',
+                ],
+            ],
+            [   
+                'id' => 'subscription_expired',
+                'name' => __('Subscription Expired'),
+                'view' => 'mail/subscription_expired',
+                'module' => $this->name,
+                'description' => __('Email sent to user when their subscription expired.'),
+                'variables' => [
+                    'fullname',
+                    'order_id',
+                    'plan_name',
+                    'order_amount',
+                    'order_currency',
+                    'support_email',
+                ],
             ]
         ]);
     }
