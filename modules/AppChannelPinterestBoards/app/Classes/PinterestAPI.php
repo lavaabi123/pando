@@ -184,29 +184,51 @@ class PinterestAPI
             return $this->sharePinVideo($accessToken, $boardId, $title, $description, $link, $firstMedia, $coverImageUrl);
         }
 
-        // Pinterest multiple_image_urls: max 5 items.
-        // Send ALL images as-is using their original stored URLs — Pinterest fetches
-        // them directly from the internet. Do NOT generate padded/temp URLs.
-        // Pinterest handles mixed ratios by cropping to the first image's ratio.
+        // Pinterest carousel: max 5 images.
+        //
+        // Pinterest API HARD ENFORCES same width/height ratio across all images in
+        // multiple_image_urls. It does NOT auto-crop on upload — the error is returned
+        // before the pin is created. We therefore normalise every image to the first
+        // image's canvas dimensions (letterbox / pad with white) before sending.
+        //
+        // S3-SAFE DESIGN:
+        // - Images are fetched via curl (downloadToTemp) so this works with local
+        //   storage, S3, Contabo, or any public CDN — no allow_url_fopen needed.
+        // - Padded images are saved to local temp files, stored via UploadFile::storeSingleFile,
+        //   and their public URLs are sent to Pinterest.
+        // - Temp files are tracked in $this->paddedTempFiles and cleaned up after
+        //   the pin is created (call cleanupPaddedFiles() after sendRequest).
+        // - When you migrate to S3 later, UploadFile::storeSingleFile will put them on
+        //   S3 automatically — no changes needed here.
+
         $medias = array_slice((array)$medias, 0, 5);
 
-        $imgItems = [];
+        // Resolve all media to full public URLs first
+        $resolvedMedias = [];
         foreach ($medias as $media) {
-            $media = $this->resolveMediaUrl((string)$media);
-            if (!$this->mediaIsImage($media)) continue;
+            $url = $this->resolveMediaUrl((string)$media);
+            if ($this->mediaIsImage($url)) {
+                $resolvedMedias[] = $url;
+            }
+        }
 
-            $imgItem = ['description' => $description, 'url' => $media];
-            if ($title !== '')                                            $imgItem['title'] = $title;
-            if ($link !== '' && filter_var($link, FILTER_VALIDATE_URL))  $imgItem['link']  = $link;
+        // Normalise all images to the first image's ratio (pad with white if needed)
+        $normalizedUrls = $this->normalizeImagesToFirstRatio($resolvedMedias);
+
+        $imgItems = [];
+        foreach ($normalizedUrls as $url) {
+            $imgItem = ['description' => $description, 'url' => $url];
+            if ($title !== '')                                           $imgItem['title'] = $title;
+            if ($link !== '' && filter_var($link, FILTER_VALIDATE_URL)) $imgItem['link']  = $link;
             $imgItems[] = $imgItem;
         }
 
         $countImg = count($imgItems);
 
-        if ($countImg > 2) {
+        if ($countImg >= 2) {
             $params = ['media_source' => ['source_type' => 'multiple_image_urls', 'items' => $imgItems]];
         } else {
-            $params = ['media_source' => ['source_type' => 'image_url', 'url' => $firstMedia]];
+            $params = ['media_source' => ['source_type' => 'image_url', 'url' => ($normalizedUrls[0] ?? $firstMedia)]];
         }
 
         $params['board_id'] = $boardId;
@@ -221,10 +243,167 @@ class PinterestAPI
             $params['link'] = $link;
         }
 
-        return $this->sendRequest("POST", $endpoint, $params, $accessToken);
+        $result = $this->sendRequest("POST", $endpoint, $params, $accessToken);
+
+        // Clean up any padded/temp images we created during ratio normalisation
+        $this->cleanupPaddedFiles();
+
+        return $result;
     }
 
-      /**
+    /**
+     * Normalise a list of image URLs so they all share the first image's
+     * width-to-height ratio. Images that already match are passed through
+     * as-is (original URL, no re-upload). Images with a different ratio are
+     * letterboxed onto a white canvas and re-uploaded via UploadFile.
+     *
+     * S3-safe: images are fetched via curl — no allow_url_fopen needed.
+     *
+     * @param  string[] $urls  Fully-resolved public image URLs
+     * @return string[]        Public URLs ready to send to Pinterest
+     */
+    protected function normalizeImagesToFirstRatio(array $urls): array
+    {
+        if (empty($urls)) return [];
+        if (count($urls) === 1) return $urls;
+
+        // ── Step 1: download first image and get its canonical dimensions ──
+        $firstLocal = $this->downloadToTemp($urls[0], 'jpg');
+        if (!$firstLocal) return $urls; // can't download → pass originals, let Pinterest decide
+
+        [$targetW, $targetH] = $this->getImageDimensions($firstLocal);
+        if (!$targetW || !$targetH) {
+            @unlink($firstLocal);
+            return $urls;
+        }
+        $targetRatio = $targetW / $targetH;
+
+        $result = [$urls[0]]; // first image is always used as-is
+
+        foreach (array_slice($urls, 1) as $url) {
+            $local = $this->downloadToTemp($url, 'jpg');
+            if (!$local) {
+                // Can't download this image — skip it; Pinterest would reject mixed-ratio anyway
+                continue;
+            }
+
+            [$srcW, $srcH] = $this->getImageDimensions($local);
+            if (!$srcW || !$srcH) {
+                @unlink($local);
+                continue;
+            }
+
+            $srcRatio = $srcW / $srcH;
+
+            // Allow 2% tolerance — minor rounding differences shouldn't trigger re-encode
+            if (abs($srcRatio - $targetRatio) < 0.02) {
+                // Same ratio — use original URL (no re-upload needed)
+                @unlink($local);
+                $result[] = $url;
+                continue;
+            }
+
+            // ── Letterbox this image onto the target canvas ──
+            $paddedPath = $this->letterboxImage($local, $srcW, $srcH, $targetW, $targetH);
+            @unlink($local);
+
+            if (!$paddedPath) {
+                // GD failed — skip image
+                continue;
+            }
+
+            // Upload the padded image and get a public URL
+            try {
+                $storedUrl = \UploadFile::storeSingleFile(
+                    new \Illuminate\Http\File($paddedPath),
+                    'uploads'
+                );
+                $this->paddedTempFiles[] = $storedUrl; // track for cleanup after pin is posted
+                $result[] = \Media::url($storedUrl);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Pinterest normalise: upload failed for {$url}: " . $e->getMessage());
+            } finally {
+                @unlink($paddedPath);
+            }
+        }
+
+        @unlink($firstLocal);
+        return $result;
+    }
+
+    /**
+     * Letterbox $srcFile onto a white canvas of ($targetW × $targetH).
+     * The source image is scaled to fit inside the canvas while preserving
+     * its own aspect ratio. Returns the path of the new temp JPEG, or null.
+     */
+    protected function letterboxImage(string $srcFile, int $srcW, int $srcH, int $targetW, int $targetH): ?string
+    {
+        if (!function_exists('imagecreatefromjpeg')) return null; // GD not installed
+
+        // Load source — support JPEG, PNG, WebP, GIF
+        $mime = mime_content_type($srcFile) ?: '';
+        $src  = match (true) {
+            str_contains($mime, 'png')  => @imagecreatefrompng($srcFile),
+            str_contains($mime, 'webp') => @imagecreatefromwebp($srcFile),
+            str_contains($mime, 'gif')  => @imagecreatefromgif($srcFile),
+            default                     => @imagecreatefromjpeg($srcFile),
+        };
+        if (!$src) return null;
+
+        // Canvas filled with white
+        $canvas = imagecreatetruecolor($targetW, $targetH);
+        $white  = imagecolorallocate($canvas, 255, 255, 255);
+        imagefill($canvas, 0, 0, $white);
+
+        // Scale source to fit inside canvas (letterbox)
+        $scale    = min($targetW / $srcW, $targetH / $srcH);
+        $newW     = (int)round($srcW * $scale);
+        $newH     = (int)round($srcH * $scale);
+        $offsetX  = (int)round(($targetW - $newW) / 2);
+        $offsetY  = (int)round(($targetH - $newH) / 2);
+
+        imagecopyresampled($canvas, $src, $offsetX, $offsetY, 0, 0, $newW, $newH, $srcW, $srcH);
+
+        imagedestroy($src);
+
+        // Save to temp JPEG
+        $outPath = tempnam(sys_get_temp_dir(), 'pin_pad_') . '.jpg';
+        $ok      = imagejpeg($canvas, $outPath, 92);
+        imagedestroy($canvas);
+
+        return $ok ? $outPath : null;
+    }
+
+    /**
+     * Read width × height of an image file using GD (no allow_url_fopen).
+     * Returns [0, 0] on failure.
+     */
+    protected function getImageDimensions(string $localPath): array
+    {
+        $info = @getimagesize($localPath);
+        return $info ? [$info[0], $info[1]] : [0, 0];
+    }
+
+    /** Files uploaded during ratio normalisation that should be removed after posting. */
+    protected array $paddedTempFiles = [];
+
+    /**
+     * Delete any re-uploaded padded images from storage after the pin is posted.
+     * Called automatically at the end of sharePin().
+     */
+    protected function cleanupPaddedFiles(): void
+    {
+        foreach ($this->paddedTempFiles as $storedPath) {
+            try {
+                \UploadFile::deleteFileFromServer($storedPath);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Pinterest cleanup: could not delete {$storedPath}: " . $e->getMessage());
+            }
+        }
+        $this->paddedTempFiles = [];
+    }
+
+    /**
      * Post a video pin to Pinterest.
      *
      * This function performs three main steps:
