@@ -622,7 +622,11 @@ var AppPubishing = new (function ()
                     confirmButtonText: 'Close',
                     confirmButtonColor: '#dc3545',
                     allowOutsideClick: false,
-                });
+                }).then(function(){
+					Main.overplay(true);
+					$('.loading').hide();
+					$form.removeClass('disabled');
+				});
                 // Do NOT call origError — we don't want Main.js to also show a toast
             };
 
@@ -648,7 +652,7 @@ var AppPubishing = new (function ()
     AppPubishing._handlePublishResponse = function(data, origSuccess, origError, origComplete, options) {
 
         // Read redirect URL from the form's data-redirect attribute
-        var $form = $('#compose-editor');
+        var $form = $('#compose-editor').length ? $('#compose-editor') : $('form.actionForm');
         var redirectUrl = $form.attr('data-redirect') || null;
 
         // Replicate what Main.js does in its success callback:
