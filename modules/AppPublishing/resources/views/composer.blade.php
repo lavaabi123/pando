@@ -601,7 +601,7 @@ if($post){
 	</div></div>
 				 <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
 					<div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 hp-100">
-						<div class="max-w-450 wp-100 mx-auto">
+						<div class="wp-100 mx-auto">
 							<div id="draft-list-content">
 								{{-- Loading indicator --}}
 								<div class="text-center py-5">
@@ -615,7 +615,7 @@ if($post){
 				</div>
 				 <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
 					<div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 hp-100">
-						<div class="max-w-450 wp-100 mx-auto">
+						<div class="wp-100 mx-auto">
 							<div id="approval-list-content">
 								{{-- Loading indicator --}}
 								<div class="text-center py-5">
@@ -631,7 +631,7 @@ if($post){
 			
 					<div class="d-flex flex-column flex-column-fluid overflow-y-auto p-3 hp-100">			
 						
-						<div class="max-w-450 wp-100 mx-auto ">
+						<div class="wp-100 mx-auto ">
 
 							@foreach(Channels::channels('apppublishing') as $value)
 
@@ -964,6 +964,12 @@ if($post){
 .text-danger.count-word-pinterest,
 .text-danger.count-word-hashtag {
     animation: pulse 1s infinite;
+}
+.composer-scheduling .loading {
+    position: fixed !important;
+    top: 0 !important; left: 0 !important;
+    width: 100vw !important; height: 100vh !important;
+    z-index: 99999 !important;
 }
 </style>
 @endsection

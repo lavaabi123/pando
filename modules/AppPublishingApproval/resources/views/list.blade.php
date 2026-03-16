@@ -166,7 +166,7 @@
                
                 <div class="w-100 text-end mb-1">
                     <a href="{{ url_app("publishing/move_to_queue") }}" 
-                       class="btn btn-primary w-110 px-4" 
+                       class="btn btn-primary btn-sm w-110 px-4" 
                        data-call-success="Main.ajaxScroll(true)"
                        data-id="{{ $value->grouping_data }}" 
                        data-confirm="{{ __('Are you sure to move this item to queue?') }}" 					   

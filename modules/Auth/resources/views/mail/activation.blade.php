@@ -9,7 +9,7 @@
 
 <div style="margin: 28px 0;">
     <a href="{{ $verify_url ?? '#' }}" class="btn"
-       style="background:#675dff; color:#fff; padding:12px 32px; border-radius:5px; text-decoration:none;">
+       style="background:#fd8107; color:#fff; padding:10px 32px; border-radius:50px; font-weight: 600; text-decoration:none;">
         {{ __('Activate Account') }}
     </a>
 </div>

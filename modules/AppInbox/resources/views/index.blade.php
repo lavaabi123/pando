@@ -8,7 +8,7 @@
         <!-- Filter Sidebar -->
         <div class="col-3 mw-300">
             <div class="my-1">
-                <h3 class="fw-7 mb-4 fs-22">
+                <h3 class="fw-7 mb-3 fs-22">
                     <i class="fa-light fa-filter me-2"></i>Filter
                 </h3>
             </div>
@@ -228,13 +228,13 @@
 
         <!-- Main Content Area -->
         <div class="col-9">
-			<h3 class="fw-7 mb-4 fs-22"><span class="d-inline-block w-22">{!! file_get_contents(public_path('img/inbox.svg')) !!}</span> Inbox</h3>
-			<div class="border b-r-30 p-3 fs-14 overflow-hidden">
+			<h3 class="fw-7 mb-3 fs-22"><span class="d-inline-block w-22">{!! file_get_contents(public_path('img/inbox.svg')) !!}</span> Inbox</h3>
+			<div class="border b-r-30 p-3 fs-14 overflow-hidden maxHeight-wos">
 
 				<div class="row h-100">
 					<!-- Inbox List -->
 					<div class="col-md-6 h-100">
-									<div id="fav-feed-header" class="mb-4">
+									<div id="fav-feed-header" class="mb-3">
     <div class="d-flex align-items-center justify-content-between">
         <div class="datarangeinbox"></div>
         
@@ -313,7 +313,7 @@
         </div>
     </div>
 </div>
-						<div class="bg-white border b-r-30 p-3 inbox-msg overflow-auto scroll-bar">
+						<div class="bg-white border b-r-30 p-3 inbox-msg overflow-auto scroll-bar pb-0">
 							
 							<div id="inbox-list-container">
 								<!-- Inbox list will be loaded here via AJAX -->

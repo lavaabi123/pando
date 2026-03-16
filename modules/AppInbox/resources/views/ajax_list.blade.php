@@ -221,7 +221,7 @@
         @endforeach
     </div>
 
-    <div class="pagination-container mt-3">
+    <div class="pagination-container py-3 mt-1">
         {!! $pagerContainer !!}
     </div>
 @else

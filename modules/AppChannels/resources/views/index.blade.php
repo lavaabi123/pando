@@ -182,36 +182,35 @@
     @endif
 
     <!-- Add Channels Modal -->
-    <div class="modal modal-xl fade" id="addChannelModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal modal-md fade" id="addChannelModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered1 modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header px-4">
                     <h1 class="modal-title fs-5">{{ __("Add accounts") }}</h1>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body p-4">
-                    <div class="row">
+                <div class="modal-body px-4">
+                    <div class="accountsList">
                         @if( !empty( $channels ) )
                             @foreach( $channels as $channel )
-                                <div class="col-md-4 mb-4">
-                                    <div class="card border-gray-300">
-                                        <div class="card-body text-center d-flex flex-column justify-content-center align-items-center gap-10">
-                                            <div class="d-flex align-items-center justify-content-center size-50 text-white border-1 b-r-100 fs-16" style="background-color: {{ $channel['color'] }};">
-                                                <i class="{{ $channel['icon'] }}"></i>
-                                            </div>
-                                            <div class="fs-14 fw-5">{{ __($channel['name']) }}</div>
-                                            <div>
-                                                @if( !empty( $channel ) && isset( $channel['items']  ) )
-                                                    @foreach( $channel['items'] as $item )
-                                                        <a href="{{ url($item["uri"]) }}" class="btn btn-outline btn-sm btn-light mb-1">
-                                                            <i class="fa-light fa-plus"></i> {{ __( ucfirst( str_replace("_", " ", $item["category"]) ) ) }}
-                                                        </a>
-                                                    @endforeach
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <div class="d-flex align-items-center justify-content-between {{ !$loop->last ? 'border-bottom' : '' }} py-2">
+										<div class="d-flex align-items-center gap-6">
+											<div class="d-flex align-items-center justify-content-center size-40 text-white border-1 b-r-100 fs-16" style="background-color: {{ $channel['color'] }};">
+												<i class="{{ $channel['icon'] }}"></i>
+											</div>
+											<div class="fs-14 fw-5">{{ __($channel['name']) }}</div>
+										</div>
+										<div class="btnRight">
+											@if( !empty( $channel ) && isset( $channel['items']  ) )
+												@foreach( $channel['items'] as $item )
+													<a href="{{ url($item["uri"]) }}" class="btn btn-outline btn-sm btn-light min-w-130">
+														<i class="fa-light fa-plus"></i> {{ __( ucfirst( str_replace("_", " ", $item["category"]) ) ) }}
+													</a>
+												@endforeach
+											@endif
+										</div>
+									</div>
+                                
                             @endforeach
                         @endif
                     </div>

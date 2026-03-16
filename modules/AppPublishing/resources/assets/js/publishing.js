@@ -618,7 +618,7 @@ var AppPubishing = new (function ()
                 Swal.fire({
                     icon: 'error',
                     title: 'Failed',
-                    html: '<p class="mb-0 fs-14 text-start">' + msg + '</p>',
+                    html: '<p class="mb-0 fs-14">' + msg + '</p>',
                     confirmButtonText: 'Close',
                     confirmButtonColor: '#dc3545',
                     allowOutsideClick: false,
@@ -692,7 +692,7 @@ var AppPubishing = new (function ()
             Swal.fire({
                 icon: 'error',
                 title: isFormValidation ? 'Please check your post' : 'Failed',
-                html: '<p class="mb-0 fs-14 text-start">' + (message || 'An unknown error occurred.') + '</p>',
+                html: '<p class="mb-0 fs-14">' + (message || 'An unknown error occurred.') + '</p>',
                 confirmButtonText: 'Close',
                 confirmButtonColor: '#dc3545',
                 allowOutsideClick: false,

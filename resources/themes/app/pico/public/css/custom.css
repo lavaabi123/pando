@@ -398,7 +398,7 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
 .brand-filters {
     display: flex;
     gap: 8px;
-    padding: 15px;
+    padding: 10px 15px !important;
     border-bottom: 1px solid #eee;
 }
 .filter-btn {
@@ -480,7 +480,9 @@ input[type="checkbox"]:checked, input[type="radio"]:checked {
     color: #1a1a1a;
     font-weight: 500;
 }
-
+#brandList .brand-badge {
+    padding: 0 2px;
+}
 /* Action Buttons */
 .brand-actions {
     display: flex;
@@ -833,8 +835,8 @@ i.post-media {
 }
 .scheduleDetails a.btn-sm {
     font-size: 10px !important;
-        min-width: 70px;
-    padding: 6px 10px;
+        min-width: 90px;
+    padding: 6px 10px !important;
     height: auto !important;
 	line-height: normal;
 }
@@ -1026,7 +1028,7 @@ span.svg-icons svg {
 
 .modal-content {
  border-radius: 1.5rem;
- border: 2px solid var(--bs-gray-300);
+ border: 0px solid var(--bs-gray-300);
 }
 .modal-content .rounded {
 	border-radius: var(--bs-border-radius-xl) !important;
@@ -1148,6 +1150,10 @@ form.modal-content input, form.modal-content select, form.modal-content .form-co
 .inputField textarea.form-control, .tox.tox-tinymce.textarea_editor {
     border-radius: 20px !important;
 }
+.form-control input.search-input {
+    border-radius: 0 !important;
+    border: none !important;
+}
 .tox-editor-header {
     padding: 3px 10px !important;
 }
@@ -1157,6 +1163,9 @@ form.modal-content input, form.modal-content select, form.modal-content .form-co
 .select2-selection.select2-selection--multiple {
     padding: 7px 10px 7px;
     border-color: #ced4da !important;
+}
+#approval-toolbar select {
+    line-height: normal;
 }
 .card-header .form-control.form-control-sm {
 	border-width:2px !important;
@@ -1250,6 +1259,9 @@ button.swal2-styled {
     font-family: 'Inter';
     letter-spacing: 1px;
     font-size: 14px;
+	
+}
+button.swal2-cancel.swal2-styled {
 	background: var(--d-red) !important;
 }
 div:where(.swal2-icon).swal2-error {

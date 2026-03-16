@@ -25,10 +25,10 @@
     @foreach($folders as $value)
     <div class="col-4 px-2">
         <div class="ratio ratio-1x1 mb-3">
-            <label class="d-flex flex-column flex-fill w-100 bg-light border b-r-10 w-100 pointer mb-3" for="folder_{{ $value->id_secure }}">
+            <label class="d-flex flex-column flex-fill w-100 bg-light border b-r-10 w-100 pointer mb-3 overflow-hidden" for="folder_{{ $value->id_secure }}">
                 <input class="d-none form-check-input ajax-scroll-filter" type="radio" name="folder_id" value="{{ $value->id_secure }}" id="folder_{{ $value->id_secure }}">
-                <div class="d-flex flex-fill align-items-center justify-content-center p-2 bg-warning-100">
-                    <div class="fs-30 text-warning">
+                <div class="d-flex flex-fill align-items-center justify-content-center p-1 bg-warning-100">
+                    <div class="fs-18 text-warning">
                         <i class="fa-light fa-folder-open"></i>
                     </div>
                 </div>
