@@ -13,7 +13,7 @@
 @endsection
 
 @section('content')
-    <div class="container pb-5 row row-cols-5">
+    <div class="container pb-5 row row-cols-5 mx-auto">
         @forelse ($analytics as $network => $data)
             <div class="mb-5 col">
                 <h4 class="fw-6 fs-18 mb-2">{{ $network }}</h4>

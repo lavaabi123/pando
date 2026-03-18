@@ -7,6 +7,8 @@ use Illuminate\Http\Request;
 use Modules\AdminPlans\Models\Plans;
 use Modules\AdminPaymentSubscriptions\Models\PaymentSubscription;
 use Modules\AdminManualPayments\Models\PaymentManual;
+use App\Models\User;
+use App\Models\SubscriptionEmailLog;
 use Payment;
 use RecurringPayment;
 use DB;
@@ -344,4 +346,105 @@ class PaymentController extends Controller
             ->route('app.dashboard')
             ->with('success', __('Your payment information has been submitted. We will verify it as soon as possible!'));
     }
+	
+	
+	public function cron(Request $request)
+	{
+		// ── Secret key guard ────────────────────────────────────────────
+		// Add to .env:   CRON_SECRET=your_random_secret_here
+		// Add to config/app.php:  'cron_secret' => env('CRON_SECRET', ''),
+		// cPanel Cron Job (run daily at midnight):
+		//   curl -s "https://yourdomain.com/app/payment/cron?secret=YOUR_SECRET"
+		$secret = config('app.cron_secret');
+		if ($secret && $request->get('secret') !== $secret) {
+			abort(403, 'Unauthorized');
+		}
+
+		$now           = time();
+		$tomorrowStart = strtotime('tomorrow midnight');   // 00:00:00 tomorrow
+		$tomorrowEnd   = $tomorrowStart + 86399;           // 23:59:59 tomorrow
+
+		$reminderCount = 0;
+		$expiredCount  = 0;
+		$errors        = [];
+
+		// Fetch all active paid users (skip free plan users & unlimited plans)
+		// users.expiration_date is a Unix timestamp (bigint)
+		// expiration_date = -1 means unlimited → skip
+		// plans.free_plan = 1 means free plan → skip
+		$users = User::with(['plan', 'latestPayment'])
+			->where('status', 2)
+			->whereNotNull('expiration_date')
+			->where('expiration_date', '!=', -1)
+			->whereHas('plan', fn($q) => $q->where('free_plan', '!=', 1))
+			->get();
+
+		foreach ($users as $user) {
+			$expiry   = (int) $user->expiration_date;
+			$plan     = $user->plan;
+			$planName = $plan->name ?? 'Your Plan';
+
+			// Get latest payment for order_id and order_amount
+			$latestPayment = $user->latestPayment;
+			$orderId       = $latestPayment->id_secure ?? 'N/A';
+			$orderAmount   = $latestPayment->amount    ?? ($plan->price ?? 0);
+			$currency      = get_option('currency', 'USD');
+			$supportEmail  = get_option('support_email', config('mail.from.address', 'support@' . request()->getHost()));
+
+			// ── Case 1: Expiry Reminder — expiring TOMORROW ──────────────
+			if ($expiry >= $tomorrowStart && $expiry <= $tomorrowEnd) {
+				if (!SubscriptionEmailLog::alreadySent($user->id, 'expiry_reminder', $expiry)) {
+					try {
+						\MailSender::sendByTemplate('subscription_expiration_notification', $user->email, [
+							'fullname'       => $user->fullname,
+							'order_id'       => $orderId,
+							'plan_name'      => $planName,
+							'order_amount'   => $orderAmount,
+							'order_currency' => $currency,
+							'order_date'     => date('d M Y', $expiry),
+							'support_email'  => $supportEmail,
+							'login_url'      => route('login'),
+						]);
+
+						SubscriptionEmailLog::markSent($user->id, 'expiry_reminder', $expiry);
+						$reminderCount++;
+					} catch (\Throwable $e) {
+						$errors[] = "Reminder failed for user #{$user->id}: " . $e->getMessage();
+					}
+				}
+			}
+
+			// ── Case 2: Expired Email — expiry is in the past ───────────
+			if ($expiry < $now) {
+				if (!SubscriptionEmailLog::alreadySent($user->id, 'expired', $expiry)) {
+					try {
+						\MailSender::sendByTemplate('subscription_expired', $user->email, [
+							'fullname'       => $user->fullname,
+							'order_id'       => $orderId,
+							'plan_name'      => $planName,
+							'order_amount'   => $orderAmount,
+							'order_currency' => $currency,
+							'order_date'     => date('d M Y', $expiry),
+							'support_email'  => $supportEmail,
+							'login_url'      => route('login'),
+						]);
+
+						SubscriptionEmailLog::markSent($user->id, 'expired', $expiry);
+						$expiredCount++;
+					} catch (\Throwable $e) {
+						$errors[] = "Expired failed for user #{$user->id}: " . $e->getMessage();
+					}
+				}
+			}
+		}
+
+		return response()->json([
+			'status'          => 'ok',
+			'processed_users' => $users->count(),
+			'reminder_sent'   => $reminderCount,
+			'expired_sent'    => $expiredCount,
+			'errors'          => $errors,
+			'run_at'          => date('Y-m-d H:i:s'),
+		]);
+	}
 }

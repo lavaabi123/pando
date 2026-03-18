@@ -31,10 +31,10 @@
     <div class="container">
 
         {{-- ── TOOLBAR: Filters + Select All + Export + Delete ── --}}
-        <div class="d-flex align-items-center flex-wrap gap-2 pt-3 pb-2" id="approval-toolbar">
+        <div class="d-flex align-items-center flex-wrap gap-10 pb-4" id="approval-toolbar">
 
             {{-- Filters --}}
-            <div class="d-flex align-items-center flex-wrap gap-2 me-auto">
+            <div class="d-flex align-items-center flex-wrap gap-10 me-auto">
 
                 {{-- Order --}}
                 <select class="form-select form-select-sm b-r-30 border-gray-300 ajax-scroll-filter" style="width:auto;min-width:130px;"
@@ -77,7 +77,7 @@
             </div>
 
             {{-- Select All --}}
-            <label class="d-flex align-items-center gap-2 mb-0" style="cursor:pointer;">
+            <label class="d-flex align-items-center gap-6 mb-0" style="cursor:pointer;">
                 <input type="checkbox" id="selectAllApprovals"
                        style="width:20px;height:20px;border-radius:50%;cursor:pointer;accent-color:#ec4899;">
                 <span class="fw-6 fs-14">{{ __('Select All') }}</span>
@@ -85,8 +85,8 @@
 
             {{-- Export PDF --}}
             <button id="exportPdfBtn" onclick="exportApprovalsPdf()"
-                    class="btn btn-sm b-r-50 text-nowrap"
-                    style="background:linear-gradient(135deg,#f472b6,#ec4899);color:#fff;border:none;opacity:0.45;pointer-events:none;transition:opacity 0.2s;">
+                    class="btn btn-primary btn-sm"
+                    style="opacity:0.45;pointer-events:none;transition:opacity 0.2s;">
                 <i class="fa-light fa-file-pdf me-1"></i> {{ __('Export selected posts as PDF') }}
             </button>
 

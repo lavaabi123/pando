@@ -175,7 +175,10 @@ class AppAIPublishingController extends Controller
             "data"     => json_encode($postData),
             "end_date" => ($end_date == 0 ? null : $end_date),
             "changed"  => time(),
-            "time_post" => $next_time,
+            "time_post" => $next_time,		
+            "brand_id"         => session('brand_id'),
+			"user_id"          => session('user_id'),
+			"grouping_data"    => session('brand_id').''.session('user_id').''.time()
         ];
 
         $item = DB::table("ai_posts")

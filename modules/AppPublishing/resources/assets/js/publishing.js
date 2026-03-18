@@ -618,11 +618,15 @@ var AppPubishing = new (function ()
                 Swal.fire({
                     icon: 'error',
                     title: 'Failed',
-                    html: '<p class="mb-0 fs-14 text-start">' + msg + '</p>',
+                    html: '<p class="mb-0 fs-14">' + msg + '</p>',
                     confirmButtonText: 'Close',
                     confirmButtonColor: '#dc3545',
                     allowOutsideClick: false,
-                });
+                }).then(function(){
+					Main.overplay(true);
+					$('.loading').hide();
+					$form.removeClass('disabled');
+				});
                 // Do NOT call origError — we don't want Main.js to also show a toast
             };
 
@@ -648,7 +652,7 @@ var AppPubishing = new (function ()
     AppPubishing._handlePublishResponse = function(data, origSuccess, origError, origComplete, options) {
 
         // Read redirect URL from the form's data-redirect attribute
-        var $form = $('#compose-editor');
+        var $form = $('#compose-editor').length ? $('#compose-editor') : $('form.actionForm');
         var redirectUrl = $form.attr('data-redirect') || null;
 
         // Replicate what Main.js does in its success callback:
@@ -692,7 +696,7 @@ var AppPubishing = new (function ()
             Swal.fire({
                 icon: 'error',
                 title: isFormValidation ? 'Please check your post' : 'Failed',
-                html: '<p class="mb-0 fs-14 text-start">' + (message || 'An unknown error occurred.') + '</p>',
+                html: '<p class="mb-0 fs-14">' + (message || 'An unknown error occurred.') + '</p>',
                 confirmButtonText: 'Close',
                 confirmButtonColor: '#dc3545',
                 allowOutsideClick: false,

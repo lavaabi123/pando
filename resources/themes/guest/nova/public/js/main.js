@@ -412,25 +412,25 @@ var Main = new (function () {
         console.log(_title);
         if(_message != undefined && _message != ""){
             switch(_type){
-				case 1:
-				case 'success':
-					var backgroundColor = "#d1f4dd";
-					var messageColor = "#17c653";
-					var addClass = "border-success-subtle";
-					break;
-				case 2:
-				case 'warning':
-					var backgroundColor = "#fdefcc";
-					var messageColor = "#f6b100";
-					var addClass = "border-warning-subtle";
-					break;
-				default:
-				case 'error':
-					var backgroundColor = "#fed4de";
-					var messageColor = "#f8285a";
-					var addClass = "border-error-subtle";
-					break;
-			}
+                case 1:
+                case 'success':
+                    var backgroundColor = "#d1f4dd";
+                    var messageColor = "#17c653";
+                    var addClass = "border-success-subtle";
+                    break;
+                case 2:
+                case 'warning':
+                    var backgroundColor = "#fdefcc";
+                    var messageColor = "#f6b100";
+                    var addClass = "border-warning-subtle";
+                    break;
+                default:
+                case 'error':
+                    var backgroundColor = "#fed4de";
+                    var messageColor = "#f8285a";
+                    var addClass = "border-error-subtle";
+                    break;
+            }
 
             iziToast.show({
                 theme: 'light',

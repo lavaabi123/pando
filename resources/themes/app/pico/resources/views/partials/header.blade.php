@@ -114,14 +114,16 @@ if ((int)$role === 2) {
             </div>
 
             <div class="d-flex flex-grow-1 justify-content-between wp-100">
+                @if(session('login_as') != "admin")
 				<ul class="top-menu d-flex align-items-center mb-0 ms-4">
-					<li><a class="icons active" href="#">{!! file_get_contents(public_path('img/post.svg')) !!}</a></li>
-					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/notification.svg')) !!}</a></li>
-					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/add.svg')) !!}</a></li>
-					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/note.svg')) !!}</a></li>
-					<li><a class="icons" href="#">{!! file_get_contents(public_path('img/inbox.svg')) !!}</a></li>
+					<li><a class="icons active" href="{{ route("app.publishing.composer") }}">{!! file_get_contents(public_path('img/post.svg')) !!}</a></li>
+					<!--<li><a class="icons" href="#">{!! file_get_contents(public_path('img/notification.svg')) !!}</a></li>-->
+					<li><a class="icons" href="{{ route("app.channels.index") }}">{!! file_get_contents(public_path('img/add.svg')) !!}</a></li>
+					<li><a class="icons" href="https://pando.royalinkdevelopment.com/app/publishing">{!! file_get_contents(public_path('img/calender.svg')) !!}</a></li>
+					<li><a class="icons" href="{{ route("inbox.index") }}">{!! file_get_contents(public_path('img/inbox.svg')) !!}</a></li>
+					<li><a class="icons" href="https://pando.royalinkdevelopment.com/app/analytics">{!! file_get_contents(public_path('img/reports.svg')) !!}</a></li>
 				</ul>
-				
+				@endif
                 @foreach(\HeaderManager::getHeaderItems('center') as $headerItem)
                     @php
                         $isVisible = $headerItem['visible'] ?? fn() => true;

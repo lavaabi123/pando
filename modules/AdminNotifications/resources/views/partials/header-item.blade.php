@@ -15,17 +15,13 @@
                 </span>
             @endif
         </button>
-        <div class="dropdown-menu dropdown-menu-end border-1 border-gray-300 w-full max-w-380 py-0">
+        <div class="dropdown-menu dropdown-menu-end border-2 border-gray-300 w-full max-w-420 py-0 b-r-20 mt-4">
             <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center px-3 py-2 border-bottom">
-                <div class="fw-5 fs-14">
+            <div class="d-flex justify-content-between align-items-center pt-10 pb-10 px-3 border-bottom-2 border-gray-200">
+                <div class="fw-6 fs-16">
                     {{ __('Notification') }}
                 </div>
-                <div class="fw-5 fs-14">
-                    <a href="javascript:void(0);" class="btn btn-sm btn-icon btn-light btn-clear shrink-0 dropdown-close">
-                        <i class="fa-duotone fa-xmark"></i>
-                    </a>
-                </div>
+				<a href="javascript:void(0);" class="btn-close dropdown-close"></a>
             </div>
 
             <!-- Tabs -->
@@ -34,7 +30,7 @@
             </div>
 
             <!-- Footer buttons -->
-            <div class="d-flex justify-content-between align-items-center px-3 py-3 border-top gap-8">
+            <div class="d-flex justify-content-between align-items-center px-3 pt-10 pb-10 border-top-2 border-gray-200 gap-8">
                 <a href="{{ route('app.notifications.markAllRead') }}"
                    class="btn btn-light btn-sm w-100 actionItem"
                    data-action="{{ route('app.notifications.markAllRead') }}"

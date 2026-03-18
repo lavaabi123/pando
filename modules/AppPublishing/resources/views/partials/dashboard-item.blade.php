@@ -541,7 +541,7 @@
             <h5 class="fs-20 mb-0">{{ __('Recent publications') }}</h5>
         </div>
         <div class="card-body p-0">
-            <div class="schedules-main overflow-auto my-3 max-h-600 h-100">
+            <div class="schedules-main overflow-auto my-3 max-h-850 h-100">
                 <div class="schedule-list px-3">
                     @forelse($recentPosts as $post)
                         @php
@@ -707,7 +707,7 @@
 </div>
 </div>
 <div class="footer pt-50 mt-50">
-	<div class="container">
+	<div class="container d-none">
 		<div class="row">
 			<div class="col-md-2 mb-4">
 				<div class="fw-7 fs-18 mb-4">Publishing</div>

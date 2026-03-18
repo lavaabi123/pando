@@ -76,4 +76,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(\Modules\AdminPaymentSubscriptions\Models\PaymentSubscription::class, 'uid', 'id');
     }
+	
+
+	// Relationship to get the user's latest payment (for order_id / amount)
+	public function latestPayment()
+	{
+		return $this->hasOne(\Modules\AdminPaymentHistory\Models\PaymentHistory::class, 'uid')
+					->latestOfMany('created');
+	}
 }

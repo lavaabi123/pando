@@ -12,8 +12,8 @@
             </a>
         </div>
 
-        <div class="sidebar-toggle bg-light">
-            <a href="javascript:void(0)" class="d-flex align-items-center justify-content-center border-1 px-2 rounded size-24 fs-14 d-block text-gray-500"><i class="fa-duotone fa-arrow-right-to-line"></i></a>
+        <div class="sidebar-toggle bg-dark border-1 p-2 rounded-5 border-gray-700">
+            <a href="javascript:void(0)" class="d-flex align-items-center justify-content-center text-white"><i class="fa fa-arrow-right-to-line"></i></a>
         </div>
     </div>
 

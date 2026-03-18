@@ -9,46 +9,39 @@
 
 		    	<input class="d-none" name="id_secure" type="text" value="{{ data($result, "id_secure") }}">
          		<div class="msg-errors"></div>
- 				<div class="row">
+ 				<div class="row gap-10">
  					<div class="col-md-12">
- 						<div class="mb-4">
-		                  	<label for="name" class="form-label">{{ __('Brand Name') }}</label>
-	                     	<input placeholder="{{ __('Brand Name') }}" class="form-control" name="name" id="name" type="text" value="{{ data($result, "name") }}">
-		                </div>
+						<label for="name" class="form-label">{{ __('Brand Name') }}</label>
+						<input placeholder="{{ __('Brand Name') }}" class="form-control" name="name" id="name" type="text" value="{{ data($result, "name") }}">
  					</div>
  					<div class="col-md-12">
- 						<div class="mb-4">
+						<div class="d-flex align-items-center gap-10">
+						<img class="h-auto" id="brand-logo-preview"
+                         src="{{ !empty($result->image) ? Media::url($result->image) : module_folder_url("/assets/img/img-add.png") }}"
+                         style="width:15%">
+						<div class="field-left">
 		                  	<label for="name" class="form-label">{{ __('Brand Logo') }}</label>
 	                     	<input placeholder="{{ __('Brand Logo') }}" class="form-file-input" name="image" id="image" type="file" value="{{ data($result, "image") }}" accept="image/*">
-							<img class="h-auto"
-                         src="{{ !empty($result->image) ? Media::url($result->image) : module_folder_url("/assets/img/mark.png") }}"
-                         style="width:15%"
-                    >
-		                </div>
+							<label for="image" class="file-label btn btn-primary btn-sm">Choose File</label>
+						</div>
+							
+						</div>
  					</div>
  					<div class="col-md-12">
- 						<div class="mb-4">
 		                  	<label for="primary_name" class="form-label">{{ __('Primary Contact Name') }}</label>
 	                     	<input placeholder="{{ __('Primary Contact Name') }}" class="form-control" name="primary_name" id="primary_name" type="text" value="{{ data($result, "primary_name") }}">
-		                </div>
  					</div>
  					<div class="col-md-12">
- 						<div class="mb-4">
 		                  	<label for="primary_email" class="form-label">{{ __('Primary Email') }}</label>
 	                     	<input placeholder="{{ __('Primary Email') }}" class="form-control" name="primary_email" id="primary_email" type="text" value="{{ data($result, "primary_email") }}">
-		                </div>
  					</div>
  					<div class="col-md-12">
- 						<div class="mb-4">
 		                  	<label for="primary_number" class="form-label">{{ __('Primary Phone Number') }}</label>
 	                     	<input placeholder="{{ __('Primary Phone Number') }}" class="form-control" name="primary_number" id="primary_number" type="text" value="{{ data($result, "primary_number") }}">
-		                </div>
  					</div>
  					<div class="col-md-12">
- 						<div class="mb-4">
 		                  	<label for="notes" class="form-label">{{ __('Notes') }}</label>
 	                     	<textarea placeholder="{{ __('Notes') }}" class="form-control" name="notes" id="notes">{{ data($result, "notes") }}</textarea>
-		                </div>
  					</div>
  					
  				</div>
@@ -65,4 +58,15 @@
 <script type="text/javascript">
 	Main.Emoji();
 	Main.activeItem();
+</script>
+<script>
+    document.getElementById('image').addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('brand-logo-preview').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
 </script>

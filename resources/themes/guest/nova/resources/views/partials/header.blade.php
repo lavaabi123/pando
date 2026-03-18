@@ -12,7 +12,7 @@
             </div>
             <div class="w-auto">
                 <div class="flex items-center justify-between">
-                    <div class="w-auto ">
+                    <div class="w-auto d-none d-sm-block">
                         <ul class="flex items-center mr-16">
                             <li class="mr-9 font-medium hover:text-gray-700">
                                 <a href="{{ url('') }}"
@@ -130,8 +130,8 @@
 
         <div :class="{'block': mobileNavOpen, 'hidden': !mobileNavOpen}" class="hidden fixed top-0 left-0 bottom-0 w-4/6 sm:max-w-xs z-50">
             <div x-on:click="mobileNavOpen = !mobileNavOpen" class="fixed inset-0 bg-gray-800 opacity-80"></div>
-            <nav class="relative z-10 px-9 pt-8 bg-white h-full overflow-y-auto">
-                <div class="flex flex-wrap justify-between h-full">
+            <nav class="relative z-10 px-6 pt-8 bg-white h-full overflow-y-auto">
+                <div class="flex flex-wrap justify-between">
                     <div class="w-full">
                         <div class="flex items-center justify-between -m-2">
                             <div class="w-auto p-2">
@@ -148,39 +148,39 @@
                             </div>
                         </div>
                     </div>
-                    <div class="flex flex-col justify-center py-16 w-full">
+                    <div class="flex flex-col justify-center py-4 w-full">
                         <ul>
-                            <li class="mb-12">
+                            <li class="mb-3">
                                 <a class="font-medium hover:text-gray-700 {{ request()->is('/') ? 'text-indigo-600' : '' }}"
                                    href="{{ url('') }}">
                                     {{ __("Home") }}
                                 </a>
                             </li>
-                            <li class="mb-12">
+                            <li class="mb-3">
                                 <a class="font-medium hover:text-gray-700 {{ (request()->is('/') && str_contains(request()->fullUrl(), '#features')) ? 'text-indigo-600' : '' }}"
                                    href="{{ url('') }}#features">
                                     {{ __("Features") }}
                                 </a>
                             </li>
-                            <li class="mb-12">
+                            <li class="mb-3">
                                 <a class="font-medium hover:text-gray-700 {{ request()->is('pricing*') ? 'text-indigo-600' : '' }}"
                                    href="{{ url('pricing') }}">
                                     {{ __("Pricing") }}
                                 </a>
                             </li>
-                            <li class="mb-12">
+                            <li class="mb-3">
                                 <a class="font-medium hover:text-gray-700 {{ request()->is('faqs*') ? 'text-indigo-600' : '' }}"
                                    href="{{ url('faqs') }}">
                                     {{ __("FAQs") }}
                                 </a>
                             </li>
-                            <li class="mb-12">
+                            <li class="mb-3">
                                 <a class="font-medium hover:text-gray-700 {{ request()->is('blogs*') ? 'text-indigo-600' : '' }}"
                                    href="{{ url('blogs') }}">
                                     {{ __("Blog") }}
                                 </a>
                             </li>
-                            <li class="mb-12">
+                            <li class="mb-3">
                                 <a class="font-medium hover:text-gray-700 {{ request()->is('contact*') ? 'text-indigo-600' : '' }}"
                                    href="{{ url('contact') }}">
                                     {{ __("Contact") }}
@@ -193,21 +193,21 @@
                             @if(Auth::check())
                                 <div class="w-full mb-3">
                                     <a href="{{ url('app/dashboard') }}"
-                                       class="py-3 px-5 w-full text-white font-semibold rounded-xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200 block text-center">
+                                       class="btn btn-primary">
                                         {{ __('Dashboard') }}
                                     </a>
                                 </div>
                             @else
                                 <div class="w-full mb-3">
                                     <a href="{{ url('auth/login') }}"
-                                       class="py-3 px-5 w-full hover:text-gray-700 font-medium rounded-xl bg-transparent transition ease-in-out duration-200 block text-center">
+                                       class="btn btn-primary">
                                         {{ __("Sign In") }}
                                     </a>
                                 </div>
                                 @if(get_option("auth_signup_page_status", 1))
                                     <div class="w-full">
                                         <a href="{{ url('auth/signup') }}"
-                                           class="py-3 px-5 w-full text-white font-semibold rounded-xl focus:ring focus:ring-indigo-300 bg-indigo-600 hover:bg-indigo-700 transition ease-in-out duration-200 block text-center">
+                                           class="btn btn-primary">
                                             {{ __("Sign Up") }}
                                         </a>
                                     </div>

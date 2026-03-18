@@ -90,6 +90,7 @@
 									</select>
 								</div>
 
+								@can("apppublishingcampaigns")
 								<div class="mb-3">
 									<label class="form-label mb-1">{{ __("Campaign") }}</label>
 									<select class="form-select calendar-filter border-2 b-r-30" name="campaign">
@@ -101,7 +102,9 @@
 										@endif
 									</select>
 								</div>
+								@endcan
 
+								@can("apppublishinglabels")
 								<div class="mb-0">
 									<label class="form-label mb-1">{{ __("Labels") }}</label>
 									<select class="form-select calendar-filter border-2 b-r-30" name="label">
@@ -113,6 +116,7 @@
 										@endif
 									</select>
 								</div>
+								@endcan
 							</div>
 						</div>
 					</div>
