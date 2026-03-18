@@ -82,6 +82,7 @@
                         // Get key values
                         $maxChannels = $getPermValue('max_channels');
                         $maxPosts = $getPermValue('apppublishing.max_post');
+                        $commonCredits = $getPermValue('credits');
                         $aiWordCredits = $getPermValue('ai_word_credits');
                         $maxStorage = $getPermValue('appfiles.max_storage');
                         $team_members_limit = $getPermValue('team_members') ?? 0;
@@ -199,8 +200,19 @@
                                         </div>
                                     @endif
 
-                                    @if($aiWordCredits)
+                                     @if($commonCredits)
                                         <div class="flex items-center gap-3">
+                                            <svg class="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <span class="text-base text-gray-900">                                               
+                                                {{ number_format($commonCredits) }} {{ __("AI Credits") }}
+                                            </span>
+                                        </div>
+                                    @endif
+
+                                    @if($aiWordCredits)
+                                        <div class="flex items-center gap-3 d-none">
                                             <svg class="w-5 h-5 text-gray-900 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
                                             </svg>

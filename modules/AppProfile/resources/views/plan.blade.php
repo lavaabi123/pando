@@ -117,6 +117,7 @@
                 // Get key values
                 $maxChannels = $getPermValue('max_channels');
                 $maxPosts = $getPermValue('apppublishing.max_post');
+                $commonCredits = $getPermValue('credits');
                 $aiWordCredits = $getPermValue('ai_word_credits');
                 $maxStorage = $getPermValue('appfiles.max_storage');
                 $hasAnalytics = $getPermValue('appanalytics');
@@ -150,6 +151,16 @@
                         @else
                             {{ number_format($maxPosts) }} {{ __("Posts per Month") }}
                         @endif
+                    </li>
+                @endif
+
+                 {{-- Credits --}}
+                @if($commonCredits)
+                    <li class="mb-2 d-flex align-items-center gap-1 d-none">
+                        <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
+                            <i class="fa-regular fa-check"></i>
+                        </span>
+                        {{ number_format($commonCredits) }} {{ __("AI Credits") }}
                     </li>
                 @endif
 
@@ -328,6 +339,7 @@
                         // Get key values
                         $maxChannels = $getPermValue('max_channels');
                         $maxPosts = $getPermValue('apppublishing.max_post');
+                        $commonCredits = $getPermValue('credits');
                         $aiWordCredits = $getPermValue('ai_word_credits');
                         $maxStorage = $getPermValue('appfiles.max_storage');
                         $hasAnalytics = $getPermValue('appanalytics');
@@ -394,9 +406,21 @@
                                         </li>
                                     @endif
 
+                                    {{-- AI Credits --}}
+                                    @if($commonCredits)
+                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                            <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
+                                                <i class="fa-regular fa-check"></i>
+                                            </span>
+                                            <span class="fs-14">                                              
+                                                {{ number_format($commonCredits) }} {{ __("AI Credits") }}
+                                            </span>
+                                        </li>
+                                    @endif
+
                                     {{-- AI Word Credits --}}
                                     @if($aiWordCredits)
-                                        <li class="mb-2 d-flex align-items-center gap-1">
+                                        <li class="mb-2 d-flex align-items-center gap-1 d-none">
                                             <span class="d-flex align-items-center justify-content-center fs-13 me-2 text-success">
                                                 <i class="fa-regular fa-check"></i>
                                             </span>
