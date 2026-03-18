@@ -1277,3 +1277,10 @@ button.swal2-confirm.btn-sm, button.swal2-cancel.btn-sm {
         border-right: 2px solid #dee2e6 !important;
     }
 }
+@media (max-width:767px) {
+	.developer {
+    font-size: 18px;
+    padding: 10px 15px;
+    flex-direction: column;
+}
+}

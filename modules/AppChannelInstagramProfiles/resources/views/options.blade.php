@@ -36,7 +36,7 @@
                         <label class="form-label">{{ __('First comment') }}</label>
                         <textarea class="form-control input-emoji bbr-r-6 bbl-r-6" name="options[ig_comment]"></textarea>
                     </div>
-					<input type="hidden" class="form-check-input" name="options[ig_pin]" id="ig_pin" value="1">
+<input type="hidden" class="form-check-input" name="options[ig_pin]" id="ig_pin" value="1">
                     <!--<div class="mb-0">
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" name="options[ig_pin]" id="ig_pin" value="1">

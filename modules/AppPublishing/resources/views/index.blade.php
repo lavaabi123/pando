@@ -89,6 +89,7 @@
 										@endif
 									</select>
 								</div>
+
 								@can("apppublishingcampaigns")
 								<div class="mb-3">
 									<label class="form-label mb-1">{{ __("Campaign") }}</label>

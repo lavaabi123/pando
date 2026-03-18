@@ -24,7 +24,7 @@ class CronJobCommand extends Command
 
     public function handle()
     {
-        \Log::info("CronJobCommand executed at " . now());
+        \Log::info("CronJobCommand AI executed at " . now());
 
         try {
             $posts = AIPosts::getAIPosts(5);

@@ -51,13 +51,15 @@
 		    <div class="mb-3">
 		        <!--<label for="timezone" class="block text-gray-700 font-semibold mb-2">{{ __("Timezone") }}</label>-->
 		        <select id="timezone" name="timezone" class="form-control" required>
-		            <option value="">{{ __("Select your timezone") }}</option>
-		            @foreach(timezone_identifiers_list() as $tz)
-		                <option value="{{ $tz }}" {{ old('timezone') == $tz ? 'selected' : '' }}>
-		                    {{ $tz }}
-		                </option>
-		            @endforeach
-		        </select>
+                    <option value="">{{ __("Select your timezone") }}</option>
+                    @foreach(timezone_identifiers_list() as $tz)
+                        @if(str_starts_with($tz, 'America/'))
+                            <option value="{{ $tz }}" {{ old('timezone') == $tz ? 'selected' : '' }}>
+                                {{ $tz }}
+                            </option>
+                        @endif
+                    @endforeach
+                </select>
 		    </div>
 
             <div class="mb-3">

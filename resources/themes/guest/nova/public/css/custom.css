@@ -246,4 +246,13 @@ a:focus, a:focus-visible {
 	.content_left .h-20 {
 		height: auto;
 	}
+	.header .container-fluid {
+    padding: 0 20px;
+}
+	.developer {
+	border-radius: 20px;
+    font-size: 18px;
+    padding: 10px 15px;
+    flex-direction: column;
+}
 }
