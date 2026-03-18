@@ -4,10 +4,12 @@ namespace Modules\AppChannelLinkedinProfiles\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Console\Scheduling\Schedule;
 use Nwidart\Modules\Traits\PathNamespace;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use Core;
+use Modules\AppChannelLinkedinProfiles\Console\Commands\CheckLinkedinTokens;
 
 class AppChannelLinkedinProfilesServiceProvider extends ServiceProvider
 {
@@ -71,7 +73,9 @@ class AppChannelLinkedinProfilesServiceProvider extends ServiceProvider
      */
     protected function registerCommands(): void
     {
-        // $this->commands([]);
+        $this->commands([
+            CheckLinkedinTokens::class,
+        ]);
     }
 
     /**
@@ -79,10 +83,11 @@ class AppChannelLinkedinProfilesServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            // Run every minute — same frequency as CI4 cron
+            $schedule->command('pando:check-linkedin-tokens')->everyMinute();
+        });
     }
 
     /**

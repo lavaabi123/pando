@@ -29,16 +29,30 @@
                         ? optional($item->manual)->message
                         : $item->message;
                 @endphp
-                <div class="border-bottom py-2 px-1">
-                    <div class="d-flex justify-content-between">
-                        <div class="fw-5 text-dark text-break">
+                @php
+                    $isLinkedinAlert = $item->url && str_contains($item->url, 'channels');
+                @endphp
+                <div class="border-bottom py-2 px-1 {{ $isLinkedinAlert ? 'bg-warning-subtle' : '' }}">
+                    <div class="d-flex justify-content-between align-items-start gap-2">
+                        <div class="fw-5 text-dark text-break d-flex align-items-start gap-1 flex-wrap">
                             <span class="badge badge-dark text-white h-20">{{ __('New') }}</span>
+                            @if($isLinkedinAlert)
+                                <span class="badge bg-danger text-white h-20">
+                                    <i class="fa-brands fa-linkedin me-1"></i>{{ __('Reconnect') }}
+                                </span>
+                            @endif
                         	<span>{!! nl2br(e($message)) !!}</span>
                     	</div>
-                        <a href="{{ route('app.notifications.markAsRead', $item->id) }}" data-id="{{ $item->id }}" data-content="notif-list" class="min-w-20 min-h-20 max-h-20 size-20 b-r-50 d-flex align-items-center justify-content-center border border-1 bg-hover-success text-hover-white d-block actionItem" data-call-success="checkUnreads(result.count);"><i class="fa-solid fa-check"></i></a>
+                        <a href="{{ route('app.notifications.markAsRead', $item->id) }}" data-id="{{ $item->id }}" data-content="notif-list" class="min-w-20 min-h-20 max-h-20 size-20 b-r-50 d-flex align-items-center justify-content-center border border-1 bg-hover-success text-hover-white d-block actionItem flex-shrink-0" data-call-success="checkUnreads(result.count);"><i class="fa-solid fa-check"></i></a>
                     </div>
                     @if($item->url)
-                        <a href="{{ $item->url }}" target="_blank" class="fs-12 text-primary d-block mt-1"> {{ __('View') }} &rarr; </a>
+                        <a href="{{ $item->url }}" class="fs-12 text-primary d-block mt-1">
+                            @if($isLinkedinAlert)
+                                <i class="fa-solid fa-arrow-right-to-bracket me-1"></i>{{ __('Go to Manage Accounts') }} &rarr;
+                            @else
+                                {{ __('View') }} &rarr;
+                            @endif
+                        </a>
                     @endif
                     <div class="fs-12 text-muted mt-1">{{ $item->created_at->diffForHumans() }}</div>
                 </div>
