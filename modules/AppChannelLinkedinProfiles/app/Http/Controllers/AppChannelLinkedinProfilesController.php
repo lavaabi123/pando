@@ -105,7 +105,8 @@ class AppChannelLinkedinProfilesController extends Controller
                     "tmp" => $response['sub'], 
                     "social_network" => "linkedin"
                 ] )->update([
-                    "token" => $accessToken
+                    "token" => $accessToken,
+					"token_status" => 0,
                 ]);
 
                 $channels = [

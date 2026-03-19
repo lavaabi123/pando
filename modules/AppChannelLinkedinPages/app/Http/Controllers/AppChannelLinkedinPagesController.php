@@ -111,7 +111,8 @@ class AppChannelLinkedinPagesController extends Controller
                     "tmp" => $person['sub'], 
                     "social_network" => "linkedin"
                 ] )->update([
-                    "token" => $accessToken
+                    "token" => $accessToken,
+					"token_status" => 0,
                 ]);
 
                 $channels = [

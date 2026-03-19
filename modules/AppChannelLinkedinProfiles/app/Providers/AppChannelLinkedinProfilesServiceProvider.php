@@ -32,6 +32,21 @@ class AppChannelLinkedinProfilesServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->name, 'database/migrations'));
+
+        \MailSender::addTemplate('AppChannelLinkedinProfiles', [
+            [
+                'id'          => 'linkedin_token_expired',
+                'name'        => __('LinkedIn Account Disconnected'),
+                'view'        => 'mail/linkedin_token_expired',
+                'module'      => $this->name,
+                'description' => __('Email sent to users when their LinkedIn account token has expired or been revoked.'),
+                'variables'   => [
+                    'fullname',
+                    'accounts_list',
+                    'reconnect_url',
+                ],
+            ],
+        ]);
     }
 
     public function btnChannels(): void
@@ -78,14 +93,10 @@ class AppChannelLinkedinProfilesServiceProvider extends ServiceProvider
         ]);
     }
 
-    /**
-     * Register command Schedules.
-     */
     protected function registerCommandSchedules(): void
     {
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
-            // Run every minute — same frequency as CI4 cron
             $schedule->command('pando:check-linkedin-tokens')->everyMinute();
         });
     }
