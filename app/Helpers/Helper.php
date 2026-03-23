@@ -709,7 +709,7 @@ if (!function_exists("get_social_media_icon")) {
             'facebook' => '<i class="post-media fab fa-facebook-f" style="background-color: #0074fa;color: #fff;"></i>',
             'twitter' => '<i class="post-media fab fa-x-twitter" style="background-color: #000000;color: #fff;"></i>',
             'x' => '<i class="post-media fab fa-x-twitter" style="background-color: #000000;color: #fff;"></i>',
-            'instagram' => '<i class="post-media fab fa-instagram" style="color: #fff; background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%); right: 13px;"></i>',
+            'instagram' => '<i class="post-media fab fa-instagram" style="color: #E4405F; right: 13px;"></i>',
             'linkedin' => '<i class="post-media fab fa-linkedin" style="color: #fff; background-color: #0077b5; right: 13px;"></i>',
             'pinterest' => '<i class="post-media fab fa-pinterest" style="color: #cd2029; right: 13px;"></i>',
             'google_business_profile' => '<i class="post-media fab fa-google" style="color: #fff;background-color:#4285F4; right: 13px;"></i>',
@@ -754,7 +754,7 @@ if (!function_exists("get_social_media_icon_large")) {
 		}elseif(strtolower($network) == 'twitter' || strtolower($network) == 'x'){
 			echo '<i class="fab fa-x-twitter" style="color: #000000;"></i>';
 		}elseif(strtolower($network) == 'instagram'){
-			echo '<i class="fab fa-instagram" style="color: #fff;background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);right: 13px;"></i>';
+			echo '<i class="fab fa-instagram" style="color: #E4405F;right: 13px;"></i>';
 		}elseif(strtolower($network) == 'linkedin'){
 			echo '<i class="fab fa-linkedin" style="color:#0077b5;right: 13px;"></i>';
 		}elseif(strtolower($network) == 'pinterest'){
