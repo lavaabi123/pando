@@ -1278,9 +1278,103 @@ button.swal2-confirm.btn-sm, button.swal2-cancel.btn-sm {
     }
 }
 @media (max-width:767px) {
+	.container {
+    padding-left: 1rem !important;
+        padding-right: 1rem !important;
+}
+.main {
+    width: 100%;
+}
 	.developer {
     font-size: 18px;
     padding: 10px 15px;
     flex-direction: column;
+}
+.header .ms-4 {
+    margin-left: 0.75rem !important;
+}
+.header p.fs-14.fw-bold.mb-0 {
+    display: none;
+}
+button.btn.btn-icon.dropdown-toggle {
+    width: 2rem;
+    height: 2rem;
+}
+.custom-brand-dropdown span {
+    display: none;
+}
+.top-menu a {
+    width: 30px;
+    height: 30px;
+    padding: 5px;
+	margin: 0 2px;
+}
+.top-menu svg {
+    width: 15px;
+    height: 15px;
+}
+.top-menu a:hover, .top-menu a:focus, .top-menu a.active {
+    margin: 0 2px;
+	background: transparent;
+}
+.top-menu a:hover svg, .top-menu a:focus svg, .top-menu a.active svg {
+    fill: var(--d-primary);
+}
+.gradient-bg.main-services.p-4 {
+	padding: 10px !important;
+	margin-left: -1rem;
+	border-radius: 0 !important;
+	margin-right: -1rem;
+	overflow: hidden;
+}
+.main-services .icons {
+    border-radius: 15px;
+    padding: 10px;
+    font-size: 12px;
+    min-height: 87px;
+    min-width: 87px;
+}
+.main-services .icons:hover {
+    margin: 0px 10px 0px 10px;
+}
+.gradient-bg.main-services.p-4 > div {
+        padding: 15px !important;
+    gap: 10px !important;
+    overflow: auto;
+    margin: 0 -10px;
+}
+.gradient-bg.main-services.p-4 > div::-webkit-scrollbar {
+    display: none;
+}
+.gradient-bg.main-services a.icons .mb-3 {
+    margin-bottom: 0.5rem !important;
+}
+.postAnalytic .card-body {
+    flex-direction: column;
+    align-items: flex-start !important;
+}
+.postAnalytic .card-body .ddRight {
+	flex-direction: column;
+	width: 100%;
+	margin-top: 15px;
+}
+.ddRight .daterange {
+    width: 100%;
+	padding-top: 7px !important;
+    padding-bottom: 6px !important;
+}
+.ddRight button.daterange {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+}
+.searchFilter > div:first-child {
+	width:100%;
+}
+#compose-editor {
+    min-width: 100%;
+}
+.compose-media {
+    max-width: 100%;
+    max-height: 420px;
 }
 }

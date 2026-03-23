@@ -112,7 +112,7 @@
             <h5 class="fw-6">{{ __('Daily Alerts!') }}</h5>
             <p class="mb-0">{{ __('Stay up to date on all your accounts!') }}</p>
         </div>
-        <div class="row row-gap-4">
+        <div class="row row-gap-3 row-gap-sm-4">
             {{-- Accounts with no scheduled posts today --}}
             <div class="col-md-4">
                 <a href="{{ url_app('publishing') }}">
@@ -167,7 +167,7 @@
             </div>
         </div>
         
-        <div class="row row-gap-4">
+        <div class="row row-gap-3 row-gap-sm-4">
             {{-- Total Scheduled Posts --}}
             <div class="col-md-4">
                 <a href="{{ url_app('publishing') }}">
@@ -283,7 +283,7 @@
                 <div class="fs-20 mb-0">{{ __("Add Channels") }}</div>
             </div>
             <div class="card-body">
-                <div class="row max-h-300 overflow-y-scroll row-gap-4">
+                <div class="row max-h-300 overflow-y-scroll row-gap-3 row-gap-sm-4">
                     @if( !empty( $channels ) )
                         @foreach( $channels as $channel )
                             <div class="col-md-6">
@@ -313,21 +313,21 @@
 
 
 	<div class="col-md-12">
-		<div class="card position-relative overflow-hidden">
+		<div class="card position-relative overflow-hidden postAnalytic">
 			<div class="card-body d-flex align-items-center justify-content-between py-3 px-4">
 				<div class="text-black">
 					<h5 class="fw-6 d-flex icon-primary"><span>{!! file_get_contents(public_path('img/Reports.svg')) !!}</span> Post Analytics</h5>
 				</div>
 				
-				<div class="d-flex gap-8">
-					<div class="align-self-end">
+				<div class="d-flex gap-8 ddRight">
+					<div class="align-self-sm-end">
 						<select class="form-control">
 							<option>All Platform</option>
 							<option>Facebook</option>
 						</select>
 					</div>
 					<div class="d-flex align-items-center justify-content-between gap-8">
-						<div class="daterange d-none bg-white b-r-20 fs-12 border-gray-300 border" data-open="left"></div>
+						<div class="daterange d-none bg-white b-r-20 fs-12 border-gray-300 border-2" data-open="left"></div>
 					</div>
 				</div>
 			</div>
