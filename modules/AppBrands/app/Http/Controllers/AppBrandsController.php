@@ -229,7 +229,21 @@ class AppBrandsController extends Controller
             return ms(['status' => 0, 'message' => __('Please select at least one item')]);
         }
 
+		// Get brand details
+		$brand = DB::table('brands')
+			->select('id', 'name', 'image')
+			->whereIN('id_secure', $id_arr)
+			->first();
+			
         DB::table($this->table)->whereIn('id_secure', $id_arr)->delete();
+		DB::table('accounts')->where('brand_id', $brand->id)->delete();
+		DB::table('posts')->where('brand_id', $brand->id)->delete();
+		
+		session([
+			'brand_id' => '',
+			'brand_name' => '',
+			'brand_image' => ''
+		]);
 
         return ms(['status' => 1, 'message' => __('Succeed')]);
     }
