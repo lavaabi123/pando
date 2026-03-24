@@ -2543,6 +2543,7 @@ var Main = new (function ()
                     initialView: 'dayGridMonth',
                     editable: true,
                     locale: VARIABLES.lang,
+					timeZone: VARIABLES.timezone,
                     direction: document.querySelector('html').getAttribute('dir'),
                     headerToolbar: {
                     left: 'prev,next today',

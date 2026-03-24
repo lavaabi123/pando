@@ -225,6 +225,7 @@ class Authentication
             'lang' => strtolower(app()->getLocale()),
             'format_date' => dateFormatJs(),
             'format_datetime' => dateTimeFormatJs(),
+			'timezone' => Auth::user()->timezone ?? 'UTC',
         ]);
         return $next($request);
     }

@@ -14,7 +14,7 @@ use Arr;
 use Media;
 use Auth;
 use Modules\AppPublishing\Models\CalendarNote;
-
+use Carbon\Carbon;
 
 class AppPublishingController extends Controller
 {
@@ -122,10 +122,12 @@ class AppPublishingController extends Controller
 
             $medias = $postData['medias'] ?? [];
             $media = !empty($medias) ? Media::url($medias[0]) : '';
-
+$startTime = Carbon::createFromTimestamp($post->time_post)
+                ->setTimezone(Auth::user()->timezone);
             return [
                 'title'           => $postData['caption'] ?? 'No Title',
-                'start' => date('Y-m-d\TH:i:s', $post->time_post),
+                'start'           => $startTime->toIso8601String(),
+    'end'             => $startTime->toIso8601String(),
                 'backgroundColor' => '000',
                 'borderColor'     => '000',
                 'textColor'       => $module['color'] ?? '',
@@ -141,7 +143,9 @@ class AppPublishingController extends Controller
                     'image'        => $media,
                     'caption'      => $postData['caption'] ?? '',
                     'link'      => $postData['link'] ?? '',
-                    'time_post'    => date('h:i A', $post->time_post),
+                    'time_post' => Carbon::createFromTimestamp($post->time_post)
+                  ->setTimezone(Auth::user()->timezone)
+                  ->format('h:i A'),
                     'module_name'  => $module['name'] ?? '',
                     'response'     => json_decode($post->result ?? '{}'),
                 ],

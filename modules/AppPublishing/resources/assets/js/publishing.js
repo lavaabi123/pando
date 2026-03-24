@@ -848,7 +848,7 @@ var AppPubishing = new (function ()
         var countClick = 0;
 
         CalendarMain = Main.Calendar(calendarEl, {
-            timeZone: 'local',
+            timeZone: VARIABLES.timezone,
             themeSystem: 'bootstrap5',
             initialView: 'dayGridMonth',
             editable: true,
@@ -1118,7 +1118,7 @@ var AppPubishing = new (function ()
         var countClick = 0;
 
         CalendarCompose = Main.Calendar(calendarEl, {
-            timeZone: 'local',
+            timeZone: VARIABLES.timezone,
             themeSystem: 'bootstrap5',
             initialView: 'dayGridMonth',
 			showNonCurrentDates: false,
