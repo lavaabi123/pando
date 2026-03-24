@@ -35,7 +35,7 @@
 								<a title="Edit Brand" class="btn brand-action-btn actionItem" href="{{ route("app.brands.update") }}" data-popup="groupModal" data-id="{{ $brand->id_secure }}" data-call-success="Main.ajaxScroll(true,'brands');">								
 									<i class="far fa-edit"></i>
 								</a>
-								<a title="Delete Brand" class="btn brand-action-btn actionItem" href="{{ route("app.brands.destroy") }}" data-confirm="All accounts under this brand will be removed and any scheduled posts will not be published. Are you sure?" data-id="{{ $brand->id_secure }}" data-call-success="Main.ajaxScroll(true);" data-redirect="<?php _ec( current_url() )?>">
+								<a title="Delete Brand" class="btn brand-action-btn actionItem" href="{{ route("app.brands.destroy") }}" data-confirm="All accounts under this brand will be removed and any scheduled posts will not be published. Are you sure?" data-id="{{ $brand->id_secure }}" data-call-success="Main.ajaxScroll(true);"  data-redirect="{{ module_url() }}">
 									<i class="far fa-trash-alt"></i>
 								</a>
 							</div>
